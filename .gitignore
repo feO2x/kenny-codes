@@ -1,0 +1,6 @@
+# Code
+.vscode/
+node_modules/
+
+# Design
+*.afdesign~lock~
