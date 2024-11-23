@@ -1,0 +1,15 @@
+.avatar {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 1rem;
+
+    & > img {
+        clip-path: circle(50% at center);
+    }
+
+    & > p {
+        text-align: center;
+    }
+}

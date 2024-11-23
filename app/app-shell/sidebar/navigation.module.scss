@@ -1,0 +1,26 @@
+.navigation {
+    & > ul {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        & a {
+            color: white;
+            font-size: x-large;
+            text-decoration: none;
+
+            &:visited {
+                color: white;
+            }
+
+            &:hover {
+                color: white;
+                text-decoration: underline;
+            }
+        }
+    }
+}

@@ -1,0 +1,19 @@
+@import "../../variables";
+
+.sidebar {
+    width: $sidebar-width;
+    height: calc(100dvh - $header-height);
+    position: fixed;
+    top: $header-height;
+    // right should never be less than 0, this is what the max function is used for.
+    // The "(100vw - $max-content-width) / 2" calculates the right margin for centralized content.
+    right: calc(max(0px, (100vw - $max-content-width) / 2));
+    background-image: linear-gradient($primary-color, $secondary-color);
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    padding: 2rem 1rem;
+}

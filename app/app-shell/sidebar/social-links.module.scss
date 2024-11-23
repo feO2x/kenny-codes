@@ -1,0 +1,22 @@
+.social-links {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    list-style: none;
+    gap: 1rem;
+
+    & a {
+        color: white;
+        text-decoration: none;
+        font-size: 2rem;
+
+        &:visited {
+            color: white;
+        }
+
+        &:hover {
+            color: white;
+            text-decoration: underline;
+        }
+    }
+}
