@@ -1,5 +1,20 @@
 @import "variables";
 
+// Define light and dark themes
+.light-theme {
+    --background-color: #ffffff;
+    --text-color: #000000;
+    --header-color: #333333;
+    --footer-color: #333333;
+}
+
+.dark-theme {
+    --background-color: #121212;
+    --text-color: #ffffff;
+    --header-color: #444444;
+    --footer-color: #444444;
+}
+
 *,
 *::before,
 *::after {
@@ -25,7 +40,8 @@ html {
 }
 
 body {
-    background-color: $background-color;
+    background-color: var(--background-color);
+    color: var(--text-color);
     min-height: 100vh;
 }
 
