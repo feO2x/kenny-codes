@@ -10,9 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: ChildProps) {
     return (
         <html lang="en">
-            <body>
-                <AppShell>{children}</AppShell>
-            </body>
+            <AppShell>{children}</AppShell>
         </html>
     );
 }
