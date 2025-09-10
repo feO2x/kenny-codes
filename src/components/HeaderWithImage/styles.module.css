@@ -1,0 +1,130 @@
+/* Header container */
+.headerContainer {
+  padding: 0; /* Override the default hero padding */
+}
+
+/* Main hero content container */
+.heroContent {
+  min-height: 150px;
+  max-height: 300px;
+  height: 40vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Blurred background image */
+.backgroundImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(4px) brightness(0.8) contrast(1.1) saturate(1.2);
+  z-index: 0;
+}
+
+/* Gradient overlay with curved cutout */
+.gradientOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 25%; /* Covers 25% of the underlying image */
+  height: 100%;
+  background: linear-gradient(270deg, #33ffdc 0%, #0070ea 100%);
+  clip-path: url(#curveClipDesktop); /* Use desktop SVG clip path for smooth Bézier curve */
+  z-index: 1;
+}
+
+/* Dark theme gradient direction change */
+[data-theme='dark'] .gradientOverlay {
+  background: linear-gradient(90deg, #33ffdc 0%, #0070ea 100%);
+}
+
+/* SVG clip path positioning */
+.svgClipPath {
+  position: absolute;
+}
+
+/* Text content container */
+.textContent {
+  position: relative;
+  z-index: 2;
+  padding: 3rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Move text away from curve */
+  width: 25%;
+  padding-left: 1.5rem; /* Extra padding from the left edge */
+}
+
+/* Title styling */
+.title {
+  transform: rotate(-90deg);
+  white-space: nowrap;
+  margin: 0;
+  /* Responsive base font size using clamp */
+  font-size: clamp(1.5rem, 4vw, 3rem);
+}
+
+/* Font size variants */
+.small .title {
+  font-size: clamp(1.2rem, 3vw, 2rem);
+}
+
+.medium .title {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+}
+
+.large .title {
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+.xlarge .title {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+}
+
+/* Mobile responsiveness - screens less than 996px */
+@media (max-width: 995px) {
+  .heroContent {
+    height: 25vh;
+  }
+  
+  /* Make gradient wider and more pronounced on mobile */
+  .gradientOverlay {
+    width: 40%; /* Increased from 25% to 40% for mobile */
+    clip-path: url(#curveClipMobile); /* Use more pronounced curve for mobile */
+  }
+  
+  /* Adjust text container width and positioning for mobile */
+  .textContent {
+    width: 40%; /* Match the gradient width */
+    padding-left: 1rem; /* Reduce left padding on mobile */
+    justify-content: flex-start; /* Keep text away from curve */
+  }
+  
+  /* Smaller font scaling on mobile for better fit */
+  .title {
+    font-size: clamp(1.2rem, 5vw, 2.5rem);
+  }
+  
+  .small .title {
+    font-size: clamp(1rem, 4vw, 1.8rem);
+  }
+  
+  .medium .title {
+    font-size: clamp(1.2rem, 5vw, 2.5rem);
+  }
+  
+  .large .title {
+    font-size: clamp(1.5rem, 6vw, 3rem);
+  }
+  
+  .xlarge .title {
+    font-size: clamp(1.8rem, 7vw, 3.5rem);
+  }
+}
