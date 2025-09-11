@@ -5,7 +5,6 @@ import styles from "./styles.module.css";
 interface HeaderWithImageProps {
   title: string;
   imageUrl: string;
-  fontSize?: "small" | "medium" | "large" | "xlarge";
 }
 
 export default function HeaderWithImage(
@@ -42,9 +41,7 @@ export default function HeaderWithImage(
 
           {/* Text content */}
           <div
-            className={`${styles.textContent} ${
-              props.fontSize ? styles[props.fontSize] : styles.large
-            }`}
+            className={`${styles.textContent}`}
           >
             <Heading as="h1" className={`hero__title ${styles.title}`}>
               {props.title}

@@ -54,44 +54,27 @@
 .textContent {
   position: relative;
   z-index: 2;
-  padding: 3rem 1rem;
+  padding: 0 1rem 3rem 1rem;
+  transform: rotate(-90deg);
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Move text away from curve */
+  justify-content: center; /* Move text away from curve */
   width: 25%;
-  padding-left: 1.5rem; /* Extra padding from the left edge */
 }
 
 /* Title styling */
 .title {
-  transform: rotate(-90deg);
   white-space: nowrap;
-  margin: 0;
   /* Responsive base font size using clamp */
-  font-size: clamp(1.5rem, 4vw, 3rem);
-}
-
-/* Font size variants */
-.small .title {
-  font-size: clamp(1.2rem, 3vw, 2rem);
-}
-
-.medium .title {
-  font-size: clamp(1.5rem, 4vw, 3rem);
-}
-
-.large .title {
-  font-size: clamp(2rem, 5vw, 4rem);
-}
-
-.xlarge .title {
-  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-size: clamp(1rem, 5vh, 4rem);
 }
 
 /* Mobile responsiveness - screens less than 996px */
-@media (max-width: 995px) {
+@media (max-width: 1140px) {
   .heroContent {
     height: 25vh;
+    margin-left: -1rem;
+    margin-right: -1rem;
   }
   
   /* Make gradient wider and more pronounced on mobile */
@@ -102,29 +85,6 @@
   
   /* Adjust text container width and positioning for mobile */
   .textContent {
-    width: 40%; /* Match the gradient width */
-    padding-left: 1rem; /* Reduce left padding on mobile */
-    justify-content: flex-start; /* Keep text away from curve */
-  }
-  
-  /* Smaller font scaling on mobile for better fit */
-  .title {
-    font-size: clamp(1.2rem, 5vw, 2.5rem);
-  }
-  
-  .small .title {
-    font-size: clamp(1rem, 4vw, 1.8rem);
-  }
-  
-  .medium .title {
-    font-size: clamp(1.2rem, 5vw, 2.5rem);
-  }
-  
-  .large .title {
-    font-size: clamp(1.5rem, 6vw, 3rem);
-  }
-  
-  .xlarge .title {
-    font-size: clamp(1.8rem, 7vw, 3.5rem);
+    width: 40%; /* Match the gradient width */    
   }
 }
