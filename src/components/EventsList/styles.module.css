@@ -1,0 +1,33 @@
+.eventsSection {
+  margin-bottom: 3rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: var(--ifm-heading-color);
+  border-bottom: 2px solid var(--ifm-color-primary);
+  padding-bottom: 0.5rem;
+}
+
+.eventsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.emptyMessage {
+  text-align: center;
+  color: var(--ifm-color-content-secondary);
+  font-style: italic;
+  padding: 2rem;
+  background: var(--ifm-color-emphasis-100);
+  border-radius: var(--ifm-border-radius);
+  border: 1px dashed var(--ifm-color-emphasis-300);
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .emptyMessage {
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-emphasis-700);
+  border-color: var(--ifm-color-emphasis-400);
+}
