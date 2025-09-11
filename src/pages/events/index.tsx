@@ -2,8 +2,8 @@ import Layout from "@theme/Layout";
 import { ReactNode } from "react";
 import HeaderWithImage from "@site/src/components/HeaderWithImage";
 import EventsList from "@site/src/components/EventsList";
-import { separateEvents, getEventStats } from "./eventUtils";
-import { events } from "./events";
+import { separateEvents, getEventStats } from "./_eventUtils";
+import { events } from "./_events";
 import styles from "./styles.module.css";
 
 export default function Events(): ReactNode {
@@ -12,7 +12,7 @@ export default function Events(): ReactNode {
 
   return (
     <Layout title="Events" description="Past and upcoming events">
-      <HeaderWithImage title="Events" imageUrl="/img/events.jpg" />
+      <HeaderWithImage title="Events" imageUrl="/kenny-codes/img/events.jpg" />
       
       <div className={styles.eventsContainer}>
         <div className={styles.statsSection}>

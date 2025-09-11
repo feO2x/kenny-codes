@@ -1,4 +1,4 @@
-import { Event } from './events';
+import { Event } from './_events';
 
 export const isEventUpcoming = (event: Event): boolean => {
   const eventDate = new Date(event.startDate);

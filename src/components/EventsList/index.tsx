@@ -1,6 +1,6 @@
 import React from 'react';
 import EventCard from '../EventCard';
-import { Event } from '../../pages/events/events';
+import { Event } from '../../pages/events/_events';
 import styles from './styles.module.css';
 
 interface EventsListProps {
