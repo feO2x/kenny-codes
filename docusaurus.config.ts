@@ -4,6 +4,10 @@ import type * as Preset from "@docusaurus/preset-classic";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+const description =
+  "Personal website of Kenny Pflug, a software engineer from Regensburg, Germany, specializing in .NET internals, software design and architecture, distributed systems, and ASP.NET Core backends.";
+const socialCardImageUrl = "https://feO2x.github.io/kenny-codes/img/kenny-codes-social-card.jpg";
+
 const config: Config = {
   title: "Kenny Codes",
   tagline:
@@ -84,8 +88,103 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Replace with your project's social card
-    image: "img/docusaurus-social-card.jpg",
+    image: "img/kenny-codes-social-card.jpg",
+    metadata: [
+      {
+        name: "keywords",
+        content:
+          ".NET, ASP.NET Core, C#, software performance, distributed systems, system architecture, API design, scalability, cloud-native, concurrency, resilience, software design, software architecture, programming, coding",
+      },
+      {
+        name: "author",
+        content: "Kenny Pflug",
+      },
+      {
+        name: "description",
+        content: description,
+      },
+      {
+        name: "category",
+        content: "technology, programming, software development",
+      },
+      {
+        name: "robots",
+        content:
+          "index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:160",
+      },
+      {
+        name: "format-detection",
+        content: "telephone=no, address=no, email=no",
+      },
+      {
+        name: "og:title",
+        content: "Kenny Codes",
+      },
+      {
+        name: "og:description",
+        content: description,
+      },
+      {
+        name: "og:url",
+        content: "https://feO2x.github.io/kenny-codes/",
+      },
+      {
+        name: "og:site_name",
+        content: "Kenny Codes",
+      },
+      {
+        name: "og:locale",
+        content: "en_IE",
+      },
+      {
+        name: "og:image",
+        content: socialCardImageUrl,
+      },
+      {
+        name: "og:image:width",
+        content: "800",
+      },
+      {
+        name: "og:image:height",
+        content: "418",
+      },
+      {
+        name: "og:image:alt",
+        content: "Kenny Codes",
+      },
+      {
+        name: "og:type",
+        content: "website",
+      },
+      {
+        name: "twitter:card",
+        content: "summary_large_image",
+      },
+      {
+        name: "twitter:site",
+        content: "@feO2x",
+      },
+      {
+        name: "twitter:creator",
+        content: "@feO2x",
+      },
+      {
+        name: "twitter:title",
+        content: "Kenny Codes",
+      },
+      {
+        name: "twitter:description",
+        content: description,
+      },
+      {
+        name: "twitter:image",
+        content: socialCardImageUrl,
+      },
+      {
+        name: "referrer",
+        content: "no-referrer-when-downgrade",
+      }
+    ],
     navbar: {
       title: "Kenny Codes",
       logo: {
