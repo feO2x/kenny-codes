@@ -45,6 +45,17 @@
   letter-spacing: 0.5px;
 }
 
+.section {
+  margin-bottom: 3rem;
+}
+
+.sectionTitle {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  padding-left: 1rem;
+  color: var(--ifm-heading-color);
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .eventsContainer {

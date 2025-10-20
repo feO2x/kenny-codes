@@ -89,6 +89,26 @@ const config: Config = {
         disableInDev: false,
       },
     ],
+    [
+      "@docusaurus/plugin-content-blog",
+      {
+        id: "events",
+        routeBasePath: "events",
+        path: "./events",
+        blogTitle: "Events",
+        blogDescription: "Past and upcoming speaking events, workshops, and webinars",
+        blogSidebarCount: 0,
+        blogSidebarTitle: "All Events",
+        showReadingTime: false,
+        sortPosts: "descending",
+        feedOptions: {
+          type: ["rss", "atom"],
+          title: "Kenny Codes - Events",
+          description: "Speaking events, workshops, and webinars by Kenny Pflug",
+          xslt: true,
+        },
+      },
+    ],
   ],
 
   themeConfig: {

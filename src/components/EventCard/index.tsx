@@ -1,68 +1,79 @@
 import React from 'react';
+import Link from '@docusaurus/Link';
 import styles from './styles.module.css';
-import { Event } from '../../pages/events/_events';
 
 interface EventCardProps {
-  event: Event;
+  title: string;
+  permalink: string;
+  date: string;
+  formattedDate: string;
+  type?: string;
+  duration?: string;
+  language?: string;
+  location?: string;
+  country?: string;
+  event?: string;
+  description?: string;
+  tags?: Array<{ label: string; permalink: string }>;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event }) => {
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toISOString().split('T')[0]; // yyyy-MM-dd format
-  };
-
-  const formatDateRange = () => {
-    if (event.endDate && event.startDate !== event.endDate) {
-      return `${formatDate(event.startDate)} - ${formatDate(event.endDate)}`;
-    }
-    return formatDate(event.startDate);
-  };
-
+const EventCard: React.FC<EventCardProps> = ({
+  title,
+  permalink,
+  date,
+  formattedDate,
+  type,
+  duration,
+  language,
+  location,
+  country,
+  event,
+  description,
+  tags,
+}) => {
   const getTypeDisplay = () => {
-    if (event.duration) {
-      return `${event.type} ${event.duration}`;
+    if (duration) {
+      return `${type} ${duration}`;
     }
-    return event.type;
+    return type;
   };
 
   return (
     <div className={styles.eventCard}>
       <div className={styles.eventHeader}>
         <h3 className={styles.eventTitle}>
-          <a href={event.url} target="_blank" rel="noopener noreferrer">
-            {event.title}
-          </a>
+          <Link to={permalink}>{title}</Link>
         </h3>
         <div className={styles.eventMeta}>
-          <span className={styles.eventType}>{getTypeDisplay()}</span>
-          <span className={styles.eventLanguage}>({event.language})</span>
+          {type && <span className={styles.eventType}>{getTypeDisplay()}</span>}
+          {language && <span className={styles.eventLanguage}>({language})</span>}
         </div>
       </div>
       
       <div className={styles.eventDetails}>
         <div className={styles.eventInfo}>
-          <div className={styles.eventConference}>{event.event}</div>
-          <div className={styles.eventDateTime}>
-            {formatDateRange()}
-            {event.startTime && ` | ${event.startTime}`}
-          </div>
-          <div className={styles.eventLocation}>
-            {event.location}
-            {event.country && `, ${event.country}`}
-          </div>
+          {event && <div className={styles.eventConference}>{event}</div>}
+          <div className={styles.eventDateTime}>{formattedDate}</div>
+          {location && (
+            <div className={styles.eventLocation}>
+              {location}
+              {country && `, ${country}`}
+            </div>
+          )}
         </div>
         
-        <div className={styles.eventDescription}>
-          {event.description}
-        </div>
+        {description && (
+          <div className={styles.eventDescription}>
+            {description}
+          </div>
+        )}
         
-        {event.tags.length > 0 && (
+        {tags && tags.length > 0 && (
           <div className={styles.eventTags}>
-            {event.tags.map((tag, index) => (
-              <span key={index} className={styles.tag}>
-                {tag}
-              </span>
+            {tags.map((tag, index) => (
+              <Link key={index} to={tag.permalink} className={styles.tag}>
+                {tag.label}
+              </Link>
             ))}
           </div>
         )}
