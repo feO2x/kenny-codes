@@ -101,6 +101,7 @@ const config: Config = {
         blogSidebarTitle: "All Events",
         showReadingTime: false,
         sortPosts: "descending",
+        postsPerPage: "ALL",
         feedOptions: {
           type: ["rss", "atom"],
           title: "Kenny Codes - Events",
