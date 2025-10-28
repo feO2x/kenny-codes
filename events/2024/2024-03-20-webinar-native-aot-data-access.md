@@ -8,7 +8,7 @@ event: Thinktecture Webinar
 tags: [Native AOT, .NET, Data Access, Humble Objects]
 ---
 
-Data access in .NET Native AOT without EF Core, using Humble Objects pattern.
+Data access in .NET Native AOT without EF Core, using the Humble Objects design pattern.
 
 <!-- truncate -->
 
@@ -16,6 +16,11 @@ Data access in .NET Native AOT without EF Core, using Humble Objects pattern.
 
 **Time:** 10:30
 
-Explore alternative approaches to data access in .NET Native AOT applications. This webinar demonstrates how to use the Humble Objects pattern as a lightweight alternative to Entity Framework Core in Native AOT scenarios.
+Interest in Native AOT has grown significantly since .NET 8 introduced the ability to deliver ASP.NET Core applications directly as machine code.
+However, a major challenge remains: Entity Framework Core is currently not compatible with Native AOT.
+
+In this session, we explore alternative approaches for designing the data access layer in Native AOT projects. We’ll examine various micro-ORMs and demonstrate how to use Humble Objects (database sessions) to clearly separate business logic from the data access layer. The goal is to create a structure that feels almost as seamless as working with EF Core.
+
+We’ll also take a closer look at patterns such as Unit of Work and Repository, discussing how these can be effectively leveraged to build a clean and maintainable codebase.
 
 [More Information](https://www.thinktecture.com/webinare/net-native-aot-data-access-ohne-ef-core-dafuer-mit-humble-objects/)

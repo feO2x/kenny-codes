@@ -16,6 +16,6 @@ Practical cloud-native development with modern end-to-end architectures.
 
 ## Event Details
 
-This 8-hour workshop provides hands-on experience with cloud-native development patterns and modern end-to-end architectures. Participants will learn best practices for building scalable, resilient applications using cloud-native technologies.
+Whether you’re modernizing you apps or starting fresh, everything is expected to be cloud-native these days. But what does “cloud-native” actually mean? Do we really always need stateless microservices everywhere? In this full-day workshop,  Thorsten Hans and Kenny Pflug use distributed application architectures and proven patterns to show you how to build cloud-native applications. Through hands-on examples, .NET architects and developers will examine common challenges and discuss pragmatic solutions. Whether your target is on-prem infrastructure, a private data center, or a public cloud like Azure, get your team ready to design applications around essential cloud-native attributes such as configurability, observability, resilience, and scalability.
 
-[More Information](https://www.thinktecture.com/contributions/cloud-native-in-der-praxis-moderne-end-to-end-architekturen/)
+[More Information in German](https://www.thinktecture.com/contributions/cloud-native-in-der-praxis-moderne-end-to-end-architekturen/)

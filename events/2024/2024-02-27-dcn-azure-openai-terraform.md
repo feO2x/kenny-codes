@@ -1,15 +1,14 @@
 ---
-title: "Private GPT LLMs: Securely Deploying Azure OpenAI Service with Terraform"
-date: 2024-07-01
+title: "Securely Deploying Private OpenAI LLMs in Azure with Terraform"
+date: 2024-02-27
 type: Talk
 language: German
-location: Nuremberg
-country: Germany
-event: DWX 2024
+location: Online
+event: Digital Craftsmanship Nordoberpfalz
 tags: [Azure, OpenAI, Terraform, Security]
 ---
 
-Securely deploying Azure OpenAI Service with Terraform for private GPT LLMs.
+Securely deploying private OpenAI LLMs in Azure using Terraform.
 
 <!-- truncate -->
 
@@ -26,4 +25,4 @@ However, beyond programmatic access, important questions arise around deployment
 
 This talk addresses all of these questions, enabling you to determine whether the Azure OpenAI Service is a suitable option for your organization and how it can be effectively integrated into existing or new cloud infrastructures.
 
-[More Information](https://www.thinktecture.com/contributions/private-gpt-llms-azure-openai-service-sicher-deployen-mit-terraform-2/)
+[More Information](https://www.thinktecture.com/contributions/private-openai-llms-sicher-deployen-in-azure-mit-terraform/)

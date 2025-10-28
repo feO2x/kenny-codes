@@ -15,6 +15,11 @@ Exploring whether .NET Native AOT is ready for your Web APIs.
 
 ## Event Details
 
-Is .NET Native AOT ready for production Web APIs? This talk examines the current state of Native AOT support in .NET, evaluates its readiness for Web API scenarios, and provides guidance on when to adopt this technology.
+With .NET 8, ASP.NET Core Web APIs can, for the first time, be compiled using Native AOT and delivered directly as machine code.
+Microsoft promises smaller application sizes, faster startup times, and lower memory consumption at runtime. That sounds great — but how substantial are these benefits in real-world scenarios?
+
+Which frameworks, libraries, and components can be used, and which are (not yet) compatible with Native AOT? How should the data access layer be structured when Entity Framework Core cannot be used? Can reflection features still be utilized, or are they completely restricted by Native AOT? How can a Native AOT app be tested, and is it possible to use the managed debugger in the IDE? And what can we expect from .NET 9?
+
+This one-hour session explores all of these questions, helping you decide whether Native AOT is a practical and worthwhile path for your projects.
 
 [More Information](https://www.thinktecture.com/contributions/net-native-aot-bereit-fuer-meine-web-apis/)
