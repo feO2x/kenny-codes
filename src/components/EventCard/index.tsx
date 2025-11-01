@@ -1,18 +1,13 @@
 import React from 'react';
 import Link from '@docusaurus/Link';
+import type { EventFrontMatter } from '@site/src/types/event';
 import styles from './styles.module.css';
 
-interface EventCardProps {
+interface EventCardProps extends EventFrontMatter {
   title: string;
   permalink: string;
   date: string;
   formattedDate: string;
-  type?: string;
-  duration?: string;
-  language?: string;
-  location?: string;
-  country?: string;
-  event?: string;
   description?: string;
   tags?: Array<{ label: string; permalink: string }>;
 }

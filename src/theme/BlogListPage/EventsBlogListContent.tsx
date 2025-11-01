@@ -3,6 +3,7 @@ import Layout from '@theme/Layout';
 import HeaderWithImage from '@site/src/components/HeaderWithImage';
 import EventCard from '@site/src/components/EventCard';
 import type {Props} from '@theme/BlogListPage';
+import type {EventFrontMatter} from '@site/src/types/event';
 import styles from './styles.module.css';
 
 type EventsBlogListContentProps = {
@@ -10,15 +11,6 @@ type EventsBlogListContentProps = {
 };
 
 type BlogListItem = EventsBlogListContentProps['items'][number];
-
-type EventFrontMatter = BlogListItem['content']['frontMatter'] & {
-  type?: string;
-  duration?: string;
-  language?: string;
-  location?: string;
-  country?: string;
-  event?: string;
-};
 
 export default function EventsBlogListContent({items}: EventsBlogListContentProps) {
   // Custom layout for events page
@@ -78,7 +70,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Upcoming Events</h2>
             {upcomingEvents.map((item, index) => {
-              const frontMatter: EventFrontMatter = item.content.frontMatter;
+              const frontMatter = item.content.frontMatter as EventFrontMatter;
               return (
                 <EventCard
                   key={index}
@@ -103,7 +95,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>Past Events</h2>
           {pastEvents.map((item, index) => {
-            const frontMatter: EventFrontMatter = item.content.frontMatter;
+            const frontMatter = item.content.frontMatter as EventFrontMatter;
             return (
               <EventCard
                 key={index}
