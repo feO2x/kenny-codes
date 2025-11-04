@@ -16,6 +16,8 @@ This talk shows what Betrand Meyer's Design by Contract is and how it can be app
 
 ## Event Details
 
+[![Design by Contract Video on YouTube](/img/2016-01-25-video-thumbnail-regensburg.png)](https://youtu.be/QsSx6-rXljI?si=yUFYHKek0yNM-Kj2)
+
 As early as 1988, Bertrand Meyer — one of the pioneers of object-oriented programming — introduced the concept of Design by Contract (DbC) in his book Object-Oriented Software Construction.
 But what exactly is DbC, and are we already applying its principles effectively in our daily programming work?
 

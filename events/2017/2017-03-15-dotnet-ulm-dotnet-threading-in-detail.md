@@ -16,7 +16,7 @@ In this talk, we look into multithreading with .NET, especially into threads and
 
 ## Event Details
 
-[![.NET Threading in Detail Video](/img/2017-03-15-video-thumbnail.png)](https://youtu.be/U5bTvc4yv5U?si=IcLtDLGnJWjD7WBo)
+[![.NET Threading in Detail Video on YouTube](/img/2017-03-15-video-thumbnail.png)](https://youtu.be/U5bTvc4yv5U?si=IcLtDLGnJWjD7WBo)
 
 Multithreading has become indispensable in modern applications — whether to offload long-running operations from the UI thread or to distribute complex computations across multiple threads. One of the main challenges, however, is ensuring proper synchronization of data accessed by multiple threads. But what exactly does a lock do, and how does it affect the thread pool?
 
