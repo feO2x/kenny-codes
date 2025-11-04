@@ -2,6 +2,7 @@
 title: "Scalable .NET Apps with async await"
 date: 2024-05-06
 type: Talk
+duration: 1h
 language: German
 location: Regensburg
 country: Germany

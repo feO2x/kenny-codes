@@ -2,6 +2,7 @@
 title: "Private GPT LLMs: Securely Deploying Azure OpenAI Service with Terraform"
 date: 2024-07-01
 type: Talk
+duration: 1h
 language: German
 location: Nuremberg
 country: Germany

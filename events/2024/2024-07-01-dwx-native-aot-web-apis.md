@@ -2,6 +2,7 @@
 title: "Web APIs with ASP.NET Core Native AOT"
 date: 2024-07-01
 type: Talk
+duration: 1h
 language: German
 location: Nuremberg
 country: Germany

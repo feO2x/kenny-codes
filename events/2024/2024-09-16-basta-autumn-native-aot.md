@@ -2,6 +2,7 @@
 title: ".NET Native AOT – Ready for My Web APIs?"
 date: 2024-09-16
 type: Talk
+duration: 1h
 language: German
 location: Mainz
 country: Germany

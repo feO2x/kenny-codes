@@ -2,6 +2,7 @@
 title: ".NET Native AOT – Overview and Performance"
 date: 2024-03-06
 type: Webinar
+duration: 1h
 language: German
 location: Online
 event: Thinktecture Webinar

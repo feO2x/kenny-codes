@@ -2,6 +2,7 @@
 title: "Scalable .NET Apps with async await – Fundamentals & Practical Tips"
 date: 2024-02-12
 type: Talk
+duration: 1h
 language: German
 location: Frankfurt
 country: Germany

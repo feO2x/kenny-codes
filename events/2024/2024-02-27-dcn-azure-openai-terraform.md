@@ -2,6 +2,7 @@
 title: "Securely Deploying Private OpenAI LLMs in Azure with Terraform"
 date: 2024-02-27
 type: Talk
+duration: 1h
 language: German
 location: Online
 event: Digital Craftsmanship Nordoberpfalz
