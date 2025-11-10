@@ -16,6 +16,8 @@ In this talk, we explore the topic of dependency injection in .NET and discuss h
 
 ## Event Details
 
+[![Dependency Injection in .NET Video on YouTube](/img/2017-06-28-video-thumbnail-regensburg.png)](https://youtu.be/nPpKVTs245M?si=ks5oZ1K5MRZ-gBng)
+
 In ASP.NET Core applications, the Dependency Injection (DI) container has become a fundamental component.
 It allows us to flexibly resolve object graphs — but what’s really happening behind registrations, lifetimes, the different types of dependency injection, and object composition?
 
