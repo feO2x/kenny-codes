@@ -16,6 +16,8 @@ In this talk, we explore the basics of git and learn how to think in acyclic dir
 
 ## Event Details
 
+[![Introduction to git Video on YouTube](/img/2018-01-16-video-thumbnail-regensburg.png)](https://youtu.be/yIEggYhkyZc?si=mjegNei-xWCBbobH)
+
 Version control systems have become an indispensable part of modern software development.
 In this talk, we’ll explore the topic from two perspectives: first, through a hands-on look at Git, where we’ll examine the details of repositories, commits, branches, and merges. Second, we’ll compare centralized and distributed version control systems — specifically Subversion and Git — and discuss the advantages and disadvantages of each approach.
 
