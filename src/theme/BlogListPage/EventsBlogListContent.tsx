@@ -14,8 +14,9 @@ type BlogListItem = EventsBlogListContentProps['items'][number];
 
 export default function EventsBlogListContent({items}: EventsBlogListContentProps) {
   // Custom layout for events page
+  // Normalize to UTC midnight for consistent date comparisons
   const now = new Date();
-  now.setHours(0, 0, 0, 0);
+  const nowUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -28,12 +29,12 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
 
   const upcomingEvents = items.filter(item => {
     const eventDate = new Date(item.content.metadata.date);
-    return eventDate >= now;
+    return eventDate.getTime() >= nowUtc;
   });
 
   const pastEvents = items.filter(item => {
     const eventDate = new Date(item.content.metadata.date);
-    return eventDate < now;
+    return eventDate.getTime() < nowUtc;
   });
 
   // Sort upcoming earliest first, past most recent first
