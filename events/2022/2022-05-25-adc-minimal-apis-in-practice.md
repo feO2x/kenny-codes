@@ -1,5 +1,5 @@
 ---
-title: "ASP.NET Core Mininmal APIs in Practice"
+title: "ASP.NET Core Minimal APIs in Practice"
 date: 2022-05-25
 type: Talk
 duration: 1h
