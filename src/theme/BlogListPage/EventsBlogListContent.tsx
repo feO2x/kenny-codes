@@ -46,6 +46,21 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
     new Date(a.content.metadata.date).getTime(),
   );
 
+  // Group past events by year
+  const pastEventsByYear = pastEvents.reduce((acc, item) => {
+    const year = new Date(item.content.metadata.date).getFullYear();
+    if (!acc[year]) {
+      acc[year] = [];
+    }
+    acc[year].push(item);
+    return acc;
+  }, {} as Record<number, BlogListItem[]>);
+
+  // Get years in descending order
+  const years = Object.keys(pastEventsByYear)
+    .map(Number)
+    .sort((a, b) => b - a);
+
   return (
     <Layout title="Events" description="Past and upcoming events">
       <HeaderWithImage title="Events" imageUrl="/kenny-codes/img/events.jpg" />
@@ -94,26 +109,31 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
 
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>Past Events</h2>
-          {pastEvents.map((item, index) => {
-            const frontMatter = item.content.frontMatter as EventFrontMatter;
-            return (
-              <EventCard
-                key={index}
-                title={item.content.metadata.title}
-                permalink={item.content.metadata.permalink}
-                date={item.content.metadata.date}
-                formattedDate={formatDate(item.content.metadata.date)}
-                type={frontMatter.type}
-                duration={frontMatter.duration}
-                language={frontMatter.language}
-                location={frontMatter.location}
-                country={frontMatter.country}
-                event={frontMatter.event}
-                description={item.content.metadata.description}
-                tags={item.content.metadata.tags}
-              />
-            );
-          })}
+          {years.map(year => (
+            <div key={year}>
+              <h3 className={styles.yearHeader}>{year}</h3>
+              {pastEventsByYear[year].map((item, index) => {
+                const frontMatter = item.content.frontMatter as EventFrontMatter;
+                return (
+                  <EventCard
+                    key={index}
+                    title={item.content.metadata.title}
+                    permalink={item.content.metadata.permalink}
+                    date={item.content.metadata.date}
+                    formattedDate={formatDate(item.content.metadata.date)}
+                    type={frontMatter.type}
+                    duration={frontMatter.duration}
+                    language={frontMatter.language}
+                    location={frontMatter.location}
+                    country={frontMatter.country}
+                    event={frontMatter.event}
+                    description={item.content.metadata.description}
+                    tags={item.content.metadata.tags}
+                  />
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
     </Layout>

@@ -56,6 +56,17 @@
   color: var(--ifm-heading-color);
 }
 
+.yearHeader {
+  font-size: 1.4rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--ifm-color-emphasis-300);
+  padding-bottom: 0.5rem;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .eventsContainer {
