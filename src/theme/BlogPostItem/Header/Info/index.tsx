@@ -51,6 +51,9 @@ export default function BlogPostItemHeaderInfo({className}: Props): ReactNode {
   const {metadata} = useBlogPost();
   const {date, readingTime} = metadata;
 
+  // Check if this is an event page by looking at the source path
+  const isEventPage = metadata.source?.includes('/events/') || metadata.permalink?.includes('/events/');
+
   const dateTimeFormat = useDateTimeFormat({
     day: 'numeric',
     month: 'long',
@@ -60,6 +63,11 @@ export default function BlogPostItemHeaderInfo({className}: Props): ReactNode {
 
   const formatDate = (blogDate: string) =>
     dateTimeFormat.format(new Date(blogDate));
+
+  // Don't render this component for event pages (date is shown in EventDetails)
+  if (isEventPage) {
+    return null;
+  }
 
   return (
     <div className={clsx(styles.container, 'margin-vert--md', className)}>

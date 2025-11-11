@@ -5,7 +5,7 @@ import styles from './styles.module.css';
 
 export default function EventDetails() {
   const { metadata } = useBlogPost();
-  const { frontMatter } = metadata;
+  const { frontMatter, date } = metadata;
 
   // Type the frontMatter with event-specific fields
   const eventFrontMatter = frontMatter as EventFrontMatter;
@@ -21,28 +21,42 @@ export default function EventDetails() {
     );
   }
 
+  // Format the date
+  const formatDate = (blogDate: string) => {
+    const dateObj = new Date(blogDate);
+    return dateObj.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'UTC'
+    });
+  };
+
   return (
     <div className={styles.eventDetails}>
       <div className={styles.eventDetailsGrid}>
-        {type && (
-          <div className={styles.eventDetailItem}>
-            <span className={styles.eventDetailLabel}>Type:</span>
-            <span className={styles.eventDetailValue}>
-              {type}
-              {duration && ` (${duration})`}
-            </span>
-          </div>
-        )}
-        {language && (
-          <div className={styles.eventDetailItem}>
-            <span className={styles.eventDetailLabel}>Language:</span>
-            <span className={styles.eventDetailValue}>{language}</span>
-          </div>
-        )}
         {event && (
           <div className={styles.eventDetailItem}>
             <span className={styles.eventDetailLabel}>Event:</span>
             <span className={styles.eventDetailValue}>{event}</span>
+          </div>
+        )}
+        {type && (
+          <div className={styles.eventDetailItem}>
+            <span className={styles.eventDetailLabel}>Type:</span>
+            <span className={styles.eventDetailValue}>{type}</span>
+          </div>
+        )}
+        {date && (
+          <div className={styles.eventDetailItem}>
+            <span className={styles.eventDetailLabel}>Date:</span>
+            <span className={styles.eventDetailValue}>{formatDate(date)}</span>
+          </div>
+        )}
+        {duration && (
+          <div className={styles.eventDetailItem}>
+            <span className={styles.eventDetailLabel}>Duration:</span>
+            <span className={styles.eventDetailValue}>{duration}</span>
           </div>
         )}
         {(location || country) && (
@@ -53,6 +67,12 @@ export default function EventDetails() {
               {location && country && ', '}
               {country}
             </span>
+          </div>
+        )}
+        {language && (
+          <div className={styles.eventDetailItem}>
+            <span className={styles.eventDetailLabel}>Language:</span>
+            <span className={styles.eventDetailValue}>{language}</span>
           </div>
         )}
       </div>
