@@ -4,6 +4,7 @@ import HeaderWithImage from '@site/src/components/HeaderWithImage';
 import EventCard from '@site/src/components/EventCard';
 import type {Props} from '@theme/BlogListPage';
 import type {EventFrontMatter} from '@site/src/types/event';
+import {formatDate} from '@site/src/utils/dateFormatting';
 import styles from './styles.module.css';
 
 type EventsBlogListContentProps = {
@@ -17,15 +18,6 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
   // Normalize to UTC midnight for consistent date comparisons
   const now = new Date();
   const nowUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   const upcomingEvents = items.filter(item => {
     const eventDate = new Date(item.content.metadata.date);

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useBlogPost } from '@docusaurus/plugin-content-blog/client';
 import type { EventFrontMatter } from '@site/src/types/event';
+import { formatDate } from '@site/src/utils/dateFormatting';
 import styles from './styles.module.css';
 
 export default function EventDetails() {
@@ -20,17 +21,6 @@ export default function EventDetails() {
       `Page: ${metadata.permalink}`
     );
   }
-
-  // Format the date
-  const formatDate = (blogDate: string) => {
-    const dateObj = new Date(blogDate);
-    return dateObj.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      timeZone: 'UTC'
-    });
-  };
 
   return (
     <div className={styles.eventDetails}>
