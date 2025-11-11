@@ -1,6 +1,7 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import { eventsId } from "./src/utils/eventUtils";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -87,6 +88,27 @@ const config: Config = {
         min: 320, // min resized image's size. if original is lower, use that size.
         steps: 4, // the max number of images generated between min and max (inclusive)
         disableInDev: false,
+      },
+    ],
+    [
+      "@docusaurus/plugin-content-blog",
+      {
+        id: eventsId,
+        routeBasePath: eventsId,
+        path: "./events",
+        blogTitle: "Events",
+        blogDescription: "Past and upcoming speaking events, workshops, and webinars",
+        blogSidebarCount: 0,
+        blogSidebarTitle: "All Events",
+        showReadingTime: false,
+        sortPosts: "descending",
+        postsPerPage: "ALL",
+        feedOptions: {
+          type: ["rss", "atom"],
+          title: "Kenny Codes - Events",
+          description: "Speaking events, workshops, and webinars by Kenny Pflug",
+          xslt: true,
+        },
       },
     ],
   ],

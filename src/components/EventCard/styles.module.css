@@ -101,6 +101,12 @@
   font-size: 0.75rem;
   font-weight: 500;
   border: 1px solid var(--ifm-color-emphasis-200);
+  text-decoration: none;
+}
+
+.tag:hover {
+  background: var(--ifm-color-emphasis-200);
+  text-decoration: none;
 }
 
 /* Responsive design */
