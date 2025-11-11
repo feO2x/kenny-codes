@@ -9,11 +9,13 @@ event: Thinktecture Webinar
 tags: [Native AOT, .NET, Performance]
 ---
 
-Overview and performance aspects of .NET Native AOT.
+In this webinar, we take a look at .NET Native AOT and explore wether Microsoft can deliver on their performance promises. We'll also check what differs between developing a .NET Native AOT app and a regular ASP.NET Core app.
 
 <!-- truncate -->
 
 ## Event Details
+
+[![.NET Native AOT Video on YouTube](/img/2024-03-06-video-thumbnail-webinar.png)](https://youtu.be/Iiu4VAQO64A?si=a4D2QaJYgQdamGbP)
 
 **Time:** 10:30
 
