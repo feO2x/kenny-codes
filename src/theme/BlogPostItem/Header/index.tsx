@@ -4,17 +4,17 @@ import BlogPostItemHeaderTitle from '@theme/BlogPostItem/Header/Title';
 import BlogPostItemHeaderInfo from '@theme/BlogPostItem/Header/Info';
 import BlogPostItemHeaderAuthors from '@theme/BlogPostItem/Header/Authors';
 import EventDetails from '@site/src/components/EventDetails';
+import {isEventPage} from '@site/src/utils/eventUtils';
 
 export default function BlogPostItemHeader(): ReactNode {
   const {metadata} = useBlogPost();
-  const isEventPage = metadata.source?.includes('/events/') || metadata.permalink?.includes('/events/');
 
   return (
     <header>
       <BlogPostItemHeaderTitle />
       <BlogPostItemHeaderInfo />
       <BlogPostItemHeaderAuthors />
-      {isEventPage && <EventDetails />}
+      {isEventPage(metadata) && <EventDetails />}
     </header>
   );
 }

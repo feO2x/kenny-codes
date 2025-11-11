@@ -2,14 +2,13 @@ import React, {type ReactNode} from 'react';
 import PaginatorNavLink from '@theme/PaginatorNavLink';
 import {useBlogPost} from '@docusaurus/plugin-content-blog/client';
 import type {Props} from '@theme/BlogPostPaginator';
+import {isEventPage} from '@site/src/utils/eventUtils';
 
 export default function BlogPostPaginator(props: Props): ReactNode {
   const {nextItem, prevItem} = props;
   const {metadata} = useBlogPost();
   
-  // Check if this is an event page
-  const isEventPage = metadata.source?.includes('/events/') || metadata.permalink?.includes('/events/');
-  const itemType = isEventPage ? 'event' : 'post';
+  const itemType = isEventPage(metadata) ? 'event' : 'post';
 
   return (
     <nav

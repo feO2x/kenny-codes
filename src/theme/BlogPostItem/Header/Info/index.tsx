@@ -5,6 +5,7 @@ import {usePluralForm} from '@docusaurus/theme-common';
 import {useDateTimeFormat} from '@docusaurus/theme-common/internal';
 import {useBlogPost} from '@docusaurus/plugin-content-blog/client';
 import type {Props} from '@theme/BlogPostItem/Header/Info';
+import {isEventPage} from '@site/src/utils/eventUtils';
 
 import styles from './styles.module.css';
 
@@ -51,9 +52,6 @@ export default function BlogPostItemHeaderInfo({className}: Props): ReactNode {
   const {metadata} = useBlogPost();
   const {date, readingTime} = metadata;
 
-  // Check if this is an event page by looking at the source path
-  const isEventPage = metadata.source?.includes('/events/') || metadata.permalink?.includes('/events/');
-
   const dateTimeFormat = useDateTimeFormat({
     day: 'numeric',
     month: 'long',
@@ -65,7 +63,7 @@ export default function BlogPostItemHeaderInfo({className}: Props): ReactNode {
     dateTimeFormat.format(new Date(blogDate));
 
   // Don't render this component for event pages (date is shown in EventDetails)
-  if (isEventPage) {
+  if (isEventPage(metadata)) {
     return null;
   }
 

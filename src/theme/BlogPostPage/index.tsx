@@ -14,6 +14,7 @@ import TOC from '@theme/TOC';
 import ContentVisibility from '@theme/ContentVisibility';
 import type {Props} from '@theme/BlogPostPage';
 import type {BlogSidebar} from '@docusaurus/plugin-content-blog';
+import {isEventPage} from '@site/src/utils/eventUtils';
 
 function BlogPostPageContent({
   sidebar,
@@ -30,14 +31,13 @@ function BlogPostPageContent({
     toc_max_heading_level: tocMaxHeadingLevel,
   } = frontMatter;
   
-  // Check if this is an event page by looking at the source path
-  const isEventPage = metadata.source?.includes('/events/') || metadata.permalink?.includes('/events/');
+  const isEvent = isEventPage(metadata);
   
   return (
     <BlogLayout
-      sidebar={isEventPage ? undefined : sidebar}
+      sidebar={isEvent ? undefined : sidebar}
       toc={
-        !isEventPage && !hideTableOfContents && toc.length > 0 ? (
+        !isEvent && !hideTableOfContents && toc.length > 0 ? (
           <TOC
             toc={toc}
             minHeadingLevel={tocMinHeadingLevel}
