@@ -7,7 +7,7 @@ language: German
 location: Karlsruhe
 country: Germany
 event: Generation AI - Rhein Neckar Kreis und Karlsruhe
-tags: [.NET, Performance, BenchmarkDotNet, Memory Management, Garbage Collection]
+tags: [AI, .NET, Aspire, Microsoft.Extensions.AI, LLM, OpenAI, Cloud-Native]
 ---
 
 At this meetup, we explore how we can integrate OpenAI’s .NET API into modern .NET Cloud Native backends, focusing on the use case of AI Information Extraction.
