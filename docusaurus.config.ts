@@ -1,6 +1,7 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import { eventsId } from "./src/utils/eventUtils";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -92,8 +93,8 @@ const config: Config = {
     [
       "@docusaurus/plugin-content-blog",
       {
-        id: "events",
-        routeBasePath: "events",
+        id: eventsId,
+        routeBasePath: eventsId,
         path: "./events",
         blogTitle: "Events",
         blogDescription: "Past and upcoming speaking events, workshops, and webinars",

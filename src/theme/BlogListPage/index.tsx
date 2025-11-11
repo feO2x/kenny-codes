@@ -14,6 +14,7 @@ import type {Props} from '@theme/BlogListPage';
 import BlogPostItems from '@theme/BlogPostItems';
 import BlogListPageStructuredData from '@theme/BlogListPage/StructuredData';
 import EventsBlogListContent from './EventsBlogListContent';
+import {isEventsBlogList} from '@site/src/utils/eventUtils';
 
 function BlogListPageMetadata(props: Props): ReactNode {
   const {metadata} = props;
@@ -33,7 +34,7 @@ function BlogListPageMetadata(props: Props): ReactNode {
 
 function BlogListPageContent(props: Props): ReactNode {
   const {metadata, items, sidebar} = props;
-  const isEventsPage = metadata.blogTitle === 'Events';
+  const isEventsPage = isEventsBlogList(metadata);
 
   if (isEventsPage) {
     return <EventsBlogListContent items={items} />;
