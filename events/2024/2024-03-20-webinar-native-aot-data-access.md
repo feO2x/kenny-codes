@@ -15,6 +15,8 @@ Data access in .NET Native AOT without EF Core, using the Humble Objects design 
 
 ## Event Details
 
+[![.NET Native AOT Data Access without EF Core Video on YouTube](/img/2024-03-20-video-thumbnail-webinar.png)](https://youtu.be/LVMjEJWAxlU?si=EbPgBg-KCeFBHGFs)
+
 **Time:** 10:30
 
 Interest in Native AOT has grown significantly since .NET 8 introduced the ability to deliver ASP.NET Core applications directly as machine code.
