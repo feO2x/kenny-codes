@@ -1,5 +1,5 @@
 ---
-title: "High Perf - .NET Performance Benchmarking and Garbage Collector in Detail"
+title: "Integrate Multimodal Language Models into .NET Backends with OpenAI .NET API and .NET Aspire"
 date: 2024-10-17
 type: Talk
 duration: 1h
@@ -10,7 +10,7 @@ event: Generation AI - Rhein Neckar Kreis und Karlsruhe
 tags: [.NET, Performance, BenchmarkDotNet, Memory Management, Garbage Collection]
 ---
 
-At this meetup, we explore how we can integrate Microsoft.Extensions.AI into modern .NET Cloud Native backends, focusing on the use case of AI Information Extraction.
+At this meetup, we explore how we can integrate OpenAI’s .NET API into modern .NET Cloud Native backends, focusing on the use case of AI Information Extraction.
 
 <!-- truncate -->
 
