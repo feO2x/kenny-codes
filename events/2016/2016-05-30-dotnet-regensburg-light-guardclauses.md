@@ -1,5 +1,5 @@
 ---
-title: "Check paramaters easily with Light.GuardClauses"
+title: "Check Parameters Easily with Light.GuardClauses"
 date: 2016-05-30
 type: Talk
 duration: 2h
