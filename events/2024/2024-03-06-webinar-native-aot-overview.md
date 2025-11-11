@@ -9,15 +9,13 @@ event: Thinktecture Webinar
 tags: [Native AOT, .NET, Performance]
 ---
 
-In this webinar, we take a look at .NET Native AOT and explore wether Microsoft can deliver on their performance promises. We'll also check what differs between developing a .NET Native AOT app and a regular ASP.NET Core app.
+In this webinar, we take a look at .NET Native AOT and explore whether Microsoft can deliver on their performance promises. We'll also check what differs between developing a .NET Native AOT app and a regular ASP.NET Core app.
 
 <!-- truncate -->
 
 ## Event Details
 
 [![.NET Native AOT Video on YouTube](/img/2024-03-06-video-thumbnail-webinar.png)](https://youtu.be/Iiu4VAQO64A?si=a4D2QaJYgQdamGbP)
-
-**Time:** 10:30
 
 With .NET 8, ASP.NET Core Web APIs can, for the first time, be compiled using Native AOT and delivered directly as machine code.
 Microsoft promises smaller application sizes, faster startup times, and reduced memory consumption at runtime. That sounds impressive — but how significant are these gains in practice?
