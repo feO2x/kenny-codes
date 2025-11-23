@@ -24,3 +24,62 @@ export function isEventPage(metadata: {source?: string; permalink?: string}): bo
 export function isEventsBlogList(metadata: {permalink: string}): boolean {
   return metadata.permalink.includes(eventsRoutePath);
 }
+
+export interface EventItem {
+  content: {
+    metadata: {
+      date: string;
+    };
+  };
+}
+
+/**
+ * Groups events into upcoming and past events, and groups past events by year.
+ * 
+ * @param items - List of blog posts/events
+ * @returns Object containing upcoming events, past events, grouped past events, and years
+ */
+export function groupEvents<T extends EventItem>(items: ReadonlyArray<T>) {
+  // Normalize to UTC midnight for consistent date comparisons
+  const now = new Date();
+  const nowUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+
+  // Pre-calculate timestamps to avoid repeated Date parsing during sort
+  const processedItems = items.map(item => ({
+    item,
+    timestamp: new Date(item.content.metadata.date).getTime()
+  }));
+
+  const upcomingProcessed = processedItems.filter(p => p.timestamp >= nowUtc);
+  const pastProcessed = processedItems.filter(p => p.timestamp < nowUtc);
+
+  // Sort upcoming earliest first, past most recent first
+  upcomingProcessed.sort((a, b) => a.timestamp - b.timestamp);
+  pastProcessed.sort((a, b) => b.timestamp - a.timestamp);
+
+  // Unwrap items
+  const upcomingEvents = upcomingProcessed.map(p => p.item);
+  const pastEvents = pastProcessed.map(p => p.item);
+
+  // Group past events by year
+  const pastEventsByYear = pastProcessed.reduce((acc, p) => {
+    const year = new Date(p.timestamp).getFullYear();
+    if (!acc[year]) {
+      acc[year] = [];
+    }
+    acc[year].push(p.item);
+    return acc;
+  }, {} as Record<number, T[]>);
+
+  // Get years in descending order
+  const years = Object.keys(pastEventsByYear)
+    .map(Number)
+    .sort((a, b) => b - a);
+
+  return {
+    upcomingEvents,
+    pastEvents,
+    pastEventsByYear,
+    years
+  };
+}
