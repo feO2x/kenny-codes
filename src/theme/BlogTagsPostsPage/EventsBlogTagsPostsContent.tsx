@@ -6,6 +6,7 @@ import type {Props} from '@theme/BlogTagsPostsPage';
 import type {EventFrontMatter} from '@site/src/types/event';
 import {formatDate} from '@site/src/utils/dateFormatting';
 import styles from '@site/src/css/events.module.css';
+import localStyles from './styles.module.css';
 
 import {groupEvents} from '@site/src/utils/eventUtils';
 import EventStats from '@site/src/components/EventStats';
@@ -24,7 +25,7 @@ export default function EventsBlogTagsPostsContent({items, tag}: EventsBlogTagsP
       <HeaderWithImage title="Events" imageUrl="/kenny-codes/img/events.jpg" />
 
       <div className={styles.eventsContainer}>
-        <h1 style={{marginBottom: '2rem', textAlign: 'center'}}>{title}</h1>
+        <h1 className={localStyles.pageTitle}>{title}</h1>
         <EventStats 
           totalEvents={items.length} 
           upcomingEvents={upcomingEvents.length} 
