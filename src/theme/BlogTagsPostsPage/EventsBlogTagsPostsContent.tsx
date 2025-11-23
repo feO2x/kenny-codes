@@ -2,7 +2,7 @@ import React from 'react';
 import Layout from '@theme/Layout';
 import HeaderWithImage from '@site/src/components/HeaderWithImage';
 import EventCard from '@site/src/components/EventCard';
-import type {Props} from '@theme/BlogListPage';
+import type {Props} from '@theme/BlogTagsPostsPage';
 import type {EventFrontMatter} from '@site/src/types/event';
 import {formatDate} from '@site/src/utils/dateFormatting';
 import styles from '@site/src/css/events.module.css';
@@ -10,20 +10,21 @@ import styles from '@site/src/css/events.module.css';
 import {groupEvents} from '@site/src/utils/eventUtils';
 import EventStats from '@site/src/components/EventStats';
 
-type EventsBlogListContentProps = {
-  items: Props['items'];
-};
+type EventsBlogTagsPostsContentProps = Props;
 
-type BlogListItem = EventsBlogListContentProps['items'][number];
+type BlogListItem = EventsBlogTagsPostsContentProps['items'][number];
 
-export default function EventsBlogListContent({items}: EventsBlogListContentProps) {
+export default function EventsBlogTagsPostsContent({items, tag}: EventsBlogTagsPostsContentProps) {
   const {upcomingEvents, pastEvents, pastEventsByYear, years} = groupEvents<BlogListItem>(items);
 
+  const title = `Events tagged with "${tag.label}"`;
+
   return (
-    <Layout title="Events" description="Past and upcoming events">
+    <Layout title={title} description={`Events tagged with ${tag.label}`}>
       <HeaderWithImage title="Events" imageUrl="/kenny-codes/img/events.jpg" />
 
       <div className={styles.eventsContainer}>
+        <h1 style={{marginBottom: '2rem', textAlign: 'center'}}>{title}</h1>
         <EventStats 
           totalEvents={items.length} 
           upcomingEvents={upcomingEvents.length} 
@@ -57,7 +58,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
         )}
 
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Past Events</h2>
+          {pastEvents.length > 0 && <h2 className={styles.sectionTitle}>Past Events</h2>}
           {years.map(year => (
             <div key={year}>
               <h3 className={styles.yearHeader}>{year}</h3>
