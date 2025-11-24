@@ -219,20 +219,20 @@ const config: Config = {
         srcDark: "img/logo-dark.svg",
       },
       items: [
+        { to: "/blog", label: "Blog", position: "left" },
         {
           to: "/events",
           label: "Events",
           position: "left",
         },
+        // {
+        //   type: "docSidebar",
+        //   sidebarId: "tutorialSidebar",
+        //   position: "left",
+        //   label: "Tutorial",
+        // },
         {
-          type: "docSidebar",
-          sidebarId: "tutorialSidebar",
-          position: "left",
-          label: "Tutorial",
-        },
-        { to: "/blog", label: "Blog", position: "left" },
-        {
-          href: "https://github.com/facebook/docusaurus",
+          href: "https://github.com/feO2x/kenny-codes",
           label: "GitHub",
           position: "right",
         },
@@ -242,41 +242,32 @@ const config: Config = {
       style: "dark",
       links: [
         {
-          title: "Docs",
-          items: [
-            {
-              label: "Tutorial",
-              to: "/docs/intro",
-            },
-          ],
-        },
-        {
-          title: "Community",
-          items: [
-            {
-              label: "Stack Overflow",
-              href: "https://stackoverflow.com/questions/tagged/docusaurus",
-            },
-            {
-              label: "Discord",
-              href: "https://discordapp.com/invite/docusaurus",
-            },
-            {
-              label: "X",
-              href: "https://x.com/docusaurus",
-            },
-          ],
-        },
-        {
-          title: "More",
+          title: "Read my stuff and meet me",
           items: [
             {
               label: "Blog",
               to: "/blog",
             },
             {
+              label: "Events",
+              to: "/events",
+            },
+          ],
+        },
+        {
+          title: "Follow me",
+          items: [
+            {
+              label: "X",
+              href: "https://x.com/feO2x",
+            },
+            {
+              label: "LinkedIn",
+              href: "https://www.linkedin.com/in/kenny-pflug-7a1012123/",
+            },
+            {
               label: "GitHub",
-              href: "https://github.com/facebook/docusaurus",
+              href: "https://github.com/feO2x/",
             },
           ],
         },

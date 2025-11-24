@@ -1,19 +1,29 @@
-facebook:
-  label: Facebook
-  permalink: /facebook
-  description: Facebook tag description
+csharp:
+  label: C#
+  permalink: /csharp
+  description: C# programming language
 
-hello:
-  label: Hello
-  permalink: /hello
-  description: Hello tag description
+software-design:
+  label: Software Design
+  permalink: /software-design
+  description: Software design principles and practices
 
-docusaurus:
-  label: Docusaurus
-  permalink: /docusaurus
-  description: Docusaurus tag description
+encapsulation:
+  label: Encapsulation
+  permalink: /encapsulation
+  description: Encapsulation is a major pillar of Object-Oriented Programming
 
-hola:
-  label: Hola
-  permalink: /hola
-  description: Hola tag description
+api-design:
+  label: API Design
+  permalink: /api-design
+  description: API design principles and practices (not Web APIs)
+
+polymorphism:
+  label: Polymorphism
+  permalink: /polymorphism
+  description: Polymorphism is a major pillar of Object-Oriented Programming
+
+object-oriented-programming:
+  label: Object-Oriented Programming
+  permalink: /object-oriented-programming
+  description: Object-Oriented Programming is a famous programming paradigm
