@@ -1,0 +1,27 @@
+.section {
+  padding: 6rem 0;
+  position: relative;
+}
+
+.sectionDark {
+  background-color: var(--ifm-color-emphasis-100);
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.sectionTitle {
+  text-align: center;
+  margin-bottom: 4rem;
+  font-size: 3rem;
+  font-weight: 800;
+}
+
+.sectionTitle span {
+  border-bottom: 4px solid var(--ifm-color-primary);
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+  gap: 2.5rem;
+}

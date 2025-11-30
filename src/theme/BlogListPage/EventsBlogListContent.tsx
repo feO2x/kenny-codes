@@ -24,44 +24,17 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
       <HeaderWithImage title="Events" imageUrl="/kenny-codes/img/events.jpg" />
 
       <div className={styles.eventsContainer}>
-        <EventStats 
-          totalEvents={items.length} 
-          upcomingEvents={upcomingEvents.length} 
-          pastEvents={pastEvents.length} 
+        <EventStats
+          totalEvents={items.length}
+          upcomingEvents={upcomingEvents.length}
+          pastEvents={pastEvents.length}
         />
 
         {upcomingEvents.length > 0 && (
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Upcoming Events</h2>
-            {upcomingEvents.map((item, index) => {
-              const frontMatter = item.content.frontMatter as EventFrontMatter;
-              return (
-                <EventCard
-                  key={index}
-                  title={item.content.metadata.title}
-                  permalink={item.content.metadata.permalink}
-                  date={item.content.metadata.date}
-                  formattedDate={formatDate(item.content.metadata.date)}
-                  type={frontMatter.type}
-                  duration={frontMatter.duration}
-                  language={frontMatter.language}
-                  location={frontMatter.location}
-                  country={frontMatter.country}
-                  event={frontMatter.event}
-                  description={item.content.metadata.description}
-                  tags={item.content.metadata.tags}
-                />
-              );
-            })}
-          </div>
-        )}
-
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Past Events</h2>
-          {years.map(year => (
-            <div key={year}>
-              <h3 className={styles.yearHeader}>{year}</h3>
-              {pastEventsByYear[year].map((item, index) => {
+            <div className={styles.cardList}>
+              {upcomingEvents.map((item, index) => {
                 const frontMatter = item.content.frontMatter as EventFrontMatter;
                 return (
                   <EventCard
@@ -81,6 +54,37 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
                   />
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>Past Events</h2>
+          {years.map(year => (
+            <div key={year}>
+              <h3 className={styles.yearHeader}>{year}</h3>
+              <div className={styles.cardList}>
+                {pastEventsByYear[year].map((item, index) => {
+                  const frontMatter = item.content.frontMatter as EventFrontMatter;
+                  return (
+                    <EventCard
+                      key={index}
+                      title={item.content.metadata.title}
+                      permalink={item.content.metadata.permalink}
+                      date={item.content.metadata.date}
+                      formattedDate={formatDate(item.content.metadata.date)}
+                      type={frontMatter.type}
+                      duration={frontMatter.duration}
+                      language={frontMatter.language}
+                      location={frontMatter.location}
+                      country={frontMatter.country}
+                      event={frontMatter.event}
+                      description={item.content.metadata.description}
+                      tags={item.content.metadata.tags}
+                    />
+                  );
+                })}
+              </div>
             </div>
           ))}
         </div>

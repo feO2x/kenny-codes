@@ -1,0 +1,110 @@
+{
+  "recentPosts": [
+    {
+      "title": "Avoid the internal modifier by default",
+      "date": "2015-09-27",
+      "link": "/blog/2015-09-27-avoid-the-internal-modifier-by-default",
+      "excerpt": "In one of his recent posts, Mark Seemann argued that you should not use the `internal` modifier for types and their members, because this decreases the testability of your code. While I totally agree ...",
+      "tags": [
+        "csharp",
+        "software-design",
+        "encapsulation",
+        "api-design"
+      ]
+    },
+    {
+      "title": "Abstractions, Abstractions… Different Kinds of Abstractions",
+      "date": "2015-08-31",
+      "link": "/blog/2015-08-31-different-kinds-of-abstractions",
+      "excerpt": "In my video series on the Dependency Inversion Principle that you can watch on YouTube now, I talk a lot about object-oriented abstractions and how we can use them to structure our code in a loosely c...",
+      "tags": [
+        "csharp",
+        "software-design",
+        "encapsulation",
+        "polymorphism",
+        "object-oriented-programming",
+        "api-design"
+      ]
+    }
+  ],
+  "recentEvents": [
+    {
+      "title": "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI",
+      "date": "2025-09-30",
+      "link": "/events/2025-09-30-dcn-cloud-native-meets-ai",
+      "excerpt": "Talk about using .NET Aspire to orchestrate Cloud Native backends at development time and using Microsoft.Extensions.AI to access multimodal LLMs from your .NET backends - no matter whether they run i...",
+      "tags": [
+        "AI",
+        ".NET",
+        "Aspire",
+        "Microsoft.Extensions.AI",
+        "LLM",
+        "Cloud-Native"
+      ],
+      "type": "Talk",
+      "location": "Weiden in der Oberpfalz",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Digital Craftsmanship Nordoberpfalz"
+    },
+    {
+      "title": "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI",
+      "date": "2025-09-24",
+      "link": "/events/2025-09-24-dotnet-regensburg-cloud-native-meets-ai",
+      "excerpt": "Talk about using .NET Aspire to orchestrate Cloud Native backends at development time and using Microsoft.Extensions.AI to access multimodal LLMs from your .NET backends - no matter whether they run i...",
+      "tags": [
+        "AI",
+        ".NET",
+        "Aspire",
+        "Microsoft.Extensions.AI",
+        "LLM",
+        "Cloud-Native"
+      ],
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET User Group Regensburg"
+    },
+    {
+      "title": "Access Multimodal LLMs from .NET Backends with Microsoft.Extensions.AI and .NET Aspire",
+      "date": "2025-05-07",
+      "link": "/events/2025-05-07-adc-access-multimodal-llms-from-dotnet-backends-with-mea-and-aspire",
+      "excerpt": "Talk about using .NET Aspire to orchestrate Cloud Native backends at development time and using Microsoft.Extensions.AI to access multimodal LLMs from your .NET backends - no matter whether they run i...",
+      "tags": [
+        "AI",
+        ".NET",
+        "Aspire",
+        "Microsoft.Extensions.AI",
+        "LLM",
+        "Cloud-Native"
+      ],
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2025"
+    },
+    {
+      "title": "How to async – async await Internals and Expert Knowledge for Scalable .NET Apps",
+      "date": "2025-05-05",
+      "link": "/events/2025-05-05-adc-async-await-workshop",
+      "excerpt": "Workshop focusing on async/await internals and expert knowledge for scalable .NET applications.",
+      "tags": [
+        "async-await",
+        ".NET",
+        "performance",
+        "scalability"
+      ],
+      "type": "Workshop",
+      "location": "Regensburg",
+      "duration": "8h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2025"
+    }
+  ]
+}

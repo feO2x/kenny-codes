@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
+    "generate-home-data": "tsx scripts/generate-home-data.ts",
+    "prestart": "npm run generate-home-data",
     "start": "docusaurus start",
+    "prebuild": "npm run generate-home-data",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
@@ -28,6 +31,7 @@
     "@docusaurus/module-type-aliases": "3.9.2",
     "@docusaurus/tsconfig": "3.9.2",
     "@docusaurus/types": "3.9.2",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3"
   },
   "browserslist": {
