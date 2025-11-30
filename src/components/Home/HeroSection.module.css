@@ -179,8 +179,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(var(--ifm-color-primary-rgb), 0.1);
-  background: var(--ifm-color-emphasis-200);
+  background: var(--ifm-color-emphasis-300);
   color: var(--ifm-color-primary);
   border-radius: 50%;
   font-size: 0.8rem;
