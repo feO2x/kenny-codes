@@ -125,6 +125,10 @@ function processContent(dir: string, type: string): ContentItem[] {
         }
       }
 
+      if (!date) {
+        throw new Error(`No date found for ${file}. Add a 'date' field in frontmatter or use YYYY-MM-DD in filename/folder.`);
+      }
+
       // Title
       const title = (data.title as string) || filename.replace(/\.mdx?$/, "");
 
@@ -144,7 +148,7 @@ function processContent(dir: string, type: string): ContentItem[] {
 
       return {
         title,
-        date: date!,
+        date,
         link,
         excerpt,
         tags: data.tags as string[] | undefined,
@@ -155,8 +159,7 @@ function processContent(dir: string, type: string): ContentItem[] {
         country: data.country as string | undefined,
         event: data.event as string | undefined,
       };
-    })
-    .filter((item) => !!item.date) as ContentItem[]; // Must have date to sort
+    });
 
   // Sort desc
   items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
