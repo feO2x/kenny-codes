@@ -68,12 +68,12 @@ export default function ContentCard({
   return (
     <div className={clsx(styles.card, 'kc-card-gradient-border', className)}>
       <div className={styles.cardMeta}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', alignItems: 'flex-start' }}>
+        <div className={styles.cardMetaInfo}>
           {date && <span>📅 {date}</span>}
           {location && <span>📍 {location}</span>}
           {organizer && <span>💬 {organizer}</span>}
         </div>
-        {type && <span className="badge badge--secondary" style={{ alignSelf: 'flex-start' }}>{type}</span>}
+        {type && <span className={clsx('badge badge--secondary', styles.typeBadge)}>{type}</span>}
       </div>
 
       <Heading as="h3" className={styles.cardTitle}>
