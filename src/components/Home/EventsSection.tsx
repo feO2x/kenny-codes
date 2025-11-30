@@ -12,7 +12,7 @@ export default function EventsSection() {
     <section className={styles.section}>
       <div className="container">
         <Heading as="h2" className={styles.sectionTitle}>
-          Recent & Upcoming Events
+          Upcoming & Recent Events
         </Heading>
         <div className={styles.cardGrid}>
           {recentEvents.map((event, idx) => (

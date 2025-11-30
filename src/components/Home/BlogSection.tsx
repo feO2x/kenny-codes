@@ -13,7 +13,7 @@ export default function BlogSection() {
     <section className={clsx(styles.section, styles.sectionDark)}>
       <div className="container">
         <Heading as="h2" className={styles.sectionTitle}>
-          Latest Insights
+          Latest Blog Posts
         </Heading>
         <div className={styles.cardGrid}>
           {recentPosts.map((post, idx) => (
