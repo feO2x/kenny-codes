@@ -67,7 +67,7 @@ function parseFrontmatter(content: string): Frontmatter {
         frontmatter[currentKey] = [];
       }
       (frontmatter[currentKey] as string[]).push(
-        line.trim().substring(1).trim()
+        line.trim().replace(/^-\s*/, "")
       );
     }
   }
