@@ -7,6 +7,7 @@ language: German
 location: Online
 event: Digital Craftsmanship Nordoberpfalz
 tags: [Azure, OpenAI, Terraform, Security]
+slug: 2024-02-27-dcn-azure-openai-terraform
 ---
 
 Securely deploying private OpenAI LLMs in Azure using Terraform.

@@ -7,6 +7,7 @@ language: German
 location: Online
 event: Digital Craftsmanship Nordoberpfalz
 tags: [.NET, ASP.NET Core, Minimal APIs, Performance]
+slug: 2022-12-13-dcn-minimal-apis-in-practice
 ---
 
 In this talk, we take a look at ASP.NET Core Minimal APIs and how to use them to build performant and scalable web APIs. Also, we take a look at the new features they offer with .NET 7.

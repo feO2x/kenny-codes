@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: Advanced Developers Conference 2024
 tags: [ASP.NET Core, Native AOT, Web APIs]
+slug: 2024-05-06-adc-native-aot-web-apis
 ---
 
 Building Web APIs with ASP.NET Core Native AOT compilation.

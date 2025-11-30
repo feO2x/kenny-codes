@@ -8,6 +8,7 @@ location: Nuremberg
 country: Germany
 event: DWX 2024
 tags: [Azure, OpenAI, Terraform, Security]
+slug: 2024-07-01-dwx-azure-openai-terraform
 ---
 
 Securely deploying Azure OpenAI Service with Terraform for private GPT LLMs.

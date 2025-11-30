@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: .NET User Group Regensburg
 tags: [.NET, Multithreading, Asynchronous Programming, Performance, async await]
+slug: 2017-01-30-dotnet-regensburg-dotnet-threading-in-detail
 ---
 
 In this talk, we look into multithreading with .NET, especially into threads and the .NET Thread Pool. We learn about Synchronization Primitves and how async await and the Task Parallel Library (TPL) can be used to achieve your multithreading goals.

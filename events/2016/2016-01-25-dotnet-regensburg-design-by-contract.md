@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: .NET User Group Regensburg
 tags: [Design by Contract, .NET]
+slug: 2016-01-25-dotnet-regensburg-design-by-contract
 ---
 
 This talk shows what Betrand Meyer's Design by Contract is and how it can be applied in C#/.NET.

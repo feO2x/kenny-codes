@@ -7,6 +7,7 @@ language: German
 location: Online
 event: My Coding Zone
 tags: [.NET, async await, Performance, Memory Management]
+slug: 2023-04-07-coding-zone-async-await-in-depth
 ---
 
 In this Twitch stream, we explore the topic of async/await in .NET, discuss how it works under the hood, and look at common pitfalls and performance considerations.

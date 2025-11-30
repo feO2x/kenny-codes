@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: .NET User Group Regensburg
 tags: [.NET, Dependency Injection, Inversion of Control, IoC, Design Patterns]
+slug: 2017-06-28-dotnet-regensburg-dependency-injection
 ---
 
 In this talk, we explore the topic of Dependency Injection in .NET and discuss how it can be used to improve the design and architecture of our applications. We also explore different DI Containers and their performance characteristics.

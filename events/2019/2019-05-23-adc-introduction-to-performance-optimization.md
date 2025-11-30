@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: Advanced Developers Conference 2019
 tags: [.NET, Performance, BenchmarkDotNet, Memory Management]
+slug: 2019-05-23-adc-introduction-to-performance-optimization
 ---
 
 In this talk, we explore the fundamentals of performance optimization in .NET, using my library Light.GuardClauses as an example to demonstrate practical techniques for measuring and improving code performance. We use BenchmarkDotNet to showcase and compare performance characteristics of different approaches.

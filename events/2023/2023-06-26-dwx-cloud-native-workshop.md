@@ -6,8 +6,9 @@ duration: 8h
 language: German
 location: Nuremberg
 country: Germany
-event: DWX 2023 
+event: DWX 2023
 tags: [Cloud-Native, Architecture, Kubernetes]
+slug: 2023-06-26-dwx-cloud-native-workshop
 ---
 
 Practical cloud-native development with modern end-to-end architectures.

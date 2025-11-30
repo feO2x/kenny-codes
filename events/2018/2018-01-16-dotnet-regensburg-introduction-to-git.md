@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: .NET User Group Regensburg
 tags: [git, SVN, Version Control, VCS, GitHub]
+slug: 2018-01-16-dotnet-regensburg-introduction-to-git
 ---
 
 In this talk, we explore the basics of git and learn how to think in acyclic directional graphs when it comes to version control. We also compare git to other VCSs like SVN.

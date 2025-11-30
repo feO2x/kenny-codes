@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: .NET User Group Regensburg
 tags: [Test-Driven Development, Automated Testing, .NET]
+slug: 2015-01-26-dotnet-regensburg-automated-testing
 ---
 
 This talk explores the benefits of Automated Testing and Test-Driven Development with Visual Studio in the .NET ecosystem.

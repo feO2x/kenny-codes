@@ -8,6 +8,7 @@ location: Mainz
 country: Germany
 event: BASTA! Autumn 2024
 tags: [Native AOT, .NET, Web APIs, performance]
+slug: 2024-09-16-basta-autumn-native-aot
 ---
 
 Exploring whether .NET Native AOT is ready for your Web APIs.

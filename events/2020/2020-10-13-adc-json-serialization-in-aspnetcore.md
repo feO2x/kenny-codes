@@ -8,6 +8,7 @@ location: Munich
 country: Germany
 event: Advanced Developers Conference 2020
 tags: [.NET, Performance, JSON, Serialization, System.Text.Json, Newtonsoft.Json, Utf8Json, ASP.NET Core]
+slug: 2020-10-13-adc-json-serialization-in-aspnetcore
 ---
 
 In this talk, we compare Newtonsoft.Json with System.Text.Json and Utf8Json, focusing on performance, memory usage, and available features in ASP.NET Core applications.

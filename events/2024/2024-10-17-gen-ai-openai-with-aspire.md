@@ -8,6 +8,7 @@ location: Karlsruhe
 country: Germany
 event: Generation AI - Rhein Neckar Kreis und Karlsruhe
 tags: [AI, .NET, Aspire, Microsoft.Extensions.AI, LLM, OpenAI, Cloud-Native]
+slug: 2024-10-17-gen-ai-openai-with-aspire
 ---
 
 At this meetup, we explore how we can integrate OpenAI’s .NET API into modern .NET Cloud Native backends, focusing on the use case of AI Information Extraction.

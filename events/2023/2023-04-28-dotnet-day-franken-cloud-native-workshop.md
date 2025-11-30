@@ -8,6 +8,7 @@ location: Nuremberg
 country: Germany
 event: .NET Day Franken 2023
 tags: [Cloud-Native, Architecture, Kubernetes]
+slug: 2023-04-28-dotnet-day-franken-cloud-native-workshop
 ---
 
 Practical cloud-native development with modern end-to-end architectures.

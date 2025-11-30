@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: Advanced Developers Conference 2025
 tags: [async-await, .NET, performance, scalability]
+slug: 2025-05-05-adc-async-await-workshop
 ---
 
 Workshop focusing on async/await internals and expert knowledge for scalable .NET applications.

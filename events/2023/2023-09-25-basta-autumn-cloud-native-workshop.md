@@ -8,6 +8,7 @@ location: Mainz
 country: Germany
 event: BASTA! Autumn 2023
 tags: [Cloud-Native, Architecture, Kubernetes]
+slug: 2023-09-25-basta-autumn-cloud-native-workshop
 ---
 
 Practical cloud-native development with modern end-to-end architectures.

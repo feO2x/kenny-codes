@@ -8,6 +8,7 @@ location: Cologne
 country: Germany
 event: Advanced Developers Conference 2017
 tags: [.NET, Asynchronous Programming, async/await, Threading, ASP.NET Core]
+slug: 2017-09-18-adc-multithreading-async-await
 ---
 
 In this talk, we explore the fundamentals of the .NET Thread Pool and how requests are processed on it by ASP.NET Core. We'll also see how async await is important for scalability of our services.

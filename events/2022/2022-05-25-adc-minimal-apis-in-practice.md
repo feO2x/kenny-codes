@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: Advanced Developers Conference 2022
 tags: [.NET, ASP.NET Core, Minimal APIs, C#, Backend, API, Web API, HTTP]
+slug: 2022-05-25-adc-minimal-apis-in-practice
 ---
 
 Talk about ASP.NET Core 6 Minimal APIs - how they work, their benefits and drawbacks, and how to structure your solutions.

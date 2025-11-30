@@ -8,6 +8,7 @@ location: Nuremberg
 country: Germany
 event: DWX 2024
 tags: [ASP.NET Core, Native AOT, Web APIs]
+slug: 2024-07-01-dwx-native-aot-web-apis
 ---
 
 Building Web APIs with ASP.NET Core Native AOT compilation.

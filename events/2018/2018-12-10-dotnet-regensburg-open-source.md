@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: .NET User Group Regensburg
 tags: [Open Source, .NET, Guard Clauses, Performance, Roslyn, Source Generators, MSBuild, BenchmarkDotNet]
+slug: 2018-12-10-dotnet-regensburg-open-source
 ---
 
 In this talk, we explore my open source library Light.GuardClauses and how I optimized certain features using Roslyn and source generators, BenchmarkDotNet, and the MSBuild multi-targeting system.

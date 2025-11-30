@@ -8,6 +8,7 @@ location: Munich
 country: Germany
 event: Advanced Developers Conference 2020
 tags: [.NET, async await, Memory Management]
+slug: 2020-10-12-adc-async-await-memory-perspective
 ---
 
 In this talk, we explore the internals of async/await from a memory perspective, examining how the compiler transforms async methods into state machines and how this state machine behaves during execution from a memory management point of view.
