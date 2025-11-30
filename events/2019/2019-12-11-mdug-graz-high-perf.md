@@ -8,6 +8,7 @@ location: Graz
 country: Austria
 event: Microsoft Developer User Group Graz
 tags: [.NET, Performance, BenchmarkDotNet, Memory Management, Garbage Collection]
+slug: 2019-12-11-mdug-graz-high-perf
 ---
 
 At this meetup, we explore both performance optimization techniques with BenchmarkDotNet and dive deep into the .NET Garbage Collector to understand how memory management affects application performance.

@@ -8,6 +8,7 @@ location: Mainz
 country: Germany
 event: BASTA! Autumn 2024
 tags: [async-await, .NET, performance, scalability]
+slug: 2024-09-16-basta-autumn-async-workshop
 ---
 
 Workshop focusing on async/await internals and expert knowledge for scalable .NET applications.

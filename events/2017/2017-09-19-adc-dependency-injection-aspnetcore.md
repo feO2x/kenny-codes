@@ -8,6 +8,7 @@ location: Cologne
 country: Germany
 event: Advanced Developers Conference 2017
 tags: [.NET, Dependency Injection, DI Container, ASP.NET Core]
+slug: 2017-09-19-adc-dependency-injection-aspnetcore
 ---
 
 In ASP.NET Core , dependency injection is a core part of the framework. In this talk, we'll explore how DI Containers work under the covers and how to design ASP.NET Core apps with DI in mind.

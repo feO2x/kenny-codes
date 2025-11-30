@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: .NET User Group Regensburg
 tags: [WPF, UI, .NET]
+slug: 2014-02-24-dotnet-regensburg-fast-and-fluent-ui-in-wpf
 ---
 
 In this talk, we explore how to create a responsive, fast and fluent user interface with WPF using the built-in tools and features provided by .NET, Visual Studio, and Blend.

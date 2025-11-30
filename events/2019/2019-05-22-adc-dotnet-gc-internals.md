@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: Advanced Developers Conference 2019
 tags: [.NET, Memory Management, Garbage Collector, GC]
+slug: 2019-05-22-adc-dotnet-gc-internals
 ---
 
 In this talk, we explore the internals of the .NET Garbage Collector, examining how it allocates and deallocates memory, how it executes its collection runs, and how it structures memory into the Small Object Heap with generations and the Large Object Heap.

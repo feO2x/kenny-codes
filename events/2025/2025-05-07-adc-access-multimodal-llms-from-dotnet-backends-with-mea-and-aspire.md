@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: Advanced Developers Conference 2025
 tags: [AI, .NET, Aspire, Microsoft.Extensions.AI, LLM, Cloud-Native]
+slug: 2025-05-07-adc-access-multimodal-llms-from-dotnet-backends-with-mea-and-aspire
 ---
 
 Talk about using .NET Aspire to orchestrate Cloud Native backends at development time and using Microsoft.Extensions.AI to access multimodal LLMs from your .NET backends - no matter whether they run in the Cloud or locally.

@@ -8,6 +8,7 @@ location: Weiden in der Oberpfalz
 country: Germany
 event: Digital Craftsmanship Nordoberpfalz
 tags: [AI, .NET, Aspire, Microsoft.Extensions.AI, LLM, Cloud-Native]
+slug: 2025-09-30-dcn-cloud-native-meets-ai
 ---
 
 Talk about using .NET Aspire to orchestrate Cloud Native backends at development time and using Microsoft.Extensions.AI to access multimodal LLMs from your .NET backends - no matter whether they run in the Cloud or locally.

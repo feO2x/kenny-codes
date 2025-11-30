@@ -8,6 +8,7 @@ location: Frankfurt
 country: Germany
 event: BASTA! Spring 2024
 tags: [Azure, OpenAI, Terraform, Security, Angular, Streaming]
+slug: 2024-02-12-basta-spring-azure-openai-terraform
 ---
 
 Securely deploying Azure OpenAI Service with Terraform for private GPT LLMs and stream results to Angular frontends.

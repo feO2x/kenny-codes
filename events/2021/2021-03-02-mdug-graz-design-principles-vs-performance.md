@@ -8,6 +8,7 @@ location: Online
 country: Austria
 event: Microsoft Developer User Group Graz
 tags: [.NET, Performance, Asynchronous Programming, Memory Management, Benchmarks, C#, Software Design]
+slug: 2021-03-02-mdug-graz-design-principles-vs-performance
 ---
 
 In this talk, I'll explore the tension between established design patterns and modern performance considerations in .NET development and explore how my growing knowledge about .NET internals has shaped the design of my software.

@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: .NET User Group Regensburg
 tags: [Guard Clauses, .NET]
+slug: 2016-05-30-dotnet-regensburg-light-guardclauses
 ---
 
 This talk shows you how to use my new library Light.GuardClauses to check parameters easily and make your code more readable.

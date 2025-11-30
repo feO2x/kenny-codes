@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: Advanced Developers Conference 2022
 tags: [.NET, csproj, compatibility, NRT, async, await, C#]
+slug: 2022-05-24-adc-old-apps-with-new-dotnet-features
 ---
 
 Talk about how to modernize legacy .NET Framework applications step-by-step.

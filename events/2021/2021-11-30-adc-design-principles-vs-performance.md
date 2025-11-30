@@ -8,6 +8,7 @@ location: Regensburg
 country: Germany
 event: Advanced Developers Conference 2021
 tags: [.NET, Performance, Asynchronous Programming, Memory Management, Benchmarks, C#, Software Design]
+slug: 2021-11-30-adc-design-principles-vs-performance
 ---
 
 In this talk, I'll explore the tension between established design patterns and modern performance considerations in .NET development and explore how my growing knowledge about .NET internals has shaped the design of my software.
