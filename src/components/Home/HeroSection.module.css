@@ -193,6 +193,18 @@
   flex-wrap: wrap;
 }
 
+.ctaButtons > a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 10rem;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+}
+
 /* Button Glow Effects */
 .ctaButtons :global(.button--primary) {
   box-shadow: 0 0 0 0 rgba(var(--ifm-color-primary-rgb), 0.7); /* Fallback */
