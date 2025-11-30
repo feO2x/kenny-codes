@@ -67,7 +67,7 @@ export default function ContentCard({
 
   return (
     <div className={clsx(styles.card, 'kc-card-gradient-border', className)}>
-      <div className={clsx(styles.cardMeta, styles.cardMetaHeader)}>
+      <div className={styles.cardMeta}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', alignItems: 'flex-start' }}>
           {date && <span>📅 {date}</span>}
           {location && <span>📍 {location}</span>}
