@@ -242,6 +242,15 @@ const config: Config = {
       style: "dark",
       links: [
         {
+          title: "Kenny Pflug - Kenny Codes",
+          items: [
+            {
+              label: "Legal Notice",
+              to: "/legal-notice",
+            },
+          ],
+        },
+        {
           title: "Read my stuff and meet me",
           items: [
             {
