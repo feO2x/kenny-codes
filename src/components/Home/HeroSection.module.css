@@ -1,0 +1,251 @@
+/* Keyframes for animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes blob-bounce {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.heroSection {
+  padding: 8rem 0 6rem;
+  position: relative;
+  overflow: hidden;
+  /* Fallback background */
+  background-color: var(--ifm-background-color);
+}
+
+/* Light mode specific enhancements - Increased Specificity */
+:global(html[data-theme='light']) .heroSection {
+  background: linear-gradient(135deg, #f0f4f8 0%, #e6f0ff 100%) !important;
+}
+
+:global(html[data-theme='light']) .heroSection::after {
+  opacity: 0.6;
+  filter: invert(1) opacity(0.5);
+}
+
+:global(html[data-theme='light']) .heroSection::before {
+  background: radial-gradient(circle, rgba(var(--ifm-color-primary-rgb), 0.1) 0%, transparent 70%);
+  opacity: 0.4;
+}
+
+.heroContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* The isometric grid overlay */
+.heroSection::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('/img/hero-pattern.svg');
+  background-repeat: repeat;
+  opacity: 0.4;
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Aurora Blob 1 (Primary/Cyan) */
+.heroSection::before {
+  content: "";
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, var(--ifm-color-primary) 0%, transparent 70%);
+  opacity: 0.15;
+  filter: blur(60px);
+  z-index: 0;
+  animation: blob-bounce 20s infinite ease-in-out alternate;
+}
+
+.heroText {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.heroImageContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.heroImage {
+  max-width: 100%;
+  width: 380px;
+  height: 380px;
+  object-fit: cover;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; /* Organic blob shape */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  border: 4px solid rgba(255, 255, 255, 0.1);
+
+  /* Animations */
+  transition: border-radius 0.5s ease;
+}
+
+.heroImage:hover {
+  border-radius: 50%; /* Morph back to circle on hover */
+  border-color: var(--ifm-color-primary);
+}
+
+/* Glowing backdrop for the image */
+.heroImageContainer::before {
+  content: "";
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  background: conic-gradient(from 0deg, transparent, var(--ifm-color-primary), transparent);
+  opacity: 0.2;
+  filter: blur(40px);
+  border-radius: 50%;
+  z-index: -1;
+  animation: float 6s ease-in-out infinite reverse; /* Move opposite to image for depth */
+}
+
+.heroTitle {
+  font-size: 4rem;
+  font-weight: 900;
+  margin-bottom: 1.5rem;
+  line-height: unset;
+
+  /* Animated Gradient Text */
+  background: linear-gradient(
+    300deg,
+    var(--ifm-color-primary),
+    var(--kc-color-special-purple),
+    var(--ifm-color-primary-lightest),
+    var(--ifm-color-primary)
+  );
+  background-size: 300% 300%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-move 8s ease infinite;
+}
+
+.heroSubtitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.bioList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2.5rem 0;
+}
+
+.bioList li {
+  margin-bottom: 1rem;
+  position: relative;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: flex-start; /* Align to top for multi-line text */
+  gap: 1rem; /* Use gap instead of padding/absolute positioning */
+}
+
+/* Custom checkmark icon */
+.bioList li::before {
+  content: "λ";
+  flex-shrink: 0; /* Prevent icon from shrinking */
+  height: 24px;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ifm-color-emphasis-300);
+  color: var(--ifm-color-primary);
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-top: 0.2rem; /* Optical alignment with text line-height */
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.ctaButtons > a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 10rem;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+}
+
+/* Button Glow Effects */
+.ctaButtons :global(.button--primary) {
+  box-shadow: 0 0 0 0 rgba(var(--ifm-color-primary-rgb), 0.7); /* Fallback */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ctaButtons :global(.button--primary):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -10px var(--ifm-color-primary);
+}
+
+@media screen and (max-width: 996px) {
+  .heroContainer {
+    flex-direction: column-reverse;
+    text-align: center;
+    gap: 3rem;
+  }
+
+  .heroSection {
+    padding: 4rem 0;
+  }
+
+  .bioList {
+    display: inline-block;
+    text-align: left;
+  }
+
+  .bioList li {
+    justify-content: flex-start;
+  }
+
+  .ctaButtons {
+    justify-content: center;
+  }
+
+  .heroImage, .heroImageContainer::before {
+    width: 280px;
+    height: 280px;
+  }
+
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+}

@@ -1,0 +1,83 @@
+.card {
+  background: var(--ifm-card-background-color);
+  border: 1px solid transparent;
+  border-radius: var(--kc-border-radius-card);
+  padding: 2rem;
+  transition: var(--kc-transition-card);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-shadow: var(--kc-shadow-card-base);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--kc-shadow-card-hover);
+  border-color: var(--ifm-color-emphasis-200);
+}
+
+.cardMeta {
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-600);
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-weight: 600;
+  letter-spacing: var(--kc-letter-spacing-wider);
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.cardExcerpt {
+  font-size: 1.05rem;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+  opacity: 0.8;
+  line-height: 1.6;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tag {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  background: var(--ifm-color-emphasis-200);
+  border-radius: var(--kc-border-radius-tag);
+  color: var(--ifm-color-content);
+  font-weight: 600;
+  transition: background var(--kc-transition-fast);
+}
+
+.tag:hover {
+  background: var(--ifm-color-primary);
+  color: white;
+}
+
+.cardFooter {
+  margin-top: auto;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  padding-top: 1.5rem;
+}
+
+.cardMetaInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  align-items: flex-start;
+}
+
+.typeBadge {
+  align-self: flex-start;
+}

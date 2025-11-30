@@ -17,6 +17,28 @@
   --ifm-background-color: hsl(217, 66%, 95%);
   --ifm-navbar-background-color: hsl(217, 65%, 100%);
   --docusaurus-highlighted-code-line-bg: hsla(0, 0%, 0%, 0.1);
+  --kc-color-special-purple: hsl(286, 100%, 45%);
+
+  /* Custom spacing and sizing */
+  --kc-border-radius-card: 16px;
+  --kc-border-radius-tag: 20px;
+  --kc-border-radius-small: 4px;
+
+  /* Custom transitions */
+  --kc-transition-card: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --kc-transition-fast: 0.2s ease-in-out;
+  --kc-transition-smooth: 0.3s ease;
+
+  /* Custom shadows */
+  --kc-shadow-card-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+  --kc-shadow-card-base: 0 4px 20px rgba(0, 0, 0, 0.05);
+
+  /* Custom gradients */
+  --kc-gradient-accent: linear-gradient(90deg, var(--ifm-color-primary), var(--kc-color-special-purple));
+
+  /* Typography */
+  --kc-letter-spacing-wide: 0.5px;
+  --kc-letter-spacing-wider: 0.05em;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -30,4 +52,26 @@
   --ifm-color-primary-lightest: hsl(170, 100%, 78%);
   --ifm-background-color: hsl(217, 33%, 17%);
   --ifm-navbar-background-color: hsl(246, 100%, 5%);
+}
+
+/* Utility class for card gradient top border effect */
+.kc-card-gradient-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.kc-card-gradient-border::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--kc-gradient-accent);
+  opacity: 0;
+  transition: opacity var(--kc-transition-smooth);
+}
+
+.kc-card-gradient-border:hover::before {
+  opacity: 1;
 }

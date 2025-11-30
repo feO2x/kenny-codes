@@ -15,11 +15,11 @@
 .statCard {
   background: var(--ifm-card-background-color);
   border: 1px solid var(--ifm-color-emphasis-200);
-  border-radius: var(--ifm-border-radius);
+  border-radius: var(--kc-border-radius-card);
   padding: 1.5rem;
   text-align: center;
   box-shadow: var(--ifm-global-shadow-lw);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: transform var(--kc-transition-fast), box-shadow var(--kc-transition-fast);
 }
 
 .statCard:hover {
@@ -42,7 +42,7 @@
   color: var(--ifm-color-content-secondary);
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--kc-letter-spacing-wide);
 }
 
 .section {
@@ -67,18 +67,24 @@
   padding-bottom: 0.5rem;
 }
 
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .eventsContainer {
     padding: 1rem 0.5rem;
   }
-  
+
   .statsSection {
     grid-template-columns: 1fr;
     padding: 0;
     margin-bottom: 2rem;
   }
-  
+
   .statNumber {
     font-size: 2rem;
   }
