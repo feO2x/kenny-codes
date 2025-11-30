@@ -14,8 +14,8 @@ export default function HeroSection() {
             Hi, I'm Kenny
           </Heading>
           <p className={styles.heroSubtitle}>
-            Conference Speaker and Consultant,<br />
-            Engineering Manager at <a href="https://gwvs.de/">TELIS/GWVS</a>
+            Engineering Manager at <a href="https://gwvs.de/">TELIS/GWVS</a>,<br />
+            Conference Speaker and Consultant
           </p>
           <ul className={styles.bioList}>
             <li>Cloud Native Systems with AI integration</li>
