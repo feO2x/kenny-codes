@@ -1,5 +1,5 @@
 .section {
-  padding: 6rem 0;
+  padding: 3rem 0;
   position: relative;
 }
 
@@ -11,8 +11,8 @@
 
 .sectionTitle {
   text-align: center;
-  margin-bottom: 4rem;
-  font-size: 3rem;
+  margin-bottom: 2rem;
+  font-size: 2rem;
   font-weight: 800;
 }
 
@@ -22,6 +22,23 @@
 
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
-  gap: 2.5rem;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+/* Desktop enhancements */
+@media (min-width: 769px) {
+  .section {
+    padding: 6rem 0;
+  }
+
+  .sectionTitle {
+    font-size: 3rem;
+    margin-bottom: 4rem;
+  }
+
+  .cardGrid {
+    grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+    gap: 2.5rem;
+  }
 }
