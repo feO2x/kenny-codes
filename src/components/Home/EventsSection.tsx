@@ -4,6 +4,7 @@ import Heading from '@theme/Heading';
 import styles from '@site/src/css/section.module.css';
 import homeData from '@site/src/data/home-data.json';
 import EventCard from '../EventCard';
+import {formatDate} from '@site/src/utils/dateFormatting';
 
 export default function EventsSection() {
   const {recentEvents} = homeData;
@@ -21,7 +22,7 @@ export default function EventsSection() {
               title={event.title}
               permalink={event.link}
               date={event.date}
-              formattedDate={new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              formattedDate={formatDate(event.date)}
               type={event.type}
               duration={event.duration}
               language={event.language}
