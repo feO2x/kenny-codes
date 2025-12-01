@@ -5,6 +5,7 @@ import Heading from '@theme/Heading';
 import styles from '@site/src/css/section.module.css';
 import homeData from '@site/src/data/home-data.json';
 import ContentCard from '../ContentCard';
+import {formatDate} from '@site/src/utils/dateFormatting';
 
 export default function BlogSection() {
   const {recentPosts} = homeData;
@@ -21,7 +22,7 @@ export default function BlogSection() {
               key={idx}
               title={post.title}
               link={post.link}
-              date={new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              date={formatDate(post.date)}
               tags={post.tags}
               excerpt={post.excerpt}
             />

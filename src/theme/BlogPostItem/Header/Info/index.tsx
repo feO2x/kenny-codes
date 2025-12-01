@@ -2,10 +2,10 @@ import React, {type ReactNode} from 'react';
 import clsx from 'clsx';
 import {translate} from '@docusaurus/Translate';
 import {usePluralForm} from '@docusaurus/theme-common';
-import {useDateTimeFormat} from '@docusaurus/theme-common/internal';
 import {useBlogPost} from '@docusaurus/plugin-content-blog/client';
 import type {Props} from '@theme/BlogPostItem/Header/Info';
 import {isEventPage} from '@site/src/utils/eventUtils';
+import {formatDate} from '@site/src/utils/dateFormatting';
 
 import styles from './styles.module.css';
 
@@ -51,16 +51,6 @@ function Spacer() {
 export default function BlogPostItemHeaderInfo({className}: Props): ReactNode {
   const {metadata} = useBlogPost();
   const {date, readingTime} = metadata;
-
-  const dateTimeFormat = useDateTimeFormat({
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
-
-  const formatDate = (blogDate: string) =>
-    dateTimeFormat.format(new Date(blogDate));
 
   // Don't render this component for event pages (date is shown in EventDetails)
   if (isEventPage(metadata)) {
