@@ -62,3 +62,13 @@ design-by-contract:
   label: Design by Contract
   permalink: /design-by-contract
   description: Design by Contract as originated by Bertrand Meyer, emphasizing preconditions, postconditions, and invariants.
+
+solid:
+  label: SOLID Principles
+  permalink: /solid
+  description: SOLID principles which are the first five principles you should learn according to famous software developers.
+
+dip:
+  label: Dependency Inversion Principle
+  permalink: /dependency-inversion-principle
+  description: The Dependency Inversion Principle from the SOLID principles.
