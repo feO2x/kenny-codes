@@ -38,6 +38,18 @@
         "object-oriented-programming",
         "api-design"
       ]
+    },
+    {
+      "title": "My New Video Series on the Dependency Inversion Principle is Online",
+      "date": "2015-08-29",
+      "link": "/blog/2015-08-29-my-new-video-series-on-the-dependency-inversion-principle-is-online",
+      "excerpt": "During the past weeks, I have been releasing videos on the Dependency Inversion Principle (DIP) which was originally published by Uncle Bob in 1996. I'm happy to announce that my video series is finis...",
+      "tags": [
+        "csharp",
+        "dotnet",
+        "solid",
+        "dip"
+      ]
     }
   ],
   "recentEvents": [

@@ -165,7 +165,7 @@ function processContent(dir: string, type: string): ContentItem[] {
   items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   // Return 4 items for events, 3 for blog posts
-  const count = type === "events" ? 4 : 3;
+  const count = type === "events" ? 4 : 4;
   return items.slice(0, count);
 }
 
