@@ -1,6 +1,19 @@
 {
   "recentPosts": [
     {
+      "title": "Stronger-Typed Resource Dictionaries in XAML",
+      "date": "2015-12-29",
+      "link": "/blog/2015-12-29-stronger-typed-resource-dictionaries-in-xaml",
+      "excerpt": "If you’ve ever programmed in XAML-based technologies, you know Resource Dictionaries: these XAML files usually contain the styles and templates you want to share across different views, or provide the...",
+      "tags": [
+        "xaml",
+        "csharp",
+        "wpf",
+        "uwp",
+        "dotnet"
+      ]
+    },
+    {
       "title": "Avoid the internal modifier by default",
       "date": "2015-09-27",
       "link": "/blog/2015-09-27-avoid-the-internal-modifier-by-default",

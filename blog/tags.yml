@@ -3,6 +3,11 @@ csharp:
   permalink: /csharp
   description: C# programming language
 
+dotnet:
+  label: .NET
+  permalink: /dotnet
+  description: .NET framework, runtime and the cross-platform ecosystem
+
 software-design:
   label: Software Design
   permalink: /software-design
@@ -27,3 +32,18 @@ object-oriented-programming:
   label: Object-Oriented Programming
   permalink: /object-oriented-programming
   description: Object-Oriented Programming is a famous programming paradigm
+
+xaml:
+  label: XAML
+  permalink: /xaml
+  description: Extensible Application Markup Language for defining user interfaces and application resources.
+
+wpf:
+  label: WPF
+  permalink: /wpf
+  description: Windows Presentation Foundation for building desktop applications.
+
+uwp:
+  label: UWP
+  permalink: /uwp
+  description: Universal Windows Platform for building cross-device applications.
