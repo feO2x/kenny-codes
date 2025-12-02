@@ -72,3 +72,13 @@ dip:
   label: Dependency Inversion Principle
   permalink: /dependency-inversion-principle
   description: The Dependency Inversion Principle from the SOLID principles.
+
+windows-10:
+  label: Windows 10
+  permalink: /windows-10
+  description: Windows 10 operating system and development for it.
+
+design:
+  label: UI Design
+  permalink: /design
+  description: User interface design principles and practices.
