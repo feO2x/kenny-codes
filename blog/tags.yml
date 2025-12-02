@@ -57,3 +57,8 @@ automated-testing:
   label: Automated Testing
   permalink: /automated-testing
   description: Automated testing practices and tools
+
+design-by-contract:
+  label: Design by Contract
+  permalink: /design-by-contract
+  description: Design by Contract as originated by Bertrand Meyer, emphasizing preconditions, postconditions, and invariants.
