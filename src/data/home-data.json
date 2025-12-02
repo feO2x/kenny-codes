@@ -1,6 +1,19 @@
 {
   "recentPosts": [
     {
+      "title": "Stronger-Typed Resource Dictionaries in XAML",
+      "date": "2015-12-29",
+      "link": "/blog/2015-12-29-stronger-typed-resource-dictionaries-in-xaml",
+      "excerpt": "If you’ve ever programmed in XAML-based technologies, you know Resource Dictionaries: these XAML files usually contain the styles and templates you want to share across different views, or provide the...",
+      "tags": [
+        "xaml",
+        "csharp",
+        "wpf",
+        "uwp",
+        "dotnet"
+      ]
+    },
+    {
       "title": "Avoid the internal modifier by default",
       "date": "2015-09-27",
       "link": "/blog/2015-09-27-avoid-the-internal-modifier-by-default",
@@ -24,6 +37,18 @@
         "polymorphism",
         "object-oriented-programming",
         "api-design"
+      ]
+    },
+    {
+      "title": "My New Video Series on the Dependency Inversion Principle is Online",
+      "date": "2015-08-29",
+      "link": "/blog/2015-08-29-my-new-video-series-on-the-dependency-inversion-principle-is-online",
+      "excerpt": "During the past weeks, I have been releasing videos on the Dependency Inversion Principle (DIP) which was originally published by Uncle Bob in 1996. I'm happy to announce that my video series is finis...",
+      "tags": [
+        "csharp",
+        "dotnet",
+        "solid",
+        "dip"
       ]
     }
   ],

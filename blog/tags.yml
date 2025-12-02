@@ -3,6 +3,11 @@ csharp:
   permalink: /csharp
   description: C# programming language
 
+dotnet:
+  label: .NET
+  permalink: /dotnet
+  description: .NET framework, runtime and the cross-platform ecosystem
+
 software-design:
   label: Software Design
   permalink: /software-design
@@ -27,3 +32,43 @@ object-oriented-programming:
   label: Object-Oriented Programming
   permalink: /object-oriented-programming
   description: Object-Oriented Programming is a famous programming paradigm
+
+xaml:
+  label: XAML
+  permalink: /xaml
+  description: Extensible Application Markup Language for defining user interfaces and application resources.
+
+wpf:
+  label: WPF
+  permalink: /wpf
+  description: Windows Presentation Foundation for building desktop applications.
+
+uwp:
+  label: UWP
+  permalink: /uwp
+  description: Universal Windows Platform for building cross-device applications.
+
+tdd:
+  label: Test-Driven Development
+  permalink: /tdd
+  description: Test-Driven Development methodology
+
+automated-testing:
+  label: Automated Testing
+  permalink: /automated-testing
+  description: Automated testing practices and tools
+
+design-by-contract:
+  label: Design by Contract
+  permalink: /design-by-contract
+  description: Design by Contract as originated by Bertrand Meyer, emphasizing preconditions, postconditions, and invariants.
+
+solid:
+  label: SOLID Principles
+  permalink: /solid
+  description: SOLID principles which are the first five principles you should learn according to famous software developers.
+
+dip:
+  label: Dependency Inversion Principle
+  permalink: /dependency-inversion-principle
+  description: The Dependency Inversion Principle from the SOLID principles.

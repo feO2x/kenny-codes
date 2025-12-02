@@ -13,8 +13,8 @@ export default function Home(): ReactNode {
       description="Kenny's stances on software development, architecture, design, Cloud Native and AI">
       <main>
         <HeroSection />
-        <BlogSection />
         <EventsSection />
+        <BlogSection />
       </main>
     </Layout>
   );
