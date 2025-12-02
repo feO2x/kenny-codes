@@ -47,3 +47,13 @@ uwp:
   label: UWP
   permalink: /uwp
   description: Universal Windows Platform for building cross-device applications.
+
+tdd:
+  label: Test-Driven Development
+  permalink: /tdd
+  description: Test-Driven Development methodology
+
+automated-testing:
+  label: Automated Testing
+  permalink: /automated-testing
+  description: Automated testing practices and tools
