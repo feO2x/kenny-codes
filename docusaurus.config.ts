@@ -284,8 +284,9 @@ const config: Config = {
       copyright: `Copyright © 2025 Kenny Pflug. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      theme: prismThemes.vsLight,
+      darkTheme: prismThemes.vsDark,
+      additionalLanguages: ["csharp"],
     },
   } satisfies Preset.ThemeConfig,
 };

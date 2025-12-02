@@ -1,6 +1,18 @@
 {
   "recentPosts": [
     {
+      "title": "More on Design by Contract - Assertions and Inheritance",
+      "date": "2016-05-07",
+      "link": "/blog/2016-05-07-assertions-and-inheritance",
+      "excerpt": "My previous two posts about Bertrand Meyer's Design by Contract (DbC) were mainly introductions to pre- and post-conditions and class invariants and how they can be implemented in C– in this one we'll...",
+      "tags": [
+        "csharp",
+        "dotnet",
+        "design-by-contract",
+        "object-oriented-programming"
+      ]
+    },
+    {
       "title": "Stronger-Typed Resource Dictionaries in XAML",
       "date": "2015-12-29",
       "link": "/blog/2015-12-29-stronger-typed-resource-dictionaries-in-xaml",
@@ -14,6 +26,18 @@
       ]
     },
     {
+      "title": "Use Segoe MDL2 Assets for Windows 10 Apps",
+      "date": "2015-12-03",
+      "link": "/blog/2015-12-03-use-segoe-mdl2-assets-for-windows-10-apps",
+      "excerpt": "Are you writing Windows 10 Apps already? I'm currently updating one app from Windows 8.1 Store to the Universal Windows Platform, which of course means that some redesign is required, too. If you ever...",
+      "tags": [
+        "windows-10",
+        "uwp",
+        "xaml",
+        "design"
+      ]
+    },
+    {
       "title": "More on Design by Contract – Class Invariants",
       "date": "2015-10-07",
       "link": "/blog/2015-10-07-more-on-design-by-contract-class-invariants",
@@ -22,33 +46,7 @@
         "csharp",
         "dotnet",
         "design-by-contract",
-        "oop"
-      ]
-    },
-    {
-      "title": "Avoid the internal modifier by default",
-      "date": "2015-09-27",
-      "link": "/blog/2015-09-27-avoid-the-internal-modifier-by-default",
-      "excerpt": "In one of his recent posts, Mark Seemann argued that you should not use the `internal` modifier for types and their members, because this decreases the testability of your code. While I totally agree ...",
-      "tags": [
-        "csharp",
-        "software-design",
-        "encapsulation",
-        "api-design"
-      ]
-    },
-    {
-      "title": "Abstractions, Abstractions… Different Kinds of Abstractions",
-      "date": "2015-08-31",
-      "link": "/blog/2015-08-31-different-kinds-of-abstractions",
-      "excerpt": "In my video series on the Dependency Inversion Principle that you can watch on YouTube now, I talk a lot about object-oriented abstractions and how we can use them to structure our code in a loosely c...",
-      "tags": [
-        "csharp",
-        "software-design",
-        "encapsulation",
-        "polymorphism",
-        "object-oriented-programming",
-        "api-design"
+        "object-oriented-programming"
       ]
     }
   ],
