@@ -8,6 +8,7 @@ location: Online
 event: Thinktecture Webinar
 tags: [Native AOT, .NET, Data Access, Humble Objects]
 slug: 2024-03-20-webinar-native-aot-data-access
+videoUrl: https://youtu.be/LVMjEJWAxlU?si=EbPgBg-KCeFBHGFs
 ---
 
 In this webinar, we identify how we can implement database access layers in .NET Native AOT apps without the help of EF Core. We use the Humble Object design pattern to separate the business logic from ADO.NET calls to PostgreSQL.

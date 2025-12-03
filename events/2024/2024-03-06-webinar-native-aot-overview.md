@@ -8,6 +8,7 @@ location: Online
 event: Thinktecture Webinar
 tags: [Native AOT, .NET, Performance]
 slug: 2024-03-06-webinar-native-aot-overview
+videoUrl: https://youtu.be/Iiu4VAQO64A?si=a4D2QaJYgQdamGbP
 ---
 
 In this webinar, we take a look at .NET Native AOT and explore whether Microsoft can deliver on their performance promises. We'll also check what differs between developing a .NET Native AOT app and a regular ASP.NET Core app.

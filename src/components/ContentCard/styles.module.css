@@ -70,6 +70,28 @@
   margin-top: auto;
   border-top: 1px solid var(--ifm-color-emphasis-200);
   padding-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.videoButton {
+  background: var(--kc-color-youtube);
+  border-color: var(--kc-color-youtube);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.videoButton:hover {
+  background: var(--kc-color-youtube-hover);
+  border-color: var(--kc-color-youtube-hover);
+  color: #fff;
+}
+
+.youtubeIcon {
+  font-size: 1.1em;
 }
 
 .cardMetaInfo {

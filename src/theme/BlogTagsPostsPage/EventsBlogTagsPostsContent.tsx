@@ -26,10 +26,10 @@ export default function EventsBlogTagsPostsContent({items, tag}: EventsBlogTagsP
 
       <div className={styles.eventsContainer}>
         <h1 className={localStyles.pageTitle}>{title}</h1>
-        <EventStats 
-          totalEvents={items.length} 
-          upcomingEvents={upcomingEvents.length} 
-          pastEvents={pastEvents.length} 
+        <EventStats
+          totalEvents={items.length}
+          upcomingEvents={upcomingEvents.length}
+          pastEvents={pastEvents.length}
         />
 
         {upcomingEvents.length > 0 && (
@@ -52,6 +52,7 @@ export default function EventsBlogTagsPostsContent({items, tag}: EventsBlogTagsP
                   event={frontMatter.event}
                   description={item.content.metadata.description}
                   tags={item.content.metadata.tags}
+                  videoUrl={frontMatter.videoUrl}
                 />
               );
             })}
@@ -80,6 +81,7 @@ export default function EventsBlogTagsPostsContent({items, tag}: EventsBlogTagsP
                     event={frontMatter.event}
                     description={item.content.metadata.description}
                     tags={item.content.metadata.tags}
+                    videoUrl={frontMatter.videoUrl}
                   />
                 );
               })}
