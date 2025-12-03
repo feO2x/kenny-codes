@@ -16,6 +16,8 @@ In this Twitch stream, we explore the topic of async/await in .NET, discuss how 
 
 ## Event Details
 
+[![My Coding Zone Video on YouTube](/img/2023-04-07-video-thumbnail-coding-zone.jpg)](https://youtu.be/CGa7w05FKsQ?si=7YXaw4TbnPOf2y6C)
+
 For more than a decade, async await has been an integral part of C# and .NET.
 But what actually happens under the hood when we write an asynchronous method?
 
