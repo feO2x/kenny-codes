@@ -9,4 +9,5 @@ export interface EventFrontMatter {
   location?: string;
   country?: string;
   event?: string;
+  videoUrl?: string;
 }

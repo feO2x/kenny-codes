@@ -9,6 +9,7 @@ country: Germany
 event: .NET User Group Regensburg
 tags: [.NET, Memory Management, Garbage Collector, GC]
 slug: 2019-05-08-dotnet-regensburg-dotnet-gc-internals
+videoUrl: https://youtu.be/_DdQ9UBezzQ?si=A6WD2kWNsrl_RVUU
 ---
 
 In this talk, we explore the internals of the .NET Garbage Collector, examining how it allocates and deallocates memory, how it executes its collection runs, and how it structures memory into the Small Object Heap with generations and the Large Object Heap.

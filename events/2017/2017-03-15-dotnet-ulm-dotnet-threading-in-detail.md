@@ -9,6 +9,7 @@ country: Germany
 event: .NET Developer Group Ulm
 tags: [.NET, Multithreading, Asynchronous Programming, Performance, async await]
 slug: 2017-03-15-dotnet-ulm-dotnet-threading-in-detail
+videoUrl: https://youtu.be/U5bTvc4yv5U?si=IcLtDLGnJWjD7WBo
 ---
 
 In this talk, we look into multithreading with .NET, especially into threads and the .NET Thread Pool. We learn about Synchronization Primitves and how async await and the Task Parallel Library (TPL) can be used to achieve your multithreading goals.

@@ -2,6 +2,7 @@ import React from 'react';
 import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import clsx from 'clsx';
+import { FaYoutube } from 'react-icons/fa';
 import styles from './styles.module.css';
 
 interface Tag {
@@ -21,6 +22,7 @@ export interface ContentCardProps {
   showAllTags?: boolean;
   organizer?: string;
   children?: React.ReactNode; // allow passing custom footer or body if needed
+  videoUrl?: string;
 }
 
 export default function ContentCard({
@@ -35,6 +37,7 @@ export default function ContentCard({
   showAllTags = false,
   organizer,
   children,
+  videoUrl,
 }: ContentCardProps) {
 
   const renderTags = () => {
@@ -90,6 +93,17 @@ export default function ContentCard({
         <Link to={link} className="button button--small button--primary">
           Read More
         </Link>
+        {videoUrl && (
+          <a
+            href={videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={clsx('button button--small', styles.videoButton)}
+          >
+            <FaYoutube className={styles.youtubeIcon} />
+            Watch Video
+          </a>
+        )}
       </div>
     </div>
   );
