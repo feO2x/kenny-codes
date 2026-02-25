@@ -52,6 +52,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
                     description={item.content.metadata.description}
                     tags={item.content.metadata.tags}
                     videoUrl={frontMatter.videoUrl}
+                    isUpcoming={true}
                   />
                 );
               })}
@@ -83,6 +84,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
                       description={item.content.metadata.description}
                       tags={item.content.metadata.tags}
                       videoUrl={frontMatter.videoUrl}
+                      isUpcoming={false}
                     />
                   );
                 })}

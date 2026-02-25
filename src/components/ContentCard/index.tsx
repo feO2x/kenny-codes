@@ -23,6 +23,7 @@ export interface ContentCardProps {
   organizer?: string;
   children?: React.ReactNode; // allow passing custom footer or body if needed
   videoUrl?: string;
+  isUpcoming?: boolean;
 }
 
 export default function ContentCard({
@@ -38,6 +39,7 @@ export default function ContentCard({
   organizer,
   children,
   videoUrl,
+  isUpcoming = false,
 }: ContentCardProps) {
 
   const renderTags = () => {
@@ -76,7 +78,10 @@ export default function ContentCard({
           {location && <span>📍 {location}</span>}
           {organizer && <span>💬 {organizer}</span>}
         </div>
-        {type && <span className={clsx('badge badge--secondary', styles.typeBadge)}>{type}</span>}
+        <div className={styles.badges}>
+          {isUpcoming && <span className={clsx('badge badge--info', styles.upcomingBadge)}>UPCOMING</span>}
+          {type && <span className={clsx('badge badge--secondary', styles.typeBadge)}>{type}</span>}
+        </div>
       </div>
 
       <Heading as="h3" className={styles.cardTitle}>
