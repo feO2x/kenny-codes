@@ -52,6 +52,23 @@
   ],
   "recentEvents": [
     {
+      "title": "Guided Coding instead of Vibe Coding in Java",
+      "date": "2026-02-26",
+      "link": "/events/2026-02-26-guided-coding-in-java",
+      "excerpt": "In the past two years, I've been working extensively with different Coding Agents and came up with a methodology called Guided Coding. I present it for the first time in this stream with Johannes Raba...",
+      "tags": [
+        "AI",
+        "Coding-Agents",
+        "Java",
+        "Guided-Coding"
+      ],
+      "type": "Talk",
+      "location": "Online",
+      "duration": "2h",
+      "language": "English",
+      "event": "LinkedIn Live"
+    },
+    {
       "title": "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI",
       "date": "2025-09-30",
       "link": "/events/2025-09-30-dcn-cloud-native-meets-ai",
@@ -107,24 +124,6 @@
       "type": "Talk",
       "location": "Regensburg",
       "duration": "1h",
-      "language": "German",
-      "country": "Germany",
-      "event": "Advanced Developers Conference 2025"
-    },
-    {
-      "title": "How to async – async await Internals and Expert Knowledge for Scalable .NET Apps",
-      "date": "2025-05-05",
-      "link": "/events/2025-05-05-adc-async-await-workshop",
-      "excerpt": "Workshop focusing on async/await internals and expert knowledge for scalable .NET applications.",
-      "tags": [
-        "async-await",
-        ".NET",
-        "performance",
-        "scalability"
-      ],
-      "type": "Workshop",
-      "location": "Regensburg",
-      "duration": "8h",
       "language": "German",
       "country": "Germany",
       "event": "Advanced Developers Conference 2025"
