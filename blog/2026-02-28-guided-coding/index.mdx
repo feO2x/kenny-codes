@@ -5,13 +5,22 @@ authors: [feO2x]
 tags: [ai, coding-agents, guided-coding, software-design]
 ---
 
-I recently joined [Johannes Rabauer](https://www.youtube.com/@johannesrabauer) on his live stream to present **Guided Coding** — an approach I developed for writing enterprise-grade software with coding agents while maintaining full control over the source code. In this post, I want to summarize the most important points from that session.
-
-You can watch the full stream here:
-
-[![Guided Coding instead of Vibe Coding](./guided-coding-stream.jpg)](https://www.youtube.com/live/vopBYXp9YV0)
+I recently joined [Johannes Rabauer](https://www.youtube.com/@johannesrabauer) on his live stream to present Guided Coding — an approach I developed for writing enterprise-grade software with coding agents while maintaining full control over the source code. In this post, I want to summarize the most important points from that session.
 
 <!-- truncate -->
+
+## TLDR;
+
+Guided Coding is a three-phase methodology — **Plan**, **Implement**, **Guide** — for writing enterprise-grade software with AI coding agents without losing control of your codebase:
+
+- **Plan** iteratively with the agent, commit plans to git
+- **Implement** by handing off focused plans, backed by automated feedback loops
+- **Guide** by thoroughly reviewing all generated code — this is where you spend most of your time
+- Keep rules files small, find the right plan size empirically, and stay vigilant about security
+
+You can find all the AI plans, agents MD files, and the complete codebase at the [Light.PortableResults repository](https://github.com/feO2x/Light.Portable.Results). The full stream with Johannes is available on [YouTube](https://www.youtube.com/live/vopBYXp9YV0).
+
+[![Guided Coding instead of Vibe Coding](./guided-coding-stream.jpg)](https://www.youtube.com/live/vopBYXp9YV0)
 
 ## Why Not Vibe Coding?
 
@@ -163,15 +172,6 @@ If you don't understand something the agent produced, ask a follow-up question. 
 
 ## Practical Results
 
-I applied Guided Coding to build [Light.Portable.Results](https://github.com/feO2x/Light.Portable.Results), an open-source .NET library implementing the result pattern with full serialization support. The codebase is roughly 25,000 lines of actual code, and more than 90% of it was written by AI agents. Depending on the feature, I estimate a speedup factor of 1.25x to 4x compared to writing everything manually.
+I applied Guided Coding to build [Light.PortableResults](https://github.com/feO2x/Light.PortableResults), an open-source .NET library implementing the result pattern with full serialization support. The codebase is roughly 25,000 lines of actual code, and more than 90% of it was written by AI agents. Depending on the feature, I estimate a speedup factor of 1.25x to 4x compared to writing everything manually.
 
-## TLDR;
 
-Guided Coding is a three-phase methodology — **Plan**, **Implement**, **Guide** — for writing enterprise-grade software with AI coding agents without losing control of your codebase:
-
-- **Plan** iteratively with the agent, commit plans to git
-- **Implement** by handing off focused plans, backed by automated feedback loops
-- **Guide** by thoroughly reviewing all generated code — this is where you spend most of your time
-- Keep rules files small, find the right plan size empirically, and stay vigilant about security
-
-You can find all the AI plans, agents MD files, and the complete codebase at the [Light.Portable.Results repository](https://github.com/feO2x/Light.Portable.Results). The full stream with Johannes is available on [YouTube](https://www.youtube.com/live/vopBYXp9YV0).
