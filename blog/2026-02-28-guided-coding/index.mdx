@@ -1,0 +1,172 @@
+---
+slug: 2026-02-28-guided-coding
+title: "Guided Coding: Staying in Control While Coding with AI Agents"
+authors: [feO2x]
+tags: [ai, coding-agents, guided-coding, software-design]
+---
+
+I recently joined [Johannes Rabauer](https://www.youtube.com/@johannesrabauer) on his live stream to present **Guided Coding** — an approach I developed for writing enterprise-grade software with coding agents while maintaining full control over the source code. In this post, I want to summarize the most important points from that session.
+
+You can watch the full stream here:
+
+[![Guided Coding instead of Vibe Coding](https://img.youtube.com/vi/vopBYXp9YV0/maxresdefault.jpg)](https://www.youtube.com/live/vopBYXp9YV0)
+
+<!-- truncate -->
+
+## Why Not Vibe Coding?
+
+Andrej Karpathy, one of the co-founders of OpenAI, coined the term **Vibe Coding** in February 2025. The core idea: you tell the coding agent what to do, never go down to the source code level, always click "accept all changes", and the code grows beyond usual comprehension. You only validate by looking at the running app — never at the code itself.
+
+While Vibe Coding is fun for personal projects and prototyping, it is not a viable approach for enterprise-grade software. You have no idea what the code is doing, how it's doing it, and technical debt accumulates rapidly. I wanted to formalize a counterpart — a methodology that lets you leverage the extraordinary productivity gains of coding agents while staying in control of the codebase.
+
+That's what Guided Coding is about.
+
+## The Three Phases of Guided Coding
+
+Guided Coding is structured around three phases: **Plan**, **Implement**, and **Guide**.
+
+<svg viewBox="0 0 750 200" xmlns="http://www.w3.org/2000/svg" style={{maxWidth: '750px', width: '100%', margin: '1.5rem auto', display: 'block'}}>
+  {/* Background */}
+  <rect x="0" y="0" width="750" height="200" rx="8" fill="#D6D6D6" />
+
+  {/* Phase boxes */}
+  <rect x="30" y="135" width="200" height="50" fill="#0078D4" rx="4" />
+  <text x="130" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">1. Planning Phase</text>
+
+  <rect x="275" y="135" width="200" height="50" fill="#FFB900" rx="4" />
+  <text x="375" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">2. Implementation Phase</text>
+
+  <rect x="520" y="135" width="200" height="50" fill="#6B2FA0" rx="4" />
+  <text x="620" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">3. Guiding Phase</text>
+
+  {/* Forward arrows between phases */}
+  <line x1="230" y1="160" x2="270" y2="160" stroke="#888" strokeWidth="2.5" markerEnd="url(#arrowGray)" />
+  <line x1="475" y1="160" x2="515" y2="160" stroke="#888" strokeWidth="2.5" markerEnd="url(#arrowGray)" />
+
+  {/* Arrow marker definitions */}
+  <defs>
+    <marker id="arrowGray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#888" />
+    </marker>
+  </defs>
+
+  {/* Self-loop on Planning Phase (right side) */}
+  <path d="M 205 135 V 115 Q 205 105, 195 105 H 175 Q 165 105, 165 115 V 122" fill="none" stroke="#0078D4" strokeWidth="4" />
+  <polygon points="165,132 158,118 172,118" fill="#0078D4" />
+
+  {/* Blue arrow: Guiding → Planning (large issue) */}
+  <path d="M 660 135 V 50 Q 660 25, 635 25 H 155 Q 130 25, 130 50 V 100" fill="none" stroke="#0078D4" strokeWidth="8" />
+  <polygon points="130,130 112,100 148,100" fill="#0078D4" />
+
+  {/* Yellow arrow: Guiding → Implementation (small issue) */}
+  <path d="M 595 135 V 100 Q 595 80, 575 80 H 395 Q 375 80, 375 100 V 108" fill="none" stroke="#FFB900" strokeWidth="8" />
+  <polygon points="375,130 358,105 392,105" fill="#FFB900" />
+</svg>
+
+### 1. Planning Phase (30–90 minutes)
+
+You start a new session with your coding agent and iteratively create a plan together. This is essentially requirements engineering combined with a coding agent:
+
+- **Give the agent a role.** I use something like "With you being an expert .NET architect" during the planning phase. This focuses the agent on planning rather than jumping into implementation. Assigning roles tends to produce better results in my experience.
+- **Discuss the feature.** Ask the agent how it would approach the problem. Review its suggestions about design, refactorings, testing, and performance. Bring your own thoughts and questions to the table — this is a conversation, not delegation.
+- **Write the plan as a markdown file in the git repo.** I don't use the built-in "planning mode" of coding agents because plans typically end up in your user directory rather than in the repository. I want them committed to git — they serve as historical documents that explain why features were implemented a certain way.
+- **End with a sanity check.** My final question is always: *"With you being the expert, would you add, change, or remove anything from the plan?"* This often catches things you didn't think of.
+
+### Plan Structure
+
+After some experimentation, I settled on three sections, mirroring how we structure Jira tickets at work:
+
+1. **Rationale** — Why do we want to build this? Why is this feature needed or why does this bug need fixing?
+2. **Acceptance Criteria** — Bullet points that must be fulfilled for the feature to be approved.
+3. **Technical Details** — Important parts of the codebase, extension points, types to modify or add, and design direction.
+
+Keep plans focused. With Anthropic models in particular (Opus, Sonnet), plans tend to become very detailed with implementation phases and step-by-step instructions that the agent doesn't actually need. The models are smart enough to figure out the implementation order themselves. A plan that's too detailed can actually steer the agent in the wrong direction, because if you missed something, the overly prescriptive structure leaves no room for the agent to adapt.
+
+A plan is not a user story — it should contain technical details. A product manager who doesn't know how to code is probably not the best person to write these plans. You should have technical knowledge when you are in the planning phase.
+
+### 2. Implementation Phase (5–45 minutes)
+
+Hand the coding agent a single plan and tell it to implement:
+
+> *"With you being an expert .NET developer, can you please implement the following plan for me?"*
+
+Then point to the corresponding markdown file. That's it. The agent goes off and works, typically for 5 to 45 minutes depending on the task. I let it run in auto-continue mode without supervising.
+
+The key to a successful implementation phase is having good **feedback loops** in place:
+
+- **Compilers / transpilers** catch invalid syntax
+- **Automated tests** validate behavior
+- **Linters** enforce code style
+- **Automated benchmarks** can verify performance
+
+These feedback loops let the agent work longer autonomously. When the agent writes code, runs the tests, sees failures, and fixes them — all without your intervention — that's the power of this setup. Modern models execute tests by themselves; you don't have to instruct them to do so. You just need a check mark in your acceptance criteria that says automated tests should be written.
+
+I once asked an agent to optimize memory allocations in a hot path. It wrote a benchmark, implemented a stack-allocated optimization for cases with fewer than 10 errors, ran the benchmark, and reported: 25% faster runtime and 80% less memory allocated. When I then asked it to eliminate one last remaining heap allocation, it tried, ran the benchmarks again, saw that performance actually got *worse* — and rolled back its own changes. These feedback loops are invaluable.
+
+### 3. Guiding Phase (1–6 hours)
+
+This is the most important and time-consuming phase. You review all the generated code:
+
+- **Read the code yourself.** You are responsible for the code the LLM produces. You need to understand it.
+- **Also let another agent review.** I open a new chat session and have a different agent review the code independently.
+- **Learn what you don't know.** If the agent wrote something you don't understand, learn that concept before judging it. Ask the model to explain it.
+- **Decide on the appropriate response:**
+  - If everything looks good → success, create a PR.
+  - If there's a small issue → iterate back to the implementation phase with a targeted prompt.
+  - If there's a large issue (wrong data structures, framework mechanisms misused, design flaws) → go back and create a new plan.
+- **Write a plan deviations document** at the end, especially if you made significant changes. Have the agent compare the original plan to the final implementation and note all differences. This serves as an architectural decision record.
+
+Large issues in the guiding phase usually mean your plan was too big to begin with. This happened to me with a cloud events serialization feature — I tried to implement reading and writing in one plan. The result had too little code reuse and poor performance optimizations, so I went back and created three smaller, focused plans instead.
+
+## Keep Your Rules Files Small
+
+A study published in February 2026 found that agents MD files (or equivalent rules files in other tools) generally don't bring measurable benefit but cost about 20% more tokens. My approach aligns with this finding:
+
+- **Start with a minimal agents MD file.** Mine is really short — a brief description of the project, a few rules that address past violations, and references to sub-rule files for production code, testing, and plans.
+- **Only add rules when a coding agent repeatedly makes the same mistake.** For example, when Opus kept creating nested test classes in .NET (which I don't want), I added a rule saying "don't do that."
+- **Context rot matters more than comprehensive rules.** The beginning of the context window is the most valuable part. If it's filled with massive rule files and dozens of MCP server endpoints, you're wasting precious tokens that could be used for actual implementation context.
+
+I also add a "here is your space" section to my agents MD, where the model can document anything unusual it finds in the codebase. This occasionally surfaces design flaws or leads to new rules.
+
+## Finding the Right Plan Size
+
+This is something you learn empirically — you can't know it in advance. The sweet spot is:
+
+- **Not too small** — if the plan is trivial, you could've done it yourself faster than creating the plan and reviewing the output
+- **Not too large** — the agent may produce lower quality results, and you end up creating additional plans anyway
+
+It also depends on the model's capabilities and *your* ability to review. Even if future models can handle huge plans, you as the reviewer are the limiting factor — you don't want massive PRs that are impossible to understand.
+
+## Security: Be Vigilant
+
+AI agents can easily be attacked. If a malicious instruction slips into the context — through an HTML comment in a markdown file, a compromised MCP server response, a manipulated CLI output, or a poisoned skills file — the agent may execute it. This is social engineering for AI agents, and it's unsafe by design: current architectures can't distinguish between trusted instructions and injected data.
+
+My advice:
+
+- **Review everything.** Look at the raw files, not rendered markdown (HTML comments are invisible in renderers but visible to agents).
+- **Disable MCP servers you don't need.** Saves context window space and reduces attack surface.
+- **Be aware of supply chain attacks.** There have been cases where hyped tools referenced nonexistent npm packages, and attackers simply created those packages with malicious code.
+- **Consider sandboxing.** Running your coding agent in a VM or container limits the blast radius of any malicious actions.
+
+## Communication Is the New Superpower
+
+Generating code is cheap now. The craft of software engineering — understanding architecture, making good design decisions, reviewing thoroughly — still matters deeply. But one skill is becoming disproportionately important: **communication**.
+
+Developers who can clearly articulate what they want, ask good follow-up questions, and structure their requirements well will get vastly better results from coding agents. The scale is tipping from pure technical prowess towards the ability to express intent precisely.
+
+If you don't understand something the agent produced, ask a follow-up question. Use a free model if you want. Just don't let code into your codebase that you haven't understood.
+
+## Practical Results
+
+I applied Guided Coding to build [Light.Portable.Results](https://github.com/feO2x/Light.Portable.Results), an open-source .NET library implementing the result pattern with full serialization support. The codebase is roughly 25,000 lines of actual code, and more than 90% of it was written by AI agents. Depending on the feature, I estimate a speedup factor of 1.25x to 4x compared to writing everything manually.
+
+## TLDR;
+
+Guided Coding is a three-phase methodology — **Plan**, **Implement**, **Guide** — for writing enterprise-grade software with AI coding agents without losing control of your codebase:
+
+- **Plan** iteratively with the agent, commit plans to git
+- **Implement** by handing off focused plans, backed by automated feedback loops
+- **Guide** by thoroughly reviewing all generated code — this is where you spend most of your time
+- Keep rules files small, find the right plan size empirically, and stay vigilant about security
+
+You can find all the AI plans, agents MD files, and the complete codebase at the [Light.Portable.Results repository](https://github.com/feO2x/Light.Portable.Results). The full stream with Johannes is available on [YouTube](https://www.youtube.com/live/vopBYXp9YV0).
