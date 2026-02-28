@@ -52,6 +52,41 @@
   ],
   "recentEvents": [
     {
+      "title": "Forget Vibe Coding, Switch to Guided Coding",
+      "date": "2026-05-05",
+      "link": "/events/2026-05-05-adc-forget-vibe-coding-use-guided-coding",
+      "excerpt": "In this talk, we'll explore Guided Coding, an approach that I developed in early 2026 during the development of Light.PortableResults to improve my development speed with Coding Agents while staying i...",
+      "tags": [
+        "AI",
+        "Coding-Agents",
+        "Guided-Coding"
+      ],
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2026"
+    },
+    {
+      "title": "AI-powered Cloud-Native Backends with Aspire and Microsoft.Extensions.AI",
+      "date": "2026-05-04",
+      "link": "/events/2026-05-04-adc-workshop-ai-powered-cloud-native-backends-with-aspire-and-mea",
+      "excerpt": "This workshop focusses on building Cloud-Native .NET backends with Aspire and integrating AI into it with Microsoft.Extension.AI",
+      "tags": [
+        "AI",
+        "Cloud-Native",
+        ".NET",
+        ""
+      ],
+      "type": "Workshop",
+      "location": "Regensburg",
+      "duration": "8h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2026"
+    },
+    {
       "title": "Guided Coding instead of Vibe Coding in Java",
       "date": "2026-02-26",
       "link": "/events/2026-02-26-guided-coding-in-java",
@@ -87,46 +122,6 @@
       "language": "German",
       "country": "Germany",
       "event": "Digital Craftsmanship Nordoberpfalz"
-    },
-    {
-      "title": "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI",
-      "date": "2025-09-24",
-      "link": "/events/2025-09-24-dotnet-regensburg-cloud-native-meets-ai",
-      "excerpt": "Talk about using .NET Aspire to orchestrate Cloud Native backends at development time and using Microsoft.Extensions.AI to access multimodal LLMs from your .NET backends - no matter whether they run i...",
-      "tags": [
-        "AI",
-        ".NET",
-        "Aspire",
-        "Microsoft.Extensions.AI",
-        "LLM",
-        "Cloud-Native"
-      ],
-      "type": "Talk",
-      "location": "Regensburg",
-      "duration": "2h",
-      "language": "German",
-      "country": "Germany",
-      "event": ".NET User Group Regensburg"
-    },
-    {
-      "title": "Access Multimodal LLMs from .NET Backends with Microsoft.Extensions.AI and .NET Aspire",
-      "date": "2025-05-07",
-      "link": "/events/2025-05-07-adc-access-multimodal-llms-from-dotnet-backends-with-mea-and-aspire",
-      "excerpt": "Talk about using .NET Aspire to orchestrate Cloud Native backends at development time and using Microsoft.Extensions.AI to access multimodal LLMs from your .NET backends - no matter whether they run i...",
-      "tags": [
-        "AI",
-        ".NET",
-        "Aspire",
-        "Microsoft.Extensions.AI",
-        "LLM",
-        "Cloud-Native"
-      ],
-      "type": "Talk",
-      "location": "Regensburg",
-      "duration": "1h",
-      "language": "German",
-      "country": "Germany",
-      "event": "Advanced Developers Conference 2025"
     }
   ]
 }
