@@ -1,0 +1,13 @@
+{
+  "servers": {
+    "mcp-video": {
+     "command": "npx",
+      "args": [
+        "@felores/mcp-video"
+      ],
+      "env": {
+        "DOWNLOADS_DIR": "~/mcp-video-downloads/"
+      }
+    }
+  }
+}
