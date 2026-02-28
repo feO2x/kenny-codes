@@ -58,6 +58,21 @@ automated-testing:
   permalink: /automated-testing
   description: Automated testing practices and tools
 
+ai:
+  label: AI
+  permalink: /ai
+  description: Artificial Intelligence related topics
+
+coding-agents:
+  label: Coding Agents
+  permalink: /coding-agents
+  description: AI-powered coding agents and agentic development workflows
+
+guided-coding:
+  label: Guided Coding
+  permalink: /guided-coding
+  description: Guided Coding is an approach to write enterprise-grade software with coding agents while staying in control of the codebase
+
 design-by-contract:
   label: Design by Contract
   permalink: /design-by-contract
