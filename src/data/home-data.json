@@ -77,7 +77,9 @@
         "AI",
         "Cloud-Native",
         ".NET",
-        ""
+        "Aspire",
+        "Microsoft.Extensions.AI",
+        "LLM"
       ],
       "type": "Workshop",
       "location": "Regensburg",
@@ -85,6 +87,23 @@
       "language": "German",
       "country": "Germany",
       "event": "Advanced Developers Conference 2026"
+    },
+    {
+      "title": "Forget Vibe Coding, Switch to Guided Coding",
+      "date": "2026-04-14",
+      "link": "/events/2026-04-14-dcn-forget-vibe-coding-use-guided-coding",
+      "excerpt": "In this talk, we'll explore Guided Coding, an approach that I developed in early 2026 during the development of Light.PortableResults to improve my development speed with Coding Agents while staying i...",
+      "tags": [
+        "AI",
+        "Coding-Agents",
+        "Guided-Coding"
+      ],
+      "type": "Talk",
+      "location": "Weiden in der Oberpfalz",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Digital Craftsmanship Nordoberpfalz"
     },
     {
       "title": "Guided Coding instead of Vibe Coding in Java",
@@ -102,26 +121,6 @@
       "duration": "2h",
       "language": "English",
       "event": "LinkedIn Live"
-    },
-    {
-      "title": "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI",
-      "date": "2025-09-30",
-      "link": "/events/2025-09-30-dcn-cloud-native-meets-ai",
-      "excerpt": "Talk about using .NET Aspire to orchestrate Cloud Native backends at development time and using Microsoft.Extensions.AI to access multimodal LLMs from your .NET backends - no matter whether they run i...",
-      "tags": [
-        "AI",
-        ".NET",
-        "Aspire",
-        "Microsoft.Extensions.AI",
-        "LLM",
-        "Cloud-Native"
-      ],
-      "type": "Talk",
-      "location": "Weiden in der Oberpfalz",
-      "duration": "2h",
-      "language": "German",
-      "country": "Germany",
-      "event": "Digital Craftsmanship Nordoberpfalz"
     }
   ]
 }
