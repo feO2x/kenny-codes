@@ -11,7 +11,7 @@ tags: [AI, Cloud-Native, .NET, Aspire, Microsoft.Extensions.AI, LLM]
 slug: 2026-05-04-adc-workshop-ai-powered-cloud-native-backends-with-aspire-and-mea
 ---
 
-This workshop focusses on building Cloud-Native .NET backends with Aspire and integrating AI into it with Microsoft.Extension.AI
+This workshop focusses on building Cloud-Native .NET backends with Aspire and integrating AI with Microsoft.Extensions.AI.
 
 <!-- truncate -->
 
@@ -19,7 +19,7 @@ This workshop focusses on building Cloud-Native .NET backends with Aspire and in
 
 Cloud-native backends are the go-to solution for many use cases when it comes to scalability, resilience, and availability — but how can AI be integrated effectively?
 
-In this workshop, we use .NET Aspire to host multiple services, including a YARP gateway and Duende Identity Server as the identity provider (IdP). Within this backend, we integrate both AI models such as GPT-5.x via the OpenAI API and locally running models via Ollama (appropriate hardware required).
+In this workshop, we use .NET Aspire to host multiple services, including a YARP gateway and Duende Identity Server as the Identity Provider (IdP). Within this backend, we integrate both AI models such as GPT-5.x via the OpenAI API and locally running models via Ollama (appropriate hardware required).
 
 We will cover both prompt design and securing such backends using the BFF (Backend-for-Frontend) pattern.
 

@@ -6,7 +6,6 @@ import { eventsId } from "./src/utils/eventUtils";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const description = "Kenny Pflug - Kenny Codes! AI, Cloud-Native, and .NET";
-const socialCardImageUrl = "/img/kenny-codes-social-card.jpg";
 
 const config: Config = {
   title: "Kenny Codes",
@@ -105,11 +104,15 @@ const config: Config = {
 
   themeConfig: {
     image: "img/kenny-codes-social-card.jpg",
+    colorMode: {
+      defaultMode: "dark",
+      respectPrefersColorScheme: false,
+    },
     metadata: [
       {
         name: "keywords",
         content:
-          ".NET, ASP.NET Core, C#, software performance, distributed systems, system architecture, API design, scalability, cloud-native, concurrency, resilience, software design, software architecture, programming, coding",
+          "AI, Coding Agents, AI Integration,.NET, ASP.NET Core, C#, software performance, distributed systems, system architecture, API design, scalability, cloud-native, concurrency, resilience, software design, software architecture, programming, coding",
       },
       {
         name: "author",
@@ -153,10 +156,6 @@ const config: Config = {
         content: "en_IE",
       },
       {
-        name: "og:image",
-        content: socialCardImageUrl,
-      },
-      {
         name: "og:image:width",
         content: "800",
       },
@@ -191,10 +190,6 @@ const config: Config = {
       {
         name: "twitter:description",
         content: description,
-      },
-      {
-        name: "twitter:image",
-        content: socialCardImageUrl,
       },
       {
         name: "referrer",
