@@ -1,27 +1,30 @@
-import React from 'react';
-import Layout from '@theme/Layout';
-import HeaderWithImage from '@site/src/components/HeaderWithImage';
-import EventCard from '@site/src/components/EventCard';
-import type {Props} from '@theme/BlogListPage';
-import type {EventFrontMatter} from '@site/src/types/event';
-import {formatDate} from '@site/src/utils/dateFormatting';
-import styles from '@site/src/css/events.module.css';
+import React from "react";
+import Layout from "@theme/Layout";
+import HeaderWithImage from "@site/src/components/HeaderWithImage";
+import EventCard from "@site/src/components/EventCard";
+import type { Props } from "@theme/BlogListPage";
+import type { EventFrontMatter } from "@site/src/types/event";
+import { formatDate } from "@site/src/utils/dateFormatting";
+import styles from "@site/src/css/events.module.css";
 
-import {groupEvents} from '@site/src/utils/eventUtils';
-import EventStats from '@site/src/components/EventStats';
+import { groupEvents } from "@site/src/utils/eventUtils";
+import EventStats from "@site/src/components/EventStats";
 
 type EventsBlogListContentProps = {
-  items: Props['items'];
+  items: Props["items"];
 };
 
-type BlogListItem = EventsBlogListContentProps['items'][number];
+type BlogListItem = EventsBlogListContentProps["items"][number];
 
-export default function EventsBlogListContent({items}: EventsBlogListContentProps) {
-  const {upcomingEvents, pastEvents, pastEventsByYear, years} = groupEvents<BlogListItem>(items);
+export default function EventsBlogListContent({
+  items,
+}: EventsBlogListContentProps) {
+  const { upcomingEvents, pastEvents, pastEventsByYear, years } =
+    groupEvents<BlogListItem>(items);
 
   return (
     <Layout title="Events" description="Past and upcoming events">
-      <HeaderWithImage title="Events" imageUrl="/kenny-codes/img/events.jpg" />
+      <HeaderWithImage title="Events" imageUrl="/img/events.jpg" />
 
       <div className={styles.eventsContainer}>
         <EventStats
@@ -35,7 +38,8 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
             <h2 className={styles.sectionTitle}>Upcoming Events</h2>
             <div className={styles.cardList}>
               {upcomingEvents.map((item, index) => {
-                const frontMatter = item.content.frontMatter as EventFrontMatter;
+                const frontMatter = item.content
+                  .frontMatter as EventFrontMatter;
                 return (
                   <EventCard
                     key={index}
@@ -62,7 +66,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
 
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>Past Events</h2>
-          {years.map(year => (
+          {years.map((year) => (
             <div key={year}>
               <h3 className={styles.yearHeader}>{year}</h3>
               <div className={styles.cardList}>

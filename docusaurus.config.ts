@@ -5,9 +5,8 @@ import { eventsId } from "./src/utils/eventUtils";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
-const description =
-  "Personal website of Kenny Pflug, a software engineer from Regensburg, Germany, specializing in .NET internals, software design and architecture, distributed systems, and ASP.NET Core backends.";
-const socialCardImageUrl = "https://feO2x.github.io/kenny-codes/img/kenny-codes-social-card.jpg";
+const description = "Kenny Pflug - Kenny Codes! AI, Cloud-Native, and .NET";
+const socialCardImageUrl = "/img/kenny-codes-social-card.jpg";
 
 const config: Config = {
   title: "Kenny Codes",
@@ -21,10 +20,10 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: "https://feO2x.github.io/",
+  url: "https://kenny-codes.net/",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/kenny-codes/",
+  baseUrl: "/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -52,10 +51,6 @@ const config: Config = {
       {
         docs: {
           sidebarPath: "./sidebars.ts",
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
         },
         blog: {
           showReadingTime: true,
@@ -63,11 +58,6 @@ const config: Config = {
             type: ["rss", "atom"],
             xslt: true,
           },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
-          // Useful options to enforce blogging best practices
           onInlineTags: "warn",
           onInlineAuthors: "warn",
           onUntruncatedBlogPosts: "warn",
@@ -152,7 +142,7 @@ const config: Config = {
       },
       {
         name: "og:url",
-        content: "https://feO2x.github.io/kenny-codes/",
+        content: "https://kenny-codes.net/",
       },
       {
         name: "og:site_name",

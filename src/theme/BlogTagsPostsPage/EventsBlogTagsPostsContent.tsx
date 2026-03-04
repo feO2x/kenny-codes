@@ -22,7 +22,7 @@ export default function EventsBlogTagsPostsContent({items, tag}: EventsBlogTagsP
 
   return (
     <Layout title={title} description={`Events tagged with ${tag.label}`}>
-      <HeaderWithImage title="Events" imageUrl="/kenny-codes/img/events.jpg" />
+      <HeaderWithImage title="Events" imageUrl="/img/events.jpg" />
 
       <div className={styles.eventsContainer}>
         <h1 className={localStyles.pageTitle}>{title}</h1>
