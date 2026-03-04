@@ -8,13 +8,27 @@ export default function LegalNotice() {
     >
       <main className="container margin-vert--lg">
         <h1>Legal Notice</h1>
-        <h2>Contact</h2>
+        <h2>Contact in English</h2>
         <p>
-          Kenny Pflug - Kenny Codes<br />
+          Information according to §5 TMG <br />
+          Kenny Pflug - Kenny Codes (Sole Proprietorship)<br />
           Würzburger Str. 10<br />
           93059 Regensburg<br />
           Germany<br />
-          <a href="mailto:info@kennycodes.net">info@kennycodes.net</a>
+          Email: <a href="mailto:info@kenny-codes.net">info@kenny-codes.net</a>
+          <br />
+          VAT Identification Number according to §27a UStG: DE457931059
+        </p>
+        <h2>Kontakt auf Deutsch</h2>
+        <p>
+          Informationen gemäß §5 TMG <br />
+          Kenny Pflug - Kenny Codes (Einzelunternehmen)<br />
+          Würzburger Str. 10<br />
+          93059 Regensburg<br />
+          Deutschland<br />
+          E-Mail: <a href="mailto:info@kenny-codes.net">info@kenny-codes.net</a>
+          <br />
+          Umsatzsteuer-Identifikationsnummer gemäß §27a UStG: DE457931059
         </p>
         <h2>Disclaimer</h2>
         <p>
