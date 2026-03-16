@@ -5,6 +5,8 @@ title: Keep Your Rules Files Small
 
 # Keep Your Rules Files Small
 
+## Less is more
+
 A [study published in February 2026](https://arxiv.org/pdf/2602.11988) found that AGENTS.md files (or equivalent rules files in other tools) generally don't bring measurable benefit to code quality but cost about 20% more tokens. My approach aligns with this finding:
 
 - **Start with a minimal agents MD file.** Mine is really short — a brief description of the project, a few rules that address past violations, and references to sub-rule files for production code, testing, and plans.
@@ -15,7 +17,7 @@ I also add a "here is your space" section to my AGENTS.md, where the model can d
 
 ## Example top-level AGENTS.md file
 
-This is an example of a top-level AGENTS.md file. I use it in [Light.PortableResults](https://github.com/feO2x/Light.PortableResults). Check out the codebase to learn how I organize my sub-rule files.
+This is an example of a top-level AGENTS.md file. I use it in [Light.PortableResults](https://github.com/feO2x/Light.PortableResults). Check out the codebase to learn how I organize my sub-rule files. **Please read the file carefully, you might want to adapt certain sections for your project.**
 
 ```md
 # Root Agents.md
