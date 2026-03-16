@@ -11,7 +11,7 @@ A [study published in February 2026](https://arxiv.org/pdf/2602.11988) found tha
 
 - **Start with a minimal agents MD file.** Mine is really short — a brief description of the project, a few rules that address past violations, and references to sub-rule files for production code, testing, and plans.
 - **Only add rules when a coding agent repeatedly makes the same mistake.** For example, when Opus kept creating nested test classes in .NET (which I don't want), I added a corresponding rule to prevent this.
-- **Context rot matters more than comprehensive rules.** As a conversation grows, early tokens lose influence on the model's behavior. If the beginning of the context window is filled with massive rule files and dozens of MCP server endpoints, you're wasting precious tokens that could be used for actual implementation context.
+- **[Context rot](https://research.trychroma.com/context-rot) matters more than comprehensive rules.** As a conversation grows, early tokens lose influence on the model's behavior. If the beginning of the context window is filled with massive rule files and dozens of MCP server endpoints, you're wasting precious tokens that could be used for actual implementation context.
 
 I also add a "here is your space" section to my AGENTS.md, where the model can document anything unusual it finds in the codebase. This occasionally surfaces design flaws or leads to new rules.
 
