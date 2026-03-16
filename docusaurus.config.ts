@@ -86,7 +86,8 @@ const config: Config = {
         routeBasePath: eventsId,
         path: "./events",
         blogTitle: "Events",
-        blogDescription: "Past and upcoming speaking events, workshops, and webinars",
+        blogDescription:
+          "Past and upcoming speaking events, workshops, and webinars",
         blogSidebarCount: 0,
         blogSidebarTitle: "All Events",
         showReadingTime: false,
@@ -95,7 +96,8 @@ const config: Config = {
         feedOptions: {
           type: ["rss", "atom"],
           title: "Kenny Codes - Events",
-          description: "Speaking events, workshops, and webinars by Kenny Pflug",
+          description:
+            "Speaking events, workshops, and webinars by Kenny Pflug",
           xslt: true,
         },
       },
@@ -194,7 +196,7 @@ const config: Config = {
       {
         name: "referrer",
         content: "no-referrer-when-downgrade",
-      }
+      },
     ],
     navbar: {
       title: "Kenny Codes",
@@ -211,10 +213,16 @@ const config: Config = {
           position: "left",
         },
         {
-          type: "docSidebar",
-          sidebarId: "tutorialSidebar",
-          position: "left",
+          type: "dropdown",
           label: "Learn",
+          position: "left",
+          items: [
+            {
+              type: "docSidebar",
+              sidebarId: "tutorialSidebar",
+              label: "Guided Coding",
+            },
+          ],
         },
         {
           href: "https://github.com/feO2x/kenny-codes",
@@ -252,16 +260,16 @@ const config: Config = {
           title: "Follow me",
           items: [
             {
-              label: "X",
-              href: "https://x.com/feO2x",
-            },
-            {
               label: "LinkedIn",
               href: "https://www.linkedin.com/in/kenny-pflug-7a1012123/",
             },
             {
               label: "GitHub",
               href: "https://github.com/feO2x/",
+            },
+            {
+              label: "X",
+              href: "https://x.com/feO2x",
             },
           ],
         },
