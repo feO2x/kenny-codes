@@ -7,12 +7,7 @@ title: "Guided Coding: Staying in Control While Coding with AI Agents"
 
 ## TLDR;
 
-Guided Coding is a three-phase methodology — **Plan**, **Implement**, **Guide** — for writing enterprise-grade software with AI coding agents without losing control of your codebase:
-
-- **Plan** iteratively with the agent, commit plans to git
-- **Implement** by handing off focused plans, backed by automated feedback loops
-- **Guide** by thoroughly reviewing all generated code — this is where you spend most of your time
-- Keep rules files small, find the right plan size empirically, and stay vigilant about security
+Guided Coding is a three-phase methodology — **Plan**, **Implement**, **Guide** — for writing enterprise-grade software with AI coding agents without losing control of your codebase. It aims to be the **counterpart to Vibe Coding** with a heavy focus on planning and reviewing iteratively in collaboration with the coding agent.
 
 <svg viewBox="0 0 870 200" xmlns="http://www.w3.org/2000/svg" style={{maxWidth: '870px', width: '100%', margin: '1.5rem auto', display: 'block'}}>
   {/* Background */}
@@ -45,22 +40,30 @@ Guided Coding is a three-phase methodology — **Plan**, **Implement**, **Guide*
   </defs>
 
   {/* Self-loop on Planning Phase (right side) */}
-  <path d="M 205 135 V 115 Q 205 105, 195 105 H 175 Q 165 105, 165 115 V 122" fill="none" stroke="#0078D4" strokeWidth="4" />
-  <polygon points="165,132 158,118 172,118" fill="#0078D4" />
+  <path d="M 205 135 V 115 Q 205 105, 195 105 H 175 Q 165 105, 165 115 V 122" fill="none" stroke="#0078D4" strokeWidth="7" />
+  <polygon points="165,132 155,114 175,114" fill="#0078D4" />
 
   {/* Blue arrow: Guiding → Planning (large issue) */}
   <path d="M 660 135 V 50 Q 660 25, 635 25 H 155 Q 130 25, 130 50 V 100" fill="none" stroke="#0078D4" strokeWidth="11" />
   <polygon points="130,130 108,96 152,96" fill="#0078D4" />
 
   {/* Yellow arrow: Guiding → Implementation (small issue) */}
-  <path d="M 595 135 V 100 Q 595 80, 575 80 H 395 Q 375 80, 375 100 V 108" fill="none" stroke="#E88A00" strokeWidth="8" />
-  <polygon points="375,130 358,105 392,105" fill="#E88A00" />
+  <path d="M 595 135 V 100 Q 595 80, 575 80 H 395 Q 375 80, 375 100 V 108" fill="none" stroke="#E88A00" strokeWidth="10" />
+  <polygon points="375,130 355,100 395,100" fill="#E88A00" />
 </svg>
+
+- **Plan** iteratively with the agent, commit plans to git. Most important question at the end of the planning phase: "Would you add, change, or remove anything?" - ask this repeatedly.
+- **Implement** by handing off focused plans to the coding agent, backed by automated feedback loops like linting, automated testing, automated benchmarks, etc.
+- **Guide** by thoroughly reviewing all generated code — this is where you spend most of your time. It allows you to understand the code, identify issues, and ensure quality. Tell the agent what to fix, either by prompting it to go back to the implementation phase for small issues or by creating one or more new plans for larger changes.
+
+Keep rules files small, find the right plan size empirically for the LLMs you use, and stay vigilant about important software traits like functional correctness, performance, and security.
 
 ## Why Not Vibe Coding?
 
-Andrej Karpathy, one of the co-founders of OpenAI, coined the term **Vibe Coding** in February 2025. The core idea: you tell the coding agent what to do, never go down to the source code level, always click "accept all changes", and the code grows beyond usual comprehension. You only validate by looking at the running app — never at the code itself.
+Andrej Karpathy, one of the co-founders of OpenAI, [coined the term Vibe Coding in February 2025](https://x.com/karpathy/status/1886192184808149383). The core idea: you tell the coding agent what to do, never go down to the source code level, always click "accept all changes", and the code grows beyond usual comprehension. You only validate by looking at the running app — never at the code itself.
 
-While Vibe Coding is fun for personal projects and prototyping, it is not a viable approach for enterprise-grade software. You have no idea what the code is doing, how it's doing it, and technical debt accumulates rapidly. I wanted to formalize a counterpart — a methodology that lets you leverage the extraordinary productivity gains of coding agents while staying in control of the codebase.
+[![Andrej Karpathy's Vibe Coding post](./vibe-coding-post.png)](https://x.com/karpathy/status/1886192184808149383)
+
+While Vibe Coding is fun for personal projects and useful for rapid prototyping, it is not a viable approach for enterprise-grade software. You have no idea what the code is doing, how it's doing it, and technical debt accumulates quickly. I wanted to formalize a counterpart — a methodology and mental model for working with coding agents that lets you leverage the productivity gains while staying in control of the codebase.
 
 That's what Guided Coding is about.
