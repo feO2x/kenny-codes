@@ -1,0 +1,23 @@
+---
+sidebar_position: 2
+title: Implementation Phase
+---
+
+# 2. Implementation Phase (5–45 minutes)
+
+Hand the coding agent a single plan and tell it to implement:
+
+> *"With you being an expert .NET developer, can you please implement the following plan for me?"*
+
+Then point to the corresponding markdown file. That's it. The agent goes off and works, typically for 5 to 45 minutes depending on the task. I let it run in auto-continue mode without supervising.
+
+The key to a successful implementation phase is having good **feedback loops** in place:
+
+- **Compilers / transpilers** catch invalid syntax
+- **Automated tests** validate behavior
+- **Linters** enforce code style
+- **Automated benchmarks** can verify performance
+
+These feedback loops let the agent work longer autonomously. When the agent writes code, runs the tests, sees failures, and fixes them — all without your intervention — that's the power of this setup. Modern models execute tests by themselves; you don't have to instruct them to do so. You just need a check mark in your acceptance criteria that says automated tests should be written.
+
+I once asked an agent to optimize memory allocations in a hot path. It wrote a benchmark, implemented a stack-allocated optimization for cases with fewer than 10 errors, ran the benchmark, and reported: 25% faster runtime and 80% less memory allocated. When I then asked it to eliminate one last remaining heap allocation, it tried, ran the benchmarks again, saw that performance actually got *worse* — and rolled back its own changes. These feedback loops are invaluable.

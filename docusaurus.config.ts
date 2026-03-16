@@ -210,12 +210,12 @@ const config: Config = {
           label: "Events",
           position: "left",
         },
-        // {
-        //   type: "docSidebar",
-        //   sidebarId: "tutorialSidebar",
-        //   position: "left",
-        //   label: "Tutorial",
-        // },
+        {
+          type: "docSidebar",
+          sidebarId: "tutorialSidebar",
+          position: "left",
+          label: "Learn",
+        },
         {
           href: "https://github.com/feO2x/kenny-codes",
           label: "GitHub",
