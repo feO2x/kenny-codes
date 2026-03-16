@@ -12,15 +12,26 @@ import GuidedCodingDiagram from '@site/src/components/GuidedCodingDiagram';
 This is the most important and time-consuming phase. You review all the generated code:
 
 - **Read the code yourself.** You are responsible for the code the LLM produces. You need to understand it.
-- **Also let another agent review.** I usually open a new conversation or use review features of Coding Agents for an additional code review.
+- **Also let another agent review.** I usually open a new conversation or use review features of coding agents for an additional code review.
 - **Learn what you don't know.** If the agent wrote something you don't understand, learn that concept before judging it. Ask the model to explain it.
 - **Decide on the appropriate response:**
   - If everything looks good → success, create a PR.
   - If there's a small issue → iterate back to the implementation phase with a targeted prompt.
   - If there's a large issue (wrong data structures, framework mechanisms misused, design flaws) → go back and create a new plan.
-- **You can make manual changes if needed.** Don't be afraid to make manual changes to the code if you need to. Your Coding Agent does not need to do all the work - use it as a tool to write the code you would write yourself faster.
-- **Write a plan deviations document** at the end, especially if you made significant changes. Have the agent compare the original plan to the final implementation and note all differences. This serves as an architectural decision record.
+- **Make manual changes if needed.** Your coding agent doesn't need to do all the work — use it as a tool to write the code you would write yourself, just faster.
+- **Write a plan deviations document** at the end of the cycle, especially if you made significant changes. Have the agent compare the original plan to the final implementation and note all differences. This serves as an architectural decision record.
 
-Large issues in the guiding phase usually mean your plan was too big to begin with. This happened to me with a cloud events serialization feature — I tried to implement reading and writing in one plan. The result had too little code reuse and poor performance optimizations, so I went back and created three smaller, focused plans to address each aspect separately.
+Large issues in the guiding phase usually mean your plan was too big to begin with. This happened to me with a cloud events serialization feature — I tried to implement reading and writing in one plan. The result had too little code reuse and suboptimal performance, so I went back and created three smaller, focused plans to address each aspect separately.
 
-**Don't be afraid to go back to the planning phase!** In Software Development, we noticed a long time ago that iterative approaches benefit the overall quality. Iterate until you're satisfied with the result.
+**Don't be afraid to go back to the planning phase!** In software development, it's long been established that iterative approaches benefit overall quality. Iterate until you're satisfied with the result.
+
+## How to Review
+
+- **Read every changed file.** Don't skim — read the code line by line. Pay attention to naming, structure, error handling, and edge cases. If something feels off, it probably is.
+- **Evaluate the design.** Step back and look at the bigger picture. Are the abstractions appropriate? Is the code well-structured and easy to extend? Watch out for over-engineering, unnecessary indirection, or patterns the agent introduced that don't fit the existing architecture.
+- **Run the automated tests.** Even though the agent likely ran them during implementation, run them again yourself. Check that coverage is adequate and that the tests actually assert meaningful behavior, not just that the code doesn't crash. Pay special attention to the assertion phase — agents tend to write weak or incomplete assertions. A test that only checks for "no exception thrown" or verifies a single property when it should verify the full expected state gives you a false sense of safety.
+- **Do a manual smoke test.** Start the application and exercise the feature end to end. Automated tests can't catch everything — visual glitches, subtle UX issues, or integration problems with external systems often only surface when you use the app.
+- **Check for regressions.** Look beyond the feature itself. Did the agent accidentally change something unrelated? A quick scan of the full diff helps catch unintended side effects.
+- **Verify non-functional aspects.** Depending on the feature, check performance characteristics, logging, error messages, and security boundaries. These are easy for agents to overlook or handle superficially.
+
+It takes experience to review the code produced by a Coding Agent. Educate yourself to become a better reviewer over time, don't be afraid to ask your (non-AI) colleagues if something is unclear and you think the coding agent is hallucinating.
