@@ -18,9 +18,11 @@ Then point to the corresponding markdown file. That's it. The agent goes off and
 The key to a successful implementation phase is having good **feedback loops** in place:
 
 - **Compilers / transpilers** catch invalid syntax
-- **Automated tests** validate behavior
+- **Static code analysis tools** catch potential issues in the code base
+- **Automated tests** validate functional correctness
 - **Linters** enforce code style
-- **Automated benchmarks** can verify performance
+- **Automated benchmarks** verify performance
+- **Security tools like trivy** detect vulnerabilities
 
 These feedback loops let the agent work longer autonomously. When the agent writes code, runs the tests, sees failures, and fixes them — all without your intervention — that's the power of this setup. Modern models execute tests by themselves; you don't have to instruct them to do so. You just need a check mark in your acceptance criteria that says automated tests should be written.
 
