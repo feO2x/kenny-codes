@@ -2,13 +2,22 @@ interface GuidedCodingDiagramProps {
   highlight?: 'planning' | 'implementation' | 'guiding';
 }
 
+const descriptions: Record<string, string> = {
+  planning: 'Guided Coding workflow diagram highlighting the Planning Phase. The three phases are Planning, Implementation, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementation for small issues.',
+  implementation: 'Guided Coding workflow diagram highlighting the Implementation Phase. The three phases are Planning, Implementation, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementation for small issues.',
+  guiding: 'Guided Coding workflow diagram highlighting the Guiding Phase. The three phases are Planning, Implementation, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementation for small issues.',
+  default: 'Guided Coding workflow diagram showing three phases: Planning, Implementation, and Guiding. Arrows indicate the flow between phases, with loops back to Planning for large issues and back to Implementation for small issues, ending with a PR.',
+};
+
 export default function GuidedCodingDiagram({ highlight }: GuidedCodingDiagramProps) {
   const dim = 0.3;
   const o = (phase: 'planning' | 'implementation' | 'guiding') =>
     highlight && highlight !== phase ? dim : 1;
+  const titleId = `guided-coding-diagram-title${highlight ? `-${highlight}` : ''}`;
 
   return (
-    <svg viewBox="0 0 870 200" xmlns="http://www.w3.org/2000/svg" style={{maxWidth: '870px', width: '100%', margin: '1.5rem auto', display: 'block'}}>
+    <svg viewBox="0 0 870 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby={titleId} style={{maxWidth: '870px', width: '100%', margin: '1.5rem auto', display: 'block'}}>
+      <title id={titleId}>{descriptions[highlight ?? 'default']}</title>
       {/* Background */}
       <rect x="0" y="0" width="870" height="200" rx="8" fill="#D6D6D6" />
 
