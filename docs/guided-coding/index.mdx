@@ -1,0 +1,30 @@
+---
+sidebar_position: 1
+title: "Guided Coding: Staying in Control While Coding with AI Agents"
+---
+
+import GuidedCodingDiagram from '@site/src/components/GuidedCodingDiagram';
+
+# Guided Coding: Staying in Control While Coding with AI Agents
+
+## TL;DR
+
+Guided Coding is a three-phase methodology — **Plan**, **Implement**, **Guide** — for writing enterprise-grade software with AI coding agents while maintaining full ownership of your codebase. It is a **counterpart to Vibe Coding** with a heavy focus on planning and reviewing iteratively in collaboration with the coding agent.
+
+<GuidedCodingDiagram />
+
+- **Plan** iteratively with the agent, commit plans to git. Most important question at the end of the planning phase: "Would you add, change, or remove anything?" Ask this repeatedly until the plan stabilizes.
+- **Implement** by handing off focused plans to the coding agent, backed by automated feedback loops like linting, automated testing, automated benchmarks, etc.
+- **Guide** by thoroughly reviewing all generated code — this is where you spend most of your time. Understand the code, identify issues, and ensure quality. For small issues, prompt the agent to go back to the implementation phase. For larger changes, create one or more new plans together with the agent.
+
+Keep rules files small, find the right plan size empirically for the LLMs you use, and stay vigilant about important software traits like functional correctness, performance, and security.
+
+## Why Not Vibe Coding?
+
+Andrej Karpathy, co-founder of OpenAI, [coined the term Vibe Coding in February 2025](https://x.com/karpathy/status/1886192184808149383). The core idea: you tell the coding agent what to do, never go down to the source code level, always click "accept all changes", and the code grows beyond usual comprehension. You only validate by looking at the running app — never at the code itself.
+
+[![Andrej Karpathy's Vibe Coding post](./vibe-coding-post.png)](https://x.com/karpathy/status/1886192184808149383)
+
+While Vibe Coding is fun for personal projects and useful for rapid prototyping, it is not a viable approach for enterprise-grade software. You have no idea what the code is doing or how it's doing it, and technical debt accumulates quickly. I wanted to formalize a counterpart — a methodology and mental model for working with coding agents that lets you leverage the productivity gains while staying in control of the codebase.
+
+That's what Guided Coding is about.
