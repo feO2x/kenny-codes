@@ -4,6 +4,10 @@
 
 - Never run the dev server. Assume it is already running.
 
+# When you implement a plan
+
+A plan markdown file typically contains acceptance criteria. Check off each criterion when you finished implementing it.
+
 ## How to write plans
 
 See ai-plans/AGENTS.md for details on how to write plans.
