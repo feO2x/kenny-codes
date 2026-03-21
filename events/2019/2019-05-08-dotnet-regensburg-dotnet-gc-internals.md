@@ -1,5 +1,6 @@
 ---
 title: ".NET Garbage Collector Internals"
+image: /img/social-cards/2019-05-08-dotnet-regensburg-dotnet-gc-internals.png
 date: 2019-05-08
 type: Talk
 duration: 2h

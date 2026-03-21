@@ -1,5 +1,6 @@
 ---
 title: "Fast and Fluent UI in WPF"
+image: /img/social-cards/2014-02-24-dotnet-regensburg-fast-and-fluent-ui-in-wpf.png
 date: 2014-02-24
 type: Talk
 duration: 2h

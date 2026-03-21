@@ -5,9 +5,10 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "generate-home-data": "tsx scripts/generate-home-data.ts",
+    "generate-social-cards": "tsx scripts/generate-social-cards.ts",
     "prestart": "npm run generate-home-data",
     "start": "docusaurus start",
-    "prebuild": "npm run generate-home-data",
+    "prebuild": "npm run generate-home-data && npm run generate-social-cards",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
@@ -32,6 +33,8 @@
     "@docusaurus/module-type-aliases": "3.9.2",
     "@docusaurus/tsconfig": "3.9.2",
     "@docusaurus/types": "3.9.2",
+    "satori": "^0.26.0",
+    "sharp": "^0.34.5",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3"
   },

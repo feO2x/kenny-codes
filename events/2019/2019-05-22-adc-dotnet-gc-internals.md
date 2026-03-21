@@ -1,5 +1,6 @@
 ---
 title: ".NET GC Internals: How the Garbage Collector Works Under the Covers"
+image: /img/social-cards/2019-05-22-adc-dotnet-gc-internals.png
 date: 2019-05-22
 type: Talk
 duration: 1h

@@ -1,6 +1,7 @@
 ---
 slug: 2015-09-27-avoid-the-internal-modifier-by-default
 title: Avoid the internal modifier by default
+image: /img/social-cards/2015-09-27-avoid-the-internal-modifier-by-default.png
 authors: [feO2x]
 tags: [csharp, software-design, encapsulation, api-design]
 ---

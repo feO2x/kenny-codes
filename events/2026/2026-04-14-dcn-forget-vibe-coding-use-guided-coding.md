@@ -1,5 +1,6 @@
 ---
 title: "Forget Vibe Coding, Switch to Guided Coding"
+image: /img/social-cards/2026-04-14-dcn-forget-vibe-coding-use-guided-coding.png
 date: 2026-04-14
 type: Talk
 duration: 2h

@@ -1,5 +1,6 @@
 ---
 title: "Design Principles vs. Performance"
+image: /img/social-cards/2021-03-02-mdug-graz-design-principles-vs-performance.png
 date: 2021-03-02
 type: Talk
 duration: 2h

@@ -1,5 +1,6 @@
 ---
 title: ".NET Threading in Detail"
+image: /img/social-cards/2017-06-12-dotnet-ingolstadt-dotnet-threading-in-detail.png
 date: 2017-06-12
 type: Talk
 duration: 2h

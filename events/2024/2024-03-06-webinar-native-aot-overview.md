@@ -1,5 +1,6 @@
 ---
 title: ".NET Native AOT – Overview and Performance"
+image: /img/social-cards/2024-03-06-webinar-native-aot-overview.png
 date: 2024-03-06
 type: Webinar
 duration: 1h

@@ -1,5 +1,6 @@
 ---
 title: "ASP.NET Core Minimal APIs in Practice"
+image: /img/social-cards/2022-12-13-dcn-minimal-apis-in-practice.png
 date: 2022-12-13
 type: Talk
 duration: 2h

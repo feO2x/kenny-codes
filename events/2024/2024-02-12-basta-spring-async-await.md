@@ -1,5 +1,6 @@
 ---
 title: "Scalable .NET Apps with async await – Fundamentals & Practical Tips"
+image: /img/social-cards/2024-02-12-basta-spring-async-await.png
 date: 2024-02-12
 type: Talk
 duration: 1h

@@ -1,6 +1,7 @@
 ---
 slug: 2015-08-29-my-new-video-series-on-the-dependency-inversion-principle-is-online
 title: My New Video Series on the Dependency Inversion Principle is Online
+image: /img/social-cards/2015-08-29-my-new-video-series-on-the-dependency-inversion-principle-is-online.png
 authors: [feO2x]
 tags: [csharp, dotnet, solid, dip]
 ---

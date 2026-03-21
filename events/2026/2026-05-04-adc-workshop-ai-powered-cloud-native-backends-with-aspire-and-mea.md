@@ -1,5 +1,6 @@
 ---
 title: "AI-powered Cloud-Native Backends with Aspire and Microsoft.Extensions.AI"
+image: /img/social-cards/2026-05-04-adc-workshop-ai-powered-cloud-native-backends-with-aspire-and-mea.png
 date: 2026-05-04
 type: Workshop
 duration: 8h

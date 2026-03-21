@@ -1,5 +1,6 @@
 ---
 title: "Design Principles vs. Performance"
+image: /img/social-cards/2021-11-30-adc-design-principles-vs-performance.png
 date: 2021-11-30
 type: Talk
 duration: 1h

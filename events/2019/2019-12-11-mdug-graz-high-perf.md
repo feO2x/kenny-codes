@@ -1,5 +1,6 @@
 ---
 title: "High Perf - .NET Performance Benchmarking and Garbage Collector in Detail"
+image: /img/social-cards/2019-12-11-mdug-graz-high-perf.png
 date: 2019-12-11
 type: Talk
 duration: 3h

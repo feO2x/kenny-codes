@@ -1,6 +1,7 @@
 ---
 slug: 2016-05-07-assertions-and-inheritance
 title: More on Design by Contract - Assertions and Inheritance
+image: /img/social-cards/2016-05-07-assertions-and-inheritance.png
 authors: [feO2x]
 tags: [csharp, dotnet, design-by-contract, object-oriented-programming]
 ---

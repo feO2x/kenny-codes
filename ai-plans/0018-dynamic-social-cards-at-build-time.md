@@ -6,19 +6,19 @@ Social cards (Open Graph images) are essential for link previews on social media
 
 ## Acceptance Criteria
 
-- [ ] A new build script generates social card images for all blog posts and events
-- [ ] Generated images follow Open Graph recommended dimensions (1200×630)
-- [ ] Each card displays the page title prominently, with optional metadata (date, tags, event type)
-- [ ] The visual design is consistent with the "Kenny Codes" branding (colors, fonts, logo)
-- [ ] Generated images are saved to `static/img/social-cards/` with predictable file names based on the slug
-- [ ] Generated images are committed to git for reproducible deploys and visual review
-- [ ] The script automatically updates frontmatter to include the `image` field pointing to the generated card
-- [ ] The generation script integrates into the existing build pipeline (via `prebuild` hook)
-- [ ] Pages can opt-out by specifying a custom `image` in their frontmatter (script skips these)
-- [ ] Long titles are handled automatically via text wrapping and dynamic font scaling
-- [ ] Users can optionally specify a `socialTitle` frontmatter field to override the title for social cards
-- [ ] The script is idempotent: re-running it produces the same output for unchanged content
-- [ ] Build performance remains acceptable (generation should not add excessive build time)
+- [x] A new build script generates social card images for all blog posts and events
+- [x] Generated images follow Open Graph recommended dimensions (1200×630)
+- [x] Each card displays the page title prominently, with optional metadata (date, tags, event type)
+- [x] The visual design is consistent with the "Kenny Codes" branding (colors, fonts, logo)
+- [x] Generated images are saved to `static/img/social-cards/` with predictable file names based on the slug
+- [x] Generated images are committed to git for reproducible deploys and visual review
+- [x] The script automatically updates frontmatter to include the `image` field pointing to the generated card
+- [x] The generation script integrates into the existing build pipeline (via `prebuild` hook)
+- [x] Pages can opt-out by specifying a custom `image` in their frontmatter (script skips these)
+- [x] Long titles are handled automatically via text wrapping and dynamic font scaling
+- [x] Users can optionally specify a `socialTitle` frontmatter field to override the title for social cards
+- [x] The script is idempotent: re-running it produces the same output for unchanged content
+- [x] Build performance remains acceptable (generation should not add excessive build time)
 
 ## Technical Details
 
