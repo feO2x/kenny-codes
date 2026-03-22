@@ -12,6 +12,20 @@ import {
   type SocialCardTemplateModel,
 } from "./social-card-template";
 
+/**
+ * This script generates all build-time social cards for blog posts and events.
+ *
+ * High-level flow:
+ * 1. Discover markdown / MDX content files.
+ * 2. Read their frontmatter and derive the data needed for a card.
+ * 3. Render a text overlay with Satori.
+ * 4. Composite that overlay onto a shared background using Sharp.
+ * 5. Write the PNG into `static/img/social-cards/`.
+ * 6. Update markdown frontmatter so Docusaurus uses the generated card.
+ *
+ * The script is deterministic on purpose. Generated files are committed to git,
+ * so identical content should always result in identical images.
+ */
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -27,21 +41,42 @@ const LOGO_PATH = path.join(STATIC_DIR, "img/logo-dark.svg");
 const PHOTO_PATH = path.join(STATIC_DIR, "img/kenny-smiles.jpg");
 const FONT_REGULAR_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
 const FONT_BOLD_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
-const TEMPLATE_VERSION = "2026-03-21-v2";
+/**
+ * Bump this value whenever the rendering logic or visual design changes in a
+ * way that should invalidate the cached images. The manifest stores this value
+ * together with per-item hashes.
+ */
+const TEMPLATE_VERSION = "2026-03-22-v13";
 const CONCURRENCY = 4;
 
 type ContentKind = "blog" | "events";
 
+/**
+ * Minimal frontmatter representation used by this script.
+ *
+ * We intentionally keep parsing lightweight instead of pulling in a full YAML
+ * parser because the project's frontmatter structure is simple and predictable.
+ */
 interface Frontmatter {
   [key: string]: string | string[] | undefined;
 }
 
+/**
+ * Describes where the frontmatter block lives inside the original source file.
+ *
+ * This lets us replace only the frontmatter section while preserving the rest
+ * of the file content exactly as it was.
+ */
 interface FrontmatterBlock {
   body: string;
   bodyStart: number;
   bodyEnd: number;
 }
 
+/**
+ * Normalized content data used by the generator. The raw markdown file is
+ * converted into this shape before any rendering starts.
+ */
 interface ContentItem {
   filePath: string;
   kind: ContentKind;
@@ -56,25 +91,49 @@ interface ContentItem {
   location?: string;
   country?: string;
   event?: string;
-  image?: string;
 }
 
+/**
+ * Small cache manifest written next to the generated images.
+ *
+ * Each slug maps to a content hash. If both the per-item hash and the template
+ * version match, we can safely reuse the existing image file.
+ */
 interface SocialCardManifest {
   templateVersion: string;
   items: Record<string, string>;
 }
 
+/**
+ * Preloaded binary assets needed during rendering.
+ */
 interface SocialCardAssets {
   logoDataUri: string;
   fonts: Array<{ name: string; data: Buffer; weight: 400 | 700; style: "normal" }>;
   baseTemplate: Buffer;
 }
 
+/**
+ * Result of trying to ensure a markdown file points at its generated image.
+ *
+ * `custom-image` means the file already defines a different image and should be
+ * left alone. That is the escape hatch for manual overrides.
+ */
 interface FrontmatterUpdateResult {
   content: string;
   status: "inserted" | "unchanged" | "custom-image";
 }
 
+/**
+ * Parses the top frontmatter block into a simple key/value object.
+ *
+ * The parser supports:
+ * - scalar values
+ * - inline arrays like `[a, b, c]`
+ * - basic YAML list syntax using leading `-`
+ *
+ * This is intentionally a narrow parser tailored to the repository's content.
+ */
 function parseFrontmatter(content: string): Frontmatter {
   const block = getFrontmatterBlock(content);
   const lines = block.body.split("\n");
@@ -110,6 +169,9 @@ function parseFrontmatter(content: string): Frontmatter {
   return frontmatter;
 }
 
+/**
+ * Parses one frontmatter value from its textual representation.
+ */
 function parseFrontmatterValue(rawValue: string): string | string[] {
   const trimmed = rawValue.trim();
 
@@ -125,10 +187,19 @@ function parseFrontmatterValue(rawValue: string): string | string[] {
   return stripWrappingQuotes(trimmed);
 }
 
+/**
+ * Removes one layer of wrapping single or double quotes from a value.
+ */
 function stripWrappingQuotes(value: string): string {
   return value.replace(/^['"]|['"]$/gu, "");
 }
 
+/**
+ * Extracts the first frontmatter block from the beginning of a file.
+ *
+ * The returned indices point to the frontmatter body only, not the surrounding
+ * `---` delimiters.
+ */
 function getFrontmatterBlock(content: string): FrontmatterBlock {
   const match = content.match(/^---\n([\s\S]*?)\n---/u);
   if (!match || match.index !== 0) {
@@ -142,6 +213,9 @@ function getFrontmatterBlock(content: string): FrontmatterBlock {
   };
 }
 
+/**
+ * Recursively discovers all markdown and MDX files below a directory.
+ */
 async function getAllMarkdownFiles(dirPath: string): Promise<string[]> {
   const entries = await fs.readdir(dirPath, { withFileTypes: true });
   const nested = await Promise.all(
@@ -162,6 +236,14 @@ async function getAllMarkdownFiles(dirPath: string): Promise<string[]> {
   return nested.flat().sort();
 }
 
+/**
+ * Resolves the publication date for one content item.
+ *
+ * Priority:
+ * 1. explicit `date` in frontmatter
+ * 2. date prefix in the file name
+ * 3. date prefix in the parent directory name
+ */
 function deriveDate(filePath: string, frontmatter: Frontmatter): string {
   const explicitDate = frontmatter.date;
   if (typeof explicitDate === "string" && explicitDate) {
@@ -181,6 +263,14 @@ function deriveDate(filePath: string, frontmatter: Frontmatter): string {
   );
 }
 
+/**
+ * Resolves the slug for one content item.
+ *
+ * Priority:
+ * 1. explicit `slug` in frontmatter
+ * 2. file name without extension
+ * 3. parent folder name for `index.md` / `index.mdx`
+ */
 function deriveSlug(filePath: string, frontmatter: Frontmatter): string {
   const explicitSlug = frontmatter.slug;
   if (typeof explicitSlug === "string" && explicitSlug) {
@@ -195,16 +285,26 @@ function deriveSlug(filePath: string, frontmatter: Frontmatter): string {
   return path.basename(path.dirname(filePath));
 }
 
+/**
+ * Reads one scalar string field from the parsed frontmatter object.
+ */
 function getStringField(frontmatter: Frontmatter, key: string): string | undefined {
   const value = frontmatter[key];
   return typeof value === "string" ? value : undefined;
 }
 
+/**
+ * Reads one string-array field from the parsed frontmatter object.
+ */
 function getStringArrayField(frontmatter: Frontmatter, key: string): string[] {
   const value = frontmatter[key];
   return Array.isArray(value) ? value.filter((entry) => typeof entry === "string") : [];
 }
 
+/**
+ * Converts all markdown files below a content root into normalized `ContentItem`
+ * objects.
+ */
 async function discoverContent(dirPath: string, kind: ContentKind): Promise<ContentItem[]> {
   const files = await getAllMarkdownFiles(dirPath);
 
@@ -227,20 +327,30 @@ async function discoverContent(dirPath: string, kind: ContentKind): Promise<Cont
         location: getStringField(frontmatter, "location"),
         country: getStringField(frontmatter, "country"),
         event: getStringField(frontmatter, "event"),
-        image: getStringField(frontmatter, "image"),
       };
     })
   );
 }
 
+/**
+ * Converts a content slug into a file-system-safe PNG file name.
+ */
 function slugToFileName(slug: string): string {
   return slug.replace(/^\/+|\/+$/gu, "").replace(/\//gu, "-");
 }
 
+/**
+ * Returns the public site path used in frontmatter and final HTML metadata.
+ */
 function getManagedImagePath(slug: string): string {
   return `/img/social-cards/${slugToFileName(slug)}.png`;
 }
 
+/**
+ * Calculates a stable content hash for one card input.
+ *
+ * If any of these values change, the corresponding image must be regenerated.
+ */
 function hashItem(item: ContentItem): string {
   return crypto
     .createHash("sha256")
@@ -264,6 +374,9 @@ function hashItem(item: ContentItem): string {
     .digest("hex");
 }
 
+/**
+ * Formats the card date in the short English style used by the design.
+ */
 function formatDate(dateValue: string): string {
   const date = new Date(`${dateValue}T00:00:00Z`);
   return new Intl.DateTimeFormat("en-US", {
@@ -274,6 +387,9 @@ function formatDate(dateValue: string): string {
   }).format(date);
 }
 
+/**
+ * Shortens long supporting strings such as conference names.
+ */
 function truncateText(value: string, maxLength: number): string {
   if (value.length <= maxLength) {
     return value;
@@ -282,16 +398,23 @@ function truncateText(value: string, maxLength: number): string {
   return `${value.slice(0, maxLength - 1).trimEnd()}\u2026`;
 }
 
+/**
+ * Turns frontmatter tags like `cloud-native` into nicer card labels.
+ */
 function formatTag(tag: string): string {
   return tag.replace(/-/gu, " ");
 }
 
+/**
+ * Maps normalized content into the text model expected by the visual template.
+ */
 function buildTemplateModel(item: ContentItem, assets: SocialCardAssets): SocialCardTemplateModel {
   const title = item.socialTitle?.trim() || item.title;
   const detailLabel = formatDate(item.date);
 
   if (item.kind === "blog") {
     return {
+      contentKind: "blog",
       categoryLabel: "Blog Post",
       detailLabel,
       title,
@@ -310,6 +433,7 @@ function buildTemplateModel(item: ContentItem, assets: SocialCardAssets): Social
     .slice(0, 3);
 
   return {
+    contentKind: "event",
     categoryLabel: item.type ?? "Event",
     detailLabel,
     title,
@@ -320,6 +444,12 @@ function buildTemplateModel(item: ContentItem, assets: SocialCardAssets): Social
   };
 }
 
+/**
+ * Loads all static assets needed for rendering.
+ *
+ * Fonts are loaded eagerly because Satori requires explicit font data instead
+ * of reading system fonts by itself.
+ */
 async function loadAssets(): Promise<SocialCardAssets> {
   const [logo, regularFont, boldFont, baseTemplate] = await Promise.all([
     fs.readFile(LOGO_PATH, "utf8"),
@@ -338,6 +468,13 @@ async function loadAssets(): Promise<SocialCardAssets> {
   };
 }
 
+/**
+ * Builds the shared image background used for all cards.
+ *
+ * The text overlay is rendered separately. This split keeps design work
+ * manageable: background composition lives here, dynamic text layout lives in
+ * the React template.
+ */
 async function createBaseTemplate(): Promise<Buffer> {
   const backgroundSvg = `
     <svg width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
@@ -385,7 +522,6 @@ async function createBaseTemplate(): Promise<Buffer> {
       <rect x="720" y="0" width="480" height="${CARD_HEIGHT}" fill="url(#photoShade)" />
       <rect x="720" y="0" width="480" height="${CARD_HEIGHT}" fill="url(#photoTint)" />
       <circle cx="1125" cy="92" r="118" fill="rgba(53, 216, 208, 0.16)" />
-      <circle cx="1024" cy="552" r="138" fill="rgba(80, 132, 255, 0.16)" />
     </svg>
   `;
 
@@ -417,6 +553,10 @@ async function createBaseTemplate(): Promise<Buffer> {
     .toBuffer();
 }
 
+/**
+ * Renders the React overlay to SVG via Satori and then converts it to a PNG
+ * buffer so Sharp can composite it.
+ */
 async function renderOverlay(
   model: SocialCardTemplateModel,
   assets: SocialCardAssets
@@ -430,8 +570,13 @@ async function renderOverlay(
   return sharp(Buffer.from(svg)).png().toBuffer();
 }
 
+/**
+ * Generates the fallback site-wide social card used on pages that do not have
+ * their own dedicated card.
+ */
 async function generateDefaultSiteCard(assets: SocialCardAssets): Promise<void> {
   const model: SocialCardTemplateModel = {
+    contentKind: "blog",
     categoryLabel: "Kenny Codes",
     detailLabel: "AI, Cloud-Native, and .NET",
     title: "Distributed Systems, Software Architecture, and Guided Coding",
@@ -450,10 +595,21 @@ async function generateDefaultSiteCard(assets: SocialCardAssets): Promise<void> 
   await fs.writeFile(DEFAULT_SOCIAL_CARD_PATH, image);
 }
 
+/**
+ * Normalizes the raw frontmatter value of an `image` field for comparisons.
+ */
 function normalizeImageValue(imageValue: string): string {
   return stripWrappingQuotes(imageValue.trim());
 }
 
+/**
+ * Ensures the markdown frontmatter points at the generated social card.
+ *
+ * Important behavior:
+ * - if the file already uses our managed path, we do nothing
+ * - if the file uses a different image, we treat it as a custom override
+ * - otherwise we insert the generated image path into the frontmatter
+ */
 function updateFrontmatterImage(content: string, managedImagePath: string): FrontmatterUpdateResult {
   const block = getFrontmatterBlock(content);
   const lines = block.body.split("\n");
@@ -492,6 +648,10 @@ function updateFrontmatterImage(content: string, managedImagePath: string): Fron
   };
 }
 
+/**
+ * Reads the cache manifest if it exists. Missing manifest is treated as "empty
+ * cache".
+ */
 async function loadManifest(): Promise<SocialCardManifest> {
   try {
     const raw = await fs.readFile(MANIFEST_PATH, "utf8");
@@ -512,6 +672,12 @@ async function loadManifest(): Promise<SocialCardManifest> {
   }
 }
 
+/**
+ * Executes async work with a simple concurrency limit.
+ *
+ * We use a small worker pool here to avoid spawning too many simultaneous Sharp
+ * jobs while still keeping the overall run time low.
+ */
 async function runWithConcurrency<T>(
   values: T[],
   limit: number,
@@ -532,6 +698,12 @@ async function runWithConcurrency<T>(
   await Promise.all(running);
 }
 
+/**
+ * Main entry point.
+ *
+ * This function ties together discovery, cache lookup, image generation,
+ * frontmatter mutation, cleanup of stale files, and manifest writing.
+ */
 async function main(): Promise<void> {
   const startTime = performance.now();
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
