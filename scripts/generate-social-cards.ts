@@ -39,8 +39,14 @@ const MANIFEST_PATH = path.join(OUTPUT_DIR, "manifest.json");
 const DEFAULT_SOCIAL_CARD_PATH = path.join(STATIC_DIR, "img/kenny-codes-social-card.png");
 const LOGO_PATH = path.join(STATIC_DIR, "img/logo-dark.svg");
 const PHOTO_PATH = path.join(STATIC_DIR, "img/kenny-smiles.jpg");
-const FONT_REGULAR_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
-const FONT_BOLD_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
+/**
+ * The social-card renderer uses repo-local font files so builds do not depend
+ * on OS-specific system font locations. The files are checked into
+ * `scripts/assets/fonts/` together with their upstream license text.
+ */
+const FONT_ASSETS_DIR = path.join(__dirname, "assets/fonts");
+const FONT_REGULAR_PATH = path.join(FONT_ASSETS_DIR, "DejaVuSans.ttf");
+const FONT_BOLD_PATH = path.join(FONT_ASSETS_DIR, "DejaVuSans-Bold.ttf");
 /**
  * Bump this value whenever the rendering logic or visual design changes in a
  * way that should invalidate the cached images. The manifest stores this value
@@ -122,6 +128,23 @@ interface SocialCardAssets {
 interface FrontmatterUpdateResult {
   content: string;
   status: "inserted" | "unchanged" | "custom-image";
+}
+
+/**
+ * Reads a required file and throws a clearer error message if the file is
+ * missing. This is especially useful for vendored font assets because missing
+ * fonts would otherwise fail with a low-level ENOENT error.
+ */
+async function readRequiredFile(filePath: string, purpose: string): Promise<Buffer> {
+  try {
+    return await fs.readFile(filePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new Error(`Missing ${purpose} at ${filePath}.`);
+    }
+
+    throw error;
+  }
 }
 
 /**
@@ -453,8 +476,8 @@ function buildTemplateModel(item: ContentItem, assets: SocialCardAssets): Social
 async function loadAssets(): Promise<SocialCardAssets> {
   const [logo, regularFont, boldFont, baseTemplate] = await Promise.all([
     fs.readFile(LOGO_PATH, "utf8"),
-    fs.readFile(FONT_REGULAR_PATH),
-    fs.readFile(FONT_BOLD_PATH),
+    readRequiredFile(FONT_REGULAR_PATH, "regular social-card font"),
+    readRequiredFile(FONT_BOLD_PATH, "bold social-card font"),
     createBaseTemplate(),
   ]);
 
