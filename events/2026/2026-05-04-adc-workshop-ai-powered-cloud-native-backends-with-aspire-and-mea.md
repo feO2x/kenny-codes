@@ -25,3 +25,5 @@ In this workshop, we use .NET Aspire to host multiple services, including a YARP
 We will cover both prompt design and securing such backends using the BFF (Backend-for-Frontend) pattern.
 
 For the workshop, a computer with the .NET 10 SDK and Docker or Podman is required.
+
+[More infos and tickets here](https://adc.ms/26/Workshops)
