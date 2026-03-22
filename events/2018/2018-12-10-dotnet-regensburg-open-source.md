@@ -1,5 +1,6 @@
 ---
 title: "Writing Open Source Software in .NET - With BenchmarkDotNet, Roslyn Source Generators and MSBuild Multitargeting"
+image: /img/social-cards/2018-12-10-dotnet-regensburg-open-source.png
 date: 2018-12-10
 type: Talk
 duration: 2h

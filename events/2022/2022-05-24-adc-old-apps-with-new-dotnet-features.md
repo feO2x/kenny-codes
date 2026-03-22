@@ -1,5 +1,6 @@
 ---
 title: "Old Apps with New .NET Features"
+image: /img/social-cards/2022-05-24-adc-old-apps-with-new-dotnet-features.png
 date: 2022-05-24
 type: Talk
 duration: 1h

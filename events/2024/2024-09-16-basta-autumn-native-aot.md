@@ -1,5 +1,6 @@
 ---
 title: ".NET Native AOT – Ready for My Web APIs?"
+image: /img/social-cards/2024-09-16-basta-autumn-native-aot.png
 date: 2024-09-16
 type: Talk
 duration: 1h

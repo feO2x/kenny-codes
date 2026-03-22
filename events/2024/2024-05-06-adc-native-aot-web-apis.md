@@ -1,5 +1,6 @@
 ---
 title: "Web APIs with ASP.NET Core Native AOT"
+image: /img/social-cards/2024-05-06-adc-native-aot-web-apis.png
 date: 2024-05-06
 type: Talk
 duration: 1h

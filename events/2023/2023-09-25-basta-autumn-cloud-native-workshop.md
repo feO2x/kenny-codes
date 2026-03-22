@@ -1,5 +1,6 @@
 ---
 title: "Cloud-Native in Practice: Modern End-to-End Architectures"
+image: /img/social-cards/2023-09-25-basta-autumn-cloud-native-workshop.png
 date: 2023-09-25
 type: Workshop
 duration: 8h

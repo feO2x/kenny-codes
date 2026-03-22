@@ -1,5 +1,6 @@
 ---
 title: "Scalable .NET Apps with async await"
+image: /img/social-cards/2024-05-06-adc-async-await.png
 date: 2024-05-06
 type: Talk
 duration: 1h

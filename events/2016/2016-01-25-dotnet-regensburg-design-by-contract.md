@@ -1,5 +1,6 @@
 ---
 title: "Design by Contract"
+image: /img/social-cards/2016-01-25-dotnet-regensburg-design-by-contract.png
 date: 2016-01-25
 type: Talk
 duration: 2h

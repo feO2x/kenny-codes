@@ -1,5 +1,6 @@
 ---
 title: "Designing ASP.NET Core Applications with Dependency Injection in Mind"
+image: /img/social-cards/2017-09-19-adc-dependency-injection-aspnetcore.png
 date: 2017-09-19
 type: Talk
 duration: 1h

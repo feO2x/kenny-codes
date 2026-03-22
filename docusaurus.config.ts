@@ -105,7 +105,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: "img/kenny-codes-social-card.jpg",
+    image: "img/kenny-codes-social-card.png",
     colorMode: {
       defaultMode: "dark",
       respectPrefersColorScheme: false,
@@ -159,11 +159,11 @@ const config: Config = {
       },
       {
         name: "og:image:width",
-        content: "800",
+        content: "1200",
       },
       {
         name: "og:image:height",
-        content: "418",
+        content: "630",
       },
       {
         name: "og:image:alt",

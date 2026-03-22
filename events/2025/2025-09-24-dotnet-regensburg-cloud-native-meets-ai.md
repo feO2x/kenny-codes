@@ -1,5 +1,6 @@
 ---
 title: "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI"
+image: /img/social-cards/2025-09-24-dotnet-regensburg-cloud-native-meets-ai.png
 date: 2025-09-24
 type: Talk
 duration: 2h

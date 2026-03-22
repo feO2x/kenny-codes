@@ -1,5 +1,6 @@
 ---
 title: "Automated Testing in TDD with Visual Studio"
+image: /img/social-cards/2015-01-26-dotnet-regensburg-automated-testing.png
 date: 2015-01-26
 type: Talk
 duration: 2h

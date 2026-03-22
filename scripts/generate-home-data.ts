@@ -77,6 +77,8 @@ function parseFrontmatter(content: string): Frontmatter {
 function getExcerpt(content: string): string {
   const parts = content.split("<!-- truncate -->");
   let excerpt = parts[0].replace(/^---\n[\s\S]*?\n---/, "").trim();
+  // Ignore top-level MDX imports/exports so generated previews stay content-focused.
+  excerpt = excerpt.replace(/^(?:(?:import|export)\s.+;\n)+/u, "").trim();
   // Remove markdown headings for cleaner excerpt
   excerpt = excerpt.replace(/#+\s/g, "");
   // Remove links [text](url) -> text

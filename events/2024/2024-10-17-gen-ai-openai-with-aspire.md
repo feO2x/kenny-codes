@@ -1,5 +1,6 @@
 ---
 title: "Integrate Multimodal Language Models into .NET Backends with OpenAI .NET API and .NET Aspire"
+image: /img/social-cards/2024-10-17-gen-ai-openai-with-aspire.png
 date: 2024-10-17
 type: Talk
 duration: 1h

@@ -1,5 +1,6 @@
 ---
 title: ".NET Async Await - In Depth"
+image: /img/social-cards/2023-04-07-coding-zone-async-await-in-depth.png
 date: 2023-04-07
 type: Talk
 duration: 5h

@@ -1,5 +1,6 @@
 ---
 title: "Introduction to git - and Everything Else about Version Control"
+image: /img/social-cards/2018-01-16-dotnet-regensburg-introduction-to-git.png
 date: 2018-01-16
 type: Talk
 duration: 3h

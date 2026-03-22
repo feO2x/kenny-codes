@@ -1,5 +1,6 @@
 ---
 title: ".NET Native AOT – Data Access without EF Core, Using Humble Objects Instead"
+image: /img/social-cards/2024-03-20-webinar-native-aot-data-access.png
 date: 2024-03-20
 type: Webinar
 duration: 1h

@@ -1,5 +1,6 @@
 ---
 title: "Cloud-Native for .NET developers: Modern End-to-End Architectures"
+image: /img/social-cards/2023-06-26-dwx-cloud-native-workshop.png
 date: 2023-06-26
 type: Workshop
 duration: 8h

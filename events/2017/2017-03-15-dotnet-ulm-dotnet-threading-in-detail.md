@@ -1,5 +1,6 @@
 ---
 title: ".NET Threading in Detail"
+image: /img/social-cards/2017-03-15-dotnet-ulm-dotnet-threading-in-detail.png
 date: 2017-03-15
 type: Talk
 duration: 2h

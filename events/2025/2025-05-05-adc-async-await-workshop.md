@@ -1,5 +1,6 @@
 ---
 title: "How to async – async await Internals and Expert Knowledge for Scalable .NET Apps"
+image: /img/social-cards/2025-05-05-adc-async-await-workshop.png
 date: 2025-05-05
 type: Workshop
 duration: 8h

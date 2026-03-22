@@ -1,6 +1,7 @@
 ---
 slug: 2015-06-05-watch-my-new-video-series-on-test-driven-development
 title: Watch My New Video Series on Test-Driven Development
+image: /img/social-cards/2015-06-05-watch-my-new-video-series-on-test-driven-development.png
 authors: [feO2x]
 tags: [csharp, dotnet, tdd, automated-testing]
 ---

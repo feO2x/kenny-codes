@@ -1,6 +1,7 @@
 ---
 slug: 2015-10-07-more-on-design-by-contract-class-invariants
 title: More on Design by Contract – Class Invariants
+image: /img/social-cards/2015-10-07-more-on-design-by-contract-class-invariants.png
 authors: [feO2x]
 tags: [csharp, dotnet, design-by-contract, object-oriented-programming]
 ---
