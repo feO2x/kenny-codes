@@ -1,6 +1,8 @@
 {
   "templateVersion": "2026-03-22-v13",
   "items": {
+    "2014-02-24-dotnet-regensburg-fast-and-fluent-ui-in-wpf": "9684ac1111504bb6ccb3cb59f9214c2bdb096906c98bf6bad4cdb4c88e8e86eb",
+    "2015-01-26-dotnet-regensburg-automated-testing": "937f9db4e5a18d9707c06353114eb89385644c732add35f5e7aa305c46442cb8",
     "2015-06-05-watch-my-new-video-series-on-test-driven-development": "6b3d79aafb29e1da7cd3abcb809ff5372ae7b8823f2e4099bb28ca4a5fa7f64b",
     "2015-07-04-about-guard-clauses-automated-tests-and-design-by-contract": "301307ebda54120d465f0a653eb9ae093fbe97aca25d560b269c78580513e91c",
     "2015-08-29-my-new-video-series-on-the-dependency-inversion-principle-is-online": "f601a53c073c96bfa7c8533f99e7374ddd05a06caae86fd15bbeb73410913495",
@@ -9,11 +11,8 @@
     "2015-10-07-more-on-design-by-contract-class-invariants": "5030bf645efa2547283e871b1c811d7f4ecbea04843283ff46af11b8e77bb0d7",
     "2015-12-03-use-segoe-mdl2-assets-for-windows-10-apps": "750d0500af01df6da5c7b3106fb604341d07648193e3d61ca539057d33baca65",
     "2015-12-29-stronger-typed-resource-dictionaries-in-xaml": "25a78ca50d863ac0d72dce6aafa19300798e1bc73c5ffe57fc4ce3e5ce4d070e",
-    "2016-05-07-assertions-and-inheritance": "26e101bca3b1990c02a64f5d70bf5fe55399df4fd913711749174c41902a5ab6",
-    "2014-02-24-dotnet-regensburg-fast-and-fluent-ui-in-wpf": "9684ac1111504bb6ccb3cb59f9214c2bdb096906c98bf6bad4cdb4c88e8e86eb",
-    "2026-02-28-guided-coding": "b715e5e3b5ef746c62b04fdec23d74466d2342d4e77573999f21b88fbc515c97",
-    "2015-01-26-dotnet-regensburg-automated-testing": "937f9db4e5a18d9707c06353114eb89385644c732add35f5e7aa305c46442cb8",
     "2016-01-25-dotnet-regensburg-design-by-contract": "5f2a26b40017088034d22775da3a7bd42a396c524326a8211f8d34c172523db9",
+    "2016-05-07-assertions-and-inheritance": "26e101bca3b1990c02a64f5d70bf5fe55399df4fd913711749174c41902a5ab6",
     "2016-05-30-dotnet-regensburg-light-guardclauses": "500c4568eef833e6c8f3b0414367d337450a656a88f11ed632b21216498cfcd0",
     "2017-01-30-dotnet-regensburg-dotnet-threading-in-detail": "efd398ac2279458c3ec3d6e94de5d0a7ecb4c3f8947d5a2cdc06aab7a27f2066",
     "2017-03-15-dotnet-ulm-dotnet-threading-in-detail": "f6f3a73021461c6c0569c0a1fc419062fb7b5a7b70da680cb75512b0e8b4aa98",
@@ -56,6 +55,7 @@
     "2025-09-24-dotnet-regensburg-cloud-native-meets-ai": "33ea039511c347294d0e87013f99db8961978507e0e22a4f3728be4741aae90c",
     "2025-09-30-dcn-cloud-native-meets-ai": "76333eff50b7d04e7fb87f6bbf0171281a2ed98db1d3784b0d0a5b9f13bd747f",
     "2026-02-26-guided-coding-in-java": "a55c32ba863c7574ed367fc268a3d4f79fe3912fb84494d6de0603be4cab8c31",
+    "2026-02-28-guided-coding": "b715e5e3b5ef746c62b04fdec23d74466d2342d4e77573999f21b88fbc515c97",
     "2026-04-14-dcn-forget-vibe-coding-use-guided-coding": "7fba949160c1e2c017a24a95207e095e774efd384c24887b7627e54fdcd584c7",
     "2026-05-04-adc-workshop-ai-powered-cloud-native-backends-with-aspire-and-mea": "89fbc7278ce1e52ee7f4fcc3aa0bbbec5b18e9a5d03a49d9719b26ac8c27911a",
     "2026-05-05-adc-forget-vibe-coding-use-guided-coding": "dd9f500feef591b159c04caa7df76910431f0068307ab8d066f24289e3553cac"

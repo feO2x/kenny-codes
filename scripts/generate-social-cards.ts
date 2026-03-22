@@ -788,7 +788,16 @@ async function main(): Promise<void> {
     }
   }
 
-  await fs.writeFile(MANIFEST_PATH, `${JSON.stringify(nextManifest, null, 2)}\n`);
+  const sortedManifest: SocialCardManifest = {
+    templateVersion: nextManifest.templateVersion,
+    items: Object.fromEntries(
+      Object.keys(nextManifest.items)
+        .sort((left, right) => left.localeCompare(right))
+        .map((slug) => [slug, nextManifest.items[slug]])
+    ),
+  };
+
+  await fs.writeFile(MANIFEST_PATH, `${JSON.stringify(sortedManifest, null, 2)}\n`);
   await generateDefaultSiteCard(assets);
 
   const elapsedMs = Math.round(performance.now() - startTime);
