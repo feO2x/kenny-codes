@@ -15,7 +15,11 @@ In my opinion, the term "Spec-Driven Development" is misleading in the context o
 
 SDD has a rich history spanning several decades and includes formal methods, model-driven approaches, and specialized tooling. Especially when you want to bring less-experienced software developers up to speed with AI coding agents, I suggest you take a look at [Guided Coding](/docs/guided-coding/) instead of simply pointing to SDD and tools like GitHub Spec Kit and Amazon Kiro.
 
-## Level 1: Informal and Structured Specification
+## Different Types of Specification
+
+To make that distinction clearer, it helps to separate three different levels of specification. They are related, but they are not interchangeable, and they offer very different guarantees.
+
+### Level 1: Informal and Structured Specification
 
 As of writing this article in March 2026, I have more than 16 years of experience in software development and have never worked in a project where we did not use natural language to describe how we want to build our software. In simple cases, the text could be informal, but most of the time we used a given structure like use-case driven methods, structural analysis and UML for diagrams.
 
@@ -25,9 +29,9 @@ The most important thing: they can easily be used to communicate with non-techni
 
 I still think this is the most viable approach when it comes to specifications for most software teams. You need a moderate amount of knowledge to succeed in this category.
 
-In my opinion, this is also the level most AI-oriented markdown workflows live today. They are structured, useful, and often much better than jumping straight into implementation. But that does not automatically make them part of the stronger historical tradition associated with SDD.
+In my opinion, this is also the level where most AI-oriented markdown workflows live today. They are structured, useful, and often much better than jumping straight into implementation. But that does not automatically make them part of the stronger historical tradition associated with SDD.
 
-## Level 2: Formal Specification
+### Level 2: Formal Specification
 
 Consider that you work on a critical software project where you need to be certain that no bug is delivered (e.g., software for nuclear plants, controller software for medical hardware, avionics). This is the territory most people historically associate with specification-driven approaches in the stronger sense: the specification is not just descriptive text, but a formal artifact you can reason about and verify. There are dedicated toolsets for this, for example:
 
@@ -53,7 +57,7 @@ check NoSharedSession
 
 This is not prose about the system. It is a formal model. The Alloy Analyzer can search for counterexamples and tell you whether your assertion holds within a given scope.
 
-## Level 3: Executable Specifications and Model-Driven Architecture
+### Level 3: Executable Specifications and Model-Driven Architecture
 
 The most ambitious tier, where specifications don't just describe or constrain — they generate:
 
@@ -88,11 +92,11 @@ Spec Kit defines a phased process: **Constitution → Specify → Plan → Tasks
  
 Similarly, `AGENTS.md` and `CLAUDE.md` files provide AI agents with project conventions, build instructions, testing commands, and coding patterns — also in natural-language markdown.
 
-The resulting markdown files are useful, but they are neither formal specifications in the Level 2 sense nor executable, machine-checked specifications in the Level 3 sense. You cannot run a Spec Kit spec to see if the described behavior is what you intended before any code exists. Alloy lets you explore counterexamples to your design before you write a single line of implementation. An executable model can be simulated. A markdown spec is human-readable and guides LLMs.
+The resulting markdown files are useful, but they are neither formal specifications in the Level 2 sense nor executable, machine-checked specifications in the Level 3 sense. You cannot run a Spec Kit spec to see if the described behavior is what you intended before any code exists. Alloy lets you explore counterexamples to your design before you write a single line of implementation. An executable model can be simulated. A markdown spec is primarily human-readable: humans can discuss and reason about it. It also guides and steers LLMs during implementation.
 
-Furthermore, the spec can drift from the code just as easily as any PRD. The `/analyze` command performs heuristic consistency checks, but these are AI-driven pattern matching, not formal verification or model execution.
+The spec can also drift from the code just as easily as any PRD. The `/analyze` command performs heuristic consistency checks, but these are AI-driven pattern matching, not formal verification or model execution.
 
-That does not make Spec Kit or Kiro bad tools. It just means the term matters. If you tell less-experienced developers that they are doing "SDD," you implicitly connect them to a much older body of ideas, practices, and tooling than the workflow actually provides. That makes it harder, not easier, to understand what they are really doing: structured planning for agent-assisted implementation.
+That does not make Spec Kit or Kiro bad tools. If you tell less-experienced developers that they are doing "SDD," you connect them to a much older body of ideas, practices, and tooling than the workflow actually provides. What they are really doing is structured planning for agent-assisted implementation.
 
 ## The Elephant in the Room
 
@@ -100,7 +104,7 @@ What we as a community actually have to decide on is this: **Is agentic coding j
 
 To be fair, this trade-off isn't purely a weakness. Formal methods give you *guarantees* at the cost of *expressiveness* — you can only specify what the formal language can express. LLMs give you *expressiveness* at the cost of *guarantees* — you can describe almost anything, but you can't prove the output is correct. The interesting pragmatic question is whether automated tests can serve as the verification layer that formal specs traditionally provided. Spec Kit's implementation phase does produce tests, and that's not nothing — but it's a fundamentally different kind of assurance than mathematical proof. The stakes determine whether that's sufficient: for avionics software, absolutely not - but it probably is for your enterprise app.
 
-This is exactly why I think the naming debate matters. "Spec-Driven Development" sounds like a continuation of a tradition where the specification itself carries strong semantic weight. In agentic coding workflows, the markdown file mostly plays a coordination role: it helps humans and LLMs decompose work, communicate intent, and sequence implementation.
+That difference is exactly why the naming debate matters. "Spec-Driven Development" sounds like a continuation of a tradition where the specification itself carries strong semantic weight. In agentic coding workflows, the markdown file mostly coordinates decomposition, communication, and sequencing.
 
 ## Focus on Code, Use Plans as Scaffolding
 
@@ -108,8 +112,6 @@ Historically, stronger forms of SDD treated the specification or model as the pr
 
 Here's what I think these tools actually get right, even if the terminology is wrong: they force *decomposition and sequencing*. Breaking a vague idea into a constitution, a spec, a plan, and discrete tasks is exactly the skill that less-experienced developers struggle with most. The spec itself isn't the valuable artifact — the *process of creating it* is.
 
-That is also why I find [Guided Coding](/docs/guided-coding/) to be a better framing for less-experienced developers. It is much clearer about what is happening: you are using plans, rules, and iterative feedback to guide implementation work done by humans and coding agents. You are not suddenly participating in the world of formal methods, executable models, or model-driven architecture.
+That is why I find [Guided Coding](/docs/guided-coding/) to be a better framing for less-experienced developers. It is clearer about what is happening: you are using plans, rules, and iterative feedback to guide implementation work done by humans and coding agents. The markdown spec is scaffolding, not the final source of truth. The code is.
 
-The spec is scaffolding, not design or architecture. It will drift from the code. It cannot be executed, simulated, or formally verified. The code is the only artifact that tells you the truth about what your system does.
-
-SDD has a long history spanning decades. In my opinion, it is a bad idea to tell your developers to "do SDD" and then hand them a markdown workflow plus an LLM. [Guided Coding](/docs/guided-coding/) is more focused and leads you into the pit of success by focusing not only on the plan, but even more on the code. This takes time, but with the help of AI you are still faster than without it.
+SDD has a long history spanning decades. In my opinion, it is a bad idea to tell your developers to "do SDD" and then hand them a markdown workflow plus an LLM. [Guided Coding](/docs/guided-coding/) is more focused and leads you into the pit of success by emphasizing the plan, but even more the code. This takes time, but with the help of AI you are still faster than without it.
