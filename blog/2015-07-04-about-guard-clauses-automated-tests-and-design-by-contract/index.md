@@ -13,7 +13,7 @@ I'm currently reading Bertrand Meyer's "Object-Oriented Software Construction" (
 Well, I was totally wrong. Not only are the topics Bertrand Meyer addresses in his book still relevant for OOP today, but more importantly he describes concepts that are not fully supported by popular object-oriented languages like C++, C#, or Java, although they are deemed necessary to achieve the main goals of software quality with OOP according to Meyer.
 One of these concepts is Design by Contract. And the best thing is that you probably apply it in your daily programming already, although not to such an extend as Meyer intends you to. So let's check what Design by Contract actually means.
 
-## TLDR;
+## TL;DR
 
 Design by Contract is an important concept to model and implement object-oriented software, with pre- and post-condition checks being the essential element to define the semantically correct behavior of a routine / method. The Eiffel programming language has built-in support for it, but we can introduce these checks to other languages like C# by using Guard Clauses and automated tests.
 

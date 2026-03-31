@@ -24,6 +24,7 @@ export interface ContentCardProps {
   children?: React.ReactNode; // allow passing custom footer or body if needed
   videoUrl?: string;
   isUpcoming?: boolean;
+  cancelled?: boolean;
 }
 
 export default function ContentCard({
@@ -40,6 +41,7 @@ export default function ContentCard({
   children,
   videoUrl,
   isUpcoming = false,
+  cancelled = false,
 }: ContentCardProps) {
 
   const renderTags = () => {
@@ -79,7 +81,8 @@ export default function ContentCard({
           {organizer && <span>💬 {organizer}</span>}
         </div>
         <div className={styles.badges}>
-          {isUpcoming && <span className={clsx('badge badge--info', styles.upcomingBadge)}>UPCOMING</span>}
+          {cancelled && isUpcoming && <span className={clsx('badge', styles.cancelledBadge)}>CANCELLED</span>}
+          {!cancelled && isUpcoming && <span className={clsx('badge badge--info', styles.upcomingBadge)}>UPCOMING</span>}
           {type && <span className={clsx('badge badge--secondary', styles.typeBadge)}>{type}</span>}
         </div>
       </div>

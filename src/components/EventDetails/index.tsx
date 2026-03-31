@@ -11,7 +11,7 @@ export default function EventDetails() {
   // Type the frontMatter with event-specific fields
   const eventFrontMatter = frontMatter as EventFrontMatter;
 
-  const { type, duration, language, location, country, event } = eventFrontMatter;
+  const { type, duration, language, location, country, event, cancelled } = eventFrontMatter;
 
   // Validate that event has required metadata
   if (!type && !duration && !language && !location && !country && !event) {
@@ -24,6 +24,11 @@ export default function EventDetails() {
 
   return (
     <div className={styles.eventDetails}>
+      {cancelled && (
+        <div className={styles.cancelledBanner}>
+          This event has been cancelled.
+        </div>
+      )}
       <div className={styles.eventDetailsGrid}>
         {event && (
           <div className={styles.eventDetailItem}>

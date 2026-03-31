@@ -22,6 +22,8 @@
   --kc-color-youtube-hover: #cc0000;
   --kc-color-upcoming: hsl(170, 100%, 40%);
   --kc-color-upcoming-text: hsl(0, 0%, 100%);
+  --kc-color-cancelled: hsl(0, 75%, 50%);
+  --kc-color-cancelled-text: hsl(0, 0%, 100%);
 
   /* Custom spacing and sizing */
   --kc-border-radius-card: 16px;
@@ -58,6 +60,8 @@
   --ifm-navbar-background-color: hsl(246, 100%, 5%);
   --kc-color-upcoming: hsl(170, 100%, 50%);
   --kc-color-upcoming-text: hsl(217, 33%, 17%);
+  --kc-color-cancelled: hsl(0, 75%, 50%);
+  --kc-color-cancelled-text: hsl(0, 0%, 100%);
 }
 
 /* Utility class for card gradient top border effect */

@@ -10,4 +10,5 @@ export interface EventFrontMatter {
   country?: string;
   event?: string;
   videoUrl?: string;
+  cancelled?: boolean;
 }

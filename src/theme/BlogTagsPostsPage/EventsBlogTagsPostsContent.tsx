@@ -18,6 +18,10 @@ type BlogListItem = EventsBlogTagsPostsContentProps['items'][number];
 export default function EventsBlogTagsPostsContent({items, tag}: EventsBlogTagsPostsContentProps) {
   const {upcomingEvents, pastEvents, pastEventsByYear, years} = groupEvents<BlogListItem>(items);
 
+  const cancelledUpcomingCount = upcomingEvents.filter(
+    item => (item.content.frontMatter as EventFrontMatter).cancelled
+  ).length;
+
   const title = `Events tagged with "${tag.label}"`;
 
   return (
@@ -27,8 +31,8 @@ export default function EventsBlogTagsPostsContent({items, tag}: EventsBlogTagsP
       <div className={styles.eventsContainer}>
         <h1 className={localStyles.pageTitle}>{title}</h1>
         <EventStats
-          totalEvents={items.length}
-          upcomingEvents={upcomingEvents.length}
+          totalEvents={upcomingEvents.length - cancelledUpcomingCount + pastEvents.length}
+          upcomingEvents={upcomingEvents.length - cancelledUpcomingCount}
           pastEvents={pastEvents.length}
         />
 
@@ -54,6 +58,7 @@ export default function EventsBlogTagsPostsContent({items, tag}: EventsBlogTagsP
                   tags={item.content.metadata.tags}
                   videoUrl={frontMatter.videoUrl}
                   isUpcoming={true}
+                  cancelled={frontMatter.cancelled}
                 />
               );
             })}

@@ -22,14 +22,18 @@ export default function EventsBlogListContent({
   const { upcomingEvents, pastEvents, pastEventsByYear, years } =
     groupEvents<BlogListItem>(items);
 
+  const cancelledUpcomingCount = upcomingEvents.filter(
+    item => (item.content.frontMatter as EventFrontMatter).cancelled
+  ).length;
+
   return (
     <Layout title="Events" description="Past and upcoming events">
       <HeaderWithImage title="Events" imageUrl="/img/events.jpg" />
 
       <div className={styles.eventsContainer}>
         <EventStats
-          totalEvents={items.length}
-          upcomingEvents={upcomingEvents.length}
+          totalEvents={upcomingEvents.length - cancelledUpcomingCount + pastEvents.length}
+          upcomingEvents={upcomingEvents.length - cancelledUpcomingCount}
           pastEvents={pastEvents.length}
         />
 
@@ -57,6 +61,7 @@ export default function EventsBlogListContent({
                     tags={item.content.metadata.tags}
                     videoUrl={frontMatter.videoUrl}
                     isUpcoming={true}
+                    cancelled={frontMatter.cancelled}
                   />
                 );
               })}
