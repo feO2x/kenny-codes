@@ -11,6 +11,7 @@ interface EventCardProps extends EventFrontMatter {
   tags?: Array<{ label: string; permalink: string }>;
   videoUrl?: string;
   isUpcoming?: boolean;
+  cancelled?: boolean;
 }
 
 const EventCard: React.FC<EventCardProps> = ({
@@ -27,6 +28,7 @@ const EventCard: React.FC<EventCardProps> = ({
   tags,
   videoUrl,
   isUpcoming,
+  cancelled,
 }) => {
 
   const getTypeDisplay = () => {
@@ -52,6 +54,7 @@ const EventCard: React.FC<EventCardProps> = ({
       organizer={event}
       videoUrl={videoUrl}
       isUpcoming={isUpcoming}
+      cancelled={cancelled}
     />
   );
 };

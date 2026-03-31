@@ -9,6 +9,7 @@ location: Regensburg
 country: Germany
 event: Advanced Developers Conference 2026
 tags: [AI, Cloud-Native, .NET, Aspire, Microsoft.Extensions.AI, LLM]
+cancelled: true
 slug: 2026-05-04-adc-workshop-ai-powered-cloud-native-backends-with-aspire-and-mea
 ---
 

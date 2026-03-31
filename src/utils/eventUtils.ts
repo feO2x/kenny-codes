@@ -30,6 +30,9 @@ export interface EventItem {
     metadata: {
       date: string;
     };
+    frontMatter?: {
+      cancelled?: boolean;
+    };
   };
 }
 
@@ -51,7 +54,9 @@ export function groupEvents<T extends EventItem>(items: ReadonlyArray<T>) {
   }));
 
   const upcomingProcessed = processedItems.filter(p => p.timestamp >= nowUtc);
-  const pastProcessed = processedItems.filter(p => p.timestamp < nowUtc);
+  const pastProcessed = processedItems
+    .filter(p => p.timestamp < nowUtc)
+    .filter(p => !p.item.content.frontMatter?.cancelled);
 
   // Sort upcoming earliest first, past most recent first
   upcomingProcessed.sort((a, b) => a.timestamp - b.timestamp);

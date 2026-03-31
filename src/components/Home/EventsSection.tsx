@@ -11,6 +11,15 @@ export default function EventsSection() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // Filter out cancelled past events, then take first 4
+  const visibleEvents = recentEvents
+    .filter((event) => {
+      const eventDate = new Date(event.date);
+      const isPast = eventDate < today;
+      return !(isPast && (event as any).cancelled);
+    })
+    .slice(0, 4);
+
   return (
     <section className={styles.section}>
       <div className="container">
@@ -18,7 +27,7 @@ export default function EventsSection() {
           Upcoming & Recent Events
         </Heading>
         <div className={styles.cardGrid}>
-          {recentEvents.map((event, idx) => {
+          {visibleEvents.map((event, idx) => {
             const eventDate = new Date(event.date);
             const isUpcoming = eventDate >= today;
             
@@ -38,6 +47,7 @@ export default function EventsSection() {
                 description={event.excerpt}
                 tags={event.tags?.map(tag => ({ label: tag, permalink: '' }))}
                 isUpcoming={isUpcoming}
+                cancelled={(event as any).cancelled}
               />
             );
           })}

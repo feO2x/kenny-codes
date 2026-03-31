@@ -6,16 +6,16 @@ Occasionally, events get cancelled after they've already been published on the w
 
 ## Acceptance Criteria
 
-- [ ] Events support a `cancelled: true` frontmatter field
-- [ ] On the events listing page (`/events`), a cancelled upcoming event shows a "CANCELLED" badge (red) instead of the "UPCOMING" badge (teal)
-- [ ] On the events listing page, cancelled events are excluded from the past events section once their date has passed
-- [ ] On tag-filtered listing pages (`/events/tags/[tag]`), the same cancelled logic applies (badge swap for upcoming, exclusion for past)
-- [ ] The `EventStats` counts exclude cancelled events (both from "Total Events" and from "Upcoming"/"Past Events")
-- [ ] On the event detail page, a prominent cancelled banner is shown above the event details grid when `cancelled: true`
-- [ ] On the home page, a cancelled upcoming event shows the "CANCELLED" badge
-- [ ] On the home page, a cancelled past event is filtered out at render time; `home-data.json` contains replacement events so 4 event cards are always displayed
-- [ ] The `generate-home-data.ts` script includes the `cancelled` field in its output and generates `4 + N` events where N is the number of cancelled events among the top 4
-- [ ] The workshop `2026-05-04-adc-workshop-ai-powered-cloud-native-backends-with-aspire-and-mea.md` has `cancelled: true` in its frontmatter
+- [x] Events support a `cancelled: true` frontmatter field
+- [x] On the events listing page (`/events`), a cancelled upcoming event shows a "CANCELLED" badge (red) instead of the "UPCOMING" badge (teal)
+- [x] On the events listing page, cancelled events are excluded from the past events section once their date has passed
+- [x] On tag-filtered listing pages (`/events/tags/[tag]`), the same cancelled logic applies (badge swap for upcoming, exclusion for past)
+- [x] The `EventStats` counts exclude cancelled events (both from "Total Events" and from "Upcoming"/"Past Events")
+- [x] On the event detail page, a prominent cancelled banner is shown above the event details grid when `cancelled: true`
+- [x] On the home page, a cancelled upcoming event shows the "CANCELLED" badge
+- [x] On the home page, a cancelled past event is filtered out at render time; `home-data.json` contains replacement events so 4 event cards are always displayed
+- [x] The `generate-home-data.ts` script includes the `cancelled` field in its output and generates `4 + N` events where N is the number of cancelled events among the top 4
+- [x] The workshop `2026-05-04-adc-workshop-ai-powered-cloud-native-backends-with-aspire-and-mea.md` has `cancelled: true` in its frontmatter
 
 ## Technical Details
 

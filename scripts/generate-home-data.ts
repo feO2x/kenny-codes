@@ -25,6 +25,7 @@ interface ContentItem {
   language?: string;
   country?: string;
   event?: string;
+  cancelled?: boolean;
 }
 
 interface HomeData {
@@ -160,15 +161,20 @@ function processContent(dir: string, type: string): ContentItem[] {
         language: data.language as string | undefined,
         country: data.country as string | undefined,
         event: data.event as string | undefined,
+        ...(data.cancelled === "true" ? { cancelled: true } : {}),
       };
     });
 
   // Sort desc
   items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  // Return 4 items for events, 3 for blog posts
-  const count = type === "events" ? 4 : 4;
-  return items.slice(0, count);
+  // For events, take 4 + N where N is cancelled count in top 4
+  if (type === "events") {
+    const top4 = items.slice(0, 4);
+    const cancelledInTop4 = top4.filter(item => item.cancelled).length;
+    return items.slice(0, 4 + cancelledInTop4);
+  }
+  return items.slice(0, 4);
 }
 
 const recentPosts = processContent(BLOG_DIR, "blog");
