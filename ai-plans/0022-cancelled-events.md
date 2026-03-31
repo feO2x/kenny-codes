@@ -27,7 +27,7 @@ Add `cancelled?: boolean` to `EventFrontMatter` in `src/types/event.ts`. Set `ca
 
 In `src/components/ContentCard/index.tsx`, add a `cancelled` prop to `ContentCardProps`. In the badges section, when `cancelled` is true and `isUpcoming` is true, render a "CANCELLED" badge instead of "UPCOMING". When `cancelled` is true and the event is past, the card won't be rendered at all (handled by filtering), so no special badge logic is needed for that case.
 
-Add a `.cancelledBadge` CSS class in `src/components/ContentCard/styles.module.css` styled with a red color scheme (`--kc-color-cancelled` / `--kc-color-cancelled-text`) to clearly distinguish it from the teal upcoming badge. Define the CSS custom properties in `src/css/custom.css`.
+Add a `.cancelledBadge` CSS class in `src/components/ContentCard/styles.module.css` styled with a red color scheme (`--kc-color-cancelled` / `--kc-color-cancelled-text`) to clearly distinguish it from the teal upcoming badge. Define the CSS custom properties in `src/css/custom.css`. The red badge alone is visually sufficient — no card muting/opacity reduction is needed, since visitors should notice the card and read the cancellation, not skip over it.
 
 ### EventCard Prop Forwarding
 
@@ -44,11 +44,9 @@ In `src/utils/eventUtils.ts`, extend the `EventItem` interface to include `conte
 - Keep cancelled events **in `upcomingProcessed`** (they show with the cancelled badge)
 - This single change covers both the main listing page and the tag-filtered page since both use `groupEvents()`
 
-Additionally, return a `cancelledUpcomingCount` from `groupEvents()` so that `EventStats` can subtract cancelled upcoming events from the "Upcoming" count (and from the total). Both `EventsBlogListContent.tsx` and `EventsBlogTagsPostsContent.tsx` pass these adjusted counts to `EventStats`.
-
 ### Listing Pages
 
-In `EventsBlogListContent.tsx` and `EventsBlogTagsPostsContent.tsx`, pass `cancelled={frontMatter.cancelled}` when rendering `EventCard` for upcoming events. Adjust the `EventStats` counts using the `cancelledUpcomingCount` returned by `groupEvents()`.
+In `EventsBlogListContent.tsx` and `EventsBlogTagsPostsContent.tsx`, pass `cancelled={frontMatter.cancelled}` when rendering `EventCard` for upcoming events. Compute the cancelled upcoming count locally (e.g. by filtering `upcomingEvents` where `frontMatter.cancelled` is true) and subtract it from the stats passed to `EventStats`. This keeps `groupEvents()` focused on date-based grouping without leaking cancellation logic into a general-purpose utility.
 
 ### Home Page Data Generation (`generate-home-data.ts`)
 
