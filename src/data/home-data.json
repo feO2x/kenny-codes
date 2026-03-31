@@ -1,10 +1,10 @@
 {
   "recentPosts": [
     {
-      "title": "Is GitHub Spec Kit SDD?",
+      "title": "Spec-Driven Development - Let's Be Precise About What We're Actually Doing",
       "date": "2026-03-31",
       "link": "/blog/2026-03-31-is-github-spec-kit-sdd",
-      "excerpt": "In 2025, a wave of tools like GitHub Spec Kit and Amazon Kiro revigorated the term Spec-Driven Development (SDD) as a counterpart to Vibe Coding. They use markdown specifications and plans to steer co...",
+      "excerpt": "In 2025, a wave of tools like GitHub Spec Kit and Amazon Kiro reinvigorated the term Spec-Driven Development (SDD) as a counterpart to Vibe Coding. They use markdown specifications and plans to steer ...",
       "tags": [
         "ai",
         "coding-agents",

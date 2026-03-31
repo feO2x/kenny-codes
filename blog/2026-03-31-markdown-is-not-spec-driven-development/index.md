@@ -1,6 +1,6 @@
 ---
 slug: 2026-03-31-is-github-spec-kit-sdd
-title: Is GitHub Spec Kit SDD?
+title: Markdown is not Spec-Driven Development
 authors: [feO2x]
 tags: [ai, coding-agents, guided-coding]
 ---
@@ -11,7 +11,9 @@ In 2025, a wave of tools like [GitHub Spec Kit](https://github.com/github/spec-k
 
 ## TL;DR
 
-In my opinion, the term "Spec-Driven Development" is misleading in the context of tools like [GitHub Spec Kit](https://github.com/github/spec-kit) and [Amazon Kiro](https://kiro.dev). The specification is neither formal nor executable/syncable/validatable. Especially when you want to bring less-experienced software developers up to speed, I suggest you take a look at [Guided Coding](/docs/guided-coding/).
+In my opinion, the term "Spec-Driven Development" is misleading in the context of tools like [GitHub Spec Kit](https://github.com/github/spec-kit) and [Amazon Kiro](https://kiro.dev). The specification is neither formal nor executable, cannot be kept in sync with the codebase, and cannot be validated by corresponding tools.
+
+SDD has a rich, long history spanning several decades. Especially when you want to bring less-experienced software developers up to speed with AI Coding Agents, I suggest you take a look at [Guided Coding](/docs/guided-coding/) instead of simply pointing to SDD and GitHub Spec Kit and Amazon Kiro.
 
 ## Level 1: Informal and Structured Specification
 
@@ -45,6 +47,8 @@ The most ambitious tier, where specifications don't just describe or constrain �
  
 At this level, specifications are **living artifacts**: they are validated by tools, checked for internal consistency, tested via simulation or model checking, and used to generate code. The spec isn't documentation — it's a machine-readable contract.
 
+So where do modern AI-driven specification tools fall in this hierarchy?
+
 ## And what does GitHub Spec Kit actually do?
 
 Spec Kit defines a phased process: **Constitution → Specify → Plan → Tasks → Implement**. Each phase produces markdown files. The constitution captures non-negotiable principles. The specification describes features and behavior in natural language. The plan breaks down technical approach. Tasks are small, testable units. An AI agent then implements each task.
@@ -57,10 +61,16 @@ Furthermore, the spec can drift from the code just as easily as any PRD. The `/a
 
 ## The Elephant in the Room
 
-What we as a community actually have to decide on: **Is Agentic Coding an Execution of the informal/structured specifications?** The results are non-deterministic. Many LLMs behind coding agents are pretty great and can provide magnificent results - but they are not deterministic. MDA used [QVT](https://www.omg.org/spec/QVT/) (Query/View/Transformation) to transform PIMs to PSMs. The transformation rules were themselves formally specified. In "modern SDD", the "transformation" is an LLM prompt.
+What we as a community actually have to decide on: **Is Agentic Coding an Execution of the informal/structured specifications?** Many LLMs behind coding agents are pretty great and can provide magnificent results - but they are not deterministic. MDA used [QVT](https://www.omg.org/spec/QVT/) (Query/View/Transformation) to transform PIMs to PSMs. The transformation rules were themselves formally specified. In "modern SDD", the "transformation" is an LLM prompt.
+
+To be fair, this trade-off isn't purely a weakness. Formal methods give you *guarantees* at the cost of *expressiveness* — you can only specify what the formal language can express. LLMs give you *expressiveness* at the cost of *guarantees* — you can describe almost anything, but you can't prove the output is correct. The interesting pragmatic question is whether automated tests can serve as the verification layer that formal specs traditionally provided. Spec Kit's implementation phase does produce tests, and that's not nothing — but it's a fundamentally different kind of assurance than mathematical proof. The stakes determine whether that's sufficient: for avionics software, absolutely not - but it probably is for your enterprise app.
 
 ## Don't Focus on the Plans
 
-Traditionally, SDD has always focused on the plans. I suggest you focus on the code. 
+Traditionally, SDD has always focused on the plans. I suggest you focus on the code.
+
+Here's what I think these tools actually get right, even if the terminology is wrong: they force *decomposition and sequencing*. Breaking a vague idea into a constitution, a spec, a plan, and discrete tasks is exactly the skill that less-experienced developers struggle with most. The spec itself isn't the valuable artifact — the *process of creating it* is.
+
+But the spec is scaffolding, not architecture. It will drift from the code. It cannot be executed or verified. The code is the only artifact that tells you the truth about what your system does.
 
 SDD has a long history spanning decades. In my opinion, it is a bad idea to tell your developers to get in touch with SDD and bring it into your organization. [Guided Coding](/docs/guided-coding/) is more focused and leads you into the pit of success by focusing not only on the plan, but even more on the code. This takes time, but with the help of AI you are still faster than without it.
