@@ -9,9 +9,7 @@ interface EventCardProps extends EventFrontMatter {
   formattedDate: string;
   description?: string;
   tags?: Array<{ label: string; permalink: string }>;
-  videoUrl?: string;
   isUpcoming?: boolean;
-  cancelled?: boolean;
 }
 
 const EventCard: React.FC<EventCardProps> = ({
