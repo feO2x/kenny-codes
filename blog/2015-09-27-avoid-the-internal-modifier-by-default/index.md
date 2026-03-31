@@ -10,7 +10,7 @@ In [one of his recent posts](https://blog.ploeh.dk/2015/09/21/public-types-hidde
 
 <!-- truncate -->
 
-## TLDR;
+## TL;DR
 
 Developers of reusable object-oriented code bases (specifically library/framework developers) often use the `internal` modifier to hide intrinsic details from client code. But as these abstractions are most certainly leaky, this usage actually harms the user-friendliness of the code base, because the user cannot easily extend or replace the internal types. Therefore, avoid `internal` in such code bases and use `public` instead, unless you have a very good reason to break this recommendation.
 

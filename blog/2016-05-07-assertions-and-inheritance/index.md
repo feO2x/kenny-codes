@@ -10,7 +10,7 @@ My previous two posts about Bertrand Meyer's Design by Contract (DbC) were mainl
 
 <!-- truncate -->
 
-## TLDR;
+## TL;DR
 
 When you place DbC assertions on a class and derive from it, you must respect them in subclasses or else you violate the LSP. This should result in more tests that are written against abstractions so that they can be shared across all test suites that exercise concrete implementations.
 

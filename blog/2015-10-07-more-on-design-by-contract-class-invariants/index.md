@@ -12,7 +12,7 @@ In this post, we will go one step further and discuss what class invariants are.
 
 <!-- truncate -->
 
-## TLDR;
+## TL;DR
 
 Aside from pre- and post-conditions, class invariants form another important part of Design by Contract. While the former are usually specific to single methods, invariants capture the very essence of a class by defining conditions that must hold true before and after every method call. Constructors have a special purpose in Design by Contract: their task is to initialize objects in such a way that all invariants are satisfied.
 

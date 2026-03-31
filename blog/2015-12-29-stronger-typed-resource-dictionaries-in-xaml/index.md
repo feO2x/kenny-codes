@@ -12,7 +12,7 @@ If you want to merge Resource Dictionaries into others (like e.g. within your Ap
 
 <!-- truncate -->
 
-## TLDR;
+## TL;DR
 
 Resource Dictionaries can be equipped with the `x:Class` attribute to link them to code-behind files containing C# code. This way you can e.g. attach event handlers to XAML elements within your styles and templates, and for some technologies like `x:Bind`, this approach is absolutely mandatory. As you cannot reference these linked Resource Dictionary with the PACK URI syntax any longer, but instead have to use the actual sub-class name, I refer to them as Stronger-Typed Resource Dictionaries.
 
