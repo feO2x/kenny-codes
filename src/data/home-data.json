@@ -1,7 +1,7 @@
 {
   "recentPosts": [
     {
-      "title": "Spec-Driven Development - Let's Be Precise About What We're Actually Doing",
+      "title": "Markdown is not Spec-Driven Development",
       "date": "2026-03-31",
       "link": "/blog/2026-03-31-is-github-spec-kit-sdd",
       "excerpt": "In 2025, a wave of tools like GitHub Spec Kit and Amazon Kiro reinvigorated the term Spec-Driven Development (SDD) as a counterpart to Vibe Coding. They use markdown specifications and plans to steer ...",
