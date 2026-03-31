@@ -1,6 +1,7 @@
 ---
 slug: 2026-03-31-is-github-spec-kit-sdd
 title: Markdown is not Spec-Driven Development
+image: /img/social-cards/2026-03-31-is-github-spec-kit-sdd.png
 authors: [feO2x]
 tags: [ai, coding-agents, guided-coding]
 ---
