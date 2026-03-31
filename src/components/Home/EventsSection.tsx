@@ -6,17 +6,35 @@ import homeData from '@site/src/data/home-data.json';
 import EventCard from '../EventCard';
 import {formatDate} from '@site/src/utils/dateFormatting';
 
+interface HomeEvent {
+  title: string;
+  date: string;
+  link: string;
+  excerpt: string;
+  tags?: string[];
+  type?: string;
+  location?: string;
+  duration?: string;
+  language?: string;
+  country?: string;
+  event?: string;
+  cancelled?: boolean;
+}
+
 export default function EventsSection() {
-  const {recentEvents} = homeData;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const recentEvents = homeData.recentEvents as HomeEvent[];
+
+  // Derive today as YYYY-MM-DD in the user's local timezone.
+  // String comparison against the event's YYYY-MM-DD date avoids
+  // all Date-object timezone pitfalls for day-level logic.
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   // Filter out cancelled past events, then take first 4
   const visibleEvents = recentEvents
     .filter((event) => {
-      const eventDate = new Date(event.date);
-      const isPast = eventDate < today;
-      return !(isPast && (event as any).cancelled);
+      const isPast = event.date < todayStr;
+      return !(isPast && event.cancelled);
     })
     .slice(0, 4);
 
@@ -28,8 +46,7 @@ export default function EventsSection() {
         </Heading>
         <div className={styles.cardGrid}>
           {visibleEvents.map((event, idx) => {
-            const eventDate = new Date(event.date);
-            const isUpcoming = eventDate >= today;
+            const isUpcoming = event.date >= todayStr;
             
             return (
               <EventCard
@@ -47,7 +64,7 @@ export default function EventsSection() {
                 description={event.excerpt}
                 tags={event.tags?.map(tag => ({ label: tag, permalink: '' }))}
                 isUpcoming={isUpcoming}
-                cancelled={(event as any).cancelled}
+                cancelled={event.cancelled}
               />
             );
           })}
