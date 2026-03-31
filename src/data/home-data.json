@@ -1,6 +1,17 @@
 {
   "recentPosts": [
     {
+      "title": "Markdown is not Spec-Driven Development",
+      "date": "2026-03-31",
+      "link": "/blog/2026-03-31-is-github-spec-kit-sdd",
+      "excerpt": "In 2025, a wave of tools like GitHub Spec Kit and Amazon Kiro reinvigorated the term Spec-Driven Development (SDD) as a counterpart to Vibe Coding. They use markdown specifications and plans to steer ...",
+      "tags": [
+        "ai",
+        "coding-agents",
+        "guided-coding"
+      ]
+    },
+    {
       "title": "Guided Coding: Staying in Control While Coding with AI Agents",
       "date": "2026-02-28",
       "link": "/blog/2026-02-28-guided-coding",
@@ -35,18 +46,6 @@
         "wpf",
         "uwp",
         "dotnet"
-      ]
-    },
-    {
-      "title": "Use Segoe MDL2 Assets for Windows 10 Apps",
-      "date": "2015-12-03",
-      "link": "/blog/2015-12-03-use-segoe-mdl2-assets-for-windows-10-apps",
-      "excerpt": "Are you writing Windows 10 Apps already? I'm currently updating one app from Windows 8.1 Store to the Universal Windows Platform, which of course means that some redesign is required, too. If you ever...",
-      "tags": [
-        "windows-10",
-        "uwp",
-        "xaml",
-        "design"
       ]
     }
   ],
