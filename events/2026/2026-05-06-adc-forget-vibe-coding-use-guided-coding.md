@@ -1,7 +1,7 @@
 ---
 title: "Forget Vibe Coding, Switch to Guided Coding"
-image: /img/social-cards/2026-05-05-adc-forget-vibe-coding-use-guided-coding.png
-date: 2026-05-05
+image: /img/social-cards/2026-05-06-adc-forget-vibe-coding-use-guided-coding.png
+date: 2026-05-06
 type: Talk
 duration: 1h
 language: German
@@ -9,7 +9,7 @@ location: Regensburg
 country: Germany
 event: Advanced Developers Conference 2026
 tags: [AI, Coding-Agents, Guided-Coding]
-slug: 2026-05-05-adc-forget-vibe-coding-use-guided-coding
+slug: 2026-05-06-adc-forget-vibe-coding-use-guided-coding
 ---
 
 In this talk, we'll explore Guided Coding, an approach that I developed in early 2026 during the development of Light.PortableResults to improve my development speed with Coding Agents while staying in control of the code base.
