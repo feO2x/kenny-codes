@@ -1,5 +1,7 @@
 # Root AGENTS.md
 
+This is Kenny Pflug's website where he blogs, announces talks and workshops, and teaches about AI, Cloud-Native and .NET.
+
 ## General Rules
 
 - Never run the dev server. Assume it is already running.
