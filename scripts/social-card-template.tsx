@@ -149,7 +149,7 @@ function wrapTitle(title: string, maxWidth: number, fontSize: number): string[] 
   let current: string | null = null;
 
   for (const token of tokens) {
-    const next = current
+    const next: string = current
       ? `${current}${token.gluedToPrevious ? "" : " "}${token.text}`
       : token.text;
     if (current && estimateTextWidth(next, fontSize) > maxWidth) {

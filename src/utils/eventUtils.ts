@@ -12,7 +12,10 @@ const eventsRoutePath = `/${eventsId}`;
  * @returns true if the post is an event page, false otherwise
  */
 export function isEventPage(metadata: {source?: string; permalink?: string}): boolean {
-  return metadata.source?.includes(eventsRoutePath) || metadata.permalink?.includes(eventsRoutePath);
+  return Boolean(
+    metadata.source?.includes(eventsRoutePath) ||
+      metadata.permalink?.includes(eventsRoutePath)
+  );
 }
 
 /**
@@ -30,10 +33,12 @@ export interface EventItem {
     metadata: {
       date: string;
     };
-    frontMatter?: {
-      cancelled?: boolean;
-    };
+    frontMatter?: Record<string, unknown>;
   };
+}
+
+function isCancelled(frontMatter?: Record<string, unknown>): boolean {
+  return frontMatter?.cancelled === true;
 }
 
 /**
@@ -56,7 +61,7 @@ export function groupEvents<T extends EventItem>(items: ReadonlyArray<T>) {
   const upcomingProcessed = processedItems.filter(p => p.timestamp >= nowUtc);
   const pastProcessed = processedItems
     .filter(p => p.timestamp < nowUtc)
-    .filter(p => !p.item.content.frontMatter?.cancelled);
+    .filter(p => !isCancelled(p.item.content.frontMatter));
 
   // Sort upcoming earliest first, past most recent first
   upcomingProcessed.sort((a, b) => a.timestamp - b.timestamp);
