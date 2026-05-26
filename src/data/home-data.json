@@ -52,6 +52,40 @@
   "recentEvents": [
     {
       "title": "Forget Vibe Coding, Switch to Guided Coding",
+      "date": "2026-09-17",
+      "link": "/events/2026-09-17-dodnedder-guided-coding",
+      "excerpt": "In this talk, we'll explore Guided Coding, an approach that I developed in early 2026 during the development of Light.PortableResults to improve my development speed with Coding Agents while staying i...",
+      "tags": [
+        "AI",
+        "Coding-Agents",
+        "Guided-Coding"
+      ],
+      "type": "Talk",
+      "location": "Nürnberg, Germany",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Dotnedder"
+    },
+    {
+      "title": "Guided Coding - Staying in Control While Coding with AI Agents",
+      "date": "2026-06-17",
+      "link": "/events/2026-06-17-oth-hof-guided-coding",
+      "excerpt": "In this talk, we'll explore Guided Coding, an approach that I developed in early 2026 during the development of Light.PortableResults to improve my development speed with Coding Agents while staying i...",
+      "tags": [
+        "AI",
+        "Coding-Agents",
+        "Guided-Coding"
+      ],
+      "type": "Talk",
+      "location": "University of Applied Sciences Hof",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Visiting Lecture"
+    },
+    {
+      "title": "Forget Vibe Coding, Switch to Guided Coding",
       "date": "2026-05-06",
       "link": "/events/2026-05-06-adc-forget-vibe-coding-use-guided-coding",
       "excerpt": "In this talk, we'll explore Guided Coding, an approach that I developed in early 2026 during the development of Light.PortableResults to improve my development speed with Coding Agents while staying i...",
@@ -86,61 +120,6 @@
       "language": "German",
       "country": "Germany",
       "event": "Advanced Developers Conference"
-    },
-    {
-      "title": "AI-powered Cloud-Native Backends with Aspire and Microsoft.Extensions.AI",
-      "date": "2026-05-04",
-      "link": "/events/2026-05-04-adc-workshop-ai-powered-cloud-native-backends-with-aspire-and-mea",
-      "excerpt": "This workshop focusses on building Cloud-Native .NET backends with Aspire and integrating AI with Microsoft.Extensions.AI.",
-      "tags": [
-        "AI",
-        "Cloud-Native",
-        ".NET",
-        "Aspire",
-        "Microsoft.Extensions.AI",
-        "LLM"
-      ],
-      "type": "Workshop",
-      "location": "Regensburg",
-      "duration": "8h",
-      "language": "German",
-      "country": "Germany",
-      "event": "Advanced Developers Conference 2026",
-      "cancelled": true
-    },
-    {
-      "title": "Forget Vibe Coding, Switch to Guided Coding",
-      "date": "2026-04-14",
-      "link": "/events/2026-04-14-dcn-forget-vibe-coding-use-guided-coding",
-      "excerpt": "In this talk, we'll explore Guided Coding, an approach that I developed in early 2026 during the development of Light.PortableResults to improve my development speed with Coding Agents while staying i...",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Guided-Coding"
-      ],
-      "type": "Talk",
-      "location": "Weiden in der Oberpfalz",
-      "duration": "2h",
-      "language": "German",
-      "country": "Germany",
-      "event": "Digital Craftsmanship Nordoberpfalz"
-    },
-    {
-      "title": "Guided Coding instead of Vibe Coding in Java",
-      "date": "2026-02-26",
-      "link": "/events/2026-02-26-guided-coding-in-java",
-      "excerpt": "In the past two years, I've been working extensively with different Coding Agents and came up with a methodology called Guided Coding. I present it for the first time in this stream with Johannes Raba...",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Java",
-        "Guided-Coding"
-      ],
-      "type": "Talk",
-      "location": "Online",
-      "duration": "2h",
-      "language": "English",
-      "event": "LinkedIn Live"
     }
   ]
 }
