@@ -16,7 +16,7 @@ Start a new conversation with your coding agent and iteratively create a plan to
 - **Give the agent a role.** I use something like "With you being an expert .NET architect" in my first prompt of the planning phase. This focuses the agent on planning rather than jumping into implementation. Assigning roles tends to produce better results in my experience.
 - **Discuss the feature.** Ask the agent how it would approach the problem. Review its suggestions about elements like design, refactorings, testing, and performance. Bring your own thoughts and questions to the table — this is a conversation, not delegation.
 - **Commit the plan as a markdown file in the git repo.** I don't use the built-in "planning mode" of coding agents because plans typically end up in your user directory or in the chat. I want them committed to git — they serve as historical documents that explain why features were implemented a certain way.
-- **End with repeated sanity checks.** At the end of the planning phase, I typically ask *"Would you add, change, or remove anything?"* This often catches things I didn't think of. Do this repeatedly until the plan stabilizes.
+- **End with repeated sanity checks.** At the end of the planning phase, I typically ask *"Would you change anything about the plan?"* This often catches things I didn't think of. Do this repeatedly until the plan stabilizes.
 
 ## Plan Structure
 
