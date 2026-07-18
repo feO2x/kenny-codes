@@ -85,3 +85,9 @@
 .kc-card-gradient-border:hover::before {
   opacity: 1;
 }
+
+/* Required for Firefox. https://github.com/facebook/docusaurus/pull/11356 introduces clipping issue. */
+.theme-doc-sidebar-item-link .menu__link > span,
+.theme-doc-sidebar-item-category .menu__link > span {
+  padding-bottom: 1px;
+}
