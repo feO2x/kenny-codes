@@ -1,17 +1,17 @@
 interface GuidedCodingDiagramProps {
-  highlight?: 'planning' | 'implementation' | 'guiding';
+  highlight?: 'planning' | 'implementing' | 'guiding';
 }
 
 const descriptions: Record<string, string> = {
-  planning: 'Guided Coding workflow diagram highlighting the Planning Phase. The three phases are Planning, Implementation, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementation for small issues.',
-  implementation: 'Guided Coding workflow diagram highlighting the Implementation Phase. The three phases are Planning, Implementation, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementation for small issues.',
-  guiding: 'Guided Coding workflow diagram highlighting the Guiding Phase. The three phases are Planning, Implementation, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementation for small issues.',
-  default: 'Guided Coding workflow diagram showing three phases: Planning, Implementation, and Guiding. Arrows indicate the flow between phases, with loops back to Planning for large issues and back to Implementation for small issues, ending with a PR.',
+  planning: 'Guided Coding workflow diagram highlighting the Planning Phase. The three phases are Planning, Implementing, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementing for small issues.',
+  implementing: 'Guided Coding workflow diagram highlighting the Implementing Phase. The three phases are Planning, Implementing, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementing for small issues.',
+  guiding: 'Guided Coding workflow diagram highlighting the Guiding Phase. The three phases are Planning, Implementing, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementing for small issues.',
+  default: 'Guided Coding workflow diagram showing three phases: Planning, Implementing, and Guiding. Arrows indicate the flow between phases, with loops back to Planning for large issues and back to Implementing for small issues, ending with a PR.',
 };
 
 export default function GuidedCodingDiagram({ highlight }: GuidedCodingDiagramProps) {
   const dim = 0.3;
-  const o = (phase: 'planning' | 'implementation' | 'guiding') =>
+  const o = (phase: 'planning' | 'implementing' | 'guiding') =>
     highlight && highlight !== phase ? dim : 1;
   const titleId = `guided-coding-diagram-title${highlight ? `-${highlight}` : ''}`;
 
@@ -35,7 +35,7 @@ export default function GuidedCodingDiagram({ highlight }: GuidedCodingDiagramPr
       </g>
 
       {/* Yellow arrow: Guiding → Implementation (small issue) */}
-      <g opacity={Math.max(o('guiding'), o('implementation'))}>
+      <g opacity={Math.max(o('guiding'), o('implementing'))}>
         <path d="M 595 135 V 100 Q 595 80, 575 80 H 395 Q 375 80, 375 100 V 108" fill="none" stroke="#E88A00" strokeWidth="10" />
         <polygon points="375,130 355,100 395,100" fill="#E88A00" />
       </g>
@@ -52,7 +52,7 @@ export default function GuidedCodingDiagram({ highlight }: GuidedCodingDiagramPr
         <text x="130" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">1. Planning Phase</text>
       </g>
 
-      <g opacity={o('implementation')}>
+      <g opacity={o('implementing')}>
         <rect x="275" y="135" width="200" height="50" fill="#E88A00" rx="4" />
         <text x="375" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">2. Implementation Phase</text>
       </g>
