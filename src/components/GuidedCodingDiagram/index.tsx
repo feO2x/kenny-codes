@@ -54,7 +54,7 @@ export default function GuidedCodingDiagram({ highlight }: GuidedCodingDiagramPr
 
       <g opacity={o('implementing')}>
         <rect x="275" y="135" width="200" height="50" fill="#E88A00" rx="4" />
-        <text x="375" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">2. Implementation Phase</text>
+        <text x="375" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">2. Implementing Phase</text>
       </g>
 
       <g opacity={o('guiding')}>

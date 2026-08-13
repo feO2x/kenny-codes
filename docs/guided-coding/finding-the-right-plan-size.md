@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 8
 title: Finding the Right Plan Size
 ---
 
@@ -27,3 +27,5 @@ Even if future models can handle massive plans flawlessly, you as the reviewer a
 - The agent struggles to establish common abstractions across the codebase because it finishes too early.
 
 When this happens, don't force it — go back and split the plan. I had to learn this the hard way with a [CloudEvents serialization feature](https://github.com/feO2x/Light.PortableResults/blob/main/ai-plans/0015-cloud-events-serialization.md) where I tried to cover reading, writing, and performance in a single plan. I had to run through three smaller, focused plans to fix the initial issues.
+
+Note what splitting a plan does *not* mean: you don't rewrite the oversized plan into three smaller ones. The original stays frozen, and the follow-up plans that replace it say which of its decisions they supersede and why. A year later, "we tried to do this in one plan and it didn't work" is more useful than a tidy set of three plans that pretend the mistake never happened. See [The Plan Record](./plan-record.md).

@@ -1,0 +1,223 @@
+---
+sidebar_position: 2
+title: Quick Start
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import GuidedCodingSkillTimeline from '@site/src/components/GuidedCodingSkillTimeline';
+
+# Quick Start
+
+This page walks through **the Opinionated Path** — my own setup, packaged as six Agent Skills that live at [github.com/feO2x/guided-coding](https://github.com/feO2x/guided-coding).
+
+:::info[Read this first]
+The skills are optional. Guided Coding is a methodology, and everything below can be done by hand with markdown files and git. What the skills give you is consistency: the same plan structure, the same filenames, and a commit at exactly the moment the Planning Phase ends.
+
+They are also opinionated. They assume the three-section plan structure (Rationale, Acceptance Criteria, Technical Details) and the [append-only plan record](./plan-record.md). If you want a different structure, don't fight the skills — write your own instructions instead, and read the phase pages for the reasoning behind each rule.
+
+Above all: no skill reviews code for you. The Guiding Phase is still yours.
+:::
+
+## Install
+
+<Tabs groupId="guided-coding-install">
+<TabItem value="claude" label="Claude Code plugin" default>
+
+Add the repository as a marketplace and install the plugin:
+
+```text
+/plugin marketplace add feO2x/guided-coding
+/plugin install guided-coding@guided-coding
+```
+
+Claude Code namespaces plugin skills, so you invoke them with the plugin prefix and a short name:
+
+```text
+/guided-coding:setup
+```
+
+</TabItem>
+<TabItem value="skills" label="Portable Agent Skills">
+
+Install the skills into the shared project-level `.agents/skills` directory with the GitHub CLI:
+
+```sh
+gh skill install feO2x/guided-coding --all --agent universal --scope project
+```
+
+Add `--scope user` to make them available across all your repositories, or name a single skill instead of `--all`. Installed this way, the skills keep their full names:
+
+```text
+/guided-coding-setup
+```
+
+The skills follow the [Agent Skills specification](https://agentskills.io/specification), so any agent that implements it can use them. GitHub CLI's skill commands are currently in preview.
+
+</TabItem>
+<TabItem value="plugin" label="Agent Plugin clients">
+
+The repository is also a package for the [Agent Plugins standard](https://agent-plugins.org/). Clients that support the standard can install it directly; the installation and marketplace commands are client-specific.
+
+</TabItem>
+</Tabs>
+
+The rest of this page uses the portable names (`guided-coding-setup`). If you installed the Claude Code plugin, drop the `guided-coding-` prefix and use the namespace instead (`/guided-coding:setup`).
+
+:::note[All skills are manually invoked]
+Every skill declares that it runs only when you explicitly ask for it. Your agent will not decide on its own to write a plan, commit one, or create an issue. Guided Coding depends on you choosing the moment each phase ends, and that choice is not delegated.
+:::
+
+## When to Call What
+
+<GuidedCodingSkillTimeline />
+
+Filled dots are skills. Hollow dots are the parts you do yourself — which, not coincidentally, are the parts that matter most.
+
+The two arrows on the right are the same iteration loops as in the phase diagram. A small issue sends you back into the Implementing Phase with a targeted prompt. A large one sends you back to the *top* of the Planning Phase — not to `guided-coding-write-plan`, but to the discussion, because a follow-up plan deserves the same conversation the first one got.
+
+Notice how much of the Planning Phase is conversation. The skills bracket the discussion; they don't replace it. If your Planning Phase consists of running three skills back to back, you have automated the paperwork and skipped the work.
+
+Each skill runs **once** per plan. The repetition in that phase is conversational: you revise the draft by prompting the agent, exactly as you would ask it to change any other file in the repository.
+
+## The Walkthrough
+
+### Step 0: Set up the repository
+
+Run this once per repository, and again after upgrading to a new Guided Coding version:
+
+```text
+/guided-coding-setup
+```
+
+The skill reads your existing instruction files, build manifests, scripts, and CI configuration to discover the feedback loops that already exist. It then writes or updates the root `AGENTS.md` with a section on implementing plans, a list of confirmed feedback-loop commands, and a "this is your space" section for the agent's own notes. It also creates `ai-plans/` with its own `AGENTS.md`.
+
+It does not invent commands. If it cannot confirm that a test or lint command actually exists and works, it says so instead of listing it. It never touches existing plans.
+
+Read the resulting diff before you commit it. This file steers every future conversation, so it is worth the two minutes. See [Keep Your Rules Files Small](./rules-files.md) for why it should stay short.
+
+### Step 1: Discuss the approach
+
+**The Planning Phase starts with a conversation, not a skill.** Start a fresh one, describe the context, and ask for an investigation rather than an implementation:
+
+> *"With you being an expert .NET architect, can you please investigate the codebase and report back how you would tackle this problem?"*
+
+Now discuss. Ask why. Push back. Propose alternatives. Ask what it considered and discarded. Keep going until you understand the suggested approach well enough to defend it to a colleague.
+
+Nothing has been created yet at this point — no issue, no branch, no file. That is on purpose. This conversation may well end with "actually, we shouldn't build this", and an untouched repository is the right outcome when it does.
+
+Don't use your agent's built-in planning mode here. See the [Planning Phase](./planning-phase.mdx) for why.
+
+### Step 2: Open the issue and the branch
+
+Once you agree with the agent on the general direction:
+
+```text
+/guided-coding-prepare-issue-for-plan
+```
+
+This creates an **empty** tracker issue — no summary, no placeholder acceptance criteria — and a clean local branch named `<issue-id>-<topic>`. The issue body stays empty on purpose: it gets filled with the finished plan at the end of the Planning Phase.
+
+The skill stops if your worktree has uncommitted changes, and it updates the default branch before branching off it.
+
+### Step 3: Write the plan
+
+Still in the same conversation:
+
+```text
+/guided-coding-write-plan
+```
+
+The skill writes the approach you already agreed on into `ai-plans/`, using the three-section structure and a UTC-timestamped filename. It is explicitly *not* meant to start or replace the planning conversation — it records its outcome.
+
+**Invoke this once per plan.** Everything that follows is ordinary conversation: you ask for changes and the agent edits the draft in place. Re-running the skill is neither needed nor wanted — it resolves a fresh UTC timestamp each time, so you would get a *second* plan file next to the one you are working on rather than an updated draft. You reach for it again only when starting a genuinely new document, such as a follow-up plan after the Guiding Phase or the initial plan for a new feature.
+
+### Step 4: Further discussion
+
+The draft is a starting point, not a result. Read it properly and go back at it with plain prompts — no skill involved:
+
+- Does every acceptance criterion describe something you could actually verify?
+- Did anything discussed in step 1 quietly not make it into the plan?
+- Does it reference types, files, or extension points that really exist?
+- Is it prescribing implementation steps a senior engineer wouldn't need?
+
+Prompt the agent to revise the draft as you go, the same way you would ask it to change any other file. The plan is still an ordinary working file at this point — it does not freeze until step 7. Expect several rounds here.
+
+### Step 5: Review the plan
+
+For larger or riskier plans, add a second opinion from a **fresh conversation** with another agent:
+
+```text
+/guided-coding-review-plan
+```
+
+The fresh conversation matters: an agent that just wrote a plan is a poor judge of it. The skill reports findings only and never edits anything. It checks acceptance criteria for verifiability, validates claims about existing types and files, and looks for omissions around error handling, migration, performance, and security.
+
+### Step 6: Further discussion
+
+Take those findings back to the main conversation and work through them. Then ask, repeatedly:
+
+> *"With you being the expert, would you change anything about the plan?"*
+
+This one question has caught more things for me than any review checklist. Ask it until the answer stops producing changes you care about. If you doo, loop back to step 4.
+
+Steps 4 through 6 are a cycle, not a checklist. Note what is *not* in that cycle: `guided-coding-write-plan` ran once, back in step 3. The loop is discussion, review, and revision by prompt. You are done when you and the agent both stop finding things.
+
+### Step 7: Finish the plan
+
+```text
+/guided-coding-finish-plan
+```
+
+This validates the filename and structure, commits the plan with a path-limited commit so nothing else sneaks in, and offers to publish the plan body as the issue description.
+
+**The commit ends the Planning Phase.** From this moment the plan is frozen: the only edit anyone may make is ticking an acceptance criterion once the implementation actually satisfies it. Corrections happen through follow-up plans, not edits. See [The Plan Record](./plan-record.md).
+
+Only the *first* plan for an issue becomes the issue description. Follow-up plans are not published there.
+
+### Step 8: Implement
+
+**No skill here either.** Start a fresh conversation and hand over the committed plan:
+
+> *"With you being an expert .NET developer, could you please implement plan `ai-plans/2026-08-13-1420-42-cancelled-events.md` for me?"*
+
+Then let it run. The frozen plan and your feedback loops are what keep the agent on track — see the [Implementing Phase](./implementing-phase.mdx).
+
+### Step 9: Guide
+
+This is the phase you actually spend most of your time in. Read every changed file, evaluate the design, run the tests yourself, and smoke-test the app. Optionally add a code review from a fresh agent conversation.
+
+Then decide:
+
+- **Small issue** → prompt the agent to fix it. Back to the Implementing Phase.
+- **Large issue** (wrong data structure, misused framework mechanism, design flaw) → back to the Planning Phase. Steps 1 through 7 again, producing a follow-up plan with the same issue ID.
+
+The [Guiding Phase](./guiding-phase.mdx) page covers what to look for.
+
+### Step 10: Record the deviations, then open the PR
+
+Before opening the pull request, ask whether the finished code still matches what the plans decided. If you made significant manual changes during the Guiding Phase, or the agent solved something differently:
+
+```text
+/guided-coding-write-deviations
+```
+
+The skill inspects the full implementation delta and the commit history, decides whether a document is even warranted — routine implementation choices don't count — and writes one when it is. Its contents become the pull request description.
+
+The goal: **a reviewer should need to read only the issue's first plan and the Plan Deviations document to understand the whole change.**
+
+## A Compressed Cheat Sheet
+
+| Moment | Skill |
+| --- | --- |
+| New repository, or after an upgrade | `guided-coding-setup` |
+| Starting a feature or bugfix | *— talk to the agent first* |
+| You agree on the general direction | `guided-coding-prepare-issue-for-plan` |
+| The agreed approach needs writing down | `guided-coding-write-plan` (once per plan) |
+| Draft written, and after every revision | *— discuss and revise by prompt* |
+| The draft wants a second opinion | `guided-coding-review-plan` |
+| Nobody is finding anything anymore | `guided-coding-finish-plan` |
+| Plan committed and frozen | *— implement, then review* |
+| Implementation done, code diverged from the plans | `guided-coding-write-deviations` |
+
+The rows without a skill are not gaps in the tooling. They are where Guided Coding actually happens: the discussion that produces the plan, and the review that decides whether the result is good enough. Everything with a skill next to it is bookkeeping around those two activities.
