@@ -27,7 +27,7 @@ const cards: Card[] = [
       {
         kind: 'skill',
         title: 'guided-coding-setup',
-        description: 'Writes AGENTS.md, creates ai-plans/, and documents your feedback loops.',
+        description: 'Writes AGENTS.md and ai-plans/, records feedback loops.',
       },
     ],
   },
@@ -39,37 +39,37 @@ const cards: Card[] = [
       {
         kind: 'manual',
         title: 'Discuss the approach',
-        description: '"With you being an expert architect, how would you tackle this?"',
+        description: '"As an expert architect, how would you tackle this?"',
       },
       {
         kind: 'skill',
         title: 'guided-coding-prepare-issue-for-plan',
-        description: 'Once you agree on the direction: empty tracker issue, clean local branch.',
+        description: 'After you agree: empty issue, clean local branch.',
       },
       {
         kind: 'skill',
         title: 'guided-coding-write-plan',
-        description: 'Writes the draft. Invoked once; later changes come from plain prompts.',
+        description: 'Writes the draft. Invoked once per plan.',
       },
       {
         kind: 'manual',
         title: 'Further discussion',
-        description: 'Read the draft, question it, prompt the agent to revise it in place.',
+        description: 'Question the draft; revise it with plain prompts.',
       },
       {
         kind: 'skill',
         title: 'guided-coding-review-plan',
-        description: 'Optional second opinion from a fresh conversation. Findings only, no edits.',
+        description: 'Optional second opinion, in a fresh conversation.',
       },
       {
         kind: 'manual',
         title: 'Further discussion',
-        description: '"Would you change anything about the plan?" Ask until nothing changes.',
+        description: '"Would you change anything about the plan?"',
       },
       {
         kind: 'skill',
         title: 'guided-coding-finish-plan',
-        description: 'Commits the plan, freezes it, and publishes it to the issue.',
+        description: 'Commits and freezes the plan; publishes it to the issue.',
       },
     ],
   },
@@ -80,7 +80,7 @@ const cards: Card[] = [
       {
         kind: 'manual',
         title: 'Hand over the plan in a fresh conversation',
-        description: 'No skill. The frozen plan and your feedback loops keep the agent on track.',
+        description: 'No skill. The frozen plan and feedback loops steer it.',
       },
     ],
   },
@@ -91,17 +91,17 @@ const cards: Card[] = [
       {
         kind: 'manual',
         title: 'Review every changed file',
-        description: 'Read it yourself, and optionally add a review from a fresh agent conversation.',
+        description: 'Read it yourself; optionally add an agent review.',
       },
       {
         kind: 'manual',
         title: 'Iterate',
-        description: 'Small issue: back to Implementing. Large issue: back to Planning.',
+        description: 'Small issue: to Implementing. Large: to Planning.',
       },
       {
         kind: 'skill',
         title: 'guided-coding-write-deviations',
-        description: 'Only when the code materially departs from the frozen plans.',
+        description: 'Only when the code materially departs from the plans.',
       },
     ],
   },
@@ -112,7 +112,7 @@ const cards: Card[] = [
       {
         kind: 'manual',
         title: 'Open the pull request',
-        description: 'Reviewers read the first plan plus the Plan Deviations document.',
+        description: 'Reviewers read the first plan and the Plan Deviations.',
       },
     ],
   },
@@ -123,16 +123,16 @@ const STEP_HEIGHT = 46;
 const CARD_PADDING = 22;
 const CARD_GAP = 16;
 const CARD_X = 20;
-const CARD_WIDTH = 780;
+const CARD_WIDTH = 580;
 const CARD_RIGHT = CARD_X + CARD_WIDTH;
 const TEXT_X = 68;
-const SVG_WIDTH = 900;
+const SVG_WIDTH = 730;
 const CONNECTOR_WIDTH = 4;
 
 // Corridors in the gutter right of the cards, for the two iteration arrows.
 // The inner one carries the shorter hop, so the two never cross.
-const INNER_CORRIDOR_X = 826;
-const OUTER_CORRIDOR_X = 860;
+const INNER_CORRIDOR_X = 638;
+const OUTER_CORRIDOR_X = 682;
 
 const description =
   'Timeline of the Guided Coding skills. Run guided-coding-setup once per repository. ' +
@@ -225,17 +225,17 @@ export default function GuidedCodingSkillTimeline() {
         {card.loop && (
           <g>
             <path
-              d={`M 615 ${loopTop} H 628 Q 644 ${loopTop} 644 ${loopTop + 16} V ${loopBottom - 16} Q 644 ${loopBottom} 628 ${loopBottom} H 600`}
+              d={`M 471 ${loopTop} H 484 Q 500 ${loopTop} 500 ${loopTop + 16} V ${loopBottom - 16} Q 500 ${loopBottom} 484 ${loopBottom} H 456`}
               fill="none"
               stroke={card.color}
               strokeWidth={CONNECTOR_WIDTH}
             />
             <polygon
-              points={`598,${loopTop} 616,${loopTop - 7.5} 616,${loopTop + 7.5}`}
+              points={`454,${loopTop} 472,${loopTop - 7.5} 472,${loopTop + 7.5}`}
               fill={card.color}
             />
             <text
-              x={656}
+              x={512}
               y={(loopTop + loopBottom) / 2 - 3}
               fill={card.color}
               fontFamily="Segoe UI, sans-serif"
@@ -245,7 +245,7 @@ export default function GuidedCodingSkillTimeline() {
               {card.loop.label[0]}
             </text>
             <text
-              x={656}
+              x={512}
               y={(loopTop + loopBottom) / 2 + 11}
               fill={card.color}
               fontFamily="Segoe UI, sans-serif"
