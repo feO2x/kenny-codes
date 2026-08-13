@@ -126,7 +126,8 @@ const CARD_X = 20;
 const CARD_WIDTH = 660;
 const TEXT_X = 68;
 const SVG_WIDTH = 700;
-const CONNECTOR_WIDTH = 4;
+const CONNECTOR_WIDTH = 6;
+const LABEL_SIZE = 13;
 
 // The two iteration arrows run over the cards, in the empty band right of the
 // step text. Keep both corridors left of the card edge, and the arrow heads
@@ -227,31 +228,32 @@ export default function GuidedCodingSkillTimeline() {
         {card.loop && (
           <g>
             <path
-              d={`M 471 ${loopTop} H 484 Q 500 ${loopTop} 500 ${loopTop + 16} V ${loopBottom - 16} Q 500 ${loopBottom} 484 ${loopBottom} H 456`}
+              d={`M 431 ${loopTop} H 440 Q 456 ${loopTop} 456 ${loopTop + 16} V ${loopBottom - 16} Q 456 ${loopBottom} 440 ${loopBottom} H 412`}
               fill="none"
               stroke={card.color}
               strokeWidth={CONNECTOR_WIDTH}
+              strokeLinecap="round"
             />
             <polygon
-              points={`454,${loopTop} 472,${loopTop - 7.5} 472,${loopTop + 7.5}`}
+              points={`410,${loopTop} 432,${loopTop - 9} 432,${loopTop + 9}`}
               fill={card.color}
             />
             <text
-              x={512}
-              y={(loopTop + loopBottom) / 2 - 3}
+              x={468}
+              y={(loopTop + loopBottom) / 2 - 4}
               fill={card.color}
               fontFamily="Segoe UI, sans-serif"
-              fontSize="11"
+              fontSize={LABEL_SIZE}
               fontWeight="600"
             >
               {card.loop.label[0]}
             </text>
             <text
-              x={512}
-              y={(loopTop + loopBottom) / 2 + 11}
+              x={468}
+              y={(loopTop + loopBottom) / 2 + 13}
               fill={card.color}
               fontFamily="Segoe UI, sans-serif"
-              fontSize="11"
+              fontSize={LABEL_SIZE}
               fontWeight="600"
             >
               {card.loop.label[1]}
@@ -297,19 +299,19 @@ export default function GuidedCodingSkillTimeline() {
       label: 'large issue',
     },
   ].map(({color, corridor, startY, targetY, label}) => {
-    const labelX = corridor + 17;
+    const labelX = corridor + 20;
     const labelY = (startY + targetY) / 2;
     return (
       <g key={label}>
         <path
-          d={`M ${ARROW_TIP_X + 10} ${startY} H ${corridor - 16} Q ${corridor} ${startY} ${corridor} ${startY - 16} V ${targetY + 16} Q ${corridor} ${targetY} ${corridor - 16} ${targetY} H ${ARROW_TIP_X + 18}`}
+          d={`M ${ARROW_TIP_X + 12} ${startY} H ${corridor - 16} Q ${corridor} ${startY} ${corridor} ${startY - 16} V ${targetY + 16} Q ${corridor} ${targetY} ${corridor - 16} ${targetY} H ${ARROW_TIP_X + 22}`}
           fill="none"
           stroke={color}
           strokeWidth={CONNECTOR_WIDTH}
           strokeLinecap="round"
         />
         <polygon
-          points={`${ARROW_TIP_X},${targetY} ${ARROW_TIP_X + 18},${targetY - 7.5} ${ARROW_TIP_X + 18},${targetY + 7.5}`}
+          points={`${ARROW_TIP_X},${targetY} ${ARROW_TIP_X + 22},${targetY - 9} ${ARROW_TIP_X + 22},${targetY + 9}`}
           fill={color}
         />
         <text
@@ -319,7 +321,7 @@ export default function GuidedCodingSkillTimeline() {
           textAnchor="middle"
           fill={color}
           fontFamily="Segoe UI, sans-serif"
-          fontSize="11"
+          fontSize={LABEL_SIZE}
           fontWeight="600"
         >
           {label}
