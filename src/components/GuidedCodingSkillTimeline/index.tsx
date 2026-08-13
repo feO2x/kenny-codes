@@ -123,16 +123,18 @@ const STEP_HEIGHT = 46;
 const CARD_PADDING = 22;
 const CARD_GAP = 16;
 const CARD_X = 20;
-const CARD_WIDTH = 580;
-const CARD_RIGHT = CARD_X + CARD_WIDTH;
+const CARD_WIDTH = 660;
 const TEXT_X = 68;
-const SVG_WIDTH = 730;
+const SVG_WIDTH = 700;
 const CONNECTOR_WIDTH = 4;
 
-// Corridors in the gutter right of the cards, for the two iteration arrows.
-// The inner one carries the shorter hop, so the two never cross.
-const INNER_CORRIDOR_X = 638;
-const OUTER_CORRIDOR_X = 682;
+// The two iteration arrows run over the cards, in the empty band right of the
+// step text. Keep both corridors left of the card edge, and the arrow heads
+// left of both corridors, or the arms invert and the heads flip outward.
+const INNER_CORRIDOR_X = 604;
+const OUTER_CORRIDOR_X = 644;
+// Where a head stops, just right of the longest text it points at.
+const ARROW_TIP_X = 430;
 
 const description =
   'Timeline of the Guided Coding skills. Run guided-coding-setup once per repository. ' +
@@ -300,13 +302,14 @@ export default function GuidedCodingSkillTimeline() {
     return (
       <g key={label}>
         <path
-          d={`M ${CARD_RIGHT + 2} ${startY} H ${corridor - 16} Q ${corridor} ${startY} ${corridor} ${startY - 16} V ${targetY + 16} Q ${corridor} ${targetY} ${corridor - 16} ${targetY} H ${CARD_RIGHT + 16}`}
+          d={`M ${ARROW_TIP_X + 10} ${startY} H ${corridor - 16} Q ${corridor} ${startY} ${corridor} ${startY - 16} V ${targetY + 16} Q ${corridor} ${targetY} ${corridor - 16} ${targetY} H ${ARROW_TIP_X + 18}`}
           fill="none"
           stroke={color}
           strokeWidth={CONNECTOR_WIDTH}
+          strokeLinecap="round"
         />
         <polygon
-          points={`${CARD_RIGHT - 2},${targetY} ${CARD_RIGHT + 16},${targetY - 7.5} ${CARD_RIGHT + 16},${targetY + 7.5}`}
+          points={`${ARROW_TIP_X},${targetY} ${ARROW_TIP_X + 18},${targetY - 7.5} ${ARROW_TIP_X + 18},${targetY + 7.5}`}
           fill={color}
         />
         <text
