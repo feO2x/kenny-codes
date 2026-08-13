@@ -10,8 +10,6 @@ when written. Omit the issue segment when work has no tracker issue. Plan Deviat
 `YYYY-MM-DD-HHMM-<issue-id>-plan-deviations.md`, or the corresponding topic when there is no issue.
 Do not rename historical documents solely to conform to the current format.
 
-In this repository, the issue segment is the four-digit GitHub issue number of the work item.
-
 Plans are frozen when their Planning Phase ends. From then on, the only permitted edit is checking
 an acceptance criterion (`- [ ]` to `- [x]`) after the implementation and relevant feedback loops
 verify it. Never reword, add, remove, or reorder criteria in a frozen plan. Plan Deviations
