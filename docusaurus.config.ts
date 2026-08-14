@@ -71,6 +71,17 @@ const config: Config = {
 
   plugins: [
     [
+      "@docusaurus/plugin-client-redirects",
+      {
+        redirects: [
+          {
+            from: "/docs/guided-coding/implementation-phase",
+            to: "/docs/guided-coding/implementing-phase",
+          },
+        ],
+      },
+    ],
+    [
       "@docusaurus/plugin-ideal-image",
       {
         quality: 85,

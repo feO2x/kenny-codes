@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 3
 title: Planning Phase
 ---
 
@@ -17,55 +17,78 @@ Start a new conversation with your coding agent and iteratively create a plan to
 - **Give the agent a role.** I use something like "With you being an expert .NET architect" in my first prompt of the planning phase. This focuses the agent on planning rather than jumping into implementation. Assigning roles tends to produce better results in my experience.
 - **Discuss the feature.** Ask the agent how it would approach the problem. Review its suggestions about elements like design, refactorings, testing, and performance. Bring your own thoughts and questions to the table — this is a conversation, not delegation.
 - **End with repeated sanity checks.** At the end of the planning phase, I typically ask *"Would you change anything about the plan?"* This often catches things I didn't think of. Do this repeatedly until the plan stabilizes.
-- **Commit the plan as a markdown file in the git repo.** They serve as a project-specific immutable decision record. They form a history, similar to Event Sourcing.
+- **Commit the plan as a markdown file in the git repo.** Plans serve as a project-specific decision record. They form a history, similar to Event Sourcing.
+
+:::tip[The Opinionated Path]
+I open a **fresh conversation** and describe the context, then ask for an investigation rather than a solution:
+
+> *"With you being an expert .NET architect, can you please investigate the codebase and report back how you would tackle this problem?"*
+
+Then I discuss this with the agent until I have understood the suggested approach. Nothing is created during this conversation — no issue, no branch, no file. Sometimes it ends with the conclusion that the change isn't worth making, and then an untouched repository is exactly what I want to be left with.
+
+Only once we agree on the general direction do I run `/guided-coding-prepare-issue-for-plan`, which creates an empty tracker issue and checks out a clean local branch named after it. The issue body stays empty at this point; it gets filled with the finished plan later.
+:::
 
 ## Plan Structure
 
 After some experimentation, I settled on three sections which are quite common in Agile Development:
 
 1. **Rationale** — Why do we want to build this? Why is this feature needed or why does this bug need fixing? This gives the agent context for the greater goal.
-2. **Acceptance Criteria** — Bullet points that must be fulfilled for the feature to be approved. The agent in the implementation phase will use these to check off each aspect of the feature after it's been implemented.
+2. **Acceptance Criteria** — Bullet points that must be fulfilled for the feature to be approved. The agent in the Implementing Phase will use these to check off each aspect of the feature after it's been implemented.
 3. **Technical Details** — Important parts of the codebase, extension points, types to modify or add, and design direction.
 
-Of course, you are free to use your own structure.
+Of course, you are free to use your own structure. What matters is that the plan states *why*, states *what must be true when it's done* in a way you can actually verify, and gives enough technical direction that a senior engineer — or a competent agent — can implement it without guessing at your intent.
 
 Keep plans focused. With Anthropic models in particular (Opus, Sonnet), plans tend to become very detailed with implementation phases and step-by-step instructions that the agent doesn't actually need. The models are smart enough to figure out the implementation order themselves. A plan that's too detailed can actually steer the agent in the wrong direction, because if you missed something, the overly prescriptive structure leaves no room for the agent to adapt. Therefore, use AGENTS.md or a skill to limit the plan size.
 
 A plan is not an epic, a user story, or an initiative — it should contain technical details. You should have technical knowledge to discuss and review these plans effectively.
 
-## Steering Plan Structure with AGENTS.md
+:::tip[The Opinionated Path]
+Once the approach is settled, I run `/guided-coding-write-plan` in the same conversation. It writes the plan into `ai-plans/` with the three sections above and a UTC-timestamped filename.
 
-To steer agents to write plans in the aforementioned structure, I usually place this file in `ai-plans/AGENTS.md`. Read the contents carefully. You might need to adjust them for your specific project. This AGENTS.md also contains instructions for writing plan deviation files, see the Guiding Phase for when this document is needed.
+The skill is explicitly not allowed to *start* the planning conversation — it records the outcome of one. If you invoke it before you have discussed the approach, you get exactly the kind of plan this methodology is trying to avoid: one nobody thought about.
 
-```md
-# AGENTS.md for AI plans
+I invoke it **once per plan**. Every revision that follows is a plain prompt — "tighten the third acceptance criterion", "we discussed X but it's missing" — and the agent edits the draft like any other file. I only reach for the skill again for a genuinely new document, such as a follow-up plan after the Guiding Phase.
 
-*Version 1.1*
+The filename convention and the reasoning behind it live on [The Plan Record](./plan-record.md) page.
+:::
 
-This directory contains Markdown plans and plan deviation records, plus this instruction file. These documents follow the [Guided Coding](https://kenny-codes.net/docs/guided-coding/) approach.
+## Reviewing the Plan
 
-File names begin with the four-digit GitHub issue number and a short kebab-case description. When an issue has multiple documents, insert a zero-based sequence after the issue number, for example `0015-0-feature.md`, `0015-1-optimization.md`, and `0015-2-plan-deviations.md`. Do not rename or restructure completed historical plans solely to conform to the current rules.
+The plan is the cheapest place to catch a bad idea. Fixing a design flaw in a plan costs a paragraph; fixing it after implementation costs a Guiding Phase, a follow-up plan, and another implementation run.
 
-## How to Write Plans
+So review it properly:
 
-1. Every plan starts with a `# Title` and contains exactly three sections, in this order: `## Rationale`, `## Acceptance Criteria`, and `## Technical Details`.
-2. The Rationale briefly describes the problem and the overarching goal of addressing it. Keep it to one or two short paragraphs unless additional context is necessary to understand the change.
-3. Acceptance Criteria contains observable and verifiable outcomes using Markdown task-list items (`- [ ]`). Describe what must be true when the work is complete, not the individual implementation steps.
-4. Technical Details records the important implementation decisions, constraints, affected components, and non-obvious interactions. Include enough information for an implementer to understand the intended design without prescribing the complete implementation. Assume the implementer is a senior software engineer.
-5. Use code examples in Technical Details when they define an important contract more clearly and concisely than prose, such as API signatures, central interfaces, or DTO shapes. Keep them minimal, omit implementation bodies and routine context, and identify them as exact or illustrative when this is not obvious. Avoid step-by-step instructions, exhaustive file lists, and background knowledge expected of a senior software engineer.
-6. When behavior changes, include an acceptance criterion requiring appropriate automated test coverage. Describe specific test cases in Technical Details only when they are not obvious from the acceptance criteria.
-7. Include microbenchmarks only for changes where performance is a relevant risk or requirement. Add them to Acceptance Criteria and describe benchmark scenarios in Technical Details only when those scenarios are not self-evident.
-8. Keep plans concise. Prefer decisions, constraints, and outcomes to explanations of routine implementation work.
+- **Read it yourself.** Do you understand every technical decision in it? If not, ask the agent to explain, and keep asking until you do.
+- **Check that acceptance criteria are verifiable.** "The API is fast" is not a criterion. "The benchmark shows no additional allocations on the happy path" is.
+- **Check the claims.** Agents confidently reference types, files, and extension points that don't exist. Verify the ones the design hinges on.
+- **Get a second opinion.** For larger or riskier plans, I open a fresh conversation with another agent and have it review the draft. An agent that just wrote a plan is a poor judge of it; a fresh one is far more likely to notice that an acceptance criterion is unfalsifiable or that a whole failure mode went unaddressed.
+- **Ask the closing question, repeatedly.** *"With you being the expert, would you change anything about the plan?"* Keep asking until the answer stops producing changes.
 
-Use these rules for follow-up plans, too.
+None of this is a linear checklist. Discussing, reviewing, and revising form a cycle you go around several times: the review turns up findings, the findings turn into discussion, the discussion turns into a revised draft, and that draft deserves another look. The draft itself gets written only once, at the start — from then on you change it by asking, the same way you change any other file. The phase is over when the cycle stops producing changes, not when you have performed each step once.
 
-## How to Write Plan Deviation Files
+If that sounds like a lot of conversation for one markdown file, it is. That is where the 30 to 90 minutes go, and it is the cheapest hour in the whole workflow.
 
-When users find substantial issues in the Guiding Phase and create new plans to fix these, a single plan deviation file sums up the differences from the original plan and its follow-up plans. They do not use the same structure as plans, you can use any format that clearly communicates the differences. Often, a feature-based approach is appropriate.
+:::tip[The Opinionated Path]
+For larger or tougher plans, I use `/guided-coding-review-plan` in a **fresh conversation** with another coding agent. It reports findings only and never edits the plan — it checks acceptance criteria for verifiability, validates claims about existing code, and judges whether relevant risks like error handling, migration, performance, and security boundaries were considered.
 
-While the format is flexible, include the following information:
+Then it's back to the main conversation for another round. There is a constant back and forth between me and the main agent until both of us are satisfied.
+:::
 
-- Reference every plan included in the comparison.
-- Describe what was originally specified, what the codebase actually does, and why the change was made.
+## Ending the Phase
 
-```
+The Planning Phase ends with a deliberate act: you commit the plan.
+
+That commit matters more than it looks. Up to that point the plan is a draft and anything can change. After it, the plan is **frozen** — a record of what you decided at that moment. You do not edit it later to match what actually happened. If the decision turns out to be wrong, you write a follow-up plan that supersedes it. If the implementation ends up somewhere else, you write a Plan Deviations document that explains why.
+
+The only edit permitted on a frozen plan is ticking an acceptance criterion from `- [ ]` to `- [x]`, and only once the implementation genuinely satisfies it.
+
+This is what makes `ai-plans/` a decision record rather than a pile of stale documents. [The Plan Record](./plan-record.md) explains the rules and the reasoning in full.
+
+:::tip[The Opinionated Path]
+I run `/guided-coding-finish-plan`. It validates the filename and the section structure, verifies that the plan's claims about existing files hold, and commits the plan with a path-limited commit so that nothing unrelated ends up in it.
+
+It then offers to publish the plan body as the description of the tracker issue. Only the first plan for an issue is published there; follow-up plans are not.
+
+That commit is the moment the Planning Phase ends and the plan freezes.
+:::

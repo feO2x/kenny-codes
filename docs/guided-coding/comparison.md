@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 11
 title: "Comparison: Vise Coding & Spec-Driven Development"
 ---
 
@@ -48,12 +48,13 @@ The original flavor of SDD uses formal specification languages — Z-notation, A
 
 ### Modern SDD: GitHub Spec Kit
 
-[GitHub's Spec Kit](https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/) adapts the *idea* of specs for AI-assisted development, but uses natural language rather than formal methods. It defines four phases:
+[GitHub's Spec Kit](https://github.com/github/spec-kit) adapts the *idea* of specs for AI-assisted development, but uses natural language rather than formal methods. Its current core workflow carries several artifacts through development:
 
-1. **Specify** — describe what you're building and why, the agent generates a detailed spec.
-2. **Plan** — provide your tech stack and constraints, the agent creates a technical plan.
-3. **Tasks** — the agent breaks the spec and plan into small, reviewable work items.
-4. **Implement** — the agent tackles tasks one by one.
+1. **Constitution** — establish the project's governing principles and development guidelines.
+2. **Specify** — describe what you're building and why; the agent generates a detailed spec.
+3. **Plan** — provide your tech stack and constraints; the agent creates a technical plan.
+4. **Tasks** — the agent breaks the spec and plan into small, reviewable work items.
+5. **Implement** — the agent tackles the generated tasks.
 
 Spec Kit puts the specification at the center as a "source of truth" that drives everything downstream. It's a more structured and heavyweight process than Guided Coding, with a strong emphasis on up-front specification.
 
@@ -68,19 +69,25 @@ Spec Kit puts the specification at the center as a "source of truth" that drives
 - **Specification depth**: Spec Kit's specify phase focuses on user journeys, experiences, and outcomes — a product-level document. Guided Coding plans are technical documents with rationale, acceptance criteria, and implementation details. They're written *by* developers *for* developers (and agents).
 - **Review phase**: Guided Coding has an explicit guiding phase where you spend the majority of your time reviewing code, evaluating design, and deciding whether to iterate. Spec Kit's review happens at phase boundaries but doesn't formalize the code review as a distinct, time-intensive phase.
 - **Iteration**: Guided Coding explicitly encourages going back — from guiding to planning, from guiding to implementation. The feedback arrows are central to the methodology. Spec Kit's phases are more sequential, though it does mention refining specs.
-- **Weight**: Spec Kit is a heavier process with tooling (`specify` CLI, slash commands, generated artifacts). Guided Coding is deliberately lean — markdown files in git, any coding agent, no special tooling required.
+- **Weight**: Spec Kit is a fuller software-development workflow with tooling (`specify` CLI, commands or skills, templates, and generated artifacts). Guided Coding deliberately narrows its durable artifacts to the decisions around a change: plans, optional follow-up plans and corresponding Plan Deviations document.
 - **Adoption**: Guided Coding can be adopted incrementally with minimal setup. You start writing plans in markdown and reviewing code more thoroughly. Spec Kit requires buying into its toolchain and artifact structure.
+- **Record**: Spec Kit's spec is a living source of truth kept in sync with the system. Guided Coding's `ai-plans/` is an append-only record of decisions: plans freeze, and corrections are appended rather than merged in. One optimizes for describing the system as it is, the other for explaining how it got that way.
+
+Guided Coding does ship [optional skills](https://github.com/feO2x/guided-coding) that automate the bookkeeping — creating the issue, naming and committing the plan, and closing the record. The distinction is not that one approach is "real" only when its CLI is installed. It is the amount of the software-development process each approach carries forward as repository context.
+
+Spec Kit intentionally materializes a constitution, specification, plan, tasks, and the instructions that move between them. [BMad](https://github.com/bmad-code-org/BMAD-METHOD) takes a similarly broad view, carrying product, architecture, UX, development, and testing context across specialized workflows. That can provide valuable standardization and traceability, especially across a larger team, but the additional artifacts and instructions also give agents more persistent context to read and usually increase token use. Guided Coding keeps a much narrower record, closer to Vise Coding in weight: enough to preserve the decisions around a change, while leaving the rest of the software-development process outside the agent workflow.
 
 ## At a glance
 
 | | **Vibe Coding** | **Vise Coding** | **Spec-Driven (Spec Kit)** | **Guided Coding** |
 |---|---|---|---|---|
 | **Core idea** | Accept everything, never read the code | Constrain every change via rules and review | Spec as source of truth, agent generates artifacts | Plan iteratively, implement autonomously, guide thoroughly |
-| **Planning** | None | Via rules and prompts | Formal specify → plan → tasks pipeline | Collaborative markdown plans committed to git |
+| **Planning** | None | Via rules and prompts | Constitution → specify → plan → tasks pipeline | Collaborative markdown plans committed to git |
 | **Change size** | Unbounded | Small, one at a time | Task-sized chunks | Plan-sized (hundreds to thousands of lines) |
 | **Review** | None (look at the running app) | Every change, including docs | At phase boundaries | Dedicated guiding phase (most time spent here) |
 | **Iteration** | Forward only | Change-level iteration | Phase-level refinement | Explicit loops back to planning or implementation |
-| **Tooling required** | Any coding agent | Markdown + any coding agent | Spec Kit CLI + coding agent | Markdown + any coding agent |
+| **Decision record** | None | Docs updated per change | Spec kept in sync | Append-only: frozen plans, follow-ups, deviations |
+| **Tooling required** | Any coding agent | Markdown + any coding agent | Spec Kit CLI + coding agent | Markdown + any coding agent (skills optional) |
 | **Adoption effort** | Zero | Low | Medium | Low |
 | **Best suited for** | Prototypes, throwaway projects | TDD-heavy workflows, small changes | Large teams, product-level specs | Iterative feature development, enterprise software |
 
