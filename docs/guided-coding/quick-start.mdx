@@ -1,13 +1,13 @@
 ---
 sidebar_position: 2
-title: Quick Start
+title: Getting Started
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import GuidedCodingSkillTimeline from '@site/src/components/GuidedCodingSkillTimeline';
 
-# Quick Start
+# Getting Started
 
 This page walks through **the Opinionated Path** — my own setup, packaged as six Agent Skills that live at [github.com/feO2x/guided-coding](https://github.com/feO2x/guided-coding).
 
@@ -78,7 +78,7 @@ The two arrows on the right are the same iteration loops as in the phase diagram
 
 Notice how much of the Planning Phase is conversation. The skills bracket the discussion; they don't replace it. If your Planning Phase consists of running three skills back to back, you have automated the paperwork and skipped the work.
 
-Each skill runs **once** per plan. The repetition in that phase is conversational: you revise the draft by prompting the agent, exactly as you would ask it to change any other file in the repository.
+`guided-coding-write-plan` runs **once** per plan. The repetition in the Planning Phase is conversational: you revise the draft by prompting the agent, exactly as you would ask it to change any other file in the repository. The other skills run at the transitions described below.
 
 ## The Walkthrough
 
@@ -110,11 +110,11 @@ Run this once per repository, and again after upgrading to a new Guided Coding v
 </TabItem>
 </Tabs>
 
-The skill reads your existing instruction files, build manifests, scripts, and CI configuration to discover the feedback loops that already exist. It then writes or updates the root `AGENTS.md` with a section on implementing plans, a list of confirmed feedback-loop commands, and a "this is your space" section for the agent's own notes. It also creates `ai-plans/` with its own `AGENTS.md`.
+The skill reads your existing instruction files, build manifests, scripts, and CI configuration to discover the feedback loops that already exist. It then writes or updates four small pieces of root guidance: how frozen plans are treated during implementation, the confirmed feedback-loop commands, a link to the plan-writing instructions, and a "this is your space" section for the agent's own notes. It also creates `ai-plans/` with its own `AGENTS.md`.
 
-It does not invent commands. If it cannot confirm that a test or lint command actually exists and works, it says so instead of listing it. It never touches existing plans.
+It does not invent commands. It runs them only when they are safe and reasonably bounded, reports which commands it could not run, and never claims that an unexecuted command passed. It never touches existing plans.
 
-Read the resulting diff before you commit it. This file steers every future conversation, so it is worth the two minutes. See [Keep Your Rules Files Small](./rules-files.md) for why it should stay short.
+Read the resulting diff before you commit it. This file steers every future conversation, so it is worth the two minutes. See [What Belongs in a Rules File](./rules-files.md) for how to decide what earns a place there.
 
 ### Step 1: Discuss the approach
 
@@ -239,7 +239,7 @@ Take those findings back to the main conversation and work through them. Then as
 
 > *"With you being the expert, would you change anything about the plan?"*
 
-This one question has caught more things for me than any review checklist. Ask it until the answer stops producing changes you care about. If you doo, loop back to step 4.
+This one question has caught more things for me than any review checklist. Ask it until the answer stops producing changes you care about. If it does, loop back to step 4.
 
 Steps 4 through 6 are a cycle, not a checklist. Note what is *not* in that cycle: `guided-coding-write-plan` ran once, back in step 3. The loop is discussion, review, and revision by prompt. You are done when you and the agent both stop finding things.
 
@@ -294,9 +294,9 @@ Then decide:
 
 The [Guiding Phase](./guiding-phase.mdx) page covers what to look for.
 
-### Step 10: Record the deviations, then open the PR
+### Step 10: Write and review the deviations, then open the PR
 
-Before opening the pull request, ask whether the finished code still matches what the plans decided. If you made significant manual changes during the Guiding Phase, or the agent solved something differently:
+Once you are satisfied with the implementation, run:
 
 <Tabs groupId="guided-coding-install">
 <TabItem value="claude" label="Claude Code plugin" default>
@@ -322,9 +322,21 @@ Before opening the pull request, ask whether the finished code still matches wha
 </TabItem>
 </Tabs>
 
-The skill inspects the full implementation delta and the commit history, decides whether a document is even warranted — routine implementation choices don't count — and writes one when it is. Its contents become the pull request description.
+The skill reads every plan for the issue, inspects the full implementation delta and commit history, and decides what record is required:
 
-The goal: **a reviewer should need to read only the issue's first plan and the Plan Deviations document to understand the whole change.**
+- If follow-up plans exist, it **always** writes a Plan Deviations document that summarizes which earlier decisions they superseded and where the implementation ended up.
+- With a single plan, it writes one only when the implementation materially departed from an explicit decision. Routine implementation choices still don't count.
+- With a single plan and no material deviations, it reports that conclusion and writes nothing.
+
+The skill only writes the document and reports its path. It does not commit anything, create a pull request, or publish the contents. Review the draft and revise it with ordinary prompts until you accept it.
+
+After approval, either finish the work yourself or use a normal prompt:
+
+> *"Please commit the Plan Deviations document, create a pull request, and use the document's contents as the pull request description."*
+
+When no document was required, create the pull request normally.
+
+The goal: **a reviewer should need to read only the issue's first plan and, when one exists, the Plan Deviations document to understand the whole change.** Follow-up plans always cause that final document to be created, so their decisions are not hidden from the reviewer.
 
 ## A Compressed Cheat Sheet
 
@@ -338,7 +350,8 @@ The goal: **a reviewer should need to read only the issue's first plan and the P
 | The draft wants a second opinion | `guided-coding-review-plan` |
 | Nobody is finding anything anymore | `guided-coding-finish-plan` |
 | Plan committed and frozen | *— implement, then review* |
-| Implementation done, code diverged from the plans | `guided-coding-write-deviations` |
+| Implementation reviewed | `guided-coding-write-deviations` |
+| Deviations reviewed, or no document required | *— commit and open the pull request* |
 
 This table uses the portable names. On the Claude Code plugin they are `/guided-coding:setup`, `/guided-coding:write-plan`, and so on — the prefix becomes a namespace and the rest of the name stays put.
 

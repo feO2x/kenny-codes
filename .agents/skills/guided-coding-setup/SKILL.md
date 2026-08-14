@@ -5,7 +5,7 @@ metadata:
     github-path: skills/guided-coding-setup
     github-ref: refs/heads/main
     github-repo: https://github.com/feO2x/guided-coding
-    github-tree-sha: cb4deacace01e85543ea232fd7ccb9234f8d1f03
+    github-tree-sha: 45dc5336407039c7a5c1422eb37ad7069a11724f
 name: guided-coding-setup
 ---
 # Set Up Guided Coding

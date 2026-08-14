@@ -67,7 +67,7 @@ I once asked an agent to optimize memory allocations in a hot path in [Light.Por
 :::tip[The Opinionated Path]
 I document every feedback loop by its exact command in the root `AGENTS.md`, with a note about what it verifies. Agents are good at running commands they've been told about and bad at guessing them.
 
-`/guided-coding-setup` builds this section for you: it discovers the commands from your build files, scripts, and CI configuration, runs the safe ones to confirm they still work, and refuses to list a command it could not verify. Re-run it when your tooling changes.
+`/guided-coding-setup` builds this section for you: it discovers commands from your build files, scripts, and CI configuration, runs them when they are safe and reasonably bounded, and reports which ones it could not run. It never claims that an unexecuted command passed. Re-run it when your tooling changes.
 
 A missing feedback loop is itself plan material. If a change needs a benchmark or a test harness that doesn't exist yet, the plan should say so explicitly rather than assuming the agent will improvise one.
 :::

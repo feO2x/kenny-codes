@@ -69,7 +69,7 @@ const cards: Card[] = [
       {
         kind: 'skill',
         title: 'guided-coding-finish-plan',
-        description: 'Commits and freezes the plan; publishes it to the issue.',
+        description: 'Commits and freezes the plan; offers to publish it to the issue.',
       },
     ],
   },
@@ -101,7 +101,7 @@ const cards: Card[] = [
       {
         kind: 'skill',
         title: 'guided-coding-write-deviations',
-        description: 'Only when the code materially departs from the plans.',
+        description: 'Always for follow-ups; otherwise for material departures.',
       },
     ],
   },
@@ -111,8 +111,8 @@ const cards: Card[] = [
     steps: [
       {
         kind: 'manual',
-        title: 'Open the pull request',
-        description: 'Reviewers read the first plan and the Plan Deviations.',
+        title: 'Review the record and open the PR',
+        description: 'Commit and publish with a normal prompt after approval.',
       },
     ],
   },
@@ -145,10 +145,12 @@ const description =
   'guided-coding-review-plan in a fresh conversation, and discuss again. Discussion, review, and ' +
   'revision repeat until the plan stabilizes, after which guided-coding-finish-plan ' +
   'commits and freezes it. In the Implementing Phase, hand the frozen plan to a fresh conversation ' +
-  'without any skill. In the Guiding Phase, review every changed file, and run ' +
-  'guided-coding-write-deviations when the code materially departs from the plans. Two arrows lead ' +
+  'without any skill. In the Guiding Phase, review every changed file, then run ' +
+  'guided-coding-write-deviations whenever follow-up plans exist ' +
+  'or the code materially departs from the plans. Two arrows lead ' +
   'back from the Guiding Phase: a small issue returns to the Implementing Phase, and a large issue ' +
-  'returns to the start of the Planning Phase. Finally, open the pull request.';
+  'returns to the start of the Planning Phase. Finally, review the record and use a normal prompt ' +
+  'to commit it and create the pull request.';
 
 export default function GuidedCodingSkillTimeline() {
   let y = 20;

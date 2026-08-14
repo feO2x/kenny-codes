@@ -51,9 +51,12 @@ Splitting a plan that turned out too large is the most common reason to write on
 
 ## Plan Deviations documents
 
-Follow-up plans capture decisions you changed *before* implementing. A **Plan Deviations document** captures the gap between what the plans decided and what the finished code actually does.
+Follow-up plans capture decisions you changed *before* implementing. A **Plan Deviations document** closes the record for the reviewer. It serves two related purposes:
 
-You write one at the end of a cycle, when the implementation materially changed or rejected an explicit decision about:
+- When follow-up plans exist, it summarizes how they changed the first plan and what the final implementation does. In this case, you **always** write one — even when the code follows every accepted plan exactly.
+- With a single plan, it records any material gap between what that plan decided and what the finished code actually does.
+
+An implementation deviation is material when it changes or rejects an explicit decision about:
 
 - an acceptance outcome;
 - a public contract or data model;
@@ -61,13 +64,13 @@ You write one at the end of a cycle, when the implementation materially changed 
 - a security or performance constraint; or
 - anything else a future maintainer would need in order to understand the design.
 
-You do **not** write one for routine implementation choices the plan deliberately left open. If the plan didn't decide it, the implementation didn't deviate from it. A document listing every small difference is worse than no document, because it buries the two entries that mattered.
+With a single plan and no material deviations, you do not create a document merely to say that everything matched. You also do **not** add entries for routine implementation choices the plans deliberately left open. If the record didn't decide it, the implementation didn't deviate from it. A document listing every small difference is worse than no document, because it buries the two entries that mattered.
 
 One thing a Plan Deviations document cannot do: resolve an unmet acceptance criterion. Documenting that a criterion wasn't met does not make it met. It stays unchecked unless an accepted follow-up plan explicitly supersedes it.
 
-A good deviation entry answers four questions:
+A good follow-up summary identifies the original decision, the exact follow-up plan that superseded it, why it changed, and the final outcome. A good implementation-deviation entry answers four questions:
 
-- **Original plan** — what was specified.
+- **Plan decision** — the exact plan filename and what it specified.
 - **Implemented** — what the code actually does.
 - **Why** — what caused the change. Never omit this; it is the entire point of the document.
 - **Impact** — trade-offs, consequences, deferred work.
@@ -78,7 +81,7 @@ Like plans, these documents freeze once committed.
 
 Here is the practical payoff, and the reason the deviations document is worth writing.
 
-A pull request produced this way comes with a promise: **a reviewer needs to read the issue's first plan and the Plan Deviations document, and they have the whole picture.** The plan tells them what was intended and why. The deviations document tells them where the result differs and why that was right.
+A pull request produced this way comes with a promise: **a reviewer needs to read the issue's first plan and, when one exists, the Plan Deviations document, and they have the whole picture.** The first plan explains the original intent. The closing document summarizes every follow-up and every material implementation departure. If there was only one plan and the implementation matched it, that plan already is the whole picture.
 
 Without that pair, a reviewer facing a few thousand lines of diff has to reverse-engineer intent from code. With it, they can spend their attention on judging decisions instead of reconstructing them.
 
@@ -112,7 +115,7 @@ The skills refuse to overwrite or reuse an existing plan or Plan Deviations file
 
 - `/guided-coding-setup` creates `ai-plans/` and writes its `AGENTS.md`. Run it again to upgrade; it preserves your project-specific additions and never touches existing plans.
 - `/guided-coding-write-plan` handles both first plans and follow-up plans, reading every earlier document for the issue before writing.
-- `/guided-coding-write-deviations` first decides whether a document is warranted at all, and reports "no material deviations" rather than inventing entries. When a PR exists, it offers to publish the accepted document as the description.
+- `/guided-coding-write-deviations` always writes a document when follow-up plans exist. With a single plan, it reports "no material deviations" rather than inventing entries when the implementation matched. The skill only writes the file. After reviewing and accepting it, I commit it, create the pull request, and use its contents as the PR description with a normal prompt.
 
-See the [Quick Start](./quick-start.mdx) for the full sequence.
+See [Getting Started](./quick-start.mdx) for the full sequence.
 :::

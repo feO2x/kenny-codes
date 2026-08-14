@@ -17,11 +17,11 @@ This is the most important and time-consuming phase. You review all the generate
 - **Also let another agent review.** I usually open a new conversation and use review features of coding agents for an additional code review.
 - **Learn what you don't know.** If the agent wrote something you don't understand, learn that concept before judging it. Ask the model to explain it.
 - **Decide on the appropriate response:**
-  - If everything looks good → success, create a PR.
+  - If everything looks good → success, close the record and create the PR.
   - If there's a small issue → iterate back to the Implementing Phase with a targeted prompt.
   - If there's a large issue (wrong data structures, framework mechanisms misused, design flaws) → go back to the Planning Phase and write a follow-up plan.
 - **Make manual changes if needed.** Your coding agent doesn't need to do all the work — use it as a tool to write the code you would write yourself, just faster.
-- **Record the deviations** before you open the PR, if the finished code materially departs from what the plans decided.
+- **Close the record.** Follow-up plans always require a Plan Deviations document; with a single plan, write one only for material departures.
 
 **There is no skill for the review itself, and there never will be.** An agent can give you a second opinion, and a useful one. It cannot take responsibility for the code. That transfer is the thing Guided Coding exists to prevent.
 
@@ -53,16 +53,16 @@ When you go back to Planning, you write a **follow-up plan** rather than editing
 
 ## Closing the Cycle
 
-Before opening the pull request, ask one question: does the finished code still match what the plans decided?
+Once you are satisfied with the implementation, ask one question: does the finished code still match what the plans decided?
 
-If it does, you're done — open the PR. If it doesn't, write a **Plan Deviations document** recording where the implementation went somewhere else and why. This is not paperwork. It is the difference between a reviewer who understands your change and one who is guessing.
+If follow-up plans exist, always write a **Plan Deviations document**. It summarizes which decisions changed across those plans and what the finished code does, giving the reviewer one closing record instead of a scavenger hunt through several files.
 
-Write one when an explicit plan decision materially changed — an acceptance outcome, a public contract, an architectural boundary, a security or performance constraint. Don't write one for routine implementation choices the plan deliberately left open; entries that don't matter bury the ones that do.
+With a single plan, write one only when the implementation materially changed an explicit decision — an acceptance outcome, a public contract, an architectural boundary, a security or performance constraint. Don't write one for routine implementation choices the plan deliberately left open; entries that don't matter bury the ones that do.
 
-The aim is a specific promise to whoever reviews the PR: **reading the issue's first plan and the Plan Deviations document is enough to understand the whole change.** [The Plan Record](./plan-record.md) covers what belongs in such a document.
+The aim is a specific promise to whoever reviews the PR: **reading the issue's first plan and, when one exists, the Plan Deviations document is enough to understand the whole change.** [The Plan Record](./plan-record.md) covers what belongs in such a document.
 
 :::tip[The Opinionated Path]
-Depending on how much the codebase changed during the Guiding Phase, I run `/guided-coding-write-deviations`. It reads every plan for the issue, inspects the complete implementation delta and the commits that produced it, and decides whether a document is warranted at all — if there are no material deviations, it says so and writes nothing.
+I run `/guided-coding-write-deviations`. It reads every plan for the issue and inspects the complete implementation delta. Follow-up plans always produce a document. With a single plan and no material deviations, the skill says so and writes nothing.
 
-The contents of that file become the **description of the pull request**. Reviewers should only need to read the issue's first plan and the plan deviations file to get the whole picture.
+The skill writes the document and stops. I review it and request corrections with ordinary prompts until I accept it. Then I commit it, create the pull request, and use its contents as the PR description — either manually or with a normal prompt to the agent.
 :::

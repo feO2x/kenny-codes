@@ -15,11 +15,11 @@ Guided Coding is a three-phase methodology — **Plan**, **Implement**, **Guide*
 
 - **Plan** iteratively with the agent and commit the plan to git. Most important question at the end of this phase: "Would you change anything about the plan?" Ask this repeatedly until the plan stabilizes. When the phase ends, the plan is **frozen** — from then on it is a record of what you decided, not a document you keep editing.
 - **Implement** by handing off a single focused plan to the coding agent in a fresh conversation, backed by automated feedback loops like linting, automated testing, automated benchmarks, etc.
-- **Guide** by thoroughly reviewing all generated code — this is where you spend most of your time. **Understand the code**, identify issues, and ensure quality. For small issues, prompt the agent to go back to the Implementing Phase. For larger changes, write a follow-up plan together with the agent. When the finished code materially departs from the initial plan, record the differences in a **Plan Deviations** document.
+- **Guide** by thoroughly reviewing all generated code — this is where you spend most of your time. **Understand the code**, identify issues, and ensure quality. For small issues, prompt the agent to go back to the Implementing Phase. For larger changes, write a follow-up plan together with the agent. Close the record with a **Plan Deviations** document whenever follow-up plans exist or the finished code materially departs from the accepted plans.
 
 You never stop guiding — it just changes shape along the way. In Planning, you and the agent map out the route together. In Implementing, you step away and let the plan and your feedback loops keep the agent on track. In Guiding, you take the wheel yourself.
 
-Keep rules files small, find the right plan size empirically for the LLMs you use, and stay vigilant about important software traits like functional correctness, performance, and security.
+Spend rules-file context deliberately, find the right plan size empirically for the LLMs you use, and stay vigilant about important software traits like functional correctness, performance, and security.
 
 ## A Methodology, Not a Framework
 
@@ -33,7 +33,7 @@ So these docs are written in two layers:
 - **The Opinionated Path** — set apart in callouts like the one below. **This is how I work**: exact prompts, exact filenames, and which skill I invoke when. Copy it wholesale, adapt it, or ignore it entirely.
 
 :::tip[The Opinionated Path]
-Callouts like this one show my concrete setup. This is the layer the [Guided Coding skills](https://github.com/feO2x/guided-coding) encode, and the [Quick Start](./quick-start.mdx) walks through it end to end.
+Callouts like this one show my concrete setup. This is the layer the [Guided Coding skills](https://github.com/feO2x/guided-coding) encode, and [Getting Started](./quick-start.mdx) walks through it end to end.
 
 Everything in these callouts is optional. Nothing here is required to practice Guided Coding.
 :::
@@ -45,7 +45,7 @@ Please don't read "I installed the skills" as "I adopted Guided Coding". The ski
 Version 2.0.0 sharpens one idea that was only implicit before: `ai-plans/` is an **append-only decision record**. Plans are not living documents that get edited to match reality. They record what you decided, when you decided it, and — through follow-up plans and Plan Deviations documents — how that decision later changed and why.
 
 - Plans and Plan Deviations documents are **frozen** once committed. The only permitted edit to a frozen plan is ticking an acceptance criterion once the implementation actually satisfies it.
-- Corrections are made by **appending**: a follow-up plan supersedes an earlier decision, a Plan Deviations document records where the finished code diverged.
+- Corrections are made by **appending**: a follow-up plan supersedes an earlier decision, and the closing Plan Deviations document summarizes follow-ups and any material implementation departures.
 - Filenames carry a **UTC timestamp**, so the directory reads in chronological order regardless of issue numbering.
 - The method is distributed as portable **Agent Skills** and an **Agent Plugin** at [github.com/feO2x/guided-coding](https://github.com/feO2x/guided-coding).
 
@@ -63,6 +63,6 @@ That's what Guided Coding is about.
 
 ## Where to Go Next
 
-- Want to try the tooling right away? Start with the [Quick Start](./quick-start.mdx).
+- Want to try the tooling right away? Start with [Getting Started](./quick-start.mdx).
 - Want to understand the method? Read the [Planning](./planning-phase.mdx), [Implementing](./implementing-phase.mdx), and [Guiding](./guiding-phase.mdx) phases in order.
 - Want to know how the plans stack up over time? Read [The Plan Record](./plan-record.md).
