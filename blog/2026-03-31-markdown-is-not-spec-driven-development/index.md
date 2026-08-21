@@ -36,7 +36,7 @@ This is also the level where most AI-oriented markdown workflows like Spec Kit a
 
 Consider that you work on a critical software project where you need to be certain that no bug is delivered (e.g., software for nuclear plants, controller software for medical hardware, avionics). This is one historical branch of specification-driven approaches in the stronger sense: the specification is not just descriptive text, but a formal artifact you can reason about and verify. There are dedicated toolsets for this, for example:
 
-- **[Z notation](https://en.wikipedia.org/wiki/Z_notation)** (Abrial, 1977; further developed at Oxford): Based on set theory and predicate calculus. Used in the IBM CICS project, which won a Queen's Award for Technological Achievement in 1992. Z specs are mathematically precise — they can be proven consistent, and refinement calculus allows you to derive implementations that provably satisfy the spec.
+- **[Z notation](https://en.wikipedia.org/wiki/Z_notation)** (Abrial, 1977; further developed at Oxford): Based on set theory and predicate calculus. Used in the IBM CICS project, which won a Queen's Award for Technological Achievement in 1992. Z specs are mathematically precise - they can be proven consistent, and refinement calculus allows you to derive implementations that provably satisfy the spec.
 - **[Alloy](https://alloytools.org/)** (Jackson, MIT, 1997–present): A "lightweight" formal method using first-order relational logic. The Alloy Analyzer performs exhaustive finite-scope model checking. You write a declarative spec, and the tool automatically finds counterexamples to your assertions. Alloy 6 added mutable state and temporal logic.
 - **[TLA+](https://lamport.azurewebsites.net/tla/tla.html)** (Lamport, 1993–present): [Used at Amazon Web Services](https://lamport.azurewebsites.net/tla/amazon-excerpt.html) to verify distributed systems designs. Specs are mathematical formulas in temporal logic. The TLC model checker exhaustively verifies properties. Famously, AWS engineers found critical bugs in production systems by writing TLA+ specs *after* the systems were already running.
 
@@ -60,14 +60,14 @@ This is not prose about the system. It is a formal model. The Alloy Analyzer can
 
 ### Level 3: Executable Specifications and Model-Driven Architecture
 
-The most ambitious tier, where specifications don't just describe or constrain — they generate:
+The most ambitious tier, where specifications don't just describe or constrain - they generate:
 
 - **Executable UML / [fUML](https://www.omg.org/spec/FUML/)**: UML models with precise enough semantics to be simulated and compiled directly to code. Championed by Shlaer-Mellor and later adopted by OMG's MDA initiative (2001).
 - **[Model-Driven Architecture (MDA)](https://www.omg.org/mda/)**: The OMG's vision of Platform-Independent Models (PIMs) transformed into Platform-Specific Models (PSMs) and then into code via formal, standardized transformations ([QVT](https://www.omg.org/spec/QVT/)). The spec *is* the primary artifact; code is a derived, regenerable output.
-- **[Enterprise Architect](https://sparxsystems.com/products/ea/), [Rhapsody](https://www.ibm.com/products/engineering-rhapsody/), [Rational Rose](https://en.wikipedia.org/wiki/IBM_Rational_Rose)**: Tools that supported round-trip engineering — specifications and code kept in sync bidirectionally. Models could generate code skeletons; code changes could be reflected back into models.
+- **[Enterprise Architect](https://sparxsystems.com/products/ea/), [Rhapsody](https://www.ibm.com/products/engineering-rhapsody/), [Rational Rose](https://en.wikipedia.org/wiki/IBM_Rational_Rose)**: Tools that supported round-trip engineering - specifications and code kept in sync bidirectionally. Models could generate code skeletons; code changes could be reflected back into models.
 - **Domain-Specific Languages (DSLs)**: Custom formal languages for specific problem domains (e.g., [JetBrains MPS](https://www.jetbrains.com/mps/), [Xtext](https://eclipse.dev/Xtext/)), where the "specification" is written in a constrained formal language that compiles directly to implementation.
 
-At this level, specifications are **living artifacts**: they are validated by tools, checked for internal consistency, tested via simulation or model checking, and used to generate code. The spec isn't documentation — it's a machine-readable contract.
+At this level, specifications are **living artifacts**: they are validated by tools, checked for internal consistency, tested via simulation or model checking, and used to generate code. The spec isn't documentation - it's a machine-readable contract.
 
 To make that more tangible, consider an executable state-machine model like this:
 
@@ -90,7 +90,7 @@ So where do modern AI-driven specification tools fall in this hierarchy?
 
 Spec Kit defines a phased process: **Constitution → Specify → Plan → Tasks → Implement**. Each phase produces markdown files. The constitution captures non-negotiable principles. The specification describes features and behavior in natural language. The plan breaks down technical approach. Tasks are small, testable units. An AI agent then implements each task.
  
-Similarly, `AGENTS.md` and `CLAUDE.md` files provide AI agents with project conventions, build instructions, testing commands, and coding patterns — also in natural-language markdown.
+Similarly, `AGENTS.md` and `CLAUDE.md` files provide AI agents with project conventions, build instructions, testing commands, and coding patterns - also in natural-language markdown.
 
 The resulting markdown files are useful, but they are neither formal specifications in the Level 2 sense nor executable, machine-checked specifications in the Level 3 sense. You cannot run a Spec Kit spec to see if the described behavior is what you intended before any code exists. Alloy lets you explore counterexamples to your design before you write a single line of implementation. An executable model can be simulated. A markdown spec is primarily human-readable: humans can discuss and reason about it, while LLMs use it as steering context during implementation.
 
@@ -106,7 +106,7 @@ Nonetheless, her framing strengthens the point: most current AI-agent workflows 
 
 One question matters here: **Is agentic coding just an execution step for informal, structured specifications?** Many LLMs behind coding agents are impressive and can produce very strong results - but they are not deterministic. MDA used [QVT](https://www.omg.org/spec/QVT/) (Query/View/Transformation) to transform PIMs to PSMs. The transformation rules were themselves formally specified. In "modern SDD", the "transformation" is an LLM prompt.
 
-To be fair, this trade-off isn't purely a weakness. Formal methods give you *guarantees* at the cost of *expressiveness* — you can only specify what the formal language can express. LLMs give you *expressiveness* at the cost of *guarantees* — you can describe almost anything, but you can't prove the output is correct. The interesting pragmatic question is whether automated tests can serve as the verification layer that formal specs traditionally provided. Spec Kit's implementation phase does produce tests, and that's not nothing — but it's a fundamentally different kind of assurance than mathematical proof. The stakes determine whether that's sufficient: for avionics software, absolutely not - but it probably is for your enterprise app.
+To be fair, this trade-off isn't purely a weakness. Formal methods give you *guarantees* at the cost of *expressiveness* - you can only specify what the formal language can express. LLMs give you *expressiveness* at the cost of *guarantees* - you can describe almost anything, but you can't prove the output is correct. The interesting pragmatic question is whether automated tests can serve as the verification layer that formal specs traditionally provided. Spec Kit's implementation phase does produce tests, and that's not nothing - but it's a fundamentally different kind of assurance than mathematical proof. The stakes determine whether that's sufficient: for avionics software, absolutely not - but it probably is for your enterprise app.
 
 That difference is exactly why the naming debate matters. **"Spec-Driven Development" sounds like a continuation of a tradition where the specification itself carries strong semantic weight. In agentic coding workflows, the markdown file mostly coordinates decomposition, communication, and sequencing.**
 
@@ -114,6 +114,6 @@ That difference is exactly why the naming debate matters. **"Spec-Driven Develop
 
 Historically, stronger forms of SDD treated the specification or model as the primary artifact and source of truth. That makes sense when the spec can be verified, simulated, transformed, or kept in sync with the implementation. Markdown-first agent workflows do not give you that property. For them, I suggest the opposite emphasis: **focus on the code and use plans as scaffolding**.
 
-Here's what I think these tools actually get right, even if the terminology is wrong: they force *decomposition and sequencing*. Breaking a vague idea into a constitution, a spec, a plan, and discrete tasks is exactly the skill that less-experienced developers struggle with most. The spec itself isn't the valuable artifact — the *process of creating it* is.
+Here's what I think these tools actually get right, even if the terminology is wrong: they force *decomposition and sequencing*. Breaking a vague idea into a constitution, a spec, a plan, and discrete tasks is exactly the skill that less-experienced developers struggle with most. The spec itself isn't the valuable artifact - the *process of creating it* is.
 
 That is why I find [Guided Coding](/docs/guided-coding/) to be a better framing for developers. It is clearer about what is happening: you are using plans, rules, and iterative feedback to guide implementation work done by humans and coding agents. The markdown spec is scaffolding, not the final source of truth. The code is. That is also why it is a bad idea to tell your developers to "do SDD" and then hand them a markdown workflow plus an LLM - they might get lost in SDD's rich history.

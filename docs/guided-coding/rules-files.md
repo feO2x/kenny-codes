@@ -9,7 +9,7 @@ title: What Belongs in a Rules File
 
 Rules files such as `AGENTS.md` consume context on every task to which they apply. A [2026 study of repository-level context files](https://arxiv.org/abs/2602.11988) found no significant improvement in task success, while inference cost increased by more than 20% on average. The useful nuance is that agents generally followed the instructions they were given, but repository overviews did not help them find the relevant code faster.
 
-The lesson is not that rules files are useless. It is that they should contain information an agent cannot reliably discover — or should not have to rediscover — from the repository itself:
+The lesson is not that rules files are useless. It is that they should contain information an agent cannot reliably discover - or should not have to rediscover - from the repository itself:
 
 - **Workflow invariants** that exist because your team decided on them, such as freezing a plan when its Planning Phase ends. See [The Plan Record](./plan-record.md).
 - **Feedback loops**, by exact command and what each one verifies. These give the agent the supervision it needs during the [Implementing Phase](./implementing-phase.mdx).
@@ -75,8 +75,8 @@ to a plan is flipping an acceptance criterion from `- [ ]` to `- [x]`.
 
 ## Feedback loops
 
-- `dotnet test` — builds the solution and runs all automated tests.
-- `dotnet format --verify-no-changes` — verifies formatting and analyzer rules.
+- `dotnet test` - builds the solution and runs all automated tests.
+- `dotnet format --verify-no-changes` - verifies formatting and analyzer rules.
 
 ## Scoped instructions
 

@@ -9,12 +9,12 @@ import GuidedCodingSkillTimeline from '@site/src/components/GuidedCodingSkillTim
 
 # Getting Started
 
-This page walks through **the Opinionated Path** — my own setup, packaged as six Agent Skills that live at [github.com/feO2x/guided-coding](https://github.com/feO2x/guided-coding).
+This page walks through **the Opinionated Path** - my own setup, packaged as six Agent Skills that live at [github.com/feO2x/guided-coding](https://github.com/feO2x/guided-coding).
 
 :::info[Read this first]
 The skills are optional. Guided Coding is a methodology, and everything below can be done by hand with markdown files and git. What the skills give you is consistency: the same plan structure, the same filenames, and a commit at exactly the moment the Planning Phase ends.
 
-They are also opinionated. They assume the three-section plan structure (Rationale, Acceptance Criteria, Technical Details) and the [append-only plan record](./plan-record.md). If you want a different structure, don't fight the skills — write your own instructions instead, and read the phase pages for the reasoning behind each rule.
+They are also opinionated. They assume the three-section plan structure (Rationale, Acceptance Criteria, Technical Details) and the [append-only plan record](./plan-record.md). If you want a different structure, don't fight the skills - write your own instructions instead, and read the phase pages for the reasoning behind each rule.
 
 Above all: no skill reviews code for you. The Guiding Phase is still yours.
 :::
@@ -72,9 +72,9 @@ Every skill declares that it runs only when you explicitly ask for it. Your agen
 
 <GuidedCodingSkillTimeline />
 
-Filled dots are skills. Hollow dots are the parts you do yourself — which, not coincidentally, are the parts that matter most.
+Filled dots are skills. Hollow dots are the parts you do yourself - which, not coincidentally, are the parts that matter most.
 
-The two arrows on the right are the same iteration loops as in the phase diagram. A small issue sends you back into the Implementing Phase with a targeted prompt. A large one sends you back to the *top* of the Planning Phase — not to `guided-coding-write-plan`, but to the discussion, because a follow-up plan deserves the same conversation the first one got.
+The two arrows on the right are the same iteration loops as in the phase diagram. A small issue sends you back into the Implementing Phase with a targeted prompt. A large one sends you back to the *top* of the Planning Phase - not to `guided-coding-write-plan`, but to the discussion, because a follow-up plan deserves the same conversation the first one got.
 
 Notice how much of the Planning Phase is conversation. The skills bracket the discussion; they don't replace it. If your Planning Phase consists of running three skills back to back, you have automated the paperwork and skipped the work.
 
@@ -124,7 +124,7 @@ Read the resulting diff before you commit it. This file steers every future conv
 
 Now discuss. Ask why. Push back. Propose alternatives. Ask what it considered and discarded. Keep going until you understand the suggested approach well enough to defend it to a colleague.
 
-Nothing has been created yet at this point — no issue, no branch, no file. That is on purpose. This conversation may well end with "actually, we shouldn't build this", and an untouched repository is the right outcome when it does.
+Nothing has been created yet at this point - no issue, no branch, no file. That is on purpose. This conversation may well end with "actually, we shouldn't build this", and an untouched repository is the right outcome when it does.
 
 Don't use your agent's built-in planning mode here. See the [Planning Phase](./planning-phase.mdx) for why.
 
@@ -156,7 +156,7 @@ Once you agree with the agent on the general direction:
 </TabItem>
 </Tabs>
 
-This creates an **empty** tracker issue — no summary, no placeholder acceptance criteria — and a clean local branch named `<issue-id>-<topic>`. The issue body stays empty on purpose: it gets filled with the finished plan at the end of the Planning Phase.
+This creates an **empty** tracker issue - no summary, no placeholder acceptance criteria - and a clean local branch named `<issue-id>-<topic>`. The issue body stays empty on purpose: it gets filled with the finished plan at the end of the Planning Phase.
 
 The skill stops if your worktree has uncommitted changes, and it updates the default branch before branching off it.
 
@@ -188,20 +188,20 @@ Still in the same conversation:
 </TabItem>
 </Tabs>
 
-The skill writes the approach you already agreed on into `ai-plans/`, using the three-section structure and a UTC-timestamped filename. It is explicitly *not* meant to start or replace the planning conversation — it records its outcome.
+The skill writes the approach you already agreed on into `ai-plans/`, using the three-section structure and a UTC-timestamped filename. It is explicitly *not* meant to start or replace the planning conversation - it records its outcome.
 
-**Invoke this once per plan.** Everything that follows is ordinary conversation: you ask for changes and the agent edits the draft in place. Re-running the skill is neither needed nor wanted — it resolves a fresh UTC timestamp each time, so you would get a *second* plan file next to the one you are working on rather than an updated draft. You reach for it again only when starting a genuinely new document, such as a follow-up plan after the Guiding Phase or the initial plan for a new feature.
+**Invoke this once per plan.** Everything that follows is ordinary conversation: you ask for changes and the agent edits the draft in place. Re-running the skill is neither needed nor wanted - it resolves a fresh UTC timestamp each time, so you would get a *second* plan file next to the one you are working on rather than an updated draft. You reach for it again only when starting a genuinely new document, such as a follow-up plan after the Guiding Phase or the initial plan for a new feature.
 
 ### Step 4: Further discussion
 
-The draft is a starting point, not a result. Read it properly and go back at it with plain prompts — no skill involved:
+The draft is a starting point, not a result. Read it properly and go back at it with plain prompts - no skill involved:
 
 - Does every acceptance criterion describe something you could actually verify?
 - Did anything discussed in step 1 quietly not make it into the plan?
 - Does it reference types, files, or extension points that really exist?
 - Is it prescribing implementation steps a senior engineer wouldn't need?
 
-Prompt the agent to revise the draft as you go, the same way you would ask it to change any other file. The plan is still an ordinary working file at this point — it does not freeze until step 7. Expect several rounds here.
+Prompt the agent to revise the draft as you go, the same way you would ask it to change any other file. The plan is still an ordinary working file at this point - it does not freeze until step 7. Expect several rounds here.
 
 ### Step 5: Review the plan
 
@@ -281,7 +281,7 @@ Only the *first* plan for an issue becomes the issue description. Follow-up plan
 
 > *"With you being an expert .NET developer, could you please implement plan `ai-plans/2026-08-13-1420-42-cancelled-events.md` for me?"*
 
-Then let it run. The frozen plan and your feedback loops are what keep the agent on track — see the [Implementing Phase](./implementing-phase.mdx).
+Then let it run. The frozen plan and your feedback loops are what keep the agent on track - see the [Implementing Phase](./implementing-phase.mdx).
 
 ### Step 9: Guide
 
@@ -343,16 +343,16 @@ The goal: **a reviewer should need to read only the issue's first plan and, when
 | Moment | Skill |
 | --- | --- |
 | New repository, or after an upgrade | `guided-coding-setup` |
-| Starting a feature or bugfix | *— talk to the agent first* |
+| Starting a feature or bugfix | *- talk to the agent first* |
 | You agree on the general direction | `guided-coding-prepare-issue-for-plan` |
 | The agreed approach needs writing down | `guided-coding-write-plan` (once per plan) |
-| Draft written, and after every revision | *— discuss and revise by prompt* |
+| Draft written, and after every revision | *- discuss and revise by prompt* |
 | The draft wants a second opinion | `guided-coding-review-plan` |
 | Nobody is finding anything anymore | `guided-coding-finish-plan` |
-| Plan committed and frozen | *— implement, then review* |
+| Plan committed and frozen | *- implement, then review* |
 | Implementation reviewed | `guided-coding-write-deviations` |
-| Deviations reviewed, or no document required | *— commit and open the pull request* |
+| Deviations reviewed, or no document required | *- commit and open the pull request* |
 
-This table uses the portable names. On the Claude Code plugin they are `/guided-coding:setup`, `/guided-coding:write-plan`, and so on — the prefix becomes a namespace and the rest of the name stays put.
+This table uses the portable names. On the Claude Code plugin they are `/guided-coding:setup`, `/guided-coding:write-plan`, and so on - the prefix becomes a namespace and the rest of the name stays put.
 
 The rows without a skill are not gaps in the tooling. They are where Guided Coding actually happens: the discussion that produces the plan, and the review that decides whether the result is good enough. Everything with a skill next to it is bookkeeping around those two activities.

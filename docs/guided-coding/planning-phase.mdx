@@ -15,7 +15,7 @@ Start a new conversation with your coding agent and iteratively create a plan to
 
 - **Don't use your Coding Agent's "planning mode"**. I don't use the built-in "planning mode" of coding agents. There is no iteration involved, and plans typically do not end up in your git repo. The default Agent mode is enough, you steer the conversation actively.
 - **Give the agent a role.** I use something like "With you being an expert .NET architect" in my first prompt of the planning phase. This focuses the agent on planning rather than jumping into implementation. Assigning roles tends to produce better results in my experience.
-- **Discuss the feature.** Ask the agent how it would approach the problem. Review its suggestions about elements like design, refactorings, testing, and performance. Bring your own thoughts and questions to the table — this is a conversation, not delegation.
+- **Discuss the feature.** Ask the agent how it would approach the problem. Review its suggestions about elements like design, refactorings, testing, and performance. Bring your own thoughts and questions to the table - this is a conversation, not delegation.
 - **End with repeated sanity checks.** At the end of the planning phase, I typically ask *"Would you change anything about the plan?"* This often catches things I didn't think of. Do this repeatedly until the plan stabilizes.
 - **Commit the plan as a markdown file in the git repo.** Plans serve as a project-specific decision record. They form a history, similar to Event Sourcing.
 
@@ -24,7 +24,7 @@ I open a **fresh conversation** and describe the context, then ask for an invest
 
 > *"With you being an expert .NET architect, can you please investigate the codebase and report back how you would tackle this problem?"*
 
-Then I discuss this with the agent until I have understood the suggested approach. Nothing is created during this conversation — no issue, no branch, no file. Sometimes it ends with the conclusion that the change isn't worth making, and then an untouched repository is exactly what I want to be left with.
+Then I discuss this with the agent until I have understood the suggested approach. Nothing is created during this conversation - no issue, no branch, no file. Sometimes it ends with the conclusion that the change isn't worth making, and then an untouched repository is exactly what I want to be left with.
 
 Only once we agree on the general direction do I run `/guided-coding-prepare-issue-for-plan`, which creates an empty tracker issue and checks out a clean local branch named after it. The issue body stays empty at this point; it gets filled with the finished plan later.
 :::
@@ -33,22 +33,22 @@ Only once we agree on the general direction do I run `/guided-coding-prepare-iss
 
 After some experimentation, I settled on three sections which are quite common in Agile Development:
 
-1. **Rationale** — Why do we want to build this? Why is this feature needed or why does this bug need fixing? This gives the agent context for the greater goal.
-2. **Acceptance Criteria** — Bullet points that must be fulfilled for the feature to be approved. The agent in the Implementing Phase will use these to check off each aspect of the feature after it's been implemented.
-3. **Technical Details** — Important parts of the codebase, extension points, types to modify or add, and design direction.
+1. **Rationale** - Why do we want to build this? Why is this feature needed or why does this bug need fixing? This gives the agent context for the greater goal.
+2. **Acceptance Criteria** - Bullet points that must be fulfilled for the feature to be approved. The agent in the Implementing Phase will use these to check off each aspect of the feature after it's been implemented.
+3. **Technical Details** - Important parts of the codebase, extension points, types to modify or add, and design direction.
 
-Of course, you are free to use your own structure. What matters is that the plan states *why*, states *what must be true when it's done* in a way you can actually verify, and gives enough technical direction that a senior engineer — or a competent agent — can implement it without guessing at your intent.
+Of course, you are free to use your own structure. What matters is that the plan states *why*, states *what must be true when it's done* in a way you can actually verify, and gives enough technical direction that a senior engineer - or a competent agent - can implement it without guessing at your intent.
 
 Keep plans focused. With Anthropic models in particular (Opus, Sonnet), plans tend to become very detailed with implementation phases and step-by-step instructions that the agent doesn't actually need. The models are smart enough to figure out the implementation order themselves. A plan that's too detailed can actually steer the agent in the wrong direction, because if you missed something, the overly prescriptive structure leaves no room for the agent to adapt. Therefore, use AGENTS.md or a skill to limit the plan size.
 
-A plan is not an epic, a user story, or an initiative — it should contain technical details. You should have technical knowledge to discuss and review these plans effectively.
+A plan is not an epic, a user story, or an initiative - it should contain technical details. You should have technical knowledge to discuss and review these plans effectively.
 
 :::tip[The Opinionated Path]
 Once the approach is settled, I run `/guided-coding-write-plan` in the same conversation. It writes the plan into `ai-plans/` with the three sections above and a UTC-timestamped filename.
 
-The skill is explicitly not allowed to *start* the planning conversation — it records the outcome of one. If you invoke it before you have discussed the approach, you get exactly the kind of plan this methodology is trying to avoid: one nobody thought about.
+The skill is explicitly not allowed to *start* the planning conversation - it records the outcome of one. If you invoke it before you have discussed the approach, you get exactly the kind of plan this methodology is trying to avoid: one nobody thought about.
 
-I invoke it **once per plan**. Every revision that follows is a plain prompt — "tighten the third acceptance criterion", "we discussed X but it's missing" — and the agent edits the draft like any other file. I only reach for the skill again for a genuinely new document, such as a follow-up plan after the Guiding Phase.
+I invoke it **once per plan**. Every revision that follows is a plain prompt - "tighten the third acceptance criterion", "we discussed X but it's missing" - and the agent edits the draft like any other file. I only reach for the skill again for a genuinely new document, such as a follow-up plan after the Guiding Phase.
 
 The filename convention and the reasoning behind it live on [The Plan Record](./plan-record.md) page.
 :::
@@ -65,12 +65,12 @@ So review it properly:
 - **Get a second opinion.** For larger or riskier plans, I open a fresh conversation with another agent and have it review the draft. An agent that just wrote a plan is a poor judge of it; a fresh one is far more likely to notice that an acceptance criterion is unfalsifiable or that a whole failure mode went unaddressed.
 - **Ask the closing question, repeatedly.** *"With you being the expert, would you change anything about the plan?"* Keep asking until the answer stops producing changes.
 
-None of this is a linear checklist. Discussing, reviewing, and revising form a cycle you go around several times: the review turns up findings, the findings turn into discussion, the discussion turns into a revised draft, and that draft deserves another look. The draft itself gets written only once, at the start — from then on you change it by asking, the same way you change any other file. The phase is over when the cycle stops producing changes, not when you have performed each step once.
+None of this is a linear checklist. Discussing, reviewing, and revising form a cycle you go around several times: the review turns up findings, the findings turn into discussion, the discussion turns into a revised draft, and that draft deserves another look. The draft itself gets written only once, at the start - from then on you change it by asking, the same way you change any other file. The phase is over when the cycle stops producing changes, not when you have performed each step once.
 
 If that sounds like a lot of conversation for one markdown file, it is. That is where the 30 to 90 minutes go, and it is the cheapest hour in the whole workflow.
 
 :::tip[The Opinionated Path]
-For larger or tougher plans, I use `/guided-coding-review-plan` in a **fresh conversation** with another coding agent. It reports findings only and never edits the plan — it checks acceptance criteria for verifiability, validates claims about existing code, and judges whether relevant risks like error handling, migration, performance, and security boundaries were considered.
+For larger or tougher plans, I use `/guided-coding-review-plan` in a **fresh conversation** with another coding agent. It reports findings only and never edits the plan - it checks acceptance criteria for verifiability, validates claims about existing code, and judges whether relevant risks like error handling, migration, performance, and security boundaries were considered.
 
 Then it's back to the main conversation for another round. There is a constant back and forth between me and the main agent until both of us are satisfied.
 :::
@@ -79,7 +79,7 @@ Then it's back to the main conversation for another round. There is a constant b
 
 The Planning Phase ends with a deliberate act: you commit the plan.
 
-That commit matters more than it looks. Up to that point the plan is a draft and anything can change. After it, the plan is **frozen** — a record of what you decided at that moment. You do not edit it later to match what actually happened. If the decision turns out to be wrong, you write a follow-up plan that supersedes it. If the implementation ends up somewhere else, you write a Plan Deviations document that explains why.
+That commit matters more than it looks. Up to that point the plan is a draft and anything can change. After it, the plan is **frozen** - a record of what you decided at that moment. You do not edit it later to match what actually happened. If the decision turns out to be wrong, you write a follow-up plan that supersedes it. If the implementation ends up somewhere else, you write a Plan Deviations document that explains why.
 
 The only edit permitted on a frozen plan is ticking an acceptance criterion from `- [ ]` to `- [x]`, and only once the implementation genuinely satisfies it.
 
