@@ -18,7 +18,7 @@ Then point to the corresponding markdown file. That's it. The agent goes off and
 **No skill runs in this phase.** The frozen plan is the instruction, and your feedback loops are the supervision. Adding process here would only get in the way of the one part of the workflow where the agent should be left alone.
 
 :::tip[The Opinionated Path]
-I use a **fresh conversation** for implementation, not the one the plan was written in. The planning conversation is long by this point, full of alternatives that were considered and rejected, and that context does the implementation no favors — see [context rot](https://research.trychroma.com/context-rot).
+I use a **fresh conversation** for implementation, not the one the plan was written in. The planning conversation is long by this point, full of alternatives that were considered and rejected, and that context does the implementation no favors - see [context rot](https://research.trychroma.com/context-rot).
 
 The prompt is short, because the plan carries everything:
 
@@ -29,7 +29,7 @@ The prompt is short, because the plan carries everything:
 
 The plan is a committed decision record by the time the agent sees it. The agent implements against it; it does not maintain it.
 
-The one exception is the acceptance criteria. As each criterion is genuinely satisfied — implemented *and* verified by the relevant feedback loop — it gets ticked from `- [ ]` to `- [x]`. Nothing else about the plan changes. Criteria are never reworded to match what was built, and unmet criteria stay unchecked so you can see them during review.
+The one exception is the acceptance criteria. As each criterion is genuinely satisfied - implemented *and* verified by the relevant feedback loop - it gets ticked from `- [ ]` to `- [x]`. Nothing else about the plan changes. Criteria are never reworded to match what was built, and unmet criteria stay unchecked so you can see them during review.
 
 This works best when it is written down where the agent will read it. A short section in your root `AGENTS.md` is enough:
 
@@ -45,7 +45,7 @@ to a plan is flipping an acceptance criterion from `- [ ]` to `- [x]`.
   Deviations document instead of editing the frozen plan.
 ```
 
-If the agent concludes mid-implementation that the plan is wrong, that is a signal worth having — but the response is to stop and go back to the Planning Phase, not to silently implement something else. See [The Plan Record](./plan-record.md).
+If the agent concludes mid-implementation that the plan is wrong, that is a signal worth having - but the response is to stop and go back to the Planning Phase, not to silently implement something else. See [The Plan Record](./plan-record.md).
 
 ## Feedback loops
 
@@ -58,7 +58,7 @@ The key to a successful Implementing Phase is having good **feedback loops** in 
 - **Automated benchmarks** verify performance
 - **Security tools like trivy** detect vulnerabilities
 
-These feedback loops let the agent work longer autonomously. When the agent writes code, runs the tests, sees failures, and fixes them — all without your intervention — that's the power of this setup. Modern models execute tests by themselves; you don't have to instruct them to do so. You just need an acceptance criterion that says automated tests should be written.
+These feedback loops let the agent work longer autonomously. When the agent writes code, runs the tests, sees failures, and fixes them - all without your intervention - that's the power of this setup. Modern models execute tests by themselves; you don't have to instruct them to do so. You just need an acceptance criterion that says automated tests should be written.
 
 I once asked an agent to optimize memory allocations in a hot path in [Light.PortableResults](https://github.com/feO2x/Light.PortableResults). It wrote a benchmark, implemented a stack-allocated optimization for cases with fewer than 10 errors, ran the benchmark, and reported: 25% faster runtime and 80% less memory allocated. When I then asked it to eliminate one last remaining heap allocation, it tried, ran the benchmarks again, and saw that performance actually got *worse*. It rolled back its own changes.
 

@@ -19,9 +19,9 @@ is flipping an acceptance criterion from `- [ ]` to `- [x]`.
 
 ## Feedback loops
 
-- `npm run typecheck` — runs `tsc` over the TypeScript sources (site components, Docusaurus config,
+- `npm run typecheck` - runs `tsc` over the TypeScript sources (site components, Docusaurus config,
   and the scripts in `scripts/`). Verified to pass in this repository.
-- `npm run build` — regenerates `src/data/home-data.json` and the social cards under
+- `npm run build` - regenerates `src/data/home-data.json` and the social cards under
   `static/img/social-cards/`, then runs the full Docusaurus production build, which also catches
   broken links and MDX errors. Note that it writes into tracked files, so run it deliberately and
   review the resulting diff.

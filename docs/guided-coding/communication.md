@@ -5,7 +5,7 @@ title: Communication Is the New Superpower
 
 # Communication Is the New Superpower
 
-Generating code is cheap now. The craft of software engineering — understanding architecture, making good design decisions, reviewing thoroughly — still matters deeply. But one skill is becoming disproportionately important: **communication**.
+Generating code is cheap now. The craft of software engineering - understanding architecture, making good design decisions, reviewing thoroughly - still matters deeply. But one skill is becoming disproportionately important: **communication**.
 
 Developers who can clearly articulate what they want, ask good follow-up questions, and structure their requirements well will get vastly better results from coding agents. The scale is tipping from pure technical prowess towards the ability to express intent precisely.
 
