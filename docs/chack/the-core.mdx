@@ -1,0 +1,60 @@
+---
+sidebar_position: 2
+title: The Core
+---
+
+import ChackDiagram from '@site/src/components/ChackDiagram';
+
+# The Core
+
+<ChackDiagram highlight="core" />
+
+## What belongs in the Core?
+
+The short answer: everything that runs in memory.
+
+The Core is the heart of the software. It is written so that it can execute completely in memory, decoupled from every I/O call, which is precisely what makes it cheap to test. It usually consists of three kinds of types:
+
+- **A domain model.** Entities capture the data and the rules of the domain. A humble object must be able to persist an entity, while the entity itself knows nothing about how that happens. An entity may carry a foreign key property it would not strictly need, but it must not have a method that builds the SQL statement to load or save itself. Whether your entities carry behaviour (as in [Domain-Driven Design](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/)) or are plain data holders ([Anemic Domain Model](https://martinfowler.com/bliki/AnemicDomainModel.html)) is your call - CHACK works with both.
+- **Services.** These are not persisted. They encapsulate logic that operates on one or more entities. Many of them are the entry points a framework calls when a request arrives - an HTTP endpoint, a gRPC method, a message subscriber - and they hold the logic for that operation. Services call other services: an endpoint may call a validator, a calculator, a mapper.
+- **Data Transfer Objects.** Inputs and outputs of endpoints, messages on a broker, configuration values. They may be mutable or immutable. DTOs that arrive from outside the process are untrusted until your Core has validated them.
+
+:::info[No I/O in the Core]
+Everything in this list runs without touching a disk, a socket, or another process. That is the property the whole model is built on: make the Core as large as you can, and the humble objects as small as you can.
+:::
+
+## How to write the Core
+
+**Encapsulate the domain.** Implement the required behaviour in a way that makes invalid state unreachable - in memory as well as in the database. If a type can only be constructed in a valid state, no caller has to remember the rules.
+
+**Check preconditions, verify postconditions.** Validate the parameters a method receives and throw when they are invalid. Make sure a method upholds its postconditions and its invariants, and pin them down with automated tests. This is Bertrand Meyer's [Design by Contract](https://www.eiffel.com/values/design-by-contract/introduction/); his [Object-Oriented Software Construction](https://bertrandmeyer.com/OOSC2/) is the long version and worth the time.
+
+**Reach for immutability** when a set of values must not change within a part of the code. It removes a whole class of bugs and makes concurrent code far easier to reason about.
+
+**Name things after the domain.** Types and methods should come out of the ubiquitous language that your domain experts use. Someone reading the Core should recognize the concepts they deal with in their daily work.
+
+**Keep framework details out.** This is the rule that gets broken most often, usually in small, convenient steps:
+
+- Your domain model must not know how it is serialized or persisted. No serialization or O/R mapping attributes on Core types - configure that where the persistence lives.
+- Your Core must not know how the application is composed. No DI container attributes, no container types in constructors. Container interactions belong in the [Composition Root](./composition-root.mdx).
+- When a Core object needs an I/O call, it calls an abstraction, and a humble object implements it. There is no direct reference to an HTTP client, a database context, a file API, or a message broker client anywhere in the Core.
+
+**Allow coupling inside the Core.** Related Core types may reference each other directly. Introduce an interface or an abstract base class where it earns its keep, not on principle. If a service receives a DTO and hands it to a validator, let it call the validator directly - both are then covered by the same unit test, with no test double in between. A forest of one-implementation interfaces is the excessive-abstraction failure mode described on the [overview page](./index.mdx).
+
+**Cover it with tests.** The Core is where the automated tests do their real work. Unit tests should reach the edge and error cases that are painful to reconstruct in an integration or end-to-end test - see [Automated Tests](./automated-tests.mdx).
+
+## The I/O abstractions belong to the Core
+
+When a Core services needs to call third-party systems, it depends on an abstractions like an interface or an abstract base class. It describes what the Core requires from the I/O call, in the Core's own vocabulary. A humble object implements this abstractions.
+
+This is the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf) at work, and it is why the diagram paints the I/O abstractions in the same blue as the Core. The abstraction is not a technical artefact of the data access layer that the Core happens to consume - it is owned, named, and shaped by the Core.
+
+Give each use case its own abstraction. For example, a single interface with a method for every I/O call across different endpoints (as you can see in many Repository implementations) is a violation of the [Interface Segregation Principle](https://www.cs.utexas.edu/~fares/papers/ISP.pdf).
+
+:::tip[In .NET Practice]
+- Keep `System.Text.Json` and Entity Framework Core attributes off your entities. Configure serialization with `JsonSerializerOptions` and persistence with `IEntityTypeConfiguration<T>` implementations that live next to the data access code.
+- Nothing in the Core should reference Data Access Dependencies directly, like `DbContext`, `HttpClient`, `IDbConnection`, `File`, or a broker client.
+- For validation, [Light.PortableResults.Validation](https://github.com/feO2x/Light.PortableResults) or [FluentValidation](https://docs.fluentvalidation.net/) keep rules out of the DTOs themselves. Design DTOs for the needs of your business logic, not for what the deserializer might produce: if a property must not be null after validation, declare it non-nullable and let the validator enforce it.
+- Avoid tight-coupling to non-deterministic dependencies like `DateTime.UtcNow` or `Guid.NewGuid()`. Abstract these calls to make your tests deterministic. See [Automated Tests](./automated-tests.mdx).
+- If a Core type genuinely needs to create other objects at runtime via the DI Container, use the Abstract Factory Pattern. Avoid injecting the container itself into services with other business logic, avoid the Service Locator Pattern.
+:::

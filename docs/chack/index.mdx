@@ -1,0 +1,93 @@
+---
+sidebar_position: 1
+title: "CHACK: A Way to Structure Software Applications"
+---
+
+import ChackDiagram from '@site/src/components/ChackDiagram';
+import useBaseUrl from '@docusaurus/useBaseUrl';
+import DesignTensionDiagram from '@site/src/components/DesignTensionDiagram';
+
+# CHACK: A Way to Structure Software Applications
+
+## TL;DR
+
+**CHACK** is a simple structural model for the code inside a single process. Every piece of code you write belongs to exactly one of four categories:
+
+- **C**ore
+- **H**umble Objects at the process boundary
+- **A**utomated Tests
+- **C**omposition Root
+
+The final K stands for "by **K**enny" - to make it sound like "Chuck".
+
+<img
+  src={useBaseUrl('/img/chuck.gif')}
+  alt="Chuck Norris nodding in approval"
+  style={{ display: 'block', margin: '1.5rem auto', maxWidth: '100%', borderRadius: '8px' }}
+/>
+
+## The CHACK Methodology
+
+<ChackDiagram />
+
+- **The Core** is everything that runs in memory: your domain model, your services, your DTOs. It holds the logic that makes the software worth building, and it never performs an I/O call itself. When it needs one, it goes through an abstraction that belongs to the Core.
+- **Humble Objects** sit at the process boundary and do the I/O. Each one does two things and nothing else: perform the actual call to a third-party system, and map the data going out and coming back. They follow the [Humble Object pattern](http://xunitpatterns.com/Humble%20Object.html) from Gerard Meszaros' [xUnit Test Patterns](http://xunitpatterns.com/).
+- **Automated Tests** follow the [test pyramid](https://martinfowler.com/bliki/TestPyramid.html). Unit tests exercise the Core with humble objects replaced by test doubles, which is why thousands of them run in seconds. Integration and end-to-end tests cover the happy path and wiring against real third-party systems and act as a second line of defense against regression.
+- **The Composition Root** assembles the pieces at startup - usually with a DI container and configuration from files, environment variables, and command line parameters. It is described in depth in Mark Seemann's and Steven van Deursen's [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns).
+
+Most arrows in the diagram are compile-time dependencies, like in UML: an open arrowhead means one category **references** another, and a dashed line with a hollow triangle means one type **implements or derives from** another. The Composition Root knows the Core; the Core does not know the Composition Root. Humble Objects implement the I/O abstractions, and so do the test doubles - the abstractions themselves belong to the Core according to the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf), which is why both boxes are blue. The one double-headed arrow on the left is not a dependency at all: it is the actual I/O happening at runtime.
+
+The placements along the process boundary are deliberate. The Humble Objects box sits **on** the boundary, because that is exactly where it lives. Integration tests **straddle** the boundary: they may exercise the system under test inside or outside the test runner process. End-to-end tests sit **outside**, to the right of the boundary, because they usually start the system under test in another process (e.g., via Aspire or Docker Compose). Unit tests and their test doubles stay inside the test runner process. Every category may also use the frameworks and libraries it references, so those arrows are left out to keep the picture readable.
+
+## The problem CHACK solves
+
+Codebases become difficult to maintain at either of two design extremes.
+
+<DesignTensionDiagram />
+
+At one extreme, **too little abstraction** produces spaghetti code. Too many responsibilities accumulate in a single type: business rules become tangled with calls to third-party systems (e.g., with SQL statements and HTTP calls), files grow to thousands of lines, and even simple tests require a database. Every change becomes risky because its effects are difficult to predict.
+
+**Excessive abstraction** sits at the opposite extreme. Applying principles like SOLID and design patterns mechanically produces a maze of interfaces, tiny classes, and layers of indirection. The code may be loosely coupled, yet understanding a single domain behaviour requires tracing it across half a dozen abstractions.
+
+CHACK avoids both extremes by being deliberate about where abstraction adds value:
+
+- **Abstract I/O at the process boundary.** For each third-party system used in a given context, define a Core-owned abstraction and implement it with a Humble Object. Tests can replace the Humble Object with a test double, allowing the Core logic to run entirely in memory.
+- **Use abstractions selectively inside the Core.** Core types may collaborate directly. Introduce an interface or abstract base class only when it serves a concrete purpose - multiple meaningful implementations are often a good indication. An endpoint service, for example, may call its validator directly; one unit test can cover both without a test double.
+
+Everything else stays open. Want the Mediator pattern? Go ahead. CQRS, event sourcing, a rich domain model, an anemic one? All compatible. CHACK forces you to abstract I/O, to write tests, and to keep the Core in memory. It does not tell you how to design within the four categories.
+
+## A methodology, not a framework
+
+There is nothing to install. CHACK is a way of introducing the right seams in your codebase. It works the same in an ASP.NET Core service, an Angular app, a WPF app, or a console tool. If you can answer "Which of the four categories does this piece of code **exclusively** belong to?", you are doing it.
+
+Because most of my work is in .NET, the concrete examples are C#. To keep the model itself language-neutral, these docs are written in two layers:
+
+- **The methodology** - the regular text on every page. It holds for any language and any framework.
+- **In .NET practice** - set apart in callouts like the one below. This is how the model looks in the stack I use every day: ASP.NET Core, Entity Framework Core, and the .NET base class library.
+
+:::tip[In .NET Practice]
+Callouts like this one carry the .NET-specific advice: which base class to derive from, which framework mechanism to reach for, which NuGet package solves the problem.
+
+If you work in another ecosystem, skip them. Nothing in the model depends on them.
+:::
+
+Two pages are the exception and are .NET-heavy throughout, because they are worked examples rather than model definitions: [Vertical Slices](./vertical-slices.md) and [Data Access Sessions](./data-access-sessions.md).
+
+## Where to go next
+
+- Read the four categories in order: [The Core](./the-core.mdx), [Humble Objects](./humble-objects.mdx), [Automated Tests](./automated-tests.mdx), and [The Composition Root](./composition-root.mdx).
+- Want to organize your folders to match? [Vertical Slices](./vertical-slices.md) is not part of CHACK, but the two work well together.
+- Want the deepest worked example? [Data Access Sessions](./data-access-sessions.md) shows a humble object that is also a Unit of Work.
+- Reviewing a codebase? [Reviewing for CHACK](./reviewing-for-chack.md) is the checklist I use.
+- Wondering how this relates to Hexagonal Architecture, Clean Architecture, or DDD? See [Relationship to Other Approaches](./relationship-to-other-approaches.md).
+
+## Sources
+
+CHACK stands on four books:
+
+- Eric Evans, [Domain-Driven Design](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/) - the Ubiquitous Language, the isolated Domain (Core) and the patterns that shape the Core and Humble Objects: Entities, Value Objects, Repositories, Units of Work.
+- Martin Fowler et al., [Patterns of Enterprise Application Architecture](https://martinfowler.com/books/eaa.html) - the catalogue for Line-of-Business software: domain models, O/R mapping, units of work, data transfer objects, among other patterns.
+- Steven van Deursen and Mark Seemann, [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns) - the Composition Root and its Register-Resolve-Release phases.
+- Gerard Meszaros, [xUnit Test Patterns](http://xunitpatterns.com/) - the Humble Object pattern, the four-phase test, and the vocabulary for test doubles.
+
+Robert C. Martin's [Clean Architecture](https://www.oreilly.com/library/view/clean-architecture-a/9780134494272/) is worth adding: chapter 23 describes humble objects at the process boundary and arrives at much the same place from a different direction.
