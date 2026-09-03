@@ -1,0 +1,64 @@
+---
+sidebar_position: 3
+title: Humble Objects
+---
+
+import ChackDiagram from '@site/src/components/ChackDiagram';
+
+# Humble Objects at the Process Boundary
+
+<ChackDiagram highlight="humble-objects" />
+
+## Why the boundary needs its own category
+
+No application does anything useful without I/O. Databases, file systems, web services, message brokers, printers. Every one of them lives outside your process, and reaching them costs orders of magnitude more time than an in-memory call. The [Automated Tests](./automated-tests.mdx) page has the numbers.
+
+Cost is only half of it. I/O is also the part of your code that is hardest to exercise in Automated Tests: a third-party system must be running, populated with the right state before the test and reset afterwards. Provoking its failure modes on demand can be hard or outright impossible. Code that mixes business rules with I/O inherits all of that difficulty.
+
+So CHACK isolates it. At the process boundary sit humble objects: for each use case, they represent the glue between the your Data Access technology and the Core. Each Humble Object should talk to one third-party system. They implement an [I/O abstraction owned by the Core](./the-core.mdx), which means a Unit Test can put a Test Double in their place and never leave memory.
+
+## A humble object does exactly two things
+
+1. **It performs the I/O call.** One interaction with the third-party system, using whatever data access framework fits: an O/R mapper, a database driver, an HTTP client, a broker client.
+2. **It maps the data.** Outgoing parameters get translated into whatever the third-party system expects, and incoming data gets translated into the types the Core wants back. This can also encompass exceptions which can be mapped to, e.g., the Result Pattern.
+
+:::info[Light.PortableResults]
+I have implemented my own Result Pattern library called Light.PortableResults. Check it out on [GitHub](https://github.com/feO2x/Light.PortableResults)!
+:::
+
+That is the whole list. Everything else - decisions, validation, calculation, orchestration, logging - belongs to the Core, because everything else is worth testing and the humble object is the one place where testing is expensive.
+
+Mapping deserves a note, because it is the part that can quietly grow. Two cases:
+
+- **The framework does it for you.** An O/R mapper materializing entities from a query, or a serializer turning a response body into a DTO, is mapping you did not write and do not test.
+- **You write it yourself.** You might be able to extract it into a testable method, especially when the mapping types of your Data Access technology can run purely in memory. What stays in the humble object is the call plus a delegation to the mapper.
+
+The rule of thumb: **make the Core as large as possible and the humble object as small as possible**. If you find yourself wanting a test for something inside a humble object, that something likely belongs in the Core.
+
+## Guidelines
+
+- **Keep them boring.** Avoid branches and loops. A humble object that needs an `if` for anything other than a precondition check is usually hiding a decision that belongs in the Core. Since these types are not covered by unit tests, code review is the mechanism that verifies them - so write them to be reviewable at a glance.
+- **One humble object per third-party system, per context.** Where the target system supports transactions, a humble object typically spans exactly one of them (a Unit of Work).
+- **One method per interaction.** Each distinct exchange with the third-party system gets its own method. If the technology supports asynchronous calls, the method is asynchronous.
+- **No validation.** A humble object returns DTOs or domain objects; the Core validates them if validation is required. Data coming back from a third-party system is input like any other.
+- **Unify at the boundary, if you must.** If the same data lives in two systems with slightly different shapes - for example, two DBMS with different table layouts - the humble objects may normalize both into the same Core type. That is mapping, and it is allowed.
+- **Release resources deterministically.** Humble objects usually own something disposable: a connection, a client, a command, a stream, a file handle. Make the humble object disposable too, and let the [Composition Root](./composition-root.mdx) decide when its lifetime ends.
+- **The same rules apply to UI code.** A view is a humble object: it renders and it forwards user interactions. Keep bindings simple, avoid multi-bindings and view-specific converters that carry logic, keep animation triggers dumb, and put no logic in printed reports. Anything you move out of the view is something you can unit-test.
+
+## Where the pattern comes from
+
+Michael Feathers published *The Humble Dialog Box* in 2000. He had built a modal dialog with the logic baked into the window, then found he could not test it without spinning up a UI thread and initializing the whole UI framework first. His fix was to move the logic into a separate class and leave the dialog with nothing but its interactions with the framework - the dialog became humble.
+
+[xUnit Test Patterns](http://xunitpatterns.com/) generalized this into the [Humble Object pattern](http://xunitpatterns.com/Humble%20Object.html): the humble object holds the logic that is hard to unit-test and delegates everything else to a testable component.
+
+> Each time the Humble Object is called by the framework, it delegates to the testable component. If the testable component needs any information from the context, the Humble Object is responsible for retrieving it and passing it to the testable component. The Humble Object code is typically so simple that we often don't bother writing tests for it because it can be quite difficult to set up the environment need to run it.
+
+Robert C. Martin arrives at the same construction in chapter 23 of [Clean Architecture](https://www.oreilly.com/library/view/clean-architecture-a/9780134494272/), where humble objects at the process boundary are what keeps business logic free of I/O.
+
+:::tip[In .NET Practice]
+- Database access is the most common case and has its own page: [Data Access Sessions](./data-access-sessions.md) shows a humble object that is simultaneously a Unit of Work.
+- Make I/O methods `async` and give them a `CancellationToken` as the last parameter with a default value. Synchronous I/O blocks a thread pool thread and invites thread starvation under load.
+- Implement `IAsyncDisposable` (and `IDisposable` where the wrapped resource requires it) and dispose the wrapped `DbContext`, `HttpClient` handler, or `DbConnection`.
+- Never let `IQueryable<T>` escape a humble object. The moment a caller composes onto the query, the decision about what SQL runs has leaked into the Core, and the query is executed somewhere nobody can see. Materialize inside the humble object and return a `List<T>`, an array, or a DTO.
+- For HTTP, use `IHttpClientFactory` and a typed client; the typed client is your humble object.
+:::

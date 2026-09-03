@@ -1,0 +1,48 @@
+---
+sidebar_position: 5
+title: The Composition Root
+---
+
+import ChackDiagram from '@site/src/components/ChackDiagram';
+
+# The Composition Root
+
+<ChackDiagram highlight="composition-root" />
+
+## What it is
+
+Because the functionality of an application is distributed across many types, something has to put them back together. That is the Composition Root: the one place where the pieces are assembled, wired to each other, and started.
+
+Most applications use a Dependency Injection container for this - some frameworks make it mandatory. The alternative is Pure DI: plain imperative statements that create the objects and pass them to each other's constructors. Both are legitimate, and for small applications Pure DI is often clearer. The concept and everything below comes from [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns) by Steven van Deursen and Mark Seemann.
+
+The Composition Root is the only category that is allowed to know all the others. It references the Core, it references the humble objects, and it decides which implementation of an I/O abstraction is used. Nothing references it back.
+
+## Register, Resolve, Release
+
+Every Composition Root runs through three phases:
+
+**Register.** The first thing the application does at startup. You configure the container by registering types and their lifetimes, and you read configuration from its sources: files, environment variables, command line parameters, secret stores. When this phase ends, the container is immutable - nothing gets registered afterwards.
+
+**Resolve.** The root component - the most high-level object that can run the application - is created, either by the container or by your own imperative code. In a web application this is the app itself; in a UI application it is the root view or window.
+
+**Release.** The root component is disposed, ending its lifetime and those of the objects it holds. Native resources are closed, buffered data is flushed, and state that should survive the session is persisted.
+
+Resolve and Release do not happen only once. They run repeatedly, on different root components, throughout the application's lifetime: once per HTTP request in a web application, once per message in a broker subscriber, once per navigation or dialog in a client application. Each of those cycles creates an object graph, uses it, and tears it down.
+
+## Guidelines
+
+**Do not use the Service Locator pattern.** The container appears in the Composition Root and nowhere else. A Core type that asks a container for its dependencies has hidden them from its constructor, and now nobody - including the compiler and your tests - can see what it actually needs. If a Core type must create objects at runtime, give it an abstract factory that the Composition Root implements by adapting the container.
+
+**Do not share state through mutable statics.** Static fields and properties that change at runtime are invisible coupling: they break test isolation, they create race conditions, and they make it impossible to run two configurations side by side. Create context objects instead and pass them where they are needed via dependency injection.
+
+**Keep lifetime management here.** Core objects should not be concerned with how long the objects they reference live. Resolve and release object graphs at well-defined points and let the container handle the rest. The exception is a disposable that a Core object deliberately owns for a short, explicit span - opening a resource, using it, and closing it immediately is clearer than pushing that decision outwards.
+
+**Keep it simple, and review it.** Like humble objects, the Composition Root is not comprehensively covered by automated tests: it is the wiring, and testing it in isolation proves little. That makes readability the safety net. Prefer straightforward registration code over clever conventions and reflection-driven scanning that nobody can follow.
+
+:::tip[In .NET Practice]
+- In ASP.NET Core, the Register phase is everything you do on `WebApplicationBuilder` before calling `Build()`. After `Build()`, the service provider is fixed. The Resolve and Release phases run per request, around the request scope; `IServiceScopeFactory` gives you the same cycle in background services.
+- Split registration into module extension methods rather than one long `Program.cs`. If you organize your code in [vertical slices](./vertical-slices.md), each folder can carry its own module, and the Composition Root only calls into the top-level ones.
+- Register humble objects against their Core abstraction: `services.AddScoped<IGetOrderSession, EfGetOrderSession>()`. The Core sees the interface; only this line knows Entity Framework Core is involved.
+- Get lifetimes right. A scoped dependency captured by a singleton is the classic bug - it keeps a `DbContext` alive for the life of the process. ASP.NET Core's scope validation catches this in development; leave it on.
+- Bind configuration to strongly typed options in the Composition Root and hand the Core plain settings objects. The Core should not know that a value came from an environment variable.
+:::
