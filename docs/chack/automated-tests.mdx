@@ -39,7 +39,7 @@ Automated testing became mainstream around 2000 with Extreme Programming and the
 
 The argument was already clear back then: service and UI tests are more expensive to build and maintain because third-party systems are involved, and they are slower to run. Recorded UI tests are also brittle - a layout change breaks them. Hence the shape: many unit tests, fewer service tests, fewest UI tests.
 
-In the 2010s, Docker arrived, and with it David Heinemeier Hansson's 2014 article [TDD is dead. Long live testing.](https://dhh.dk/2014/04/23/tdd-is-dead-long-live-testing.html). A movement formed around the **Test Diamond**: write mostly integration tests, spin the third-party systems up in containers inside the test run, and test components in interaction rather than in isolation.
+In the 2010s, Docker arrived, and with it David Heinemeier Hansson's 2014 article [TDD is dead. Long live testing.](https://dhh.dk/2014/04/23/tdd-is-dead-long-live-testing.html) A movement formed around the **Test Diamond**: write mostly integration tests, spin the third-party systems up in containers inside the test run, and test components in interaction rather than in isolation.
 
 <img
   src={useBaseUrl('/img/testing-pyramid-vs-diamond.svg')}
@@ -79,45 +79,39 @@ Beyond that, two appraoches to writing Unit Tests matter: **Solitary vs. Sociabl
 
 CHACK recognizes that the definition of Unit Tests is vague, thus it redefines the three layers of Automated Tests in an unambiguous way:
 
-1. **Unit Tests** run entirely in memory. They mainly excersize types in the Core and are written as Sociable Tests. They target higher-level APIs first with referenced lower-level Core components being part of the same test, reducing the need for Test Doubles. Where the system under test would perform an I/O call, the Humble Object is replaced by a test double. These are the tests we write the most of, and they cover both the happy path as well as error and edge cases. There is one deliberate exception: **the local file system does not disqualify a Unit Test**. It is available in every context - development machine, CI/CD pipeline, container - and it is fast and stable. Reading a sample file from disk in a Unit Test is fine.
-2. **Integration Tests** perform at least one real I/O call to one third-party system in another process: a database server, a web service, a message broker, SAP - you name it. An integration test may still use test doubles for the parts it is not interested in, as long as one genuine I/O call happens. These tests focus on happy paths and prove that components integrate correctly.
+1. **Unit Tests** run entirely in memory. They mainly excersize types in the Core and are written preferably as Sociable Tests. They target higher-level APIs first with referenced lower-level Core components being part of the same test, reducing the need for Test Doubles. Where the system under test would perform an I/O call, the Humble Object is replaced by a test double. These tests cover both the happy path as well as error and edge cases. There is one deliberate exception: **the local file system does not disqualify a Unit Test**. It is available in every context - development machine, CI/CD pipeline, container - and it is fast and stable.
+2. **Integration Tests** perform at least one real I/O call to one third-party system in another process: a database server, a web service, a message broker, SAP - you name it. An integration test may still use test doubles for certain abstractions, as long as one genuine I/O call happens. These tests focus on happy paths because failures and edge cases are typically hard to replicate in real-systems running in a Docker container or in staging environments.
 3. **End-to-end tests** allow no test doubles at all. Every I/O call goes to a real instance of the real system, in a configuration as close to production as you can make it. They are the most expensive tests to build and run, and like integration tests they mainly cover the happy path.
 
-Where possible, start the third-party systems inside the test run (typically using Docker containers) so the suite is self-contained and reproducible. Running against a shared, always-available test environment also works, but be aware of the trade-off: if that environment is only reset periodically, data-manipulating tests will eventually collide with their own leftovers, and you get flaky tests.
-
-:::tip[In .NET Practice]
-[Testcontainers](https://dotnet.testcontainers.org/) starts databases, brokers, and other dependencies as Docker containers from within the test run. For end-to-end scenarios, [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/) can bring up the whole application graph, and [Playwright](https://playwright.dev/dotnet/) drives the browser.
-
-Which test framework you use barely matters - xUnit.net, NUnit, MSTest, and TUnit all do the job.
-:::
+Where possible, start the third-party systems inside the test run (typically using [Testcontainers](https://testcontainers.com/) for Integration tests and [Aspire](https://aspire.dev/) or [Docker Compose](https://docs.docker.com/compose/) for E2E tests) so the suite is self-contained and reproducible. Running against a shared, always-available test environment also works, but be aware of the trade-off: if that environment is only reset periodically, data-manipulating tests will eventually collide with their own leftovers and the chance to encounter [flaky tests](https://en.wikipedia.org/wiki/Flaky_test) rises.
 
 This approach is taken for two reasons:
 
 ### Performance Costs of Integration Tests
 
-The first reason is cost. You can run many thousands of Unit Tests in a few seconds. A single integration test can take several seconds. I/O calls are not a little slower than in-memory operations, they are one million to one billion times slower.
+The first reason is cost. You can run many thousands of Unit Tests in a few seconds, or 2 to 3 Integration Tests. I/O calls are not a little slower than in-memory operations, they are one million to one billion times slower.
 
 <IoCostChart />
 
-The horizontal axis is logarithmic by default: every grid step is a factor of ten. Switch to linear scaling to see how the slowest operation dominates. In this benchmark, loading an entity from Oracle over a VPN takes about 20.3 ms, compared with about 245.1 µs for MS SQL on the same computer and 8.377 ns for a dictionary lookup with 1,000 strings. These are measurements from one setup, not universal costs, but the difference shows up directly in the wall-clock time and the resources your CI/CD pipeline consumes, and in how long you sit waiting before you know whether your change works.
+The horizontal axis is logarithmic by default: every grid step is a factor of ten. Switch to linear scaling to see how the slowest operation dominates. You shouldn't focus on the absolute values of this setup, but rather on the differences between these values. They determine how long you sit waiting before you know whether your change works.
 
 ### Writing Tests for Errors and Edge Cases
 
-The second reason is coverage of the unhappy paths. Integration tests are excellent at the happy path and at proving that the pieces fit together. They are bad at edge and error cases: reproducing a deadlock, a timeout, a truncated response, a unique-constraint violation, or a broker that rejects a message on demand is hard to do reliably and often ends in a flaky test. With a test double, injecting that exact failure and asserting how the Core reacts is straightforward.
+The second reason is coverage of the unhappy paths. Integration tests are excellent at the happy path and at proving that the pieces fit together, even across process boundaries. They are bad at edge and error cases: reproducing a deadlock, a timeout, a truncated response, a unique-constraint violation, or a broker that rejects a message on demand is hard to do reliably and often ends in a flaky test. With a test double, injecting that exact failure and asserting how the Core reacts is straightforward.
 
 ### What tests may depend on
 
 The diagram at the top of this page splits the Automated Tests box into its parts, because the three kinds of tests do not point at the same things.
 
-**The system under test of a unit test is always in the Core.** Never a humble object, never a component of the Composition Root. Humble objects are replaced by test doubles that implement the same I/O abstraction; that is the entire reason those abstractions exist. Reusing a piece of the Composition Root inside a unit test is fine - for example, building a DI container in the setup phase to assemble the object graph - but the Composition Root is the fixture, not the thing under test.
+**The system under test of a unit test is always in the Core.** Never a humble object, never a component of the Composition Root. Humble objects are replaced by test doubles that implement the same I/O abstraction; that is the entire reason those abstractions exist. Reusing a piece of the Composition Root inside a unit test is fine - for example, building a DI container in the setup phase to assemble the object graph - but the Composition Root is the fixture, not the system under test.
 
-**Test doubles implement the I/O abstractions.** That is the only reason a unit test can reach the Core without leaving memory, and it is why the diagram draws the test doubles pointing at the I/O abstractions rather than at the humble objects, with the same hollow-triangle "implements" arrowhead. A test double is not a stand-in for a humble object's implementation; it is a second implementation of the same abstraction, written for the test.
+**Test doubles implement the I/O abstractions.** Because of them, the system under test can stay in-memory during a test run, and it is why the diagram draws the test doubles pointing at the I/O abstractions rather than at the humble objects. A test double is is a second implementation of the same abstraction, written for the test.
 
-**Integration and end-to-end tests may touch everything.** Their point is realism: they use the real humble objects and typically the real Composition Root, so that the fixture resembles what runs in production. They also reach the third-party systems directly - starting a container, seeding a database, publishing a message - which is why the diagram draws them outside the process boundary, next to the unit tests but on the other side of the line. Integration tests may add test doubles where they need to; end-to-end tests may not.
+**Integration and end-to-end tests may touch everything.** Their point is realism: they use the real humble objects and typically the real Composition Root, so that the fixture resembles what runs in production. They also reach the third-party systems directly - starting a container, seeding a database, publishing a message. Depending on your test setup, they run inside the test runner process (e.g., via Testcontainers) or outside of it (Aspire, Docker Compose). Integration tests may add test doubles where they need to; end-to-end tests may not.
 
-### Aim your tests at the most abstract API of a slice
+### Sociable Tests: Aim your tests at the most abstract API of a slice
 
-Here is what that means in practice. Say you implement a feature - an HTTP endpoint, or a subscriber that handles a message from a broker. Typically there will be an entry point and one or more services below it holding the actual logic, plus the I/O abstraction for the database.
+Imagine you implement a feature - an HTTP endpoint, or a subscriber that handles a message from a broker. Typically there will be an entry point and one or more services below it holding the actual logic, plus the I/O abstraction for the database.
 
 The tempting approach is one test class per type: test the endpoint with a mocked service, test the service with a mocked repository, test the validator on its own. You end up maintaining a web of doubles that mirrors your class structure - and every refactoring below the surface breaks tests, even when behaviour did not change.
 
