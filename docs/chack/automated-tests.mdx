@@ -113,61 +113,14 @@ The diagram at the top of this page splits the Automated Tests box into its part
 
 Imagine you implement a feature - an HTTP endpoint, or a subscriber that handles a message from a broker. Typically there will be an entry point and one or more services below it holding the actual logic, plus the I/O abstraction for the database.
 
-The tempting approach is one test class per type: test the endpoint with a mocked service, test the service with a mocked repository, test the validator on its own. You end up maintaining a web of doubles that mirrors your class structure - and every refactoring below the surface breaks tests, even when behaviour did not change.
+The tempting approach is one test class per type: test the endpoint with a mocked service, test the service with a mocked repository, test the validator on its own. You end up maintaining a web of test doubles that mirrors your class structure, and every refactoring below the surface breaks tests, even when behaviour did not change. A typical scenario for solitary tests.
 
 CHACK does the opposite. **Write the test against the most abstract API of the slice** - the endpoint - and let the real service, the real validator, and the real mapper participate. Only the humble object is doubled. The benefits are immediate:
 
-- Very few test doubles, so the arrange phase stays readable.
+- Few test doubles.
 - You are free to refactor everything below the endpoint - split a service, merge two types, rename a method - without breaking a single test, as long as the observable behaviour is unchanged.
 - The test reads like a description of what the feature does, because it enters through the same door the outside world uses.
 
-Test doubles at the level of the slice's high-level API therefore stay coarse-grained on purpose. If some behaviour cannot be reached comfortably from the top - an intricate calculation, an awkward branch, a mapping routine - go one level down and write additional unit tests against that lower-level API. Those are frequently reusable static methods that need no test doubles at all, which makes them the cheapest tests in the suite.
+Test doubles at the level of the slice's high-level API therefore stay coarse-grained on purpose. If some behaviour cannot be reached comfortably from the top - an intricate calculation, an awkward branch, a mapping routine - wirte individual tests against that lower-level API. Typical targets for those are guard clauses at the beginning of methods.
 
-## Vocabulary
-
-We use the definitions from [xUnit Test Patterns](http://xunitpatterns.com/) so that everyone means the same thing.
-
-### The four-phase test
-
-Every test is structured in four phases:
-
-1. **Setup** - create and configure everything the test needs to run.
-2. **Exercise** - invoke the functionality under test.
-3. **Verify** - assert on return values and side effects.
-4. **Teardown** - clean up what the garbage collector cannot, such as shutting down containers or deleting files.
-
-Arrange-Act-Assert (from Test-Driven Development) and Given-When-Then (from Behavior-Driven Development) are synonyms for the first three phases; in practice you will find `// Arrange`, `// Act`, `// Assert` comments in most of my test code. The four-phase test has one advantage over both: it makes teardown explicit.
-
-The four phases do not all have to appear inside the test method. They are commonly spread across constructors, setup and teardown methods, and base class members.
-
-### System under test and test fixture
-
-The **system under test (SUT)** is the thing the test targets. It can be anything: a single function, an object, an endpoint, or a group of services acting together. As described above, we start at the highest-level API that makes sense and go lower when we need to.
-
-The **test fixture** is everything you must set up to be able to exercise the SUT. Depending on the kind of test, that includes other production objects, test doubles for humble objects, containers, configuration, and sample input files.
-
-### Test doubles
-
-1. **Dummy / Null Object** - a value passed to the SUT that is irrelevant to the test case. A dummy is never called, only passed along. A null object is called, but its methods do nothing.
-2. **Stub** - returns prepared data when the SUT calls it.
-3. **Spy** - records the calls the SUT makes so the verify phase can assert on them.
-4. **Mock** - a combination of stub and spy.
-5. **Fake** - a working implementation of a dependency that is not controlled by the test, usually something substantial such as an in-memory database or a simulator standing in for a third-party system.
-
-Whether you hand-write these as small classes or generate them with a dynamic mocking framework is up to you. Hand-written doubles read better in my experience, especially for the humble object abstractions, which tend to be small.
-
-## Practices
-
-**Tests must be independent.** Every test runs on its own, in any order, and the suite should be able to run them randomized. Test runners rarely guarantee execution order unless you force it. For expensive integration and end-to-end tests, ordering for performance reasons can be justified - but never let one test depend on another's leftover state.
-
-**Tests must be deterministic.** Anything the production code pulls out of the environment must be abstracted so the test can control it: the current time, random values, generated identifiers, the machine name, the culture. A test that fails once a day at midnight or once a month on the 31st erodes trust in the whole suite.
-
-**Tests are specification.** They state what the Core is supposed to do, from the domain expert's perspective, in executable form. Name them so that the context is obvious when you read the failure message six months from now.
-
-**Treat test code as production code.** Refactor it, remove duplication, keep it readable. Use the established patterns so the next person can navigate it without a tour.
-
-**Snapshot testing** helps when the verify phase would otherwise be enormous. The result is serialized to a file and compared against an approved file checked into git. Use it where the assertion is genuinely large and structural - and review the approved files, because approving a wrong snapshot is silent.
-
-**Code coverage is a hint, not a goal.** High coverage does not mean correct software; it only means the lines were executed. Complement it with **mutation testing** - remove a statement, invert a condition, change a boundary, and check that at least one test turns red. Doing this manually during code review is a fast way to find assertions that are too weak.
-
-**TDD and BDD are optional.** Both are test-first approaches, and neither is mandatory here. I do recommend every developer learn TDD well enough to choose it deliberately; whether you write the test first on a given day is your call.
+Overall, strive to keep the number of test doubles low.
