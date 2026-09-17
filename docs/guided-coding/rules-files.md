@@ -46,9 +46,9 @@ I keep a `## This is your space` section where an agent can record something unu
 Review those notes after the task. Promote a note into a rule only when later experience confirms it, move durable knowledge to the documentation where it belongs, and delete the rest. Otherwise the section slowly becomes the oversized context file this page is warning against.
 
 :::tip[The Opinionated Path]
-`/guided-coding-setup` creates or updates four small pieces of root guidance: how frozen plans are treated during implementation, the repository's confirmed feedback-loop commands, a link to the plan-writing instructions, and "This is your space".
+`/guided-coding-setup` creates or updates two sections of root guidance: the repository's confirmed feedback-loop commands, and the rules for implementing frozen plans with a link to `ai-plans/AGENTS.md`. It matches existing sections by meaning and changes nothing unrelated, so your own rules and a "This is your space" section survive a re-run.
 
-The skill discovers candidate commands from build manifests, task runners, scripts, and CI configuration. It runs commands only when they are safe and reasonably bounded, reports which ones it could not run, and never pretends an unconfirmed feedback loop passed. It also creates the scoped `ai-plans/AGENTS.md` and preserves project-specific instructions when run again after an upgrade.
+The skill discovers candidate commands from build manifests, task runners, scripts, and CI configuration and lists only those that are immediately executable in the repository. It also creates the scoped `ai-plans/AGENTS.md` and preserves project-specific instructions when run again after an upgrade.
 :::
 
 ## A small top-level example

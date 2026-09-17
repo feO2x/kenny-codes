@@ -34,17 +34,12 @@ const cards: Card[] = [
   {
     color: '#0078D4',
     header: '1. PLANNING PHASE',
-    loop: {from: 3, to: 5, label: ['repeat until', 'it stabilizes']},
+    loop: {from: 2, to: 4, label: ['repeat until', 'it stabilizes']},
     steps: [
       {
         kind: 'manual',
         title: 'Discuss the approach',
         description: '"As an expert architect, how would you tackle this?"',
-      },
-      {
-        kind: 'skill',
-        title: 'guided-coding-prepare-issue-for-plan',
-        description: 'After you agree: empty issue, clean local branch.',
       },
       {
         kind: 'skill',
@@ -68,8 +63,8 @@ const cards: Card[] = [
       },
       {
         kind: 'skill',
-        title: 'guided-coding-finish-plan',
-        description: 'Commits and freezes the plan; offers to publish it to the issue.',
+        title: 'guided-coding-freeze-plan',
+        description: 'Timestamps and freezes the plan. Commit it afterwards.',
       },
     ],
   },
@@ -140,11 +135,11 @@ const ARROW_TIP_X = 430;
 const description =
   'Timeline of the Guided Coding skills. Run guided-coding-setup once per repository. ' +
   'The Planning Phase starts with a discussion of the approach. Once you agree on the direction, run ' +
-  'guided-coding-prepare-issue-for-plan, then guided-coding-write-plan once to produce the draft. ' +
+  'guided-coding-write-plan once to produce the draft. ' +
   'Discuss the draft further and prompt the agent to revise it directly, optionally run ' +
   'guided-coding-review-plan in a fresh conversation, and discuss again. Discussion, review, and ' +
-  'revision repeat until the plan stabilizes, after which guided-coding-finish-plan ' +
-  'commits and freezes it. In the Implementing Phase, hand the frozen plan to a fresh conversation ' +
+  'revision repeat until the plan stabilizes, after which guided-coding-freeze-plan ' +
+  'timestamps and freezes it and you commit it. In the Implementing Phase, hand the frozen plan to a fresh conversation ' +
   'without any skill. In the Guiding Phase, review every changed file, then run ' +
   'guided-coding-write-deviations whenever follow-up plans exist ' +
   'or the code materially departs from the plans. Two arrows lead ' +

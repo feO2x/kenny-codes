@@ -93,11 +93,11 @@ The record lives in `ai-plans/` alongside an `AGENTS.md` that tells agents how t
 ### Filenames
 
 ```text
-YYYY-MM-DD-HHMM-<issue-id>-<kebab-case-description>.md
-YYYY-MM-DD-HHMM-<issue-id>-plan-deviations.md
+YYYY-MM-DD-HHMM-<ticket-id>-<short-title>.md
+YYYY-MM-DD-HHMM-<ticket-id>-plan-deviations.md
 ```
 
-The timestamp is **UTC**, taken from the shell at the moment of writing - never inferred from the conversation, because agents are unreliable about the current time. Omit the `<issue-id>` segment when the work has no tracker issue.
+Before it freezes, a draft is simply `<short-title>.md`. The timestamp is **UTC**, taken from the shell at the moment of freezing - never inferred from the conversation, because agents are unreliable about the current time. A frozen plan also carries a `*Frozen at ...*` line below its title. Omit the `<ticket-id>` segment when the work has no ticket.
 
 ```text
 2026-08-13-1420-42-cancelled-events.md
@@ -109,12 +109,13 @@ Version 1 numbered files by issue and sequence (`0015-0-feature.md`). The timest
 
 ### Guardrails
 
-The skills refuse to overwrite or reuse an existing plan or Plan Deviations filename; a collision stops the run and gets reported. Plans and deviations are committed with path-limited commits, so a plan commit contains the plan and nothing else.
+The skills refuse to overwrite or reuse an existing plan or Plan Deviations filename; a collision stops the run and gets reported. The skills do not commit anything. Committing a frozen plan or an accepted Plan Deviations document is your step, and keeping that commit to the document alone keeps the record readable.
 
 ### Skills
 
 - `/guided-coding-setup` creates `ai-plans/` and writes its `AGENTS.md`. Run it again to upgrade; it preserves your project-specific additions and never touches existing plans.
 - `/guided-coding-write-plan` handles both first plans and follow-up plans, reading every earlier document for the issue before writing.
+- `/guided-coding-freeze-plan` ends the Planning Phase: it renames the draft with a UTC timestamp and the optional ticket ID, inserts the `*Frozen at ...*` line, and stops. I commit the frozen plan afterwards.
 - `/guided-coding-write-deviations` always writes a document when follow-up plans exist. With a single plan, it reports "no material deviations" rather than inventing entries when the implementation matched. The skill only writes the file. After reviewing and accepting it, I commit it, create the pull request, and use its contents as the PR description with a normal prompt.
 
 See [Getting Started](./quick-start.mdx) for the full sequence.

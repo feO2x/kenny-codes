@@ -26,7 +26,6 @@ I open a **fresh conversation** and describe the context, then ask for an invest
 
 Then I discuss this with the agent until I have understood the suggested approach. Nothing is created during this conversation - no issue, no branch, no file. Sometimes it ends with the conclusion that the change isn't worth making, and then an untouched repository is exactly what I want to be left with.
 
-Only once we agree on the general direction do I run `/guided-coding-prepare-issue-for-plan`, which creates an empty tracker issue and checks out a clean local branch named after it. The issue body stays empty at this point; it gets filled with the finished plan later.
 :::
 
 ## Plan Structure
@@ -44,7 +43,7 @@ Keep plans focused. With Anthropic models in particular (Opus, Sonnet), plans te
 A plan is not an epic, a user story, or an initiative - it should contain technical details. You should have technical knowledge to discuss and review these plans effectively.
 
 :::tip[The Opinionated Path]
-Once the approach is settled, I run `/guided-coding-write-plan` in the same conversation. It writes the plan into `ai-plans/` with the three sections above and a UTC-timestamped filename.
+Once the approach is settled, I run `/guided-coding-write-plan` in the same conversation. It writes the plan into `ai-plans/<short-title>.md` with the three sections above. The plain short title marks a mutable draft; the timestamp is added only when the plan freezes.
 
 The skill is explicitly not allowed to *start* the planning conversation - it records the outcome of one. If you invoke it before you have discussed the approach, you get exactly the kind of plan this methodology is trying to avoid: one nobody thought about.
 
@@ -77,18 +76,18 @@ Then it's back to the main conversation for another round. There is a constant b
 
 ## Ending the Phase
 
-The Planning Phase ends with a deliberate act: you commit the plan.
+The Planning Phase ends with a deliberate act: you freeze the plan and commit it.
 
-That commit matters more than it looks. Up to that point the plan is a draft and anything can change. After it, the plan is **frozen** - a record of what you decided at that moment. You do not edit it later to match what actually happened. If the decision turns out to be wrong, you write a follow-up plan that supersedes it. If the implementation ends up somewhere else, you write a Plan Deviations document that explains why.
+That moment matters more than it looks. Up to that point the plan is a draft and anything can change. After it, the plan is **frozen** - a record of what you decided at that moment. You do not edit it later to match what actually happened. If the decision turns out to be wrong, you write a follow-up plan that supersedes it. If the implementation ends up somewhere else, you write a Plan Deviations document that explains why.
 
 The only edit permitted on a frozen plan is ticking an acceptance criterion from `- [ ]` to `- [x]`, and only once the implementation genuinely satisfies it.
 
 This is what makes `ai-plans/` a decision record rather than a pile of stale documents. [The Plan Record](./plan-record.md) explains the rules and the reasoning in full.
 
 :::tip[The Opinionated Path]
-I run `/guided-coding-finish-plan`. It validates the filename and the section structure, verifies that the plan's claims about existing files hold, and commits the plan with a path-limited commit so that nothing unrelated ends up in it.
+If the work has a ticket, I create it right before freezing, so the ticket ID can go into the filename. The stable draft doubles as the issue description.
 
-It then offers to publish the plan body as the description of the tracker issue. Only the first plan for an issue is published there; follow-up plans are not.
+Then I run `/guided-coding-freeze-plan`. It takes the current UTC timestamp from the shell, renames the draft to `<timestamp>-<ticket-id>-<short-title>.md`, and inserts a `*Frozen at ...*` line below the title. It refuses to overwrite an existing file, and it does not commit.
 
-That commit is the moment the Planning Phase ends and the plan freezes.
+The freeze is the moment the Planning Phase ends. Afterwards I commit the frozen plan, myself or with a normal prompt, keeping the plan file alone in that commit.
 :::

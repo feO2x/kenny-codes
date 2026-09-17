@@ -38,13 +38,13 @@ Callouts like this one show my concrete setup. This is the layer the [Guided Cod
 Everything in these callouts is optional. Nothing here is required to practice Guided Coding.
 :::
 
-Please don't read "I installed the skills" as "I adopted Guided Coding". The skills automate bookkeeping - creating an issue, naming a file, committing it at the right moment. They cannot do the two things the methodology is actually about: thinking hard about the plan, and reviewing every line of code that comes back. Those remain yours.
+Please don't read "I installed the skills" as "I adopted Guided Coding". The skills automate bookkeeping - writing the draft, freezing it with a timestamp at the right moment, recording deviations. They cannot do the two things the methodology is actually about: thinking hard about the plan, and reviewing every line of code that comes back. Those remain yours.
 
 ## What Changed in Version 2.0.0
 
 Version 2.0.0 sharpens one idea that was only implicit before: `ai-plans/` is an **append-only decision record**. Plans are not living documents that get edited to match reality. They record what you decided, when you decided it, and - through follow-up plans and Plan Deviations documents - how that decision later changed and why.
 
-- Plans and Plan Deviations documents are **frozen** once committed. The only permitted edit to a frozen plan is ticking an acceptance criterion once the implementation actually satisfies it.
+- Plans are **frozen** when their Planning Phase ends: they receive a UTC timestamp and a `*Frozen at ...*` line, and get committed. Plan Deviations documents are frozen once committed. The only permitted edit to a frozen plan is ticking an acceptance criterion once the implementation actually satisfies it.
 - Corrections are made by **appending**: a follow-up plan supersedes an earlier decision, and the closing Plan Deviations document summarizes follow-ups and any material implementation departures.
 - Filenames carry a **UTC timestamp**, so the directory reads in chronological order regardless of issue numbering.
 - The method is distributed as portable **Agent Skills** and an **Agent Plugin** at [github.com/feO2x/guided-coding](https://github.com/feO2x/guided-coding).
