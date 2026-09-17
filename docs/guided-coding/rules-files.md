@@ -9,7 +9,7 @@ title: What Belongs in a Rules File
 
 Rules files such as `AGENTS.md` consume context on every task to which they apply. A [2026 study of repository-level context files](https://arxiv.org/abs/2602.11988) found no significant improvement in task success, while inference cost increased by more than 20% on average. The useful nuance is that agents generally followed the instructions they were given, but repository overviews did not help them find the relevant code faster.
 
-The lesson is not that rules files are useless. It is that they should contain information an agent cannot reliably discover — or should not have to rediscover — from the repository itself:
+The lesson is not that rules files are useless. It is that they should contain information an agent cannot reliably discover - or should not have to rediscover - from the repository itself:
 
 - **Workflow invariants** that exist because your team decided on them, such as freezing a plan when its Planning Phase ends. See [The Plan Record](./plan-record.md).
 - **Feedback loops**, by exact command and what each one verifies. These give the agent the supervision it needs during the [Implementing Phase](./implementing-phase.mdx).
@@ -46,9 +46,9 @@ I keep a `## This is your space` section where an agent can record something unu
 Review those notes after the task. Promote a note into a rule only when later experience confirms it, move durable knowledge to the documentation where it belongs, and delete the rest. Otherwise the section slowly becomes the oversized context file this page is warning against.
 
 :::tip[The Opinionated Path]
-`/guided-coding-setup` creates or updates four small pieces of root guidance: how frozen plans are treated during implementation, the repository's confirmed feedback-loop commands, a link to the plan-writing instructions, and "This is your space".
+`/guided-coding-setup` creates or updates two sections of root guidance: the repository's confirmed feedback-loop commands, and the rules for implementing frozen plans with a link to `ai-plans/AGENTS.md`. It matches existing sections by meaning and changes nothing unrelated, so your own rules and a "This is your space" section survive a re-run.
 
-The skill discovers candidate commands from build manifests, task runners, scripts, and CI configuration. It runs commands only when they are safe and reasonably bounded, reports which ones it could not run, and never pretends an unconfirmed feedback loop passed. It also creates the scoped `ai-plans/AGENTS.md` and preserves project-specific instructions when run again after an upgrade.
+The skill discovers candidate commands from build manifests, task runners, scripts, and CI configuration and lists only those that are immediately executable in the repository. It also creates the scoped `ai-plans/AGENTS.md` and preserves project-specific instructions when run again after an upgrade.
 :::
 
 ## A small top-level example
@@ -75,8 +75,8 @@ to a plan is flipping an acceptance criterion from `- [ ]` to `- [x]`.
 
 ## Feedback loops
 
-- `dotnet test` — builds the solution and runs all automated tests.
-- `dotnet format --verify-no-changes` — verifies formatting and analyzer rules.
+- `dotnet test` - builds the solution and runs all automated tests.
+- `dotnet format --verify-no-changes` - verifies formatting and analyzer rules.
 
 ## Scoped instructions
 
