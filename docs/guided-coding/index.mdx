@@ -1,11 +1,11 @@
 ---
 sidebar_position: 1
-title: "Guided Coding: Staying in Control While Coding with AI Agents"
+title: "Guided Coding & Guided Learning"
 ---
 
 import GuidedCodingDiagram from '@site/src/components/GuidedCodingDiagram';
 
-# Guided Coding: Staying in Control While Coding with AI Agents
+# Guided Coding & Guided Learning
 
 ## TL;DR
 
@@ -21,6 +21,8 @@ You never stop guiding - it just changes shape along the way. In Planning, you a
 
 Spend rules-file context deliberately, find the right plan size empirically for the LLMs you use, and stay vigilant about important software traits like functional correctness, performance, and security.
 
+**Guided Learning** is a variant for developers who are still learning the domain a plan touches: in the Implementing Phase, you write the code yourself while the agent teaches you, ideally with a senior developer at your side during Planning and Guiding. See [Guided Learning: Getting Started](./guided-learning-getting-started.mdx).
+
 ## A Methodology, Not a Framework
 
 Guided Coding is a way of working, not a toolchain you install. You can adopt all of it with nothing but markdown files, git, and the coding agent you already use. There is no CLI to learn, no artifact format you must conform to, and no vendor to lock yourself into.
@@ -33,7 +35,7 @@ So these docs are written in two layers:
 - **The Opinionated Path** - set apart in callouts like the one below. **This is how I work**: exact prompts, exact filenames, and which skill I invoke when. Copy it wholesale, adapt it, or ignore it entirely.
 
 :::tip[The Opinionated Path]
-Callouts like this one show my concrete setup. This is the layer the [Guided Coding skills](https://github.com/feO2x/guided-coding) encode, and [Getting Started](./quick-start.mdx) walks through it end to end.
+Callouts like this one show my concrete setup. This is the layer the [Guided Coding skills](https://github.com/feO2x/guided-coding) encode, and [Guided Coding: Getting Started](./guided-coding-getting-started.mdx) walks through it end to end.
 
 Everything in these callouts is optional. Nothing here is required to practice Guided Coding.
 :::
@@ -48,6 +50,7 @@ Version 2.0.0 sharpens one idea that was only implicit before: `ai-plans/` is an
 - Corrections are made by **appending**: a follow-up plan supersedes an earlier decision, and the closing Plan Deviations document summarizes follow-ups and any material implementation departures.
 - Filenames carry a **UTC timestamp**, so the directory reads in chronological order regardless of issue numbering.
 - The method is distributed as portable **Agent Skills** and an **Agent Plugin** at [github.com/feO2x/guided-coding](https://github.com/feO2x/guided-coding).
+- **Guided Learning** joins as a variant for developers who want to learn: two skills let you implement a plan yourself while the agent teaches you, and a private learning profile tracks your progress across sessions. See [Guided Learning: Getting Started](./guided-learning-getting-started.mdx).
 
 The [Plan Record](./plan-record.md) page covers all of this in depth.
 
@@ -63,6 +66,7 @@ That's what Guided Coding is about.
 
 ## Where to Go Next
 
-- Want to try the tooling right away? Start with [Getting Started](./quick-start.mdx).
+- Want to try the tooling right away? Start with [Guided Coding: Getting Started](./guided-coding-getting-started.mdx).
 - Want to understand the method? Read the [Planning](./planning-phase.mdx), [Implementing](./implementing-phase.mdx), and [Guiding](./guiding-phase.mdx) phases in order.
 - Want to know how the plans stack up over time? Read [The Plan Record](./plan-record.md).
+- Want to write the code yourself and learn along the way? Read [Guided Learning: Getting Started](./guided-learning-getting-started.mdx).

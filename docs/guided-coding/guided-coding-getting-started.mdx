@@ -1,15 +1,15 @@
 ---
 sidebar_position: 2
-title: Getting Started
+title: "Guided Coding: Getting Started"
 ---
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import GuidedCodingSkillTimeline from '@site/src/components/GuidedCodingSkillTimeline';
 
-# Getting Started
+# Guided Coding: Getting Started
 
-This page walks through **the Opinionated Path** - my own setup, packaged as five Agent Skills that live at [github.com/feO2x/guided-coding](https://github.com/feO2x/guided-coding).
+This page walks through **the Opinionated Path** - my own setup, packaged as six Agent Skills that live at [github.com/feO2x/guided-coding](https://github.com/feO2x/guided-coding). Two more skills let you implement a plan yourself while the agent teaches you - see [Guided Learning: Getting Started](./guided-learning-getting-started.mdx).
 
 :::info[Read this first]
 The skills are optional. Guided Coding is a methodology, and everything below can be done by hand with markdown files and git. What the skills give you is consistency: the same plan structure, the same filenames, and a frozen, timestamped plan at exactly the moment the Planning Phase ends.
@@ -258,7 +258,35 @@ Now commit the frozen plan. The skill does not do that for you, so commit it you
 
 ### Step 7: Implement
 
-**No skill here either.** Start a fresh conversation and hand over the committed plan:
+Start a fresh conversation and hand over the committed plan:
+
+<Tabs groupId="guided-coding-install">
+<TabItem value="claude" label="Claude Code plugin" default>
+
+```text
+/guided-coding:implement ai-plans/2026-08-13-1420-42-cancelled-events.md
+```
+
+</TabItem>
+<TabItem value="skills" label="Portable Agent Skills">
+
+```text
+/guided-coding-implement ai-plans/2026-08-13-1420-42-cancelled-events.md
+```
+
+</TabItem>
+<TabItem value="plugin" label="Agent Plugin clients">
+
+```text
+/guided-coding-implement ai-plans/2026-08-13-1420-42-cancelled-events.md
+```
+
+</TabItem>
+</Tabs>
+
+When you don't name a plan, the skill picks the latest one with all acceptance criteria unchecked, and asks otherwise. It refuses to start on a plan that isn't frozen. Then it implements the plan, verifies the changes with your feedback loops, and ticks an acceptance criterion only when a feedback loop genuinely satisfies it. When a plan decision turns out to be wrong, it looks for a workaround and reports it instead of silently building something else. At the end, it reports what it implemented, which feedback loops ran, and which criteria remain unchecked and why. It does not commit anything or open a pull request unless you ask it to.
+
+The skill adds little to a plain prompt, and that is on purpose. A prompt works just as well:
 
 > *"With you being an expert .NET developer, could you please implement plan `ai-plans/2026-08-13-1420-42-cancelled-events.md` for me?"*
 
@@ -330,7 +358,9 @@ The goal: **a reviewer should need to read only the issue's first plan and, when
 | The draft wants a second opinion | `guided-coding-review-plan` |
 | Nobody is finding anything anymore | *- create the ticket, if the work needs one* |
 | The ticket exists, or the work needs none | `guided-coding-freeze-plan` |
-| Plan frozen | *- commit it, implement, then review* |
+| Plan frozen | *- commit it* |
+| Plan committed | `guided-coding-implement` (in a fresh conversation) |
+| Implementation finished | *- review every changed file* |
 | Implementation reviewed | `guided-coding-write-deviations` |
 | Deviations reviewed, or no document required | *- commit and open the pull request* |
 

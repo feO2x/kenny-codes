@@ -1,0 +1,150 @@
+---
+sidebar_position: 3
+title: "Guided Learning: Getting Started"
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import GuidedLearningSkillTimeline from '@site/src/components/GuidedLearningSkillTimeline';
+
+# Guided Learning: Getting Started
+
+Guided Coding assumes that you can judge the code your agent writes. The whole Guiding Phase rests on that assumption. But what if you can't yet - because you are new to the profession, or new to the language, framework, or domain the plan touches?
+
+**Guided Learning** is a variant of Guided Coding for exactly this situation. The three phases stay the same, with one change: in the Implementing Phase, the agent no longer writes the code. **You do.** The agent breaks the frozen plan into milestones and teaches you how to implement each of them. It knows the codebase, it has the plan in front of it, and it never runs out of patience for your questions.
+
+## Three Stages of Learning
+
+How the agent teaches depends on where you are in the domain at hand. Guided Learning distinguishes three stages:
+
+- **Beginning** - you are new to a domain and need to learn its fundamental concepts and mechanisms, mostly by copying what you are shown. You don't adapt or transform them yet.
+- **Advancing** - you are fluent in the fundamentals and can adapt them to new problems. You don't question the fundamentals themselves.
+- **Mastering** - you adapt and transform concepts quickly, and you question or replace the fundamentals when they no longer fit.
+
+A stage belongs to a domain, not to a person. You can be Mastering in .NET, Advancing in automated testing, and Beginning in React, all at the same time. That's normal, and it is exactly why a single plan can call for different kinds of help in different places.
+
+| Stage | Implementing Phase | How the agent teaches |
+| --- | --- | --- |
+| **Beginning** | `guided-coding-implement-show-me` | Splits the plan into layers and presents complete code, fragment by fragment, for you to type in and discuss. |
+| **Advancing** | `guided-coding-implement-coach-me` | Splits the plan into vertical slices that you implement yourself, reviews your work, and reveals hints one at a time when you are stuck. |
+| **Mastering** | `guided-coding-implement` | Regular [Guided Coding](./implementing-phase.mdx): the agent implements the plan, and your expertise goes into planning and guiding. |
+
+## Better With a Senior Developer
+
+You can do Guided Learning on your own. **It works best when a senior developer accompanies you through the Planning and Guiding Phases.**
+
+Consider what those two phases demand. In the Planning Phase, you decide whether the approach is right, whether the plan has the right size, and whether its acceptance criteria are actually verifiable. In the Guiding Phase, you decide whether the result is good enough. Both decisions require the very experience you are still building. A plan with a flawed approach doesn't just produce flawed code in Guided Learning - it teaches you the flawed approach, diligently, one milestone at a time.
+
+A senior developer closes that gap:
+
+- **In the Planning Phase**, they make sure the plan is properly laid out before it freezes: a sound approach, a manageable size, and criteria that describe verifiable outcomes.
+- **In the Guiding Phase**, they verify the result with you. They read the code you wrote, explain why something should be different, point out what matters in your team's codebase, and recognize the progress you made - all with a human touch that no agent provides.
+
+The Implementing Phase is where the agent takes over the teaching. The senior stays involved in the Planning and Guiding Phases, while the junior developer takes the time they need to build their skills in the Implementing Phase.
+
+:::info
+If you are the senior developer, join before the plan freezes, not after the pull request is opened. And review the result together with the learner rather than asynchronously - the conversation about the code is where the learning happens.
+:::
+
+## When to Call What
+
+<GuidedLearningSkillTimeline />
+
+As in [Guided Coding: Getting Started](./guided-coding-getting-started.mdx), filled dots are skills and hollow dots are the parts you do yourself. The Planning and Guiding Phases are the same as in Guided Coding - only the people around the table change. The Implementing Phase is where Guided Learning differs: you start a fresh conversation, invoke the skill that matches your learning progress, and work through what the agent lays out, step-by-step.
+
+## The Implementing Phase, Taught
+
+Both skills start the same way. They verify that the plan is frozen, read your [learning profile](#the-learning-profile), and present a roadmap of milestones before any code is written. Every milestone ends in a compilable codebase whose feedback loops pass, including its tests. You tick the acceptance criteria the milestone fully satisfies and commit - the agent never changes your repository.
+
+### Show Me: for the Beginning stage
+
+<Tabs groupId="guided-coding-install">
+<TabItem value="claude" label="Claude Code plugin" default>
+
+```text
+/guided-coding:implement-show-me
+```
+
+</TabItem>
+<TabItem value="skills" label="Portable Agent Skills">
+
+```text
+/guided-coding-implement-show-me
+```
+
+</TabItem>
+<TabItem value="plugin" label="Agent Plugin clients">
+
+```text
+/guided-coding-implement-show-me
+```
+
+</TabItem>
+</Tabs>
+
+The agent builds the roadmap **layer by layer**. For example, if you would implement a backend feature: the domain model first, then database access, a service, and finally the endpoint. Each milestone puts one area in focus, so you take in its concepts without the noise of everything else.
+
+Within a milestone, the agent presents complete code, one fragment at a time, and explains it. You type it in yourself - typing is where a good part of the learning happens, so resist copy and paste. Before you run the feedback loops, the agent asks what you expect to happen and why. Your answer tells it whether the explanation landed.
+
+### Coach Me: for the Advancing stage
+
+<Tabs groupId="guided-coding-install">
+<TabItem value="claude" label="Claude Code plugin" default>
+
+```text
+/guided-coding:implement-coach-me
+```
+
+</TabItem>
+<TabItem value="skills" label="Portable Agent Skills">
+
+```text
+/guided-coding-implement-coach-me
+```
+
+</TabItem>
+<TabItem value="plugin" label="Agent Plugin clients">
+
+```text
+/guided-coding-implement-coach-me
+```
+
+</TabItem>
+</Tabs>
+
+The agent builds the roadmap from **vertical slices** that each run end-to-end. At the Advancing stage, you know the individual areas; what you practice is fitting them together. A thin first slice also exposes a wrong design decision in the first milestone rather than the last.
+
+Each milestone is a task for you to solve. The agent describes what should change, which constraints apply, and how the result will be verified - but not how to implement it. When you get stuck, it reveals help one step at a time: a focused question, a pointer to similar code, the missing concept, an outline. It hands you code only when nothing else helps, and never the whole milestone. The goal is productive struggle, not withholding information. When you are done, the agent inspects your changes and takes a valid solution on its own terms, even when it differs from what it expected.
+
+## The Learning Profile
+
+Both skills remember what you learned across sessions in `~/.guided-learning/profile.md`. The profile contains two things:
+
+- **Preferences** - how you like to be taught, for example the language to speak, or explanation before code. The agent asks for them in your first session and records any preference you express later.
+- **Knowledge** - a tree of areas, each at one of the three stages. Technologies are organized by ecosystem, disciplines such as automated testing or software design by topic.
+
+```md
+# Guided Learning Profile
+
+## Preferences
+
+- Explain in German
+- Explanation before code
+
+## Knowledge
+
+- **.NET** `Advancing` — covers ASP.NET Core, xUnit
+  - **EF Core** `Beginning` — covers change tracking, migrations
+- **Automated testing** `Advancing`
+```
+
+The agent uses the profile to decide how large to make the milestones, how much to explain, and how much help to offer at the start. It is a rough starting point: what the agent observes in the session always wins. After each milestone, it records what it saw. A stage moves up at most one step per plan, and only on evidence - for example, when you carried a milestone in an area without being handed the implementation. The show-me skill never moves an area beyond Beginning, because it hands you the code; when you seem ready for more, it suggests switching to coach-me instead.
+
+On first use, the agent creates `~/.guided-learning/` as a local git repository and commits every update with a message that says what it observed. That history is your learning record. It never ends up in your project repository and is never pushed. If you want to share it across machines, push it to a private repository yourself. You can edit or delete the profile at any time.
+
+## Tips
+
+- **Resume the conversation, don't restart it.** A plan often takes more than one sitting in Guided Learning. The skills always start at the beginning of a plan, so continue the same conversation the next day instead of invoking the skill again.
+- **Keep plans small.** Everything in [Finding the Right Plan Size](./finding-the-right-plan-size.md) applies twice over here. A plan that takes an agent 20 minutes can take you an afternoon, and a smaller plan gets you to the Guiding Phase - and to your senior's feedback - sooner.
+- **Ask everything.** The agent answers questions about the codebase, the language, the framework, and the tooling directly, at any point.
+- **Move on when you are ready.** When show-me starts to feel slow, try coach-me for the same area. When coach-me stops challenging you, you are ready for regular Guided Coding - and for being someone else's senior developer.

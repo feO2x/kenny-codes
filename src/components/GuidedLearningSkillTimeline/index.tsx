@@ -6,7 +6,7 @@ interface Step {
   description: string;
 }
 
-interface Loop {
+interface Span {
   from: number;
   to: number;
   label: [string, string];
@@ -16,7 +16,9 @@ interface Card {
   color: string;
   header: string;
   steps: Step[];
-  loop?: Loop;
+  // Steps of which you pick exactly one, marked by a bracket.
+  choice?: Span;
+  loop?: Span;
 }
 
 const cards: Card[] = [
@@ -33,13 +35,13 @@ const cards: Card[] = [
   },
   {
     color: '#0078D4',
-    header: '1. PLANNING PHASE',
+    header: '1. PLANNING PHASE · WITH A SENIOR DEVELOPER',
     loop: {from: 2, to: 4, label: ['repeat until', 'it stabilizes']},
     steps: [
       {
         kind: 'manual',
         title: 'Discuss the approach',
-        description: '"As an expert architect, how would you tackle this?"',
+        description: 'Your senior helps you judge the direction.',
       },
       {
         kind: 'skill',
@@ -49,7 +51,7 @@ const cards: Card[] = [
       {
         kind: 'manual',
         title: 'Further discussion',
-        description: 'Question the draft; revise it with plain prompts.',
+        description: 'Your senior checks that the plan is laid out well.',
       },
       {
         kind: 'skill',
@@ -70,23 +72,45 @@ const cards: Card[] = [
   },
   {
     color: '#E88A00',
-    header: '2. IMPLEMENTING PHASE',
+    header: '2. IMPLEMENTING PHASE · YOU WRITE THE CODE',
+    choice: {from: 1, to: 2, label: ['pick the one', 'for your stage']},
+    loop: {from: 3, to: 4, label: ['repeat per', 'milestone']},
     steps: [
       {
+        kind: 'manual',
+        title: 'Start a fresh conversation',
+        description: 'Invoke the skill that matches your stage.',
+      },
+      {
         kind: 'skill',
-        title: 'guided-coding-implement',
-        description: 'In a fresh conversation. Plan and feedback loops steer it.',
+        title: 'guided-coding-implement-show-me',
+        description: 'Beginning: complete code, one fragment at a time.',
+      },
+      {
+        kind: 'skill',
+        title: 'guided-coding-implement-coach-me',
+        description: 'Advancing: you solve milestones, hints on demand.',
+      },
+      {
+        kind: 'manual',
+        title: 'Work through a milestone',
+        description: 'Type the code, run the feedback loops, ask away.',
+      },
+      {
+        kind: 'manual',
+        title: 'Tick its criteria and commit',
+        description: 'The agent updates your learning profile.',
       },
     ],
   },
   {
     color: '#6B2FA0',
-    header: '3. GUIDING PHASE',
+    header: '3. GUIDING PHASE · WITH A SENIOR DEVELOPER',
     steps: [
       {
         kind: 'manual',
-        title: 'Review every changed file',
-        description: 'Read it yourself; optionally add an agent review.',
+        title: 'Review every changed file together',
+        description: 'Your senior verifies the result, with a human touch.',
       },
       {
         kind: 'manual',
@@ -122,32 +146,62 @@ const CARD_WIDTH = 660;
 const TEXT_X = 68;
 const SVG_WIDTH = 700;
 const CONNECTOR_WIDTH = 6;
+const BRACKET_WIDTH = 3;
 const LABEL_SIZE = 13;
 
 // The two iteration arrows run over the cards, in the empty band right of the
 // step text. Keep both corridors left of the card edge, and the arrow heads
 // left of both corridors, or the arms invert and the heads flip outward.
+// Their target rows must stay free of choice brackets and loops.
 const INNER_CORRIDOR_X = 604;
 const OUTER_CORRIDOR_X = 644;
 // Where a head stops, just right of the longest text it points at.
 const ARROW_TIP_X = 430;
 
 const description =
-  'Timeline of the Guided Coding skills. Run guided-coding-setup once per repository. ' +
-  'The Planning Phase starts with a discussion of the approach. Once you agree on the direction, run ' +
-  'guided-coding-write-plan once to produce the draft. ' +
-  'Discuss the draft further and prompt the agent to revise it directly, optionally run ' +
-  'guided-coding-review-plan in a fresh conversation, and discuss again. Discussion, review, and ' +
-  'revision repeat until the plan stabilizes, after which guided-coding-freeze-plan ' +
-  'timestamps and freezes it and you commit it. In the Implementing Phase, run guided-coding-implement ' +
-  'with the frozen plan in a fresh conversation. In the Guiding Phase, review every changed file, then run ' +
-  'guided-coding-write-deviations whenever follow-up plans exist ' +
-  'or the code materially departs from the plans. Two arrows lead ' +
-  'back from the Guiding Phase: a small issue returns to the Implementing Phase, and a large issue ' +
-  'returns to the start of the Planning Phase. Finally, review the record and use a normal prompt ' +
-  'to commit it and create the pull request.';
+  'Timeline of the Guided Learning skills. Run guided-coding-setup once per repository. ' +
+  'The Planning Phase works as in Guided Coding, ideally with a senior developer at your side: ' +
+  'discuss the approach, run guided-coding-write-plan once to produce the draft, discuss and revise it, ' +
+  'optionally run guided-coding-review-plan in a fresh conversation, and repeat until the plan stabilizes. ' +
+  'Then guided-coding-freeze-plan timestamps and freezes it, and you commit it. ' +
+  'In the Implementing Phase, you write the code yourself: start a fresh conversation and invoke ' +
+  'guided-coding-implement-show-me if you are at the Beginning stage, or guided-coding-implement-coach-me ' +
+  'if you are at the Advancing stage. For each milestone, you type the code, run the feedback loops, ' +
+  'tick the acceptance criteria it satisfies, and commit, while the agent updates your learning profile. ' +
+  'In the Guiding Phase, review every changed file together with your senior developer, then run ' +
+  'guided-coding-write-deviations whenever follow-up plans exist or the code materially departs from the plans. ' +
+  'Two arrows lead back from the Guiding Phase: a small issue returns to the Implementing Phase, and a large ' +
+  'issue returns to the start of the Planning Phase. Finally, review the record and use a normal prompt to ' +
+  'commit it and create the pull request.';
 
-export default function GuidedCodingSkillTimeline() {
+function SpanLabel({x, y, color, label}: {x: number; y: number; color: string; label: [string, string]}) {
+  return (
+    <>
+      <text
+        x={x}
+        y={y - 4}
+        fill={color}
+        fontFamily="Segoe UI, sans-serif"
+        fontSize={LABEL_SIZE}
+        fontWeight="600"
+      >
+        {label[0]}
+      </text>
+      <text
+        x={x}
+        y={y + 13}
+        fill={color}
+        fontFamily="Segoe UI, sans-serif"
+        fontSize={LABEL_SIZE}
+        fontWeight="600"
+      >
+        {label[1]}
+      </text>
+    </>
+  );
+}
+
+export default function GuidedLearningSkillTimeline() {
   let y = 20;
   const markerPositions: number[][] = [];
   const rendered = cards.map((card, cardIndex) => {
@@ -208,8 +262,8 @@ export default function GuidedCodingSkillTimeline() {
     y = cardTop + cardHeight + CARD_GAP;
 
     const firstMarkerY = cardTop + (card.header ? HEADER_HEIGHT + 12 : 16) + 10;
-    const loopTop = card.loop ? firstMarkerY + card.loop.from * STEP_HEIGHT : 0;
-    const loopBottom = card.loop ? firstMarkerY + card.loop.to * STEP_HEIGHT : 0;
+    const spanTop = (span: Span) => firstMarkerY + span.from * STEP_HEIGHT;
+    const spanBottom = (span: Span) => firstMarkerY + span.to * STEP_HEIGHT;
 
     return (
       <g key={cardIndex}>
@@ -222,39 +276,42 @@ export default function GuidedCodingSkillTimeline() {
           fill="#FFFFFF"
         />
         <rect x={CARD_X} y={cardTop} width={6} height={cardHeight} rx="3" fill={card.color} />
+        {card.choice && (
+          <g>
+            <path
+              d={`M 412 ${spanTop(card.choice)} H 440 Q 456 ${spanTop(card.choice)} 456 ${spanTop(card.choice) + 16} V ${spanBottom(card.choice) - 16} Q 456 ${spanBottom(card.choice)} 440 ${spanBottom(card.choice)} H 412`}
+              fill="none"
+              stroke={card.color}
+              strokeWidth={BRACKET_WIDTH}
+              strokeLinecap="round"
+            />
+            <SpanLabel
+              x={468}
+              y={(spanTop(card.choice) + spanBottom(card.choice)) / 2}
+              color={card.color}
+              label={card.choice.label}
+            />
+          </g>
+        )}
         {card.loop && (
           <g>
             <path
-              d={`M 431 ${loopTop} H 440 Q 456 ${loopTop} 456 ${loopTop + 16} V ${loopBottom - 16} Q 456 ${loopBottom} 440 ${loopBottom} H 412`}
+              d={`M 431 ${spanTop(card.loop)} H 440 Q 456 ${spanTop(card.loop)} 456 ${spanTop(card.loop) + 16} V ${spanBottom(card.loop) - 16} Q 456 ${spanBottom(card.loop)} 440 ${spanBottom(card.loop)} H 412`}
               fill="none"
               stroke={card.color}
               strokeWidth={CONNECTOR_WIDTH}
               strokeLinecap="round"
             />
             <polygon
-              points={`410,${loopTop} 432,${loopTop - 9} 432,${loopTop + 9}`}
+              points={`410,${spanTop(card.loop)} 432,${spanTop(card.loop) - 9} 432,${spanTop(card.loop) + 9}`}
               fill={card.color}
             />
-            <text
+            <SpanLabel
               x={468}
-              y={(loopTop + loopBottom) / 2 - 4}
-              fill={card.color}
-              fontFamily="Segoe UI, sans-serif"
-              fontSize={LABEL_SIZE}
-              fontWeight="600"
-            >
-              {card.loop.label[0]}
-            </text>
-            <text
-              x={468}
-              y={(loopTop + loopBottom) / 2 + 13}
-              fill={card.color}
-              fontFamily="Segoe UI, sans-serif"
-              fontSize={LABEL_SIZE}
-              fontWeight="600"
-            >
-              {card.loop.label[1]}
-            </text>
+              y={(spanTop(card.loop) + spanBottom(card.loop)) / 2}
+              color={card.color}
+              label={card.loop.label}
+            />
           </g>
         )}
         {card.header && (
@@ -332,10 +389,10 @@ export default function GuidedCodingSkillTimeline() {
       viewBox={`0 0 ${SVG_WIDTH} ${totalHeight}`}
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-labelledby="guided-coding-skill-timeline-title"
+      aria-labelledby="guided-learning-skill-timeline-title"
       style={{maxWidth: `${SVG_WIDTH}px`, width: '100%', margin: '1.5rem auto', display: 'block'}}
     >
-      <title id="guided-coding-skill-timeline-title">{description}</title>
+      <title id="guided-learning-skill-timeline-title">{description}</title>
       <rect x="0" y="0" width={SVG_WIDTH} height={totalHeight} rx="8" fill="#D6D6D6" />
       {rendered}
       {iterationArrows}
