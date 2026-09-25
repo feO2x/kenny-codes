@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 title: The Plan Record
 ---
 
@@ -118,5 +118,5 @@ The skills refuse to overwrite or reuse an existing plan or Plan Deviations file
 - `/guided-coding-freeze-plan` ends the Planning Phase: it renames the draft with a UTC timestamp and the optional ticket ID, inserts the `*Frozen at ...*` line, and stops. I commit the frozen plan afterwards.
 - `/guided-coding-write-deviations` always writes a document when follow-up plans exist. With a single plan, it reports "no material deviations" rather than inventing entries when the implementation matched. The skill only writes the file. After reviewing and accepting it, I commit it, create the pull request, and use its contents as the PR description with a normal prompt.
 
-See [Getting Started](./quick-start.mdx) for the full sequence.
+See [Getting Started](./guided-coding-getting-started.mdx) for the full sequence.
 :::

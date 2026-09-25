@@ -78,6 +78,10 @@ const config: Config = {
             from: "/docs/guided-coding/implementation-phase",
             to: "/docs/guided-coding/implementing-phase",
           },
+          {
+            from: "/docs/guided-coding/quick-start",
+            to: "/docs/guided-coding/guided-coding-getting-started",
+          },
         ],
       },
     ],
@@ -232,7 +236,7 @@ const config: Config = {
             {
               type: "docSidebar",
               sidebarId: "tutorialSidebar",
-              label: "Guided Coding",
+              label: "Guided Coding & Guided Learning",
             },
           ],
         },
