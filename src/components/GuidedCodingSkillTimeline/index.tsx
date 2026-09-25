@@ -73,9 +73,9 @@ const cards: Card[] = [
     header: '2. IMPLEMENTING PHASE',
     steps: [
       {
-        kind: 'manual',
-        title: 'Hand over the plan in a fresh conversation',
-        description: 'No skill. The frozen plan and feedback loops steer it.',
+        kind: 'skill',
+        title: 'guided-coding-implement',
+        description: 'In a fresh conversation. Plan and feedback loops steer it.',
       },
     ],
   },
@@ -139,8 +139,8 @@ const description =
   'Discuss the draft further and prompt the agent to revise it directly, optionally run ' +
   'guided-coding-review-plan in a fresh conversation, and discuss again. Discussion, review, and ' +
   'revision repeat until the plan stabilizes, after which guided-coding-freeze-plan ' +
-  'timestamps and freezes it and you commit it. In the Implementing Phase, hand the frozen plan to a fresh conversation ' +
-  'without any skill. In the Guiding Phase, review every changed file, then run ' +
+  'timestamps and freezes it and you commit it. In the Implementing Phase, run guided-coding-implement ' +
+  'with the frozen plan in a fresh conversation. In the Guiding Phase, review every changed file, then run ' +
   'guided-coding-write-deviations whenever follow-up plans exist ' +
   'or the code materially departs from the plans. Two arrows lead ' +
   'back from the Guiding Phase: a small issue returns to the Implementing Phase, and a large issue ' +

@@ -116,7 +116,8 @@ The skills refuse to overwrite or reuse an existing plan or Plan Deviations file
 - `/guided-coding-setup` creates `ai-plans/` and writes its `AGENTS.md`. Run it again to upgrade; it preserves your project-specific additions and never touches existing plans.
 - `/guided-coding-write-plan` handles both first plans and follow-up plans, reading every earlier document for the issue before writing.
 - `/guided-coding-freeze-plan` ends the Planning Phase: it renames the draft with a UTC timestamp and the optional ticket ID, inserts the `*Frozen at ...*` line, and stops. I commit the frozen plan afterwards.
+- `/guided-coding-implement` implements a frozen plan. It only ticks an acceptance criterion once a feedback loop genuinely satisfies it.
 - `/guided-coding-write-deviations` always writes a document when follow-up plans exist. With a single plan, it reports "no material deviations" rather than inventing entries when the implementation matched. The skill only writes the file. After reviewing and accepting it, I commit it, create the pull request, and use its contents as the PR description with a normal prompt.
 
-See [Getting Started](./guided-coding-getting-started.mdx) for the full sequence.
+See [Guided Coding: Getting Started](./guided-coding-getting-started.mdx) for the full sequence.
 :::

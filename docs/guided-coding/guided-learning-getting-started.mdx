@@ -27,7 +27,7 @@ A stage belongs to a domain, not to a person. You can be Mastering in .NET, Adva
 | --- | --- | --- |
 | **Beginning** | `guided-coding-implement-show-me` | Splits the plan into layers and presents complete code, fragment by fragment, for you to type in and discuss. |
 | **Advancing** | `guided-coding-implement-coach-me` | Splits the plan into vertical slices that you implement yourself, reviews your work, and reveals hints one at a time when you are stuck. |
-| **Mastering** | Regular [Guided Coding](./implementing-phase.mdx) | The agent implements the plan; your expertise goes into planning and guiding. |
+| **Mastering** | `guided-coding-implement` | Regular [Guided Coding](./implementing-phase.mdx): the agent implements the plan, and your expertise goes into planning and guiding. |
 
 ## Better With a Senior Developer
 
@@ -40,7 +40,7 @@ A senior developer closes that gap:
 - **In the Planning Phase**, they make sure the plan is properly laid out before it freezes: a sound approach, a manageable size, and criteria that describe verifiable outcomes.
 - **In the Guiding Phase**, they verify the result with you. They read the code you wrote, explain why something should be different, point out what matters in your team's codebase, and recognize the progress you made - all with a human touch that no agent provides.
 
-The Implementing Phase is where the agent takes over the teaching. The senior is still present in Planning and Guiding phases while a junior developers can take their time to extend their capabilities in the Implementing Phase.
+The Implementing Phase is where the agent takes over the teaching. The senior stays involved in the Planning and Guiding Phases, while the junior developer takes the time they need to build their skills in the Implementing Phase.
 
 :::info
 If you are the senior developer, join before the plan freezes, not after the pull request is opened. And review the result together with the learner rather than asynchronously - the conversation about the code is where the learning happens.
@@ -54,7 +54,7 @@ As in [Guided Coding: Getting Started](./guided-coding-getting-started.mdx), fil
 
 ## The Implementing Phase, Taught
 
-Both skills start the same way. They verify that the plan is frozen, read your [learning profile](#the-learning-profile), and present a roadmap of milestones before any code is written. Every milestone ends in a compilable codebase whose feedback loops pass, including its tests. You tick the acceptance criteria the milestone fully satisfies and commit - the agent never touches your repository.
+Both skills start the same way. They verify that the plan is frozen, read your [learning profile](#the-learning-profile), and present a roadmap of milestones before any code is written. Every milestone ends in a compilable codebase whose feedback loops pass, including its tests. You tick the acceptance criteria the milestone fully satisfies and commit - the agent never changes your repository.
 
 ### Show Me: for the Beginning stage
 
@@ -146,5 +146,5 @@ On first use, the agent creates `~/.guided-learning/` as a local git repository 
 
 - **Resume the conversation, don't restart it.** A plan often takes more than one sitting in Guided Learning. The skills always start at the beginning of a plan, so continue the same conversation the next day instead of invoking the skill again.
 - **Keep plans small.** Everything in [Finding the Right Plan Size](./finding-the-right-plan-size.md) applies twice over here. A plan that takes an agent 20 minutes can take you an afternoon, and a smaller plan gets you to the Guiding Phase - and to your senior's feedback - sooner.
-- **Ask everything.** The agent answers questions about the codebase, the language, the framework, and the tooling directly, at any point. There is no such thing as a stupid question here, and nobody is waiting for you.
+- **Ask everything.** The agent answers questions about the codebase, the language, the framework, and the tooling directly, at any point.
 - **Move on when you are ready.** When show-me starts to feel slow, try coach-me for the same area. When coach-me stops challenging you, you are ready for regular Guided Coding - and for being someone else's senior developer.

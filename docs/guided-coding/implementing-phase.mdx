@@ -9,21 +9,14 @@ import GuidedCodingDiagram from '@site/src/components/GuidedCodingDiagram';
 
 <GuidedCodingDiagram highlight="implementing" />
 
-Hand the coding agent a single plan and ask it to implement:
+In a new conversation, use the `guided-coding-implement` skill, including a reference to the plan file.
 
-> *"With you being an expert .NET developer, can you please implement the following plan for me?"*
+```
+/guided-coding-implement @path/to/plan.md
+```
 
-Then point to the corresponding markdown file. That's it. The agent goes off and works, typically for 5 to 45 minutes depending on the task. I let it run in auto-continue mode without supervising.
+The agent verifies that the plan is frozen, goes off and works, typically for 5 to 45 minutes depending on the task. I let it run in auto-continue mode without supervising. In enterprise environments, make sure that you run in a secure VM or Docker container to prevent rogue agents from hurting your host, see [Security: Be Vigilant](./security.md).
 
-**No skill runs in this phase.** The frozen plan is the instruction, and your feedback loops are the supervision. Adding process here would only get in the way of the one part of the workflow where the agent should be left alone.
-
-:::tip[The Opinionated Path]
-I use a **fresh conversation** for implementation, not the one the plan was written in. The planning conversation is long by this point, full of alternatives that were considered and rejected, and that context does the implementation no favors - see [context rot](https://research.trychroma.com/context-rot).
-
-The prompt is short, because the plan carries everything:
-
-> *"With you being an expert .NET developer, could you please implement plan `ai-plans/2026-08-13-1420-42-cancelled-events.md` for me?"*
-:::
 
 ## The plan stays frozen
 
