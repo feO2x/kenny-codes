@@ -27,7 +27,8 @@ is flipping an acceptance criterion from `- [ ]` to `- [x]`.
   review the resulting diff.
 
 There is no test runner, linter, or security scanner configured in this repository. The GitHub
-Actions workflow `.github/workflows/deploy-docusaurus.yml` runs only `npm ci` and `npm run build`.
+Actions workflows in `.github/workflows/` run only `npm ci` and `npm run build` (`build.yml`, reused by
+`pull-request.yml` for PRs to `main` and by `deploy.yml`, which also deploys to GitHub Pages).
 
 ## How to write plans
 
