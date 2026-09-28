@@ -5,7 +5,7 @@ This is Kenny Pflug's website where he blogs, announces talks and workshops, and
 ## General Rules
 
 - Never run the dev server. Assume it is already running.
-- When you create git commit, always use Conventional Commits messages 
+- When you create git commit, always sign off and use Conventional Commits messages. Decide whether a message body is required.
 
 ## When you implement a plan
 
