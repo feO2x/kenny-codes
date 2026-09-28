@@ -22,7 +22,35 @@ Above all: no skill reviews code for you. The Guiding Phase is still yours.
 ## Install
 
 <Tabs groupId="guided-coding-install">
-<TabItem value="claude" label="Claude Code plugin" default>
+<TabItem value="skills" label="Agent Skills" default>
+
+Install the skills with the GitHub CLI. The `--agent` flag decides where they land. Claude Code reads skills only from its own `.claude/skills` directory, while all other major agents share the `.agents/skills` directory:
+
+```sh
+# Claude Code
+gh skill install feO2x/guided-coding --all --agent claude-code --scope project
+
+# Any other agent
+gh skill install feO2x/guided-coding --all --agent universal --scope project
+```
+
+Add `--scope user` to make them available across all your repositories, or name a single skill instead of `--all`. Installed this way, the skills keep their full names:
+
+```text
+/guided-coding-setup
+```
+
+To update, check for changes first and then update all skills. The GitHub CLI finds the installed skills in both directories on its own:
+
+```sh
+gh skill update --dry-run
+gh skill update --all
+```
+
+The skills follow the [Agent Skills specification](https://agentskills.io/specification), so any agent that implements it can use them. GitHub CLI's skill commands are currently in preview.
+
+</TabItem>
+<TabItem value="claude" label="Claude Code plugin">
 
 Add the repository as a marketplace and install the plugin:
 
@@ -37,32 +65,23 @@ Claude Code namespaces plugin skills, so you invoke them with the plugin prefix 
 /guided-coding:setup
 ```
 
-</TabItem>
-<TabItem value="skills" label="Portable Agent Skills">
-
-Install the skills into the shared project-level `.agents/skills` directory with the GitHub CLI:
+To update, refresh the marketplace first and then the plugin. Replace `project` with the scope you installed the plugin into:
 
 ```sh
-gh skill install feO2x/guided-coding --all --agent universal --scope project
+claude plugin marketplace update guided-coding
+claude plugin update guided-coding@guided-coding --scope project
 ```
 
-Add `--scope user` to make them available across all your repositories, or name a single skill instead of `--all`. Installed this way, the skills keep their full names:
-
-```text
-/guided-coding-setup
-```
-
-The skills follow the [Agent Skills specification](https://agentskills.io/specification), so any agent that implements it can use them. GitHub CLI's skill commands are currently in preview.
-
-</TabItem>
-<TabItem value="plugin" label="Agent Plugin clients">
-
-The repository is also a package for the [Agent Plugins standard](https://agent-plugins.org/). Clients that support the standard can install it directly; the installation and marketplace commands are client-specific.
+:::warning
+Restart Claude Code after updating. Only then does it pick up the updated skills.
+:::
 
 </TabItem>
 </Tabs>
 
-Every skill invocation further down this page offers the same three tabs, and they all follow the choice you make here. Pick your install method once and the walkthrough spells each skill the way *your* agent expects it.
+The repository is also a package for the [Agent Plugins standard](https://agent-plugins.org/). Clients that support the standard can install it directly; the installation and marketplace commands are client-specific. These clients use the skills' full names, so pick the **Agent Skills** tab.
+
+Every skill invocation further down this page offers the same two tabs, and they all follow the choice you make here. Pick your install method once and the walkthrough spells each skill the way *your* agent expects it.
 
 :::note[All skills are manually invoked]
 Every skill declares that it runs only when you explicitly ask for it. Your agent will not decide on its own to write a plan, freeze one, or record deviations. Guided Coding depends on you choosing the moment each phase ends, and that choice is not delegated.
@@ -87,24 +106,17 @@ Notice how much of the Planning Phase is conversation. The skills bracket the di
 Run this once per repository, and again after upgrading to a new Guided Coding version:
 
 <Tabs groupId="guided-coding-install">
-<TabItem value="claude" label="Claude Code plugin" default>
+<TabItem value="skills" label="Agent Skills" default>
+
+```text
+/guided-coding-setup
+```
+
+</TabItem>
+<TabItem value="claude" label="Claude Code plugin">
 
 ```text
 /guided-coding:setup
-```
-
-</TabItem>
-<TabItem value="skills" label="Portable Agent Skills">
-
-```text
-/guided-coding-setup
-```
-
-</TabItem>
-<TabItem value="plugin" label="Agent Plugin clients">
-
-```text
-/guided-coding-setup
 ```
 
 </TabItem>
@@ -142,24 +154,17 @@ Don't use your agent's built-in planning mode here. See the [Planning Phase](./p
 Still in the same conversation:
 
 <Tabs groupId="guided-coding-install">
-<TabItem value="claude" label="Claude Code plugin" default>
+<TabItem value="skills" label="Agent Skills" default>
+
+```text
+/guided-coding-write-plan
+```
+
+</TabItem>
+<TabItem value="claude" label="Claude Code plugin">
 
 ```text
 /guided-coding:write-plan
-```
-
-</TabItem>
-<TabItem value="skills" label="Portable Agent Skills">
-
-```text
-/guided-coding-write-plan
-```
-
-</TabItem>
-<TabItem value="plugin" label="Agent Plugin clients">
-
-```text
-/guided-coding-write-plan
 ```
 
 </TabItem>
@@ -185,24 +190,17 @@ Prompt the agent to revise the draft as you go, the same way you would ask it to
 For larger or riskier plans, add a second opinion from a **fresh conversation** with another agent:
 
 <Tabs groupId="guided-coding-install">
-<TabItem value="claude" label="Claude Code plugin" default>
+<TabItem value="skills" label="Agent Skills" default>
+
+```text
+/guided-coding-review-plan
+```
+
+</TabItem>
+<TabItem value="claude" label="Claude Code plugin">
 
 ```text
 /guided-coding:review-plan
-```
-
-</TabItem>
-<TabItem value="skills" label="Portable Agent Skills">
-
-```text
-/guided-coding-review-plan
-```
-
-</TabItem>
-<TabItem value="plugin" label="Agent Plugin clients">
-
-```text
-/guided-coding-review-plan
 ```
 
 </TabItem>
@@ -227,24 +225,17 @@ If the work should have a tracker issue, create it now, before you freeze. The s
 Then freeze the plan:
 
 <Tabs groupId="guided-coding-install">
-<TabItem value="claude" label="Claude Code plugin" default>
+<TabItem value="skills" label="Agent Skills" default>
+
+```text
+/guided-coding-freeze-plan
+```
+
+</TabItem>
+<TabItem value="claude" label="Claude Code plugin">
 
 ```text
 /guided-coding:freeze-plan
-```
-
-</TabItem>
-<TabItem value="skills" label="Portable Agent Skills">
-
-```text
-/guided-coding-freeze-plan
-```
-
-</TabItem>
-<TabItem value="plugin" label="Agent Plugin clients">
-
-```text
-/guided-coding-freeze-plan
 ```
 
 </TabItem>
@@ -261,24 +252,17 @@ Now commit the frozen plan. The skill does not do that for you, so commit it you
 Start a fresh conversation and hand over the committed plan:
 
 <Tabs groupId="guided-coding-install">
-<TabItem value="claude" label="Claude Code plugin" default>
+<TabItem value="skills" label="Agent Skills" default>
+
+```text
+/guided-coding-implement ai-plans/2026-08-13-1420-42-cancelled-events.md
+```
+
+</TabItem>
+<TabItem value="claude" label="Claude Code plugin">
 
 ```text
 /guided-coding:implement ai-plans/2026-08-13-1420-42-cancelled-events.md
-```
-
-</TabItem>
-<TabItem value="skills" label="Portable Agent Skills">
-
-```text
-/guided-coding-implement ai-plans/2026-08-13-1420-42-cancelled-events.md
-```
-
-</TabItem>
-<TabItem value="plugin" label="Agent Plugin clients">
-
-```text
-/guided-coding-implement ai-plans/2026-08-13-1420-42-cancelled-events.md
 ```
 
 </TabItem>
@@ -308,24 +292,17 @@ The [Guiding Phase](./guiding-phase.mdx) page covers what to look for.
 Once you are satisfied with the implementation, run:
 
 <Tabs groupId="guided-coding-install">
-<TabItem value="claude" label="Claude Code plugin" default>
+<TabItem value="skills" label="Agent Skills" default>
+
+```text
+/guided-coding-write-deviations
+```
+
+</TabItem>
+<TabItem value="claude" label="Claude Code plugin">
 
 ```text
 /guided-coding:write-deviations
-```
-
-</TabItem>
-<TabItem value="skills" label="Portable Agent Skills">
-
-```text
-/guided-coding-write-deviations
-```
-
-</TabItem>
-<TabItem value="plugin" label="Agent Plugin clients">
-
-```text
-/guided-coding-write-deviations
 ```
 
 </TabItem>
@@ -346,24 +323,3 @@ After approval, either finish the work yourself or use a normal prompt:
 When no document was required, create the pull request normally.
 
 The goal: **a reviewer should need to read only the issue's first plan and, when one exists, the Plan Deviations document to understand the whole change.** Follow-up plans always cause that final document to be created, so their decisions are not hidden from the reviewer.
-
-## A Compressed Cheat Sheet
-
-| Moment | Skill |
-| --- | --- |
-| New repository, or after an upgrade | `guided-coding-setup` |
-| Starting a feature or bugfix | *- talk to the agent first* |
-| The agreed approach needs writing down | `guided-coding-write-plan` (once per plan) |
-| Draft written, and after every revision | *- discuss and revise by prompt* |
-| The draft wants a second opinion | `guided-coding-review-plan` |
-| Nobody is finding anything anymore | *- create the ticket, if the work needs one* |
-| The ticket exists, or the work needs none | `guided-coding-freeze-plan` |
-| Plan frozen | *- commit it* |
-| Plan committed | `guided-coding-implement` (in a fresh conversation) |
-| Implementation finished | *- review every changed file* |
-| Implementation reviewed | `guided-coding-write-deviations` |
-| Deviations reviewed, or no document required | *- commit and open the pull request* |
-
-This table uses the portable names. On the Claude Code plugin they are `/guided-coding:setup`, `/guided-coding:write-plan`, and so on - the prefix becomes a namespace and the rest of the name stays put.
-
-The rows without a skill are not gaps in the tooling. They are where Guided Coding actually happens: the discussion that produces the plan, and the review that decides whether the result is good enough. Everything with a skill next to it is bookkeeping around those two activities.

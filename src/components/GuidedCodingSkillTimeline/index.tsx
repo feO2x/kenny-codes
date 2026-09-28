@@ -64,7 +64,7 @@ const cards: Card[] = [
       {
         kind: 'skill',
         title: 'guided-coding-freeze-plan',
-        description: 'Timestamps and freezes the plan. Commit it afterwards.',
+        description: 'Create any ticket first. Commit the frozen plan afterwards.',
       },
     ],
   },
@@ -138,8 +138,9 @@ const description =
   'guided-coding-write-plan once to produce the draft. ' +
   'Discuss the draft further and prompt the agent to revise it directly, optionally run ' +
   'guided-coding-review-plan in a fresh conversation, and discuss again. Discussion, review, and ' +
-  'revision repeat until the plan stabilizes, after which guided-coding-freeze-plan ' +
-  'timestamps and freezes it and you commit it. In the Implementing Phase, run guided-coding-implement ' +
+  'revision repeat until the plan stabilizes. Create a ticket if the work needs one, then ' +
+  'guided-coding-freeze-plan timestamps and freezes the plan, and you commit it. ' +
+  'In the Implementing Phase, run guided-coding-implement ' +
   'with the frozen plan in a fresh conversation. In the Guiding Phase, review every changed file, then run ' +
   'guided-coding-write-deviations whenever follow-up plans exist ' +
   'or the code materially departs from the plans. Two arrows lead ' +
