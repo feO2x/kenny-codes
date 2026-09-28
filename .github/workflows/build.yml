@@ -1,0 +1,33 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      upload-pages-artifact:
+        description: Upload the build output as the GitHub Pages artifact
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    name: Docusaurus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+      - name: Build website
+        run: npm run build
+
+      - name: Upload Build Artifact
+        if: inputs.upload-pages-artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: build

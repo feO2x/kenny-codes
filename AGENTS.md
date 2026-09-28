@@ -5,7 +5,7 @@ This is Kenny Pflug's website where he blogs, announces talks and workshops, and
 ## General Rules
 
 - Never run the dev server. Assume it is already running.
-- When you create git commit, always use Conventional Commits messages 
+- When you create git commit, always sign off and use Conventional Commits messages. Decide whether a message body is required.
 
 ## When you implement a plan
 
@@ -27,7 +27,8 @@ is flipping an acceptance criterion from `- [ ]` to `- [x]`.
   review the resulting diff.
 
 There is no test runner, linter, or security scanner configured in this repository. The GitHub
-Actions workflow `.github/workflows/deploy-docusaurus.yml` runs only `npm ci` and `npm run build`.
+Actions workflows in `.github/workflows/` run only `npm ci` and `npm run build` (`build.yml`, reused by
+`pull-request.yml` for PRs to `main` and by `deploy.yml`, which also deploys to GitHub Pages).
 
 ## How to write plans
 
