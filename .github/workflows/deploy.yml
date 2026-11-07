@@ -213,14 +213,12 @@ jobs:
           PREVIEWS: ${{ needs.assemble.outputs.previews }}
         run: |
           marker='<!-- pages-preview -->'
-          # Pages reports http:// as long as "Enforce HTTPS" is off, but the site is served via HTTPS.
-          site_url="${PAGE_URL/#http:\/\//https://}"
           for number in $PREVIEWS; do
             existing=$(gh api "repos/$GITHUB_REPOSITORY/issues/$number/comments" --paginate \
               --jq "[.[] | select(.body | contains(\"$marker\"))] | length" | jq -s add)
             if [ "$existing" -eq 0 ]; then
               gh pr comment "$number" --repo "$GITHUB_REPOSITORY" --body "$marker
-          **Preview:** ${site_url%/}/pr/$number/
+          **Preview:** ${PAGE_URL%/}/pr/$number/
 
           Rebuilt on every push and removed once the pull request is closed. Social cards and slide PDFs are left out of previews."
             fi
