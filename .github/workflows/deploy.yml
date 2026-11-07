@@ -107,13 +107,16 @@ jobs:
           # previews on other platforms, the slide PDFs aren't linked from any page,
           # and crawlers only read robots.txt at the root.
           rm -rf build/img/social-cards build/img/kenny-codes-social-card.* build/*.pdf build/robots.txt
+          # The artifact contains pr/<number>/, so all previews can be merged on download.
+          mkdir -p preview/pr
+          mv build "preview/pr/${{ matrix.number }}"
 
       - name: Upload preview
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v7
         with:
           name: preview-${{ matrix.number }}
-          path: build
+          path: preview
           retention-days: 1
           include-hidden-files: true
           if-no-files-found: error
@@ -141,13 +144,18 @@ jobs:
           artifact-ids: ${{ needs.build-main.outputs.artifact-id }}
           path: site
 
+      # Merged, because a single matching artifact is extracted without its own
+      # subdirectory. Each artifact contains pr/<number>/.
       - name: Download previews
         if: needs.build-preview.result != 'skipped'
         uses: actions/download-artifact@v8
         with:
           pattern: preview-*
           path: previews
+          merge-multiple: true
 
+      # Only pr/<number>/ of open pull requests is taken over, nothing else an
+      # artifact might contain.
       - name: Place previews under pr/
         id: assemble
         env:
@@ -155,9 +163,9 @@ jobs:
         run: |
           built=()
           for number in $(jq -r '.[]' <<< "$NUMBERS"); do
-            if [ -d "previews/preview-$number" ]; then
+            if [ -d "previews/pr/$number" ]; then
               mkdir -p site/pr
-              mv "previews/preview-$number" "site/pr/$number"
+              mv "previews/pr/$number" "site/pr/$number"
               built+=("$number")
             fi
           done
