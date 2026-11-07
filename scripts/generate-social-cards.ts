@@ -20,7 +20,7 @@ import {
  * 2. Read their frontmatter and derive the data needed for a card.
  * 3. Render a text overlay with Satori.
  * 4. Composite that overlay onto a shared background using Sharp.
- * 5. Write the PNG into `static/img/social-cards/`.
+ * 5. Write the JPEG into `static/img/social-cards/`.
  * 6. Update markdown frontmatter so Docusaurus uses the generated card.
  *
  * The script is deterministic on purpose. Generated files are committed to git,
@@ -36,7 +36,21 @@ const EVENTS_DIR = path.join(__dirname, "../events");
 const STATIC_DIR = path.join(__dirname, "../static");
 const OUTPUT_DIR = path.join(STATIC_DIR, "img/social-cards");
 const MANIFEST_PATH = path.join(OUTPUT_DIR, "manifest.json");
-const DEFAULT_SOCIAL_CARD_PATH = path.join(STATIC_DIR, "img/kenny-codes-social-card.png");
+/**
+ * Cards are written as JPEG because they contain a photo and gradients, which
+ * PNG compresses poorly (about 0.7 MB per card as PNG versus about 70 KB as
+ * JPEG). Intermediate images used for compositing stay PNG to keep their alpha
+ * channel; only the final, flattened card is encoded as JPEG.
+ */
+const CARD_EXTENSION = ".jpg";
+/**
+ * Cards used to be written as PNG. Frontmatter that still points at the old
+ * managed PNG path is migrated to the JPEG path instead of being treated as a
+ * custom image, and stale PNG cards are removed.
+ */
+const LEGACY_CARD_EXTENSION = ".png";
+const JPEG_OPTIONS = { quality: 85, mozjpeg: true } as const;
+const DEFAULT_SOCIAL_CARD_PATH = path.join(STATIC_DIR, `img/kenny-codes-social-card${CARD_EXTENSION}`);
 const LOGO_PATH = path.join(STATIC_DIR, "img/logo-dark.svg");
 const PHOTO_PATH = path.join(STATIC_DIR, "img/kenny-smiles.jpg");
 /**
@@ -52,7 +66,7 @@ const FONT_BOLD_PATH = path.join(FONT_ASSETS_DIR, "DejaVuSans-Bold.ttf");
  * way that should invalidate the cached images. The manifest stores this value
  * together with per-item hashes.
  */
-const TEMPLATE_VERSION = "2026-03-22-v13";
+const TEMPLATE_VERSION = "2026-11-07-v14";
 const CONCURRENCY = 4;
 
 type ContentKind = "blog" | "events";
@@ -123,11 +137,13 @@ interface SocialCardAssets {
  * Result of trying to ensure a markdown file points at its generated image.
  *
  * `custom-image` means the file already defines a different image and should be
- * left alone. That is the escape hatch for manual overrides.
+ * left alone. That is the escape hatch for manual overrides. `migrated` means
+ * the file pointed at the legacy PNG path of its generated card and now points
+ * at the current one.
  */
 interface FrontmatterUpdateResult {
   content: string;
-  status: "inserted" | "unchanged" | "custom-image";
+  status: "inserted" | "migrated" | "unchanged" | "custom-image";
 }
 
 /**
@@ -366,7 +382,15 @@ function slugToFileName(slug: string): string {
  * Returns the public site path used in frontmatter and final HTML metadata.
  */
 function getManagedImagePath(slug: string): string {
-  return `/img/social-cards/${slugToFileName(slug)}.png`;
+  return `/img/social-cards/${slugToFileName(slug)}${CARD_EXTENSION}`;
+}
+
+/**
+ * Returns the path that `getManagedImagePath` produced before cards were
+ * written as JPEG. Used to migrate existing frontmatter.
+ */
+function getLegacyManagedImagePath(slug: string): string {
+  return `/img/social-cards/${slugToFileName(slug)}${LEGACY_CARD_EXTENSION}`;
 }
 
 /**
@@ -612,7 +636,7 @@ async function generateDefaultSiteCard(assets: SocialCardAssets): Promise<void> 
   const overlay = await renderOverlay(model, assets);
   const image = await sharp(assets.baseTemplate)
     .composite([{ input: overlay, top: 0, left: 0 }])
-    .png()
+    .jpeg(JPEG_OPTIONS)
     .toBuffer();
 
   await fs.writeFile(DEFAULT_SOCIAL_CARD_PATH, image);
@@ -630,10 +654,15 @@ function normalizeImageValue(imageValue: string): string {
  *
  * Important behavior:
  * - if the file already uses our managed path, we do nothing
+ * - if the file uses the legacy PNG path of its card, we rewrite it
  * - if the file uses a different image, we treat it as a custom override
  * - otherwise we insert the generated image path into the frontmatter
  */
-function updateFrontmatterImage(content: string, managedImagePath: string): FrontmatterUpdateResult {
+function updateFrontmatterImage(
+  content: string,
+  managedImagePath: string,
+  legacyManagedImagePath: string
+): FrontmatterUpdateResult {
   const block = getFrontmatterBlock(content);
   const lines = block.body.split("\n");
   const imageIndex = lines.findIndex((line) => /^image:\s*/u.test(line));
@@ -644,6 +673,14 @@ function updateFrontmatterImage(content: string, managedImagePath: string): Fron
       return {
         content,
         status: "unchanged",
+      };
+    }
+
+    if (currentValue === legacyManagedImagePath) {
+      lines[imageIndex] = `image: ${managedImagePath}`;
+      return {
+        content: `${content.slice(0, block.bodyStart)}${lines.join("\n")}${content.slice(block.bodyEnd)}`,
+        status: "migrated",
       };
     }
 
@@ -753,14 +790,18 @@ async function main(): Promise<void> {
     const managedImagePath = getManagedImagePath(item.slug);
     const absoluteOutputPath = path.join(STATIC_DIR, managedImagePath.replace(/^\//u, ""));
     const content = await fs.readFile(item.filePath, "utf8");
-    const frontmatterResult = updateFrontmatterImage(content, managedImagePath);
+    const frontmatterResult = updateFrontmatterImage(
+      content,
+      managedImagePath,
+      getLegacyManagedImagePath(item.slug)
+    );
 
     if (frontmatterResult.status === "custom-image") {
       skippedCustomImageCount += 1;
       return;
     }
 
-    if (frontmatterResult.status === "inserted") {
+    if (frontmatterResult.status === "inserted" || frontmatterResult.status === "migrated") {
       await fs.writeFile(item.filePath, frontmatterResult.content);
       updatedFrontmatterCount += 1;
     }
@@ -787,7 +828,7 @@ async function main(): Promise<void> {
     const overlay = await renderOverlay(model, assets);
     const image = await sharp(assets.baseTemplate)
       .composite([{ input: overlay, top: 0, left: 0 }])
-      .png()
+      .jpeg(JPEG_OPTIONS)
       .toBuffer();
 
     await fs.writeFile(absoluteOutputPath, image);
@@ -795,13 +836,13 @@ async function main(): Promise<void> {
   });
 
   const desiredFiles = new Set(
-    Object.keys(nextManifest.items).map((slug) => `${slugToFileName(slug)}.png`)
+    Object.keys(nextManifest.items).map((slug) => `${slugToFileName(slug)}${CARD_EXTENSION}`)
   );
   const existingOutputFiles = await fs.readdir(OUTPUT_DIR);
   let removedCount = 0;
 
   for (const fileName of existingOutputFiles) {
-    if (!fileName.endsWith(".png")) {
+    if (!fileName.endsWith(CARD_EXTENSION) && !fileName.endsWith(LEGACY_CARD_EXTENSION)) {
       continue;
     }
 
