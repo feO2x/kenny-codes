@@ -7,6 +7,11 @@ import { eventsId } from "./src/utils/eventUtils";
 
 const description = "Kenny Pflug - Kenny Codes! AI, Cloud-Native, and .NET";
 
+// PR previews are built by .github/workflows/deploy.yml with BASE_URL=/pr/<number>/
+// and published next to the production site. Production builds leave BASE_URL unset.
+const baseUrl = process.env.BASE_URL || "/";
+const isPreview = baseUrl !== "/";
+
 const config: Config = {
   title: "Kenny Codes",
   tagline:
@@ -21,8 +26,9 @@ const config: Config = {
   // Set the production url of your site here
   url: "https://kenny-codes.net/",
   // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/",
+  baseUrl,
+  // Keep PR previews out of search engines
+  noIndex: isPreview,
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -146,8 +152,10 @@ const config: Config = {
       },
       {
         name: "robots",
-        content:
-          "index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:160",
+        // noIndex alone isn't enough, because this tag would override it
+        content: isPreview
+          ? "noindex, nofollow"
+          : "index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:160",
       },
       {
         name: "format-detection",

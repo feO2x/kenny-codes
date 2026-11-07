@@ -1,37 +1,225 @@
 name: Deploy to GitHub Pages
 
+# GitHub Pages holds exactly one site per repository and replaces it on every
+# deployment. That's why every run rebuilds everything: main into the root and
+# every open pull request from this repository as a preview into pr/<number>/.
+# Closed pull requests drop out on the next run.
+
 on:
   push:
-    branches:
-      - main
-  # Allows you to run this workflow manually from the Actions tab
+    branches: [main]
+  # pull_request_target instead of pull_request: the github-pages environment
+  # only allows main to deploy, and pull_request_target runs in the context of
+  # main. The workflow file itself always comes from main, a pull request can't
+  # change it.
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, closed]
+  # Dry run for changes to this workflow: builds everything, deploys nothing.
+  pull_request:
+    branches: [main]
+    paths: [.github/workflows/deploy.yml]
+  # Manual runs from other branches only build, they never deploy.
   workflow_dispatch:
 
+# Only one deployment at a time, and running deployments are never cancelled.
+# A pending run may be replaced by a newer one, which loses nothing, because
+# every run builds the current state of all pull requests. Dry runs use their
+# own group so they can't push a pending deployment out.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('pages-check-{0}', github.ref) || 'pages' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
-  build:
-    name: Build
+  list-previews:
+    name: List previews
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      numbers: ${{ steps.list.outputs.numbers }}
+    steps:
+      # Pull requests from forks are never built: their code would run with
+      # access to this run's artifacts, which end up on the site.
+      - name: Find open pull requests
+        id: list
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          numbers=$(gh pr list --repo "$GITHUB_REPOSITORY" --base main --state open --limit 100 \
+            --json number,isCrossRepository \
+            --jq '[.[] | select(.isCrossRepository | not) | .number] | sort')
+          echo "numbers=$numbers" >> "$GITHUB_OUTPUT"
+          echo "Open pull requests from this repository: $numbers"
+
+  build-main:
+    name: Build main
     uses: ./.github/workflows/build.yml
     with:
-      upload-pages-artifact: true
+      artifact-name: site
+
+  # Each preview is built in its own job, so code from a pull request (including
+  # install scripts of updated dependencies) never runs in the jobs that build
+  # production or upload the Pages artifact. A preview that fails to build is
+  # left out, but blocks neither production nor the other previews.
+  build-preview:
+    name: "Build preview #${{ matrix.number }}"
+    needs: list-previews
+    if: needs.list-previews.outputs.numbers != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        number: ${{ fromJSON(needs.list-previews.outputs.numbers) }}
+    env:
+      BASE_URL: /pr/${{ matrix.number }}/
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/pull/${{ matrix.number }}/head
+          persist-credentials: false
+
+      # No npm cache: this job runs code from the pull request in the context of
+      # main and must not write to the cache that builds of main restore.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Build website
+        id: build
+        continue-on-error: true
+        run: |
+          npm ci
+          npm run build
+          # Branches that predate BASE_URL support in docusaurus.config.ts ignore it
+          # and would be published with broken asset paths.
+          if ! grep -qF "${BASE_URL}assets/" build/index.html; then
+            echo "::error::The build ignores BASE_URL. Merge main into the branch of PR #${{ matrix.number }} to get a preview."
+            exit 1
+          fi
+          # Not needed to review a pull request: social cards are only used by link
+          # previews on other platforms, the slide PDFs aren't linked from any page,
+          # and crawlers only read robots.txt at the root.
+          rm -rf build/img/social-cards build/img/kenny-codes-social-card.* build/*.pdf build/robots.txt
+          # The artifact contains pr/<number>/, so all previews can be merged on download.
+          mkdir -p preview/pr
+          mv build "preview/pr/${{ matrix.number }}"
+
+      - name: Upload preview
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v7
+        with:
+          name: preview-${{ matrix.number }}
+          path: preview
+          retention-days: 1
+          include-hidden-files: true
+          if-no-files-found: error
+
+      - name: Report missing preview
+        if: steps.build.outcome != 'success'
+        run: |
+          echo "::warning::The preview for PR #${{ matrix.number }} could not be built."
+
+  assemble:
+    name: Assemble site
+    needs: [list-previews, build-main, build-preview]
+    if: always() && needs.build-main.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      previews: ${{ steps.assemble.outputs.built }}
+    steps:
+      # By ID, not by name: a preview job could replace an artifact named "site",
+      # but not one with this ID.
+      - name: Download production build
+        uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ needs.build-main.outputs.artifact-id }}
+          path: site
+
+      # Merged, because a single matching artifact is extracted without its own
+      # subdirectory. Each artifact contains pr/<number>/.
+      - name: Download previews
+        if: needs.build-preview.result != 'skipped'
+        uses: actions/download-artifact@v8
+        with:
+          pattern: preview-*
+          path: previews
+          merge-multiple: true
+
+      # Only pr/<number>/ of open pull requests is taken over, nothing else an
+      # artifact might contain.
+      - name: Place previews under pr/
+        id: assemble
+        env:
+          NUMBERS: ${{ needs.list-previews.outputs.numbers }}
+        run: |
+          built=()
+          for number in $(jq -r '.[]' <<< "$NUMBERS"); do
+            if [ -d "previews/pr/$number" ]; then
+              mkdir -p site/pr
+              mv "previews/pr/$number" "site/pr/$number"
+              built+=("$number")
+            fi
+          done
+          echo "built=${built[*]}" >> "$GITHUB_OUTPUT"
+          echo "Previews: ${built[*]:-none}"
+          du -sh site
+
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        with:
+          path: site
 
   deploy:
     name: Deploy
-    needs: build
-    # Manual runs from other branches only build, they never deploy
-    if: github.ref == 'refs/heads/main'
-
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    needs: assemble
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     permissions:
       pages: write # to deploy to Pages
       id-token: write # to verify the deployment originates from an appropriate source
-
-    # Deploy to the github-pages environment
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
-    runs-on: ubuntu-latest
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  # One comment with the link per pull request. Runs for all built previews, so
+  # pull requests opened before this workflow existed get one, too.
+  comment:
+    name: Link previews
+    needs: [assemble, deploy]
+    if: needs.assemble.outputs.previews != ''
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Link previews in their pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+          PREVIEWS: ${{ needs.assemble.outputs.previews }}
+        run: |
+          marker='<!-- pages-preview -->'
+          for number in $PREVIEWS; do
+            existing=$(gh api "repos/$GITHUB_REPOSITORY/issues/$number/comments" --paginate \
+              --jq "[.[] | select(.body | contains(\"$marker\"))] | length" | jq -s add)
+            if [ "$existing" -eq 0 ]; then
+              gh pr comment "$number" --repo "$GITHUB_REPOSITORY" --body "$marker
+          **Preview:** ${PAGE_URL%/}/pr/$number/
+
+          Rebuilt on every push and removed once the pull request is closed. Social cards and slide PDFs are left out of previews."
+            fi
+          done
