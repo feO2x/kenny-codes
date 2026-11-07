@@ -1,6 +1,6 @@
 ---
 title: "Guided Coding - Staying in Control While Coding with AI Agents"
-image: /img/social-cards/2026-06-17-oth-hof-guided-coding.png
+image: /img/social-cards/2026-06-17-oth-hof-guided-coding.jpg
 date: 2026-06-17
 type: Talk
 duration: 2h

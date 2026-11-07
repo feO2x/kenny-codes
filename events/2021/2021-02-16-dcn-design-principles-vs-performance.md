@@ -1,6 +1,6 @@
 ---
 title: "Design Principles vs. Performance"
-image: /img/social-cards/2021-02-16-dcn-design-principles-vs-performance.png
+image: /img/social-cards/2021-02-16-dcn-design-principles-vs-performance.jpg
 date: 2021-02-16
 type: Talk
 duration: 2h

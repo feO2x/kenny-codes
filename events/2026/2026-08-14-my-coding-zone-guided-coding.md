@@ -1,6 +1,6 @@
 ---
 title: "Guided Coding: Agentic Coding Without Loss of Control"
-image: /img/social-cards/2026-08-14-guided-coding-agentic-coding-without-loss-of-control.png
+image: /img/social-cards/2026-08-14-guided-coding-agentic-coding-without-loss-of-control.jpg
 date: 2026-08-14
 type: Talk
 duration: 4h

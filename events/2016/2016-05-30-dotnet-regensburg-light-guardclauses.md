@@ -1,6 +1,6 @@
 ---
 title: "Check Parameters Easily with Light.GuardClauses"
-image: /img/social-cards/2016-05-30-dotnet-regensburg-light-guardclauses.png
+image: /img/social-cards/2016-05-30-dotnet-regensburg-light-guardclauses.jpg
 date: 2016-05-30
 type: Talk
 duration: 2h

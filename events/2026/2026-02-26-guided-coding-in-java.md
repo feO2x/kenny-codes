@@ -1,6 +1,6 @@
 ---
 title: "Guided Coding instead of Vibe Coding in Java"
-image: /img/social-cards/2026-02-26-guided-coding-in-java.png
+image: /img/social-cards/2026-02-26-guided-coding-in-java.jpg
 date: 2026-02-26
 type: Talk
 duration: 2h

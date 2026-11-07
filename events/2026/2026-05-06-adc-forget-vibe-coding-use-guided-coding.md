@@ -1,6 +1,6 @@
 ---
 title: "Forget Vibe Coding, Switch to Guided Coding"
-image: /img/social-cards/2026-05-06-adc-forget-vibe-coding-use-guided-coding.png
+image: /img/social-cards/2026-05-06-adc-forget-vibe-coding-use-guided-coding.jpg
 date: 2026-05-06
 type: Talk
 duration: 1h

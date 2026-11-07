@@ -1,6 +1,6 @@
 ---
 title: "Multithreading and async await in ASP.NET Core"
-image: /img/social-cards/2017-09-18-adc-multithreading-async-await.png
+image: /img/social-cards/2017-09-18-adc-multithreading-async-await.jpg
 date: 2017-09-18
 type: Talk
 duration: 1h

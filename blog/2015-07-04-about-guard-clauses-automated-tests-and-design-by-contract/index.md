@@ -1,7 +1,7 @@
 ---
 slug: 2015-07-04-about-guard-clauses-automated-tests-and-design-by-contract
 title: About Guard Clauses, Automated Tests, and Design by Contract
-image: /img/social-cards/2015-07-04-about-guard-clauses-automated-tests-and-design-by-contract.png
+image: /img/social-cards/2015-07-04-about-guard-clauses-automated-tests-and-design-by-contract.jpg
 authors: [feO2x]
 tags: [csharp, dotnet, automated-testing, design-by-contract]
 ---

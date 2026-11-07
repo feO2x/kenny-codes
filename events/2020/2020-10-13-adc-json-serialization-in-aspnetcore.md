@@ -1,6 +1,6 @@
 ---
 title: "JSON Serialization in ASP.NET Core"
-image: /img/social-cards/2020-10-13-adc-json-serialization-in-aspnetcore.png
+image: /img/social-cards/2020-10-13-adc-json-serialization-in-aspnetcore.jpg
 date: 2020-10-13
 type: Talk
 duration: 1h

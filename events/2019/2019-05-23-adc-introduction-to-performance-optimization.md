@@ -1,6 +1,6 @@
 ---
 title: "Introduction to Performance Optimization in .NET"
-image: /img/social-cards/2019-05-23-adc-introduction-to-performance-optimization.png
+image: /img/social-cards/2019-05-23-adc-introduction-to-performance-optimization.jpg
 date: 2019-05-23
 type: Talk
 duration: 1h

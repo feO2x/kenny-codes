@@ -1,6 +1,6 @@
 ---
 title: "Forget Vibe Coding, Switch to Guided Coding"
-image: /img/social-cards/2026-09-17-dodnedder-guided-coding.png
+image: /img/social-cards/2026-09-17-dodnedder-guided-coding.jpg
 date: 2026-09-17
 type: Talk
 duration: 2h
