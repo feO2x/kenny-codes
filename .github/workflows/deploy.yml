@@ -129,7 +129,7 @@ jobs:
   assemble:
     name: Assemble site
     needs: [list-previews, build-main, build-preview]
-    if: always() && needs.build-main.result == 'success'
+    if: ${{ !cancelled() && needs.build-main.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -178,10 +178,12 @@ jobs:
         with:
           path: site
 
+  # Without !cancelled(), a job is skipped as soon as any job before it was
+  # skipped, which build-preview is whenever no pull request is open.
   deploy:
     name: Deploy
     needs: assemble
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: ${{ !cancelled() && needs.assemble.result == 'success' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:
       pages: write # to deploy to Pages
@@ -201,7 +203,7 @@ jobs:
   comment:
     name: Link previews
     needs: [assemble, deploy]
-    if: needs.assemble.outputs.previews != ''
+    if: ${{ !cancelled() && needs.deploy.result == 'success' && needs.assemble.outputs.previews != '' }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
