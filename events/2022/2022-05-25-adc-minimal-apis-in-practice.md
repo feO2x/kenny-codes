@@ -1,6 +1,6 @@
 ---
 title: "ASP.NET Core Minimal APIs in Practice"
-image: /img/social-cards/2022-05-25-adc-minimal-apis-in-practice.png
+image: /img/social-cards/2022-05-25-adc-minimal-apis-in-practice.jpg
 date: 2022-05-25
 type: Talk
 duration: 1h

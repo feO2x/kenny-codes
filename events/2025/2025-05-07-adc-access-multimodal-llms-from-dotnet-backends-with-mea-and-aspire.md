@@ -1,6 +1,6 @@
 ---
 title: "Access Multimodal LLMs from .NET Backends with Microsoft.Extensions.AI and .NET Aspire"
-image: /img/social-cards/2025-05-07-adc-access-multimodal-llms-from-dotnet-backends-with-mea-and-aspire.png
+image: /img/social-cards/2025-05-07-adc-access-multimodal-llms-from-dotnet-backends-with-mea-and-aspire.jpg
 date: 2025-05-07
 type: Talk
 duration: 1h

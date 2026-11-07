@@ -1,6 +1,6 @@
 ---
 title: "Dependency Injection in .NET"
-image: /img/social-cards/2017-06-28-dotnet-regensburg-dependency-injection.png
+image: /img/social-cards/2017-06-28-dotnet-regensburg-dependency-injection.jpg
 date: 2017-06-28
 type: Talk
 duration: 2h

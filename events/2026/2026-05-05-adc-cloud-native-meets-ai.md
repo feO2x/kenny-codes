@@ -1,6 +1,6 @@
 ---
 title: "Cloud-Native Meets AI: Modern Backends with Aspire and Microsoft.Extensions.AI"
-image: /img/social-cards/2026-05-05-adc-cloud-native-meets-ai.png
+image: /img/social-cards/2026-05-05-adc-cloud-native-meets-ai.jpg
 date: 2026-05-05
 type: Talk
 duration: 1h

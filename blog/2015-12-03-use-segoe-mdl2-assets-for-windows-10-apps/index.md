@@ -1,7 +1,7 @@
 ---
 slug: 2015-12-03-use-segoe-mdl2-assets-for-windows-10-apps
 title: Use Segoe MDL2 Assets for Windows 10 Apps
-image: /img/social-cards/2015-12-03-use-segoe-mdl2-assets-for-windows-10-apps.png
+image: /img/social-cards/2015-12-03-use-segoe-mdl2-assets-for-windows-10-apps.jpg
 authors: [feO2x]
 tags: [windows-10, uwp, xaml, design]
 ---

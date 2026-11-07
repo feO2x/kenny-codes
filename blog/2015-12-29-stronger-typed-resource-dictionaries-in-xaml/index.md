@@ -1,7 +1,7 @@
 ---
 slug: 2015-12-29-stronger-typed-resource-dictionaries-in-xaml
 title: Stronger-Typed Resource Dictionaries in XAML
-image: /img/social-cards/2015-12-29-stronger-typed-resource-dictionaries-in-xaml.png
+image: /img/social-cards/2015-12-29-stronger-typed-resource-dictionaries-in-xaml.jpg
 authors: [feO2x]
 tags: [xaml, csharp, wpf, uwp, dotnet]
 ---

@@ -121,7 +121,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: "img/kenny-codes-social-card.png",
+    image: "img/kenny-codes-social-card.jpg",
     colorMode: {
       defaultMode: "dark",
       respectPrefersColorScheme: false,

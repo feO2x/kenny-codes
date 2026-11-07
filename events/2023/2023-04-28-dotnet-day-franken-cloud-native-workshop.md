@@ -1,6 +1,6 @@
 ---
 title: "Cloud-Native for .NET developers: Modern End-to-End Architectures"
-image: /img/social-cards/2023-04-28-dotnet-day-franken-cloud-native-workshop.png
+image: /img/social-cards/2023-04-28-dotnet-day-franken-cloud-native-workshop.jpg
 date: 2023-04-28
 type: Workshop
 duration: 8h

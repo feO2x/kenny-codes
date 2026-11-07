@@ -1,6 +1,6 @@
 ---
 title: "Async Await Internals: Understand the Async State Machine from a Memory Perspective"
-image: /img/social-cards/2020-10-12-adc-async-await-memory-perspective.png
+image: /img/social-cards/2020-10-12-adc-async-await-memory-perspective.jpg
 date: 2020-10-12
 type: Talk
 duration: 1h

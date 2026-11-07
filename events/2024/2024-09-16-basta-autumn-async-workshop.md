@@ -1,6 +1,6 @@
 ---
 title: "Async Workshop: Clarity in Asynchrony – async await Internals and Expert Knowledge for Scalable .NET Apps"
-image: /img/social-cards/2024-09-16-basta-autumn-async-workshop.png
+image: /img/social-cards/2024-09-16-basta-autumn-async-workshop.jpg
 date: 2024-09-16
 type: Workshop
 duration: 8h

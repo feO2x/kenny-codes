@@ -1,7 +1,7 @@
 ---
 slug: 2015-08-31-different-kinds-of-abstractions
 title: Abstractions, Abstractions… Different Kinds of Abstractions
-image: /img/social-cards/2015-08-31-different-kinds-of-abstractions.png
+image: /img/social-cards/2015-08-31-different-kinds-of-abstractions.jpg
 authors: [feO2x]
 tags: [csharp, software-design, encapsulation, polymorphism, object-oriented-programming, api-design]
 ---

@@ -1,6 +1,6 @@
 ---
 title: "Private GPT LLMs: Securely Deploying Azure OpenAI Service with Terraform"
-image: /img/social-cards/2024-07-01-dwx-azure-openai-terraform.png
+image: /img/social-cards/2024-07-01-dwx-azure-openai-terraform.jpg
 date: 2024-07-01
 type: Talk
 duration: 1h
