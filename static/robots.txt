@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /pr/
+
+Sitemap: https://kenny-codes.net/sitemap.xml
