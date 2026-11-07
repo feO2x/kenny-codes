@@ -30,6 +30,14 @@ There is no test runner, linter, or security scanner configured in this reposito
 Actions workflows in `.github/workflows/` run only `npm ci` and `npm run build` (`build.yml`, reused by
 `pull-request.yml` for PRs to `main` and by `deploy.yml`, which also deploys to GitHub Pages).
 
+`deploy.yml` also publishes a preview of every open PR from this repository at `/pr/<number>/` and
+links it in a PR comment. Previews are built with `BASE_URL=/pr/<number>/`, which
+`docusaurus.config.ts` uses as `baseUrl` and which also marks the pages `noindex`. Previews leave
+out the social cards and the slide PDFs. Root-absolute paths must therefore go through Docusaurus
+(`<Link>`, `useBaseUrl`, Markdown links), never hardcoded `href="/..."` strings, or they break in
+previews. To check a change locally, run
+`BASE_URL=/pr/1/ npx docusaurus build --out-dir <scratch dir>` after `npm run build`.
+
 ## How to write plans
 
 See ai-plans/AGENTS.md for details on how to write plans.

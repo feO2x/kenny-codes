@@ -3,19 +3,28 @@ name: Build
 on:
   workflow_call:
     inputs:
-      upload-pages-artifact:
-        description: Upload the build output as the GitHub Pages artifact
-        type: boolean
-        default: false
+      artifact-name:
+        description: Upload the build output as an artifact with this name (empty skips the upload)
+        type: string
+        default: ""
+    outputs:
+      artifact-id:
+        description: ID of the uploaded artifact, empty if nothing was uploaded
+        value: ${{ jobs.build.outputs.artifact-id }}
 
 jobs:
   build:
     name: Docusaurus
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -27,7 +36,12 @@ jobs:
         run: npm run build
 
       - name: Upload Build Artifact
-        if: inputs.upload-pages-artifact
-        uses: actions/upload-pages-artifact@v5
+        id: upload
+        if: inputs.artifact-name != ''
+        uses: actions/upload-artifact@v7
         with:
+          name: ${{ inputs.artifact-name }}
           path: build
+          retention-days: 1
+          include-hidden-files: true
+          if-no-files-found: error
