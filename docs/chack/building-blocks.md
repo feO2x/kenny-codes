@@ -11,7 +11,7 @@ The overview below holds for any backend stack. The example code is .NET through
 
 ## The building blocks
 
-The four categories tell you where a piece of code belongs. In a backend feature - an HTTP endpoint, or a handler for a message from a broker - the same handful of building blocks keeps showing up:
+The four categories tell you where a piece of code belongs. When you build a backend feature - an HTTP endpoint, or a handler for a message from a broker - you'll meet the same handful of building blocks again and again:
 
 | Building Block         | Category         | Description |
 |------------------------|------------------|-------------|
@@ -25,9 +25,9 @@ The four categories tell you where a piece of code belongs. In a backend feature
 | Module                 | Composition Root | Registers the building blocks of a slice with the DI container and calls the Modules of its child slices. |
 | Test Double            | Automated Tests  | Replaces a dependency of the system under test in a test. |
 
-Not every feature needs all of them. A feature without input has no Request DTO and no validator; a feature with little logic has no service; a feature that does not touch a third-party system has neither a Client nor a Session. What matters is that each building block you do write belongs to exactly one category.
+Not every feature needs all of them. A feature without input has no Request DTO and no validator; a feature with little logic has no service; a feature that does not touch a third-party system has neither a Client nor a Session. Each building block you do write belongs to exactly one category, and the table tells you which.
 
-The mapping of a route or a message subscription to an endpoint is not part of the endpoint. It belongs to the [Composition Root](./composition-root.mdx) - in practice, often to the slice's Module.
+You might wonder where the route of an endpoint is defined. Mapping a route or a message subscription to an endpoint is part of the [Composition Root](./composition-root.mdx), and in practice, it often lives in the slice's Module.
 
 ## A complete slice
 
@@ -77,7 +77,7 @@ public sealed class ToDoItem
 }
 ```
 
-The entity checks its preconditions, so it cannot be created in an invalid state. It carries no serialization or O/R mapping attributes; how it is stored is configured elsewhere (see [Frameworks and Libraries](./the-core.mdx#frameworks-and-libraries)). The database assigns the `Id` when the item is saved.
+The entity checks its preconditions, so nobody can create it in an invalid state. It carries no serialization or O/R mapping attributes; how it is stored is configured elsewhere (see [Frameworks and Libraries](./the-core.mdx#frameworks-and-libraries)). The database assigns the `Id` when the item is saved.
 
 ### Request DTO and validator
 
@@ -149,12 +149,12 @@ public sealed class AddToDoItemEndpoint(
 }
 ```
 
-A few things are worth pointing out:
+A few things in here are worth a closer look:
 
 - **The endpoint calls the validator directly.** Both are Core types, so there is no abstraction between them. One Unit Test covers both.
-- **The current time comes from `TimeProvider`.** The endpoint does not call `DateTimeOffset.UtcNow` itself, so tests can control the time.
-- **`TypedResults` is an ASP.NET Core type, and that is fine.** The result types run in memory and can be inspected in a test. The deciding criterion for the Core is I/O, not where a type comes from.
-- **There is no service.** The logic is small enough to live in the endpoint. When it grows - several entities, rules that depend on each other, calls to more than one Humble Object - move it into an `AddToDoItemService` that the endpoint calls directly. The tests do not need to change, because they aim at the endpoint.
+- **The current time comes from `TimeProvider`.** The endpoint doesn't call `DateTimeOffset.UtcNow` itself, so tests can decide what time it is.
+- **`TypedResults` is an ASP.NET Core type, and that's fine.** The result types run in memory and can be inspected in a test. What decides whether a type fits into the Core is I/O, not where the type comes from.
+- **There is no service.** The logic is small enough to live in the endpoint. When it grows - several entities, rules that depend on each other, calls to more than one Humble Object - you can move it into an `AddToDoItemService` that the endpoint calls directly. The tests stay the same, because they aim at the endpoint.
 
 ### Module
 
@@ -179,7 +179,7 @@ public static class AddToDoItemModule
 }
 ```
 
-The Module physically lives in the slice folder, but it belongs to the Composition Root category. Look at what it does **not** register: `AppDbContext` and `TimeProvider`. The endpoint and the Session depend on them, but they are owned by other Modules - `AppDbContext` by the Module in `DatabaseAccess`, `TimeProvider.System` by the Composition Root itself. Registering them here would register them twice and make the result depend on the order in which the Modules are called. See [Modules](./composition-root.mdx#modules) for the rules.
+The Module physically lives in the slice folder, but it belongs to the Composition Root category. It's worth noticing what it does *not* register: `AppDbContext` and `TimeProvider`. The endpoint and the Session depend on them, but other parts of the application own them - `AppDbContext` is registered by the Module in `DatabaseAccess`, and `TimeProvider.System` by the Composition Root itself. If this Module registered them as well, they would be registered twice, and the outcome would depend on the order in which the Modules run. [Modules](./composition-root.mdx#modules) explains this in more detail.
 
 The parent Module only calls into its children:
 
@@ -202,7 +202,7 @@ public static class ToDoItemsModule
 
 ### Test Double and Unit Tests
 
-The tests aim at the endpoint and let the real validator and the real domain model participate. Only the Session is replaced. The test needs to observe what the endpoint did with it, so the Test Double is a [Spy](./automated-tests.mdx#test-doubles) and is named like one:
+The tests aim at the endpoint and let the real validator and the real domain model take part. Only the Session is replaced. Since the test wants to observe what the endpoint did with it, the Test Double is a [Spy](./automated-tests.mdx#test-doubles), and its name says so:
 
 ```csharp
 public sealed class AddToDoItemSessionSpy : IAddToDoItemSession
@@ -257,6 +257,6 @@ public sealed class AddToDoItemEndpointTests
 }
 ```
 
-`FakeTimeProvider` comes from the `Microsoft.Extensions.TimeProvider.Testing` package. These tests never leave memory, so you can add dozens more for edge and error cases - a title that is too long, or a Session Stub that throws a `ConcurrencyConflictException` - without making the test suite noticeably slower.
+`FakeTimeProvider` comes from the `Microsoft.Extensions.TimeProvider.Testing` package. These tests never leave memory, so you can add dozens more for edge and error cases - a title that is too long, or a Session Stub that throws a `ConcurrencyConflictException` - and your test suite stays fast.
 
-What the Unit Tests cannot verify is whether `EfAddToDoItemSession`, the EF Core mapping, the Module, and the route mapping work together. That is the job of one Integration Test for the happy path: it starts the application in-process with `WebApplicationFactory<Program>` and the real Composition Root, starts PostgreSQL via [Testcontainers](https://testcontainers.com/), sends a `POST` request, and checks that the item ends up in the database. See [Automated Tests](./automated-tests.mdx) for the reasoning.
+What the Unit Tests can't tell you is whether `EfAddToDoItemSession`, the EF Core mapping, the Module, and the route mapping work together. That is the job of one Integration Test for the happy path: it starts the application in-process with `WebApplicationFactory<Program>` and the real Composition Root, starts PostgreSQL via [Testcontainers](https://testcontainers.com/), sends a `POST` request, and checks that the item ends up in the database. See [Automated Tests](./automated-tests.mdx) for the reasoning.

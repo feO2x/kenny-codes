@@ -11,33 +11,37 @@ This page goes deeper into the Humble Objects that the Core calls, and the examp
 
 ## Who controls the transaction?
 
-Every Humble Object that the Core uses acts in one of two ways. Which one depends on a single question: **does the Core control the transaction?**
+When the Core talks to a third-party system through a Humble Object, one question tells you what kind of Humble Object you are writing: **does the Core control a transaction?**
 
-- A **Client** is used when the Core does not control transactions. The Core calls a method, the I/O happens, and the result comes back. A Client may use a transaction internally - for example, a query that runs with the Read Uncommitted isolation level - but that transaction starts and ends inside the method, and the Core never sees it.
-- A **Session** is used when the Core controls a transaction. The Core loads data, changes it in memory, and decides when the changes are committed. A Session therefore offers a method to commit, usually called `SaveChangesAsync`. Disposing a Session without committing rolls back all changes.
+- A **Client** is used when the Core does not control transactions. The Core asks, the Client does the I/O, and the answer comes back. That doesn't mean a Client never uses transactions - it just never hands them to the Core. A transaction may live inside a single method, like a query that reads with Read Uncommitted. Or it may live as long as the Client itself: it begins when the Client is opened and ends when the Client is disposed. This is useful when several reads need to agree with each other. A report that loads orders and then their order lines should not stumble over an order whose lines were deleted in between.
+- A **Session** is used when the Core does control a transaction. The Core loads data, changes it in memory, and decides when those changes become permanent. That's why a Session offers a method to commit, usually called `SaveChangesAsync`. If the Core never calls it, nothing sticks: disposing a Session without committing rolls back all changes.
 
-|                           | Client                                     | Session                                       |
-|---------------------------|--------------------------------------------|-----------------------------------------------|
-| Who controls transactions | Nobody, or the Client internally           | The Core                                      |
-| Commit method             | None                                       | `SaveChangesAsync` or similar                 |
-| Typical use               | Queries, web service calls, sending messages | Use cases that change data in a database     |
-| When disposed             | Releases its resources                     | Rolls back everything that was not committed |
+|                           | Client                                         | Session                                      |
+|---------------------------|------------------------------------------------|----------------------------------------------|
+| Who controls transactions | Nobody, or the Client internally               | The Core                                     |
+| Commit method             | None                                           | `SaveChangesAsync` or similar                |
+| Typical use               | Queries, web service calls, sending messages   | Features that change data in a database      |
+| When disposed             | Ends its transaction, if it has one, and releases its resources | Rolls back everything that was not committed |
 
-It follows that a Humble Object which only reads data and offers no way to commit is a Client, not a Session - even if it talks to the same database as the Sessions next to it.
+This also answers a question that comes up often: what about a Humble Object that only reads? If it offers no way to commit, it's a Client - even when it talks to the same database as the Sessions next to it.
+
+Keeping a transaction open for the Client's whole lifetime is handy, and it has a price. While it's open, the Client holds on to its database connection, and the database keeps locks or old row versions around so that your reads see the same snapshot. Under load, other requests may have to wait, and the connection pool empties sooner. So it pays to keep the Client's lifetime short - one HTTP request or one message is a good fit - and to use a lifetime transaction only when your reads really need to agree.
+
+You might wonder about writes. The Core never commits a Client's transaction, so a write inside it would either vanish on rollback or be committed silently when the Client is disposed. Neither is what you want, and that's exactly the situation a Session is made for.
 
 ## A Session is a Unit of Work
 
-According to [Patterns of Enterprise Application Architecture](https://martinfowler.com/books/eaa.html), a [Unit of Work](https://martinfowler.com/eaaCatalog/unitOfWork.html) handles three things:
+In [Patterns of Enterprise Application Architecture](https://martinfowler.com/books/eaa.html), Martin Fowler describes this kind of object as a [Unit of Work](https://martinfowler.com/eaaCatalog/unitOfWork.html). It takes care of three things:
 
 - Keeping track of the objects affected during a business transaction (change tracking)
 - Coordinating the writing out of those changes (DML generation)
 - Resolving concurrency problems (database transactions or optimistic concurrency)
 
-Entity Framework Core's `DbContext` already implements all three. A Session on top of it is therefore a thin layer between the Core and EF Core: it exposes exactly the operations one feature needs, in the Core's vocabulary, and nothing else. Because a Session represents a transaction, it also marks the transaction boundary of exactly one feature.
+If you use Entity Framework Core, you already have one: `DbContext` implements all three. Your Session can therefore stay thin. It offers exactly the operations one feature needs, named in the Core's vocabulary. And because a Session represents a transaction, it also shows you at a glance where the transaction of a feature begins and ends.
 
 ## Implementing a Session
 
-The Core programs against an interface that describes what one feature needs. Every Session can commit, so pull that into a base interface:
+Every Session can commit, so it makes sense to put that into a small base interface:
 
 ```csharp
 public interface IAsyncSession
@@ -46,7 +50,7 @@ public interface IAsyncSession
 }
 ```
 
-The name avoids a collision with `Microsoft.AspNetCore.Http.ISession`. The abstraction of a feature then only carries what is specific to it:
+It's called `IAsyncSession` rather than `ISession` so that it doesn't collide with `Microsoft.AspNetCore.Http.ISession`. The abstraction of a feature then only adds what is specific to it:
 
 ```csharp
 public interface IAddToDoItemSession : IAsyncSession
@@ -55,7 +59,7 @@ public interface IAddToDoItemSession : IAsyncSession
 }
 ```
 
-Committing is the same in every Session, and so is translating EF Core's concurrency exception into one the Core understands. Both belong in a base class:
+Committing looks the same in every Session. So does a detail you'll want to handle in one place: EF Core reports a concurrency conflict with a `DbUpdateConcurrencyException`, and the Core shouldn't need to know that type. A base class takes care of both:
 
 ```csharp
 public abstract class EfSession<TDbContext>(TDbContext dbContext) : IAsyncSession
@@ -80,9 +84,9 @@ public abstract class EfSession<TDbContext>(TDbContext dbContext) : IAsyncSessio
 }
 ```
 
-`ConcurrencyConflictException` is a Core type. The Core can catch it and decide what to do - retry, report a conflict to the caller, or give up - without knowing that EF Core exists.
+`ConcurrencyConflictException` lives in the Core. When it arrives, the Core can decide what makes sense for the feature - try again, report the conflict to the caller, or give up - without ever hearing about EF Core.
 
-The implementation of a feature's Session is reduced to the one thing that is actually specific to it. The `Ef` prefix says which technology is behind the abstraction:
+With the base class in place, the Session of a feature only contains what is truly its own. The `Ef` prefix tells you which technology sits behind the abstraction:
 
 ```csharp
 public sealed class EfAddToDoItemSession(AppDbContext dbContext)
@@ -92,13 +96,13 @@ public sealed class EfAddToDoItemSession(AppDbContext dbContext)
 }
 ```
 
-Where is the rollback? EF Core collects changes in memory and only writes them inside `SaveChangesAsync`, wrapped in a database transaction. A Session that is disposed without committing leaves the database untouched. When a feature needs an explicit transaction - for example, with the Serializable isolation level - the Session begins it with `DbContext.Database.BeginTransactionAsync`, commits it in `SaveChangesAsync`, and disposes it in its own `DisposeAsync`. Disposing an uncommitted transaction rolls it back.
+You might be looking for the rollback. EF Core collects changes in memory and only writes them inside `SaveChangesAsync`, wrapped in a database transaction. So when a Session is disposed before anyone commits, the database simply never hears about the changes. If a feature needs an explicit transaction, for example with the Serializable isolation level, the Session can begin one with `DbContext.Database.BeginTransactionAsync`, commit it in `SaveChangesAsync`, and dispose it in its own `DisposeAsync`. A transaction that is disposed without being committed rolls back.
 
-Notice that the Session does not dispose the `DbContext`. With `AddDbContext`, the DI container creates a `DbContext` per scope and disposes it at the end of the scope, so the container owns it. The rule is: whoever creates a resource disposes it. If a Session creates its `DbContext` itself, for example through `IDbContextFactory<TDbContext>`, it owns it and must implement `IAsyncDisposable`.
+You may also notice that the Session doesn't dispose the `DbContext`. With `AddDbContext`, the DI container creates one `DbContext` per scope and disposes it when the scope ends. A helpful rule of thumb: whoever creates a resource also disposes it. If a Session creates its own `DbContext`, say through `IDbContextFactory<TDbContext>`, it owns that context and implements `IAsyncDisposable` to clean it up.
 
 ## Implementing a Client
 
-A Client that reads from the database looks almost the same, minus the commit:
+A Client that reads from the database looks very similar - it just doesn't commit:
 
 ```csharp
 public interface IOrderQueueClient
@@ -123,9 +127,9 @@ public sealed class EfOrderQueueClient(AppDbContext dbContext) : IOrderQueueClie
 }
 ```
 
-Notice what this method is: one I/O call plus a mapping - exactly the two jobs a Humble Object has. The mapping is a projection that EF Core translates to SQL, so there is nothing to unit-test here. It is covered by the Integration and End-to-End tests of the feature.
+Take a look at what the method does: one I/O call and a mapping. That's exactly the job description of a Humble Object. The mapping is a projection that EF Core turns into SQL, so there's nothing here for a Unit Test to check. The Integration and End-to-End Tests of the feature cover it.
 
-Clients are not tied to databases. A typed `HttpClient` that calls a web service is a Client as well:
+Clients aren't limited to databases. A typed `HttpClient` that calls a web service is a Client, too:
 
 ```csharp
 public interface IShippingRatesClient
@@ -162,11 +166,11 @@ public sealed class HttpShippingRatesClient(HttpClient httpClient) : IShippingRa
 }
 ```
 
-The `if` is not a business decision: it maps the web service's "not found" to the `null` the Core expects. Whether a missing shipping rate means "show an error" or "fall back to a flat rate" is decided in the Core.
+You may wonder whether the `if` is fine in a Humble Object. It is, because it's part of the mapping: it translates the web service's "not found" into the `null` that the Core expects. What a missing shipping rate *means* - show an error, or fall back to a flat rate - is still decided in the Core.
 
 ## One per slice, not one per entity
 
-There is one Humble Object per vertical slice per third-party system. This might look like a lot of small types at first, and the obvious alternative is the [Repository pattern](https://martinfowler.com/eaaCatalog/repository.html) as many codebases implement it: one abstraction per entity that collects every operation any feature ever needed.
+CHACK gives each vertical slice its own Humble Object per third-party system. At first, that can feel like a lot of small types, and a familiar alternative comes to mind: the [Repository pattern](https://martinfowler.com/eaaCatalog/repository.html) as many codebases implement it, with one abstraction per entity that gathers every operation any feature ever needed.
 
 ```csharp
 public interface IOrderRepository
@@ -181,14 +185,14 @@ public interface IOrderRepository
 }
 ```
 
-This abstraction is shaped by the data, not by its consumers. That violates the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf), because the abstraction no longer belongs to the code that uses it, and the [Interface Segregation Principle](https://www.cs.utexas.edu/~fares/papers/ISP.pdf), because every consumer depends on members it does not need. The costs show up quickly:
+It feels convenient, but this abstraction is shaped by the data rather than by the code that uses it. In terms of principles, it no longer belongs to its consumer, as the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf) asks, and every consumer depends on members it doesn't need, which the [Interface Segregation Principle](https://www.cs.utexas.edu/~fares/papers/ISP.pdf) warns about. In your day-to-day work, you'd notice it like this:
 
-- Every Test Double has to deal with the whole interface, even though the feature under test calls two of its members.
-- Read-only features suddenly have access to `SaveChangesAsync`. You cannot tell from the constructor whether a feature writes.
-- The transaction boundary is no longer obvious. Which feature commits what?
-- The interface keeps growing, and changes to it touch features that have nothing to do with each other.
+- A Test Double has to implement the whole interface, even when the feature under test only calls two of its members.
+- A read-only feature gets `SaveChangesAsync` as well, so its constructor no longer tells you whether it writes.
+- It becomes harder to see which feature commits what, and where a transaction begins and ends.
+- The interface keeps growing, and a change made for one feature touches the Test Doubles of many others.
 
-CHACK gives each feature its own abstraction instead:
+When each feature gets its own abstraction, all of this stays small and visible:
 
 ```csharp
 public interface ICancelOrderSession : IAsyncSession
@@ -207,11 +211,11 @@ public interface IOrderHistoryClient
 }
 ```
 
-Two slices may share the same Humble Object, but only if they require exactly the same abstraction. When their needs diverge later, split it again - the abstraction belongs to the feature, not to the table.
+Sometimes two slices really do need the same thing. They can share a Humble Object then, as long as they need exactly the same abstraction. If their needs drift apart later, you split it again - the abstraction follows the features, not the table.
 
 ### Sharing code without sharing abstractions
 
-Separate Humble Objects do not mean duplicated code. When several Humble Objects need the same query, filter, projection, or mapping, extract it into a static method that each of them calls:
+Separate Humble Objects don't have to mean duplicated code. When several of them need the same query, filter, projection, or mapping, you can move it into a static method and call it from each of them:
 
 ```csharp
 public static class OrderQueries
@@ -235,19 +239,19 @@ public sealed class EfCancelOrderSession(AppDbContext dbContext)
 }
 ```
 
-Place these methods according to the rules in [Vertical Slices](./vertical-slices.md#hierarchy-and-sharing): in the closest common parent of the slices that use them, or in a sibling folder named after the concept. A static method that performs I/O, like the one above, belongs to the Humble Object category. A static method that runs in memory - for example, an `Expression<Func<Order, OrderHistoryEntry>>` that several projections reuse - may belong to the Core.
+Where should such a method live? [Vertical Slices](./vertical-slices.md#hierarchy-and-sharing) has the answer: in the closest common parent of the slices that use it, or in a sibling folder named after the concept. A static method that performs I/O, like the one above, belongs to the Humble Object category. One that only runs in memory - say, an `Expression<Func<Order, OrderHistoryEntry>>` that several projections reuse - may belong to the Core.
 
 ## Guidelines
 
-- **Decide Client or Session first.** If the Core needs to commit, it is a Session that derives from `IAsyncSession` and `EfSession<TDbContext>`. Otherwise, it is a Client.
-- **Name it after the feature and the technology.** `IAddToDoItemSession` is the Core's abstraction, `EfAddToDoItemSession` its implementation. `IOrderQueueClient` and `EfOrderQueueClient` work the same way.
-- **One method per interaction** with the third-party system.
-- **I/O calls are asynchronous** and take a `CancellationToken` as the last parameter with a default value. Pass the token down from the caller - ASP.NET Core injects it into endpoints, and message handlers get one from their context. Synchronous I/O blocks a thread pool thread and invites thread starvation.
-- **Attach and remove synchronously.** Methods that only add an entity to a `DbSet` or remove it do not hit the database, so they should not be asynchronous.
-- **Call `SaveChangesAsync` exactly once per Session.** If a Session saves twice and the second call fails, half a business transaction is committed. If a feature genuinely needs several saves, take control of the transaction explicitly.
-- **Never return `IQueryable<T>`.** Materialize inside the Humble Object. A query that leaves it is a query whose SQL is decided somewhere in the Core, executed at a point nobody can see, and impossible to replace faithfully with a Test Double.
-- **Use `AsNoTracking` in Clients.** Nobody will save the entities a Client returns, so there is no reason to track changes on them.
-- **Translate exceptions at the boundary.** Catch the exceptions of the data access technology that the Core needs to react to, and turn them into Core exceptions or results. Let everything else bubble up.
-- **`AppDbContext` is a Humble Object, too.** It does not implement a Core abstraction, but it performs I/O and is therefore categorized like the Clients and Sessions that use it. It lives in a folder that is [not a slice](./vertical-slices.md#folders-that-are-not-slices), together with base classes like `EfSession<TDbContext>`.
+- **Start with the question: Client or Session?** If the Core needs to commit, you're writing a Session that derives from `IAsyncSession` and `EfSession<TDbContext>`. Otherwise, it's a Client. Most of the other decisions follow from this one.
+- **Name it after the feature and the technology.** `IAddToDoItemSession` is the Core's abstraction, `EfAddToDoItemSession` its implementation; `IOrderQueueClient` and `EfOrderQueueClient` work the same way. The names then tell you what a feature needs and what fulfills it.
+- **One method per interaction** with the third-party system. Each method stays easy to read, and each Test Double stays easy to write.
+- **Make I/O calls asynchronous** and give them a `CancellationToken` as the last parameter with a default value. Pass the token on from the caller: ASP.NET Core injects one into endpoints, and message handlers get one from their context. Synchronous I/O blocks a thread pool thread while it waits, which can starve the thread pool under load.
+- **Attach and remove synchronously.** Adding an entity to a `DbSet` or removing it doesn't hit the database yet, so these methods don't need to be asynchronous.
+- **Call `SaveChangesAsync` once per Session.** One commit means one transaction: either the whole business transaction succeeds, or none of it does. If a feature really needs several saves, take control of the transaction explicitly so that this stays true.
+- **Materialize results inside the Humble Object.** When an `IQueryable<T>` leaves it, the Core ends up deciding which SQL runs, the query executes somewhere further away, and a Test Double can't imitate it faithfully. Returning a `List<T>`, an array, or a DTO keeps all of that in one place.
+- **Use `AsNoTracking` in Clients.** Nobody saves the entities a Client returns, so EF Core can skip change tracking for them.
+- **Translate exceptions at the boundary.** When the Core needs to react to an exception of the data access technology, turn it into a Core exception or result right here. Exceptions the Core can't do anything about can simply bubble up.
+- **Your `AppDbContext` is a Humble Object, too.** It doesn't implement a Core abstraction, but it performs I/O, so it belongs to the same category as the Clients and Sessions that use it. A good home for it is a [folder that is not a slice](./vertical-slices.md#folders-that-are-not-slices), together with base classes like `EfSession<TDbContext>`.
 
-To see how an endpoint uses a Session, how the Session is registered, and how a unit test replaces it with a Spy, read [Building Blocks of a Backend Feature](./building-blocks.md).
+If you'd like to see a Session in action - used by an endpoint, registered in a Module, and replaced by a Spy in a Unit Test - continue with [Building Blocks of a Backend Feature](./building-blocks.md).

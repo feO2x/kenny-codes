@@ -45,34 +45,34 @@ The rule of thumb: **make the Core as large as possible and the Humble Object as
 - **Unify at the boundary, if you must.** If the same data lives in two systems with slightly different shapes - for example, two DBMS with different table layouts - the Humble Objects may normalize both into the same Core type. That is mapping, and it is allowed.
 - **Release resources deterministically.** Humble objects usually own something disposable: a connection, a client, a command, a stream, a file handle. Make the Humble Object disposable, too. Aim for the [Composition Root](./composition-root.mdx) disposing the Humble Object. Especially if the calling Core logic requires dynamic creation of Humble Objects, it can handle them.
 - **The same rules apply to UI code.** A view is a Humble Object: it renders and it forwards user interactions. Keep bindings simple, avoid multi-bindings and view-specific converters that carry logic, keep animation triggers dumb, and put no logic in printed reports. Anything you move out of the view is something you can unit-test.
-- **Never return deferred queries.** A query object that the caller can still compose and execute later moves the decision about what is queried into the Core. Materialize the results inside the Humble Object.
+- **Return results, not deferred queries.** A query object that the caller can still extend and execute later moves the decision about what is queried into the Core. When the Humble Object materializes the results itself, the I/O stays in one place.
 
 ## Clients and Sessions
 
-A Humble Object that the Core uses acts in one of two ways, depending on who controls the transaction:
+A Humble Object that the Core uses comes in one of two flavors, depending on who controls the transaction:
 
-- A **Client** is used when the Core does not control transactions. A Client may use a transaction internally - for example, to read uncommitted data - but it never exposes it to the Core.
+- A **Client** is used when the Core does not control transactions. A Client may still use a transaction internally - for a single query, or for its whole lifetime - but it never hands it to the Core.
 - A **Session** is used when the Core controls a transaction. It offers a method to commit, usually `SaveChangesAsync`, and disposing it without committing rolls back all changes.
 
-Consequently, a Humble Object that only reads data and offers no way to commit is a Client, not a Session. [Clients and Sessions](./clients-and-sessions.md) shows both in detail.
+So a Humble Object that only reads data and offers no way to commit is a Client, not a Session. [Clients and Sessions](./clients-and-sessions.md) shows both in detail.
 
 ## Scope and sharing
 
-There is one Humble Object per vertical slice per third-party system. This matters most when transactions are involved: a Session represents the transaction boundary of exactly one feature.
+Each vertical slice gets its own Humble Object per third-party system. This matters most when transactions are involved, because a Session then marks the transaction boundary of exactly one feature.
 
-Do not structure Humble Objects like the Repository pattern, where a single abstraction accumulates all operations that belong to an entity across different features. Such an abstraction is shaped by the data instead of by its consumer, which violates the Dependency Inversion and Interface Segregation Principles: every consumer depends on members it does not need, and every Test Double has to deal with them.
+You may know a different approach from the Repository pattern, where a single abstraction collects all operations that belong to an entity across different features. Such an abstraction is shaped by the data instead of by its consumer, which works against the Dependency Inversion and Interface Segregation Principles: every consumer depends on members it doesn't need, and every Test Double has to deal with them. [Clients and Sessions](./clients-and-sessions.md#one-per-slice-not-one-per-entity) shows how the two approaches compare.
 
-Two or more slices may share the same Humble Object, but only if they require exactly the same abstraction. When their needs diverge, split it again.
+Two or more slices can share the same Humble Object when they need exactly the same abstraction. If their needs drift apart later, you split it again.
 
-Separate Humble Objects do not mean duplicated code. Extract common implementation code - queries, filters, projections, mapping - into static methods that every Humble Object needing them calls, and place them according to [Hierarchy and sharing](./vertical-slices.md#hierarchy-and-sharing). Static methods that perform I/O belong to the Humble Object category; static methods that run in memory may belong to the Core.
+Separate Humble Objects don't have to mean duplicated code. Common implementation code - queries, filters, projections, mapping - can move into static methods that each Humble Object calls. [Hierarchy and sharing](./vertical-slices.md#hierarchy-and-sharing) helps you find the right folder for them. Static methods that perform I/O belong to the Humble Object category; static methods that run in memory may belong to the Core.
 
 ## The local file system is I/O, too
 
-Reading and writing files is I/O, even though the file system is always there. This includes libraries that work on files on behalf of the Core, like document converters or image processing libraries. Put such access behind an I/O abstraction as well: the Unit Tests may still touch the local file system (see [Automated Tests](./automated-tests.mdx)), but a Test Double lets you inject the errors that are hard to provoke on a real disk - a locked file, a full drive, a corrupt document.
+Reading and writing files is I/O, even though the file system is always there. The same goes for libraries that work on files on behalf of the Core, like document converters or image processing libraries. It's worth putting such access behind an I/O abstraction, too. Your Unit Tests may still touch the local file system (see [Automated Tests](./automated-tests.mdx)), but a Test Double lets you simulate the errors that are hard to provoke on a real disk - a locked file, a full drive, a corrupt document.
 
 ## Supporting types
 
-Not every type in this category is called by the Core. A database context subclass, a base class for Humble Objects, a static helper method that performs I/O, or a startup task that the Composition Root invokes to create database indexes - all of them perform I/O, so they are Humble Objects. They do not need to implement an I/O abstraction of the Core, but the guidelines above apply to them as well.
+Not every type in this category is called by the Core. A database context subclass, a base class for Humble Objects, a static helper method that performs I/O, or a startup task that the Composition Root runs to create database indexes - all of them perform I/O, so they are Humble Objects, too. They don't need to implement an I/O abstraction of the Core, and the guidelines above help them stay just as simple.
 
 ## Where the pattern comes from
 

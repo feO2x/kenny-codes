@@ -6,7 +6,7 @@ title: Vertical Slices
 # Organizing Code with Vertical Slices
 
 :::info[Not a fifth category]
-The four categories tell you what a piece of code *is*. Vertical slices tell you which *folder* it goes in. A slice folder usually contains code from three categories: Core, Humble Objects, and the slice's part of the Composition Root.
+The four categories tell you what a piece of code *is*. Vertical slices help you decide which *folder* it goes in. That's why a slice folder usually contains code from three categories: Core, Humble Objects, and the slice's part of the Composition Root.
 :::
 
 ## Organize by feature, not by technical concern
@@ -54,7 +54,7 @@ The problems above go away:
 - You can judge the size of a feature by expanding its folder.
 - Two developers working on two features rarely produce merge conflicts, because they work in different directories.
 
-There is one cost: as the application grows, you will spend a little more time refactoring the folder structure than you would with fixed technical folders. In my experience that time is well spent - see [Keeping slices clean](#keeping-slices-clean).
+There is one cost: as the application grows, you will spend a little more time refactoring the folder structure than you would with fixed technical folders. In my experience, that time is well spent, and [Keeping slices clean](#keeping-slices-clean) shows how to make it a habit.
 
 Vertical slices were described by Jimmy Bogard in [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/).
 
@@ -81,7 +81,7 @@ A slice can contain sub-slices, in the same way a feature can be broken down int
 
 Here, "Orders" has a sub-feature "Queuing", which in turn has four endpoints. This works well with a [one endpoint per file](https://ardalis.com/moving-from-controllers-and-actions-to-endpoints-with-mediatr/) approach, and it lines up with the advice from [Automated Tests](./automated-tests.mdx): the endpoint is the most abstract API of a leaf slice, and that is where the Unit Tests aim.
 
-Every folder contributes its registrations through a [Module](./composition-root.mdx#modules). A parent Module calls the Modules of its children, and the Composition Root only calls the top-level Modules. Adding a feature therefore never means editing a central registration file.
+Each folder can also bring its own registrations, in the form of a [Module](./composition-root.mdx#modules). A parent Module calls the Modules of its children, and the Composition Root only calls the top-level Modules. When you add a feature, you add its Module next to it and call it from the parent - there's no central registration file that everybody edits.
 
 :::tip[In .NET Practice]
 A Module is a static class with an extension method on `IServiceCollection`. A leaf Module registers the types of its own folder:
@@ -114,7 +114,7 @@ public static class QueuingModule
 
 ## Hierarchy and sharing
 
-Sooner or later, two slices need the same code. Consider two sub-features that turn out to need exactly the same Session:
+Sooner or later, two slices need the same code. Imagine two sub-features that turn out to need exactly the same Session:
 
 ```text
 📁 WebApp
@@ -136,7 +136,7 @@ Sooner or later, two slices need the same code. Consider two sub-features that t
    |- 📄 FeatureAModule.cs
 ```
 
-Unify them and move the result up into the closest common parent:
+You can unify them and move the result up into the closest common parent:
 
 ```text
 📁 WebApp
@@ -156,14 +156,14 @@ Unify them and move the result up into the closest common parent:
    |- 📄 IFeatureASession.cs
 ```
 
-Both sub-features now reference `IFeatureASession`, and because the Session lives in `FeatureA`, `FeatureAModule` registers it - not the Modules of the two sub-features.
+Both sub-features now reference `IFeatureASession`. Because the Session lives in `FeatureA`, `FeatureAModule` registers it, and the Modules of the two sub-features don't need to know about it.
 
-The rules behind this move:
+A few ideas guide moves like this one:
 
-- **Shared code moves up.** When code is used by two or more slices, move it to their closest common parent, or into a sibling folder named after the concept it represents.
-- **Code that is no longer shared moves back down.** When one of the two slices stops using the Session, it belongs to the remaining slice again.
-- **Shared Humble Objects need identical needs.** Two slices only share a Client or Session if they require exactly the same abstraction. Often, they only share implementation code - then each slice keeps its own Humble Object, and the common code moves up as a static method. See [Clients and Sessions](./clients-and-sessions.md#sharing-code-without-sharing-abstractions).
-- **Dependencies between slices point in one direction.** A slice may use code of another slice, but never the other way around at the same time. As soon as a cycle appears, move the shared code into a common parent or into a new sibling folder - the cycle is telling you that the code does not belong to either feature.
+- **Shared code moves up.** When two or more slices use the same code, its natural home is their closest common parent, or a sibling folder named after the concept it represents.
+- **Code that is no longer shared moves back down.** If one of the two slices stops using the Session, it belongs to the remaining slice again.
+- **Sharing a Humble Object requires identical needs.** Two slices share a Client or Session only if they need exactly the same abstraction. Often, they only share implementation code. Then each slice keeps its own Humble Object, and the common code moves up as a static method, as shown in [Clients and Sessions](./clients-and-sessions.md#sharing-code-without-sharing-abstractions).
+- **Dependencies between slices point in one direction.** A slice may use code of another slice, as long as the other slice doesn't use code of the first one in return. When such a cycle appears, it's a sign that the code in between belongs to neither feature. A common parent or a new sibling folder gives it a home of its own.
 
 ## Folders that are not slices
 
@@ -183,20 +183,20 @@ Not every folder represents a feature. Some folders extend frameworks and librar
 |- 📁 ...
 ```
 
-These folders are fine, and they follow slightly different rules:
+These folders are perfectly fine, and they work a little differently:
 
-- They may be organized by technology. `DatabaseAccess` and `Messaging` are honest names here.
-- They may contain Modules, options, base types for Humble Objects, and shared static methods that Humble Objects call.
-- They do not contain feature-specific logic. As soon as a type in `DatabaseAccess` knows what an order is, it belongs into the `Orders` slice or one of its concept folders.
+- They can be organized by technology. `DatabaseAccess` and `Messaging` describe exactly what you'll find inside.
+- They can contain Modules, options, base types for Humble Objects, and shared static methods that Humble Objects call.
+- They stay free of feature-specific logic. When a type in `DatabaseAccess` starts to know what an order is, it has found its way into the wrong folder - the `Orders` slice or one of its concept folders is a better home.
 
 ## Keeping slices clean
 
-The structure of a codebase should tell the truth about the system. That only works if restructuring folders is part of feature work, not a separate task that never gets prioritized.
+The structure of a codebase is most helpful when it tells the truth about the system. The easiest way to keep it that way is to tidy up folders as part of feature work, while the context is still fresh - rather than planning a separate task for it.
 
-- **A parent folder only contains its Module and code that is shared by its children.** When shared types accumulate in a parent folder, group them into sibling folders named after the concept they represent - for example, the domain model of an aggregate together with its persistence mapping, or the access to a particular third-party system.
-- **Code that is only used by a single slice moves down into that slice.**
-- **Code lives in the folder of the slice or concept it belongs to, and is registered by that folder's Module.**
-- **Re-evaluate shared code whenever a slice is added, changed, or removed.** Did the change make code shared that was not before? Did it leave code behind that only one slice still uses?
+- **A parent folder holds its Module and the code its children share.** When shared types pile up in a parent folder, grouping them into sibling folders named after the concept they represent makes them easier to find - for example, the domain model of an aggregate together with its persistence mapping, or the access to a particular third-party system.
+- **Code that only one slice uses lives in that slice.**
+- **Code lives in the folder of the slice or concept it belongs to, and that folder's Module registers it.**
+- **Each change to a slice is a good moment to look around.** Did the change make code shared that wasn't before? Did it leave code behind that only one slice still uses?
 
 Here is what a grown `Orders` slice can look like after a few rounds of this:
 
@@ -222,7 +222,7 @@ Here is what a grown `Orders` slice can look like after a few rounds of this:
 
 ## Tests mirror the slices
 
-The test projects follow the same structure as the production code. The Unit Tests for `Orders/Queuing/CreateQueueItem` live in `Orders/Queuing/CreateQueueItem` of the test project, next to the Test Doubles they need. When a slice moves, its tests move with it, and when you look for the tests of a feature, there is exactly one place to look.
+The test projects follow the same structure as the production code. The Unit Tests for `Orders/Queuing/CreateQueueItem` live in `Orders/Queuing/CreateQueueItem` of the test project, next to the Test Doubles they need. When a slice moves, its tests move with it, and whenever you look for the tests of a feature, you know right away where to find them.
 
 ```text
 📁 WebApp.Tests

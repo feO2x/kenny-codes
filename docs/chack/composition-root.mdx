@@ -41,17 +41,17 @@ Resolve and Release do not happen only once. They run repeatedly, on different r
 
 **Keep it simple, and review it.** Like humble objects, the Composition Root is not comprehensively covered by automated tests: it is the wiring, and testing it in isolation proves little. That makes readability the safety net. Prefer straightforward registration code over clever conventions and reflection-driven scanning that nobody can follow.
 
-**Bind configuration to options objects.** Reading configuration from files, environment variables, or secret stores happens here. The Core receives plain options objects - DTOs - and does not know where the values came from.
+**Bind configuration to options objects.** Reading configuration from files, environment variables, or secret stores happens here. The Core receives plain options objects - DTOs - and doesn't need to know where the values came from.
 
-**Call Humble Objects directly for startup tasks.** Some tasks need I/O before the application starts serving requests, like creating database indexes or setting up a storage bucket. The Composition Root may call a Humble Object directly for this. If logic is involved, it calls a Core service instead, which in turn uses the Humble Object.
+**Startup tasks can call Humble Objects directly.** Some tasks need I/O before the application starts serving requests, like creating database indexes or setting up a storage bucket. The Composition Root can simply call a Humble Object for this. When logic is involved, it calls a Core service instead, which in turn uses the Humble Object - that way, the logic stays testable.
 
 ## Modules
 
-In a larger application, a single registration file becomes a merge-conflict magnet. Split it into Modules instead: each [vertical slice](./vertical-slices.md) contributes its registrations via its own Module. Parent Modules call the Modules of their children, and the Composition Root only calls the top-level Modules. A Module physically lives in its slice folder, but it belongs to the Composition Root category.
+As an application grows, a single registration file gets long, and everybody who adds a feature has to edit it. Modules spread that work out: each [vertical slice](./vertical-slices.md) contributes its registrations via its own Module. Parent Modules call the Modules of their children, and the Composition Root only calls the top-level Modules. A Module physically lives in its slice folder, but it belongs to the Composition Root category.
 
-Modules stay manageable with one strict rule: **a Module only registers the types that belong to its own folder.** It does not register dependencies that are registered by other Modules - neither directly nor by calling those Modules - even if the types of its slice depend on them. Otherwise, Modules become bloated, types end up registered several times, and the result depends on the order in which the Modules are called.
+One rule keeps Modules easy to work with: **a Module only registers the types that belong to its own folder.** Even when the types of its slice depend on something registered elsewhere, the Module leaves that registration to its owner - it neither registers it directly nor calls the other Module. Otherwise, Modules grow, types end up registered several times, and the result depends on the order in which the Modules are called.
 
-This leads to three consequences:
+Three things follow from this rule:
 
 - Types shared by several slices are registered by the Module of the folder that owns them - the closest common parent, or the sibling folder they were moved to (see [Hierarchy and sharing](./vertical-slices.md#hierarchy-and-sharing)).
 - Infrastructure like the database context is registered by the Module of a [folder that is not a slice](./vertical-slices.md#folders-that-are-not-slices), e.g. `DatabaseAccess`.
