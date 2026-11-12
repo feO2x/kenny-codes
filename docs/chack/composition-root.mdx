@@ -15,7 +15,9 @@ Because the functionality of an application is distributed across many types, so
 
 Most applications use a Dependency Injection container for this - some frameworks make it mandatory. The alternative is Pure DI: plain imperative statements that create the objects and pass them to each other's constructors. Both are legitimate, and for small applications Pure DI is often clearer. The concept and everything below comes from [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns) by Steven van Deursen and Mark Seemann.
 
-The Composition Root is the only category that is allowed to know all the others. It references the Core, it references the humble objects, and it decides which implementation of an I/O abstraction is used. Nothing references it back.
+The Composition Root is the only category that is allowed to know all the others. It references the Core, it references the humble objects, and it decides which implementation of an I/O abstraction is used. Neither the Core nor the Humble Objects reference it back; only [Automated Tests](./automated-tests.mdx) may use it, as part of their fixture.
+
+Besides creating objects, the Composition Root sets up the hosting pipeline: which middleware runs in which order, and which route or message subscription is mapped to which endpoint.
 
 ## Register, Resolve, Release
 
@@ -39,10 +41,26 @@ Resolve and Release do not happen only once. They run repeatedly, on different r
 
 **Keep it simple, and review it.** Like humble objects, the Composition Root is not comprehensively covered by automated tests: it is the wiring, and testing it in isolation proves little. That makes readability the safety net. Prefer straightforward registration code over clever conventions and reflection-driven scanning that nobody can follow.
 
+**Bind configuration to options objects.** Reading configuration from files, environment variables, or secret stores happens here. The Core receives plain options objects - DTOs - and does not know where the values came from.
+
+**Call Humble Objects directly for startup tasks.** Some tasks need I/O before the application starts serving requests, like creating database indexes or setting up a storage bucket. The Composition Root may call a Humble Object directly for this. If logic is involved, it calls a Core service instead, which in turn uses the Humble Object.
+
+## Modules
+
+In a larger application, a single registration file becomes a merge-conflict magnet. Split it into Modules instead: each [vertical slice](./vertical-slices.md) contributes its registrations via its own Module. Parent Modules call the Modules of their children, and the Composition Root only calls the top-level Modules. A Module physically lives in its slice folder, but it belongs to the Composition Root category.
+
+Modules stay manageable with one strict rule: **a Module only registers the types that belong to its own folder.** It does not register dependencies that are registered by other Modules - neither directly nor by calling those Modules - even if the types of its slice depend on them. Otherwise, Modules become bloated, types end up registered several times, and the result depends on the order in which the Modules are called.
+
+This leads to three consequences:
+
+- Types shared by several slices are registered by the Module of the folder that owns them - the closest common parent, or the sibling folder they were moved to (see [Hierarchy and sharing](./vertical-slices.md#hierarchy-and-sharing)).
+- Infrastructure like the database context is registered by the Module of a [folder that is not a slice](./vertical-slices.md#folders-that-are-not-slices), e.g. `DatabaseAccess`.
+- The Composition Root is responsible for calling every Module whose registrations other Modules rely on.
+
 :::tip[In .NET Practice]
 - In ASP.NET Core, the Register phase is everything you do on `WebApplicationBuilder` before calling `Build()`. After `Build()`, the service provider is fixed. The Resolve and Release phases run per request, around the request scope; `IServiceScopeFactory` gives you the same cycle in background services.
-- Split registration into module extension methods rather than one long `Program.cs`. If you organize your code in [vertical slices](./vertical-slices.md), each folder can carry its own module, and the Composition Root only calls into the top-level ones.
-- Register humble objects against their Core abstraction: `services.AddScoped<IGetOrderSession, EfGetOrderSession>()`. The Core sees the interface; only this line knows Entity Framework Core is involved.
+- Implement [Modules](#modules) as extension methods on `IServiceCollection` rather than one long `Program.cs`. [Building Blocks of a Backend Feature](./building-blocks.md#module) shows a complete one, including the route mapping.
+- Register humble objects against their Core abstraction: `services.AddScoped<IPlaceOrderSession, EfPlaceOrderSession>()`. The Core sees the interface; only this line knows Entity Framework Core is involved.
 - Get lifetimes right. A scoped dependency captured by a singleton is the classic bug - it keeps a `DbContext` alive for the life of the process. ASP.NET Core's scope validation catches this in development; leave it on.
 - Bind configuration to strongly typed options in the Composition Root and hand the Core plain settings objects. The Core should not know that a value came from an environment variable.
 :::

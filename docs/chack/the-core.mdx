@@ -35,24 +35,41 @@ Everything in this list runs in memory, without touching a disk, a socket, or an
 
 **Keep framework details out.** This is the rule that gets broken most often, usually in small, convenient steps:
 
-- Your domain model must not know how it is serialized or persisted. No serialization or O/R mapping attributes on Core types - configure that in your Data Access layer.
+- Your domain model must not know how it is serialized or persisted. No serialization or O/R mapping attributes on Core types - configure that in separate types, see [Frameworks and libraries](#frameworks-and-libraries).
 - Your Core must not know how the application is composed. No DI container attributes, no container types in constructors. Container interactions belong in the [Composition Root](./composition-root.mdx). If absolutely necessary, hide the container in the core behind an abstract factory.
 - When a Core wants to perform an I/O call, introduce an abstraction, and a humble object that implements it. There is no direct reference to an HTTP client, a database library, a file API, or a message broker client anywhere in the Core.
 
 **Allow coupling inside the Core.** Related Core types may reference each other directly. Introduce indirection via interfaces, abstract base classes, function pointers, etc. only when your code benefits from it. If a service receives a DTO and hands it to a validator, let it call the validator directly - both are then covered by the same unit test, with no test double in between.
 
+**Make non-determinism explicit.** The current time, new GUIDs, and random numbers change with every call. Obtain them through an abstraction so that tests can control them and stay deterministic.
+
 **Cover it with Unit Tests.** They do not only cover the happy path, but allow edge and error cases via prepared test doubles that are painful to reconstruct in an integration or end-to-end test, see [Automated Tests](./automated-tests.mdx).
+
+## Frameworks and libraries
+
+The deciding criterion for the Core is I/O, not the origin of a type. Your Core will use framework and library types, and that is fine as long as they do not perform I/O. This even holds for types of a data access framework: when a type can easily be instantiated and handled in memory - an enum, a value object, an options type - the Core may couple to it directly. How strongly your Core depends on a framework is your design decision.
+
+Code that extends or configures a framework is categorized by the same criterion:
+
+- **Pipes and filters** like middleware, endpoint filters, or pipeline behaviors belong to the Core if they only work in memory. If they require I/O, they call an I/O abstraction like any other Core type. Registering them and deciding their order in the pipeline is the job of the [Composition Root](./composition-root.mdx).
+- **Configuration that does not perform I/O by itself** - serialization converters, BSON class maps, O/R mapping configurations - belongs to the Core. Because it runs in memory, you may cover it with Unit Tests.
+- **Types that perform I/O**, like a database context or a message broker connection, are part of the data access technology. Code that derives from or wraps them is a [Humble Object](./humble-objects.mdx).
 
 ## The I/O abstractions belong to the Core
 
-When a Core services needs to call third-party systems, it depends on an abstractions like an interface or an abstract base class. It describes what the Core requires from the I/O call, in the Core's own vocabulary. A humble object implements this abstractions.
+When a Core service needs to call third-party systems, it depends on an abstraction like an interface or an abstract base class. It describes what the Core requires from the I/O call, in the Core's own vocabulary. A humble object implements this abstraction.
 
 This is the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf) at work. The abstraction is not a technical artefact of the data access layer that the Core happens to consume - it is owned, named, and shaped by the Core.
 
-Give each use case its own abstraction. For example, a single interface with a method for every I/O call across different endpoints (as you can see in many Repository implementations) is a violation of the [Interface Segregation Principle](https://www.cs.utexas.edu/~fares/papers/ISP.pdf).
+Give each use case its own abstraction. For example, a single interface with a method for every I/O call across different endpoints (as you can see in many Repository implementations) is a violation of the [Interface Segregation Principle](https://www.cs.utexas.edu/~fares/papers/ISP.pdf). Design each abstraction for exactly one consumer - usually one [vertical slice](./vertical-slices.md) - and give it only the members this consumer requires. [Clients and Sessions](./clients-and-sessions.md#one-per-slice-not-one-per-entity) shows what this looks like in practice.
+
+There is one exception to "the Core owns its I/O abstractions": the Core may depend directly on I/O abstractions that a framework provides, as long as they are designed for substitution, are small, and come with readily available test doubles. A logger is the typical example. Writing your own logging abstraction on top of it would add indirection and buy nothing.
 
 :::tip[In .NET Practice]
-- Keep `System.Text.Json` and Entity Framework Core attributes off your entities. Configure serialization with `JsonSerializerOptions` and persistence with `IEntityTypeConfiguration<T>` implementations that live next to the data access code.
+- Keep `System.Text.Json` and Entity Framework Core attributes off your entities. Configure serialization with `JsonSerializerOptions` and persistence with `IEntityTypeConfiguration<T>` implementations. Both run in memory, so they are Core and can be unit-tested; a custom `JsonConverter<T>` is a good candidate for that.
+- Middleware, `IEndpointFilter` implementations, and MediatR pipeline behaviors that do not perform I/O are Core. Their registration and order are configured in the Composition Root.
+- `ILogger<T>` is the exception to Core-owned I/O abstractions: inject it directly and use `NullLogger<T>` in tests. `TimeProvider` serves the same purpose for the current time.
+- Your `DbContext` subclass performs I/O, so it is a Humble Object, even though it does not implement a Core abstraction.
 - Nothing in the Core should reference Data Access Dependencies directly, like `DbContext`, `HttpClient`, `IDbConnection` and related ADO.NET types, `File`, or a broker client.
 - For validation, [Light.PortableResults.Validation](https://github.com/feO2x/Light.PortableResults) or [FluentValidation](https://docs.fluentvalidation.net/) keep rules out of the DTOs themselves. Design DTOs for the needs of your business logic, not for what the deserializer might produce: if a property must not be null after validation, declare it non-nullable and let the validator enforce it.
 - Avoid tight-coupling to non-deterministic dependencies like `DateTime.UtcNow` or `Guid.NewGuid()`. Abstract these calls to make your tests deterministic. See [Automated Tests](./automated-tests.mdx).

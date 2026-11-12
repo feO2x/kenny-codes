@@ -82,19 +82,20 @@ Callouts like this one carry the .NET-specific advice: which base class to deriv
 If you work in another ecosystem, skip them. Nothing in CHACK depends on them.
 :::
 
-Two pages are the exception and are .NET-heavy throughout, because they are worked examples rather than model definitions: [Vertical Slices](./vertical-slices.md) and [Data Access Sessions](./data-access-sessions.md).
+Two pages are the exception and are .NET-heavy throughout, because they are worked examples rather than model definitions: [Clients and Sessions](./clients-and-sessions.md) and [Building Blocks of a Backend Feature](./building-blocks.md).
 
 ## Why CHACK?
 
 You might be wondering why you should care about CHACK. There are already many approaches to designing software, like Hexagonal Architecture, Clean Architecture, etc. CHACK doesn't bring particularly new things to the table. It is rather a distillation of patterns and approaches which can be easily taught and applied.
 
-Consider how many books you need to read to understand and apply Hexagonal Architecture, or Clean Architecture? I think CHACK is so condensed that it can be easily taught 4 to 8 hours. You can start applying it without use of any frameworks or project templates. You can just start applying to parts of your codebase and see the benefits. Start small and grow over time.
+Consider how many books you need to read to understand and apply Hexagonal Architecture, or Clean Architecture? I think CHACK is so condensed that it can be easily taught in 4 to 8 hours. You can start applying it without use of any frameworks or project templates. You can just start applying to parts of your codebase and see the benefits. Start small and grow over time.
 
 ## Where to go next
 
 - Read the four categories in order: [The Core](./the-core.mdx), [Humble Objects](./humble-objects.mdx), [Automated Tests](./automated-tests.mdx), and [The Composition Root](./composition-root.mdx).
-- Want to organize your folders to match? [Vertical Slices](./vertical-slices.md) is not part of CHACK, but the two work well together.
-- Want the deepest worked example? [Data Access Sessions](./data-access-sessions.md) shows a humble object that is also a Unit of Work.
+- Want to see how Humble Objects deal with transactions? [Clients and Sessions](./clients-and-sessions.md) shows both kinds and why CHACK avoids Repositories.
+- Want to see a complete feature? [Building Blocks of a Backend Feature](./building-blocks.md) walks through one, from the domain model to the Unit Tests.
+- Want to organize your folders to match? [Vertical Slices](./vertical-slices.md) is not a fifth category, but it decides which folder each piece of code goes in.
 - Reviewing a codebase? [Reviewing for CHACK](./reviewing-for-chack.md) is the checklist I use.
 - Wondering how this relates to Hexagonal Architecture, Clean Architecture, or DDD? See [Relationship to Other Approaches](./relationship-to-other-approaches.md).
 
@@ -102,9 +103,9 @@ Consider how many books you need to read to understand and apply Hexagonal Archi
 
 CHACK stands mainly on four books:
 
-- Eric Evans, [Domain-Driven Design](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/) - the Ubiquitous Language, the isolated Domain (Core) and the patterns that shape the Core and Humble Objects: Entities, Value Objects, Repositories, Units of Work.
+- Eric Evans, [Domain-Driven Design](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/) - the Ubiquitous Language, the isolated Domain (Core) and the patterns that shape the Core: Entities, Value Objects, and Aggregates.
 - Martin Fowler et al., [Patterns of Enterprise Application Architecture](https://martinfowler.com/books/eaa.html) - the catalogue for Line-of-Business software: domain models, O/R mapping, units of work, data transfer objects, among other patterns.
 - Steven van Deursen and Mark Seemann, [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns) - the Composition Root and its Register-Resolve-Release phases.
 - Gerard Meszaros, [xUnit Test Patterns](http://xunitpatterns.com/) - the Humble Object pattern, the four-phase test, and the vocabulary for test doubles.
 
-Robert C. Martin's [Clean Architecture](https://www.oreilly.com/library/view/clean-architecture-a/9780134494272/) is worth adding: chapter 23 describes humble objects at the process boundary and arrives at much the same place from a different direction.
+Robert C. Martin's [Clean Architecture](https://www.oreilly.com/library/view/clean-architecture-a/9780134494272/) is worth adding: chapter 23 describes humble objects at the process boundary and arrives at much the same place from a different direction. For organizing folders, CHACK uses Jimmy Bogard's [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/).

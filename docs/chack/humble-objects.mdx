@@ -15,7 +15,7 @@ No application does anything useful without I/O. Databases, the file system, web
 
 Cost is only half of it. I/O is also the main part of your code that causes exceptions and that is the hardest to exercise in Automated Tests: a third-party system must be running, populated with the right state before the test and reset afterwards. Provoking failures on demand can be hard or outright impossible. Code that mixes business rules with I/O inherits all of that difficulty, entangling both is the main reason for "Spaghetti Code" in my opinion.
 
-So CHACK isolates I/O from the Core. At the process boundary sit Humble Objects: for each use case, they represent the glue between the your Data Access technology and the Core. Each Humble Object should talk to one third-party system. They implement an [I/O abstraction owned by the Core](./the-core.mdx), which means you can introcude a Test Double for it in Unit Tests and stay in-memory.
+So CHACK isolates I/O from the Core. At the process boundary sit Humble Objects: for each use case, they represent the glue between your Data Access technology and the Core. Each Humble Object should talk to one third-party system. They implement an [I/O abstraction owned by the Core](./the-core.mdx), which means you can introduce a Test Double for it in Unit Tests and stay in-memory.
 
 ## The responsibilities of a Humble Object
 
@@ -32,19 +32,47 @@ That is the whole list. Everything else like decisions, validation, calculation,
 Two notes on mapping the data:
 
 - **The framework does it for you.** An O/R mapper materializing entities from a query, or a serializer turning a response body into a DTO, is mapping you did not write. Cover it in Integration and End-to-End Tests.
-- **You write it yourself.** You might simply leave it in the Humble Object as a `private` method. If you are able to unit-test it easily, you might move it into a `public static` method on a different type, belonging to the Core. What stays in the Humble Object is the call plus a delegation to the mapper.
+- **You write it yourself.** You might simply leave it in the Humble Object as a `private` method. If it is complex enough to deserve its own tests and you are able to unit-test it easily, move it into a `public static` method on a different type, belonging to the Core. What stays in the Humble Object is the call plus a delegation to the mapper.
 
 The rule of thumb: **make the Core as large as possible and the Humble Object as small as possible**. If you find yourself wanting a test for something inside a Humble Object, that something likely belongs in the Core.
 
 ## Guidelines
 
 - **Keep them boring.** Avoid branches and loops. A Humble Object that needs an `if` for anything other than a precondition check is usually hiding a decision that belongs in the Core.
-- **One Humble Object per third-party system, per context.** Where the target system supports transactions, a Humble Object typically spans exactly one of them (representing a Unit of Work or on connection to the third-party system). Do not access two different systems within one Humble Object.
-- **One method per interaction.** Target one I/O call per method. On rare occasions, multiple I/O calls per Hunmble Object method can make sense. If the technology supports asynchronous calls, the method is asynchronous.
+- **One Humble Object per third-party system, per vertical slice.** Where the target system supports transactions, a Humble Object typically spans exactly one of them (representing a Unit of Work or one connection to the third-party system). Do not access two different systems within one Humble Object.
+- **One method per interaction.** Target one I/O call per method. On rare occasions, multiple I/O calls per Humble Object method can make sense. If the technology supports asynchronous calls, the method is asynchronous.
 - **No validation.** A Humble Object returns DTOs or domain objects; the Core validates them if validation is required. Data coming back from a third-party system is input like any other.
 - **Unify at the boundary, if you must.** If the same data lives in two systems with slightly different shapes - for example, two DBMS with different table layouts - the Humble Objects may normalize both into the same Core type. That is mapping, and it is allowed.
 - **Release resources deterministically.** Humble objects usually own something disposable: a connection, a client, a command, a stream, a file handle. Make the Humble Object disposable, too. Aim for the [Composition Root](./composition-root.mdx) disposing the Humble Object. Especially if the calling Core logic requires dynamic creation of Humble Objects, it can handle them.
 - **The same rules apply to UI code.** A view is a Humble Object: it renders and it forwards user interactions. Keep bindings simple, avoid multi-bindings and view-specific converters that carry logic, keep animation triggers dumb, and put no logic in printed reports. Anything you move out of the view is something you can unit-test.
+- **Never return deferred queries.** A query object that the caller can still compose and execute later moves the decision about what is queried into the Core. Materialize the results inside the Humble Object.
+
+## Clients and Sessions
+
+A Humble Object that the Core uses acts in one of two ways, depending on who controls the transaction:
+
+- A **Client** is used when the Core does not control transactions. A Client may use a transaction internally - for example, to read uncommitted data - but it never exposes it to the Core.
+- A **Session** is used when the Core controls a transaction. It offers a method to commit, usually `SaveChangesAsync`, and disposing it without committing rolls back all changes.
+
+Consequently, a Humble Object that only reads data and offers no way to commit is a Client, not a Session. [Clients and Sessions](./clients-and-sessions.md) shows both in detail.
+
+## Scope and sharing
+
+There is one Humble Object per vertical slice per third-party system. This matters most when transactions are involved: a Session represents the transaction boundary of exactly one feature.
+
+Do not structure Humble Objects like the Repository pattern, where a single abstraction accumulates all operations that belong to an entity across different features. Such an abstraction is shaped by the data instead of by its consumer, which violates the Dependency Inversion and Interface Segregation Principles: every consumer depends on members it does not need, and every Test Double has to deal with them.
+
+Two or more slices may share the same Humble Object, but only if they require exactly the same abstraction. When their needs diverge, split it again.
+
+Separate Humble Objects do not mean duplicated code. Extract common implementation code - queries, filters, projections, mapping - into static methods that every Humble Object needing them calls, and place them according to [Hierarchy and sharing](./vertical-slices.md#hierarchy-and-sharing). Static methods that perform I/O belong to the Humble Object category; static methods that run in memory may belong to the Core.
+
+## The local file system is I/O, too
+
+Reading and writing files is I/O, even though the file system is always there. This includes libraries that work on files on behalf of the Core, like document converters or image processing libraries. Put such access behind an I/O abstraction as well: the Unit Tests may still touch the local file system (see [Automated Tests](./automated-tests.mdx)), but a Test Double lets you inject the errors that are hard to provoke on a real disk - a locked file, a full drive, a corrupt document.
+
+## Supporting types
+
+Not every type in this category is called by the Core. A database context subclass, a base class for Humble Objects, a static helper method that performs I/O, or a startup task that the Composition Root invokes to create database indexes - all of them perform I/O, so they are Humble Objects. They do not need to implement an I/O abstraction of the Core, but the guidelines above apply to them as well.
 
 ## Where the pattern comes from
 
@@ -57,9 +85,9 @@ Michael Feathers published *The Humble Dialog Box* in 2000. He had built a modal
 Robert C. Martin arrives at the same construction in chapter 23 of [Clean Architecture](https://www.oreilly.com/library/view/clean-architecture-a/9780134494272/), where Humble Objects at the process boundary are what keeps business logic free of I/O.
 
 :::tip[In .NET Practice]
-- Database access is the most common case and has its own page: [Data Access Sessions](./data-access-sessions.md) shows a Humble Object that is simultaneously a Unit of Work.
+- Database access is the most common case and has its own page: [Clients and Sessions](./clients-and-sessions.md) shows Entity Framework Core and `HttpClient` examples, including a Session that is simultaneously a Unit of Work.
 - Make I/O methods `async` and give them a `CancellationToken` as the last parameter with a default value. Synchronous I/O blocks a thread pool thread and invites thread starvation under load.
-- Implement `IAsyncDisposable` (and `IDisposable` where the wrapped resource requires it) and dispose the wrapped `DbContext`, `HttpClient` handler, or `DbConnection`.
+- Implement `IAsyncDisposable` (and `IDisposable` where the wrapped resource requires it) when the Humble Object creates a resource itself, e.g. a `DbContext` from `IDbContextFactory<T>` or a `DbConnection`, and dispose it. Resources injected by the DI container, like a scoped `DbContext`, are disposed by the container.
 - Never let `IQueryable<T>` escape a Humble Object. The moment a caller composes onto the query, the decision about what SQL runs has leaked into the Core, and the query is executed somewhere nobody can see. Materialize inside the Humble Object and return a `List<T>`, an array, or a DTO.
 - For HTTP, use `IHttpClientFactory` and a typed client; the typed client is your Humble Object.
 :::
