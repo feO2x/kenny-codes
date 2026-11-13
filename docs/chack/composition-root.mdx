@@ -1,0 +1,66 @@
+---
+sidebar_position: 5
+title: The Composition Root
+---
+
+import ChackDiagram from '@site/src/components/ChackDiagram';
+
+# The Composition Root
+
+<ChackDiagram highlight="composition-root" />
+
+## What it is
+
+Because the functionality of an application is distributed across many types, something has to put them back together. That is the Composition Root: the one place where the pieces are assembled, wired to each other, and started.
+
+Most applications use a Dependency Injection container for this - some frameworks make it mandatory. The alternative is Pure DI: plain imperative statements that create the objects and pass them to each other's constructors. Both are legitimate, and for small applications Pure DI is often clearer. The concept and everything below comes from [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns) by Steven van Deursen and Mark Seemann.
+
+The Composition Root is the only category that is allowed to know all the others. It references the Core, it references the humble objects, and it decides which implementation of an I/O abstraction is used. Neither the Core nor the Humble Objects reference it back; only [Automated Tests](./automated-tests.mdx) may use it, as part of their fixture.
+
+Besides creating objects, the Composition Root sets up the hosting pipeline: which middleware runs in which order, and which route or message subscription is mapped to which endpoint.
+
+## Register, Resolve, Release
+
+Every Composition Root runs through three phases:
+
+**Register.** The first thing the application does at startup. You configure the container by registering types and their lifetimes, and you read configuration from its sources: files, environment variables, command line parameters, secret stores. When this phase ends, the container is immutable - nothing gets registered afterwards.
+
+**Resolve.** The root component - the most high-level object that can run the application - is created, either by the container or by your own imperative code. In a web application this is the app itself; in a UI application it is the root view or window.
+
+**Release.** The root component is disposed, ending its lifetime and those of the objects it holds. Native resources are closed, buffered data is flushed, and state that should survive the session is persisted.
+
+Resolve and Release do not happen only once. They run repeatedly, on different root components, throughout the application's lifetime: once per HTTP request in a web application, once per message in a broker subscriber, once per navigation or dialog in a client application. Each of those cycles creates an object graph, uses it, and tears it down.
+
+## Guidelines
+
+**Do not use the Service Locator pattern.** The container appears in the Composition Root and nowhere else. A Core type that asks a container for its dependencies has hidden them from its constructor, and now nobody - including the compiler and your tests - can see what it actually needs. If a Core type must create objects at runtime, give it an abstract factory that the Composition Root implements by adapting the container.
+
+**Do not share state through mutable statics.** Static fields and properties that change at runtime are invisible coupling: they break test isolation, they create race conditions, and they make it impossible to run two configurations side by side. Create context objects instead and pass them where they are needed via dependency injection.
+
+**Keep lifetime management here.** Core objects should not be concerned with how long the objects they reference live. Resolve and release object graphs at well-defined points and let the container handle the rest. The exception is a disposable that a Core object deliberately owns for a short, explicit span - opening a resource, using it, and closing it immediately is clearer than pushing that decision outwards.
+
+**Keep it simple, and review it.** Like humble objects, the Composition Root is not comprehensively covered by automated tests: it is the wiring, and testing it in isolation proves little. That makes readability the safety net. Prefer straightforward registration code over clever conventions and reflection-driven scanning that nobody can follow.
+
+**Bind configuration to options objects.** Reading configuration from files, environment variables, or secret stores happens here. The Core receives plain options objects - DTOs - and doesn't need to know where the values came from.
+
+**Startup tasks can call Humble Objects directly.** Some tasks need I/O before the application starts serving requests, like creating database indexes or setting up a storage bucket. The Composition Root can simply call a Humble Object for this. When logic is involved, it calls a Core service instead, which in turn uses the Humble Object - that way, the logic stays testable.
+
+## Modules
+
+As an application grows, a single registration file gets long, and everybody who adds a feature has to edit it. Modules spread that work out: each [vertical slice](./vertical-slices.md) contributes its registrations via its own Module. Parent Modules call the Modules of their children, and the Composition Root only calls the top-level Modules. A Module physically lives in its slice folder, but it belongs to the Composition Root category.
+
+One rule keeps Modules easy to work with: **a Module only registers the types that belong to its own folder.** Even when the types of its slice depend on something registered elsewhere, the Module leaves that registration to its owner - it neither registers it directly nor calls the other Module. Otherwise, Modules grow, types end up registered several times, and the result depends on the order in which the Modules are called.
+
+Three things follow from this rule:
+
+- Types shared by several slices are registered by the Module of the folder that owns them - the closest common parent, or the sibling folder they were moved to (see [Hierarchy and sharing](./vertical-slices.md#hierarchy-and-sharing)).
+- Infrastructure like the database context is registered by the Module of a [folder that is not a slice](./vertical-slices.md#folders-that-are-not-slices), e.g. `DatabaseAccess`.
+- The Composition Root is responsible for calling every Module whose registrations other Modules rely on.
+
+:::tip[In .NET Practice]
+- In ASP.NET Core, the Register phase is everything you do on `WebApplicationBuilder` before calling `Build()`. After `Build()`, the service provider is fixed. The Resolve and Release phases run per request, around the request scope; `IServiceScopeFactory` gives you the same cycle in background services.
+- Implement [Modules](#modules) as extension methods on `IServiceCollection` rather than one long `Program.cs`. [Building Blocks of a Backend Feature](./building-blocks.md#module) shows a complete one, including the route mapping.
+- Register humble objects against their Core abstraction: `services.AddScoped<IPlaceOrderSession, EfPlaceOrderSession>()`. The Core sees the interface; only this line knows Entity Framework Core is involved.
+- Get lifetimes right. A scoped dependency captured by a singleton is the classic bug - it keeps a `DbContext` alive for the life of the process. ASP.NET Core's scope validation catches this in development; leave it on.
+- Bind configuration to strongly typed options in the Composition Root and hand the Core plain settings objects. The Core should not know that a value came from an environment variable.
+:::

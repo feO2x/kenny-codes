@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title description">
+  <title id="title">Testing pyramid and testing diamond</title>
+  <desc id="description">The testing pyramid has a broad Unit base, a narrower Integration layer, and an E2E tip. The testing diamond is widest at Integration and narrows toward E2E above and Unit below. Both shapes have the same height and use teal for Unit tests, blue for Integration tests, and purple for E2E tests.</desc>
+
+  <rect width="960" height="540" fill="#FFFFFF" />
+
+  <!-- Unit tests -->
+  <g fill="#087F8C">
+    <path d="M 133.58 298 H 406.42 L 470 408 H 70 Z" />
+    <path d="M 661.62 294.36 H 838.38 L 750 408 Z" />
+  </g>
+
+  <!-- Integration tests -->
+  <g fill="#2563EB">
+    <path d="M 192.54 196 H 347.46 L 406.42 298 H 133.58 Z" />
+    <path d="M 660.96 176.49 H 839.04 L 884.55 235 L 838.38 294.36 H 661.62 L 615.45 235 Z" />
+  </g>
+
+  <!-- End-to-end tests -->
+  <g fill="#7447B8">
+    <path d="M 270 62 L 347.46 196 H 192.54 Z" />
+    <path d="M 750 62 L 839.04 176.49 H 660.96 Z" />
+  </g>
+
+  <g fill="none" stroke="#FFFFFF" stroke-width="2">
+    <path d="M 192.54 196 H 347.46 M 133.58 298 H 406.42" />
+    <path d="M 660.96 176.49 H 839.04 M 661.62 294.36 H 838.38" />
+  </g>
+
+  <g fill="#FFFFFF" font-family="Arial, sans-serif" font-size="27" text-anchor="middle">
+    <text x="270" y="160">E2E</text>
+    <text x="270" y="260">Integration</text>
+    <text x="270" y="360">Unit</text>
+    <text x="750" y="147">E2E</text>
+    <text x="750" y="244">Integration</text>
+    <text x="750" y="342">Unit</text>
+  </g>
+
+  <g fill="#111111" font-family="Arial, sans-serif" font-size="27" font-style="italic" font-weight="700" text-anchor="middle">
+    <text x="270" y="518">Test Pyramid</text>
+    <text x="750" y="518">Test Diamond</text>
+  </g>
+</svg>

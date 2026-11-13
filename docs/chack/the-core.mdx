@@ -1,0 +1,77 @@
+---
+sidebar_position: 2
+title: The Core
+---
+
+import ChackDiagram from '@site/src/components/ChackDiagram';
+
+# The Core
+
+<ChackDiagram highlight="core" />
+
+## What belongs in the Core?
+
+Everything that runs in memory.
+
+The Core is the heart of the software. It is written so that it can execute completely in memory, decoupled from every I/O call, which is what makes it cheap to test. It usually consists of three kinds of types:
+
+- **A domain model.** Related types capture the data and potentially rules of the domain. A humble object must be able to persist an entity, while the entity itself knows nothing about how that happens. An entity may carry a foreign key property it would not strictly need, but it must not have a method that builds the SQL statement to load or save itself. Whether your entities carry behaviour (as in [Domain-Driven Design](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/)) or are plain data holders ([Anemic Domain Model](https://martinfowler.com/bliki/AnemicDomainModel.html)) is your call - CHACK works with both.
+- **Services.** These are not persisted. They encapsulate logic that operates on one or more entities. They might be the entry points a framework calls when a request arrives - an HTTP endpoint, a gRPC method, a message subscriber - and they hold the logic for that operation. Services may call other services: an endpoint may call a validator, a calculator, or a mapper.
+- **Data Transfer Objects.** Inputs and outputs of endpoints, messages on a broker, configuration values. An anemic domain model usually consists of DTO types. They may be mutable or immutable. If possible, prefer the latter. DTOs that arrive from outside the process are untrusted until your Core has validated them.
+
+:::info[No I/O in the Core]
+Everything in this list runs in memory, without touching a disk, a socket, or another process. Make the Core as large and the humble objects as small as you can.
+:::
+
+## How to write the Core
+
+**Encapsulate the domain.** Implement the required behaviour in a way that makes invalid state unreachable - in memory as well as in the database. If a type can only be constructed in a valid state, no caller has to remember the rules.
+
+**Check preconditions, verify postconditions.** As described by Bertrand Meyer's [Design by Contract](https://www.eiffel.com/values/design-by-contract/introduction/), validate the parameters a method receives and throw when they are invalid. Make sure a method upholds its postconditions and its invariants with automated tests. An advanced developer should study his book [Object-Oriented Software Construction](https://bertrandmeyer.com/OOSC2/).
+
+**Reach for immutability** when a set of values must not change within a part of the code. It removes a whole class of bugs and makes concurrent code far easier to reason about.
+
+**Name things after the domain.** Types and methods should come out of the ubiquitous language that your domain experts use. Someone reading the Core should recognize the concepts they deal with in their daily work.
+
+**Keep framework details out.** This is the rule that gets broken most often, usually in small, convenient steps:
+
+- Your domain model must not know how it is serialized or persisted. No serialization or O/R mapping attributes on Core types - configure that in separate types, see [Frameworks and libraries](#frameworks-and-libraries).
+- Your Core must not know how the application is composed. No DI container attributes, no container types in constructors. Container interactions belong in the [Composition Root](./composition-root.mdx). If absolutely necessary, hide the container in the core behind an abstract factory.
+- When a Core wants to perform an I/O call, introduce an abstraction, and a humble object that implements it. There is no direct reference to an HTTP client, a database library, a file API, or a message broker client anywhere in the Core.
+
+**Allow coupling inside the Core.** Related Core types may reference each other directly. Introduce indirection via interfaces, abstract base classes, function pointers, etc. only when your code benefits from it. If a service receives a DTO and hands it to a validator, let it call the validator directly - both are then covered by the same unit test, with no test double in between.
+
+**Make non-determinism explicit.** The current time, new GUIDs, and random numbers change with every call - and so would the results of your tests. When the Core gets these values through an abstraction, each test can decide what they are.
+
+**Cover it with Unit Tests.** They do not only cover the happy path, but allow edge and error cases via prepared test doubles that are painful to reconstruct in an integration or end-to-end test, see [Automated Tests](./automated-tests.mdx).
+
+## Frameworks and libraries
+
+What decides whether a type fits into the Core is I/O, not where the type comes from. Your Core will use framework and library types, and that's perfectly fine as long as they don't perform I/O. This even holds for types of a data access framework: when a type can easily be created and used in memory - an enum, a value object, an options type - the Core can use it directly. How strongly your Core depends on a framework is up to you.
+
+The same question helps with code that extends or configures a framework:
+
+- **Pipes and filters** like middleware, endpoint filters, or pipeline behaviors belong to the Core when they work in memory. When they need I/O, they call an I/O abstraction, just like any other Core type. Registering them and deciding their order in the pipeline is the job of the [Composition Root](./composition-root.mdx).
+- **Configuration that doesn't perform I/O by itself** - serialization converters, BSON class maps, O/R mapping configurations - belongs to the Core. Since it runs in memory, you can cover it with Unit Tests, too.
+- **Types that perform I/O**, like a database context or a message broker connection, are part of the data access technology. Code that derives from or wraps them is a [Humble Object](./humble-objects.mdx).
+
+## The I/O abstractions belong to the Core
+
+When a Core service needs to call third-party systems, it depends on an abstraction like an interface or an abstract base class. It describes what the Core requires from the I/O call, in the Core's own vocabulary. A humble object implements this abstraction.
+
+This is the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf) at work. The abstraction is not a technical artefact of the data access layer that the Core happens to consume - it is owned, named, and shaped by the Core.
+
+Give each use case its own abstraction. For example, a single interface with a method for every I/O call across different endpoints (as you can see in many Repository implementations) is a violation of the [Interface Segregation Principle](https://www.cs.utexas.edu/~fares/papers/ISP.pdf). An abstraction works best when it is designed for exactly one consumer - usually one [vertical slice](./vertical-slices.md) - and only contains the members this consumer needs. [Clients and Sessions](./clients-and-sessions.md#one-per-slice-not-one-per-entity) shows what this looks like in practice.
+
+There is one exception to "the Core owns its I/O abstractions": the Core can depend directly on I/O abstractions that a framework provides, as long as they are small, designed for substitution, and come with ready-made test doubles. A logger is the typical example. Your own logging abstraction on top of it would only add another layer without making anything easier to test.
+
+:::tip[In .NET Practice]
+- Keep `System.Text.Json` and Entity Framework Core attributes off your entities. Configure serialization with `JsonSerializerOptions` and persistence with `IEntityTypeConfiguration<T>` implementations. Both run in memory, so they are Core and can be unit-tested; a custom `JsonConverter<T>` is a good candidate for that.
+- Middleware, `IEndpointFilter` implementations, and MediatR pipeline behaviors that do not perform I/O are Core. Their registration and order are configured in the Composition Root.
+- `ILogger<T>` is the exception to Core-owned I/O abstractions: inject it directly and use `NullLogger<T>` in tests. `TimeProvider` serves the same purpose for the current time.
+- Your `DbContext` subclass performs I/O, so it is a Humble Object, even though it does not implement a Core abstraction.
+- Nothing in the Core should reference Data Access Dependencies directly, like `DbContext`, `HttpClient`, `IDbConnection` and related ADO.NET types, `File`, or a broker client.
+- For validation, [Light.PortableResults.Validation](https://github.com/feO2x/Light.PortableResults) or [FluentValidation](https://docs.fluentvalidation.net/) keep rules out of the DTOs themselves. Design DTOs for the needs of your business logic, not for what the deserializer might produce: if a property must not be null after validation, declare it non-nullable and let the validator enforce it.
+- Avoid tight-coupling to non-deterministic dependencies like `DateTime.UtcNow` or `Guid.NewGuid()`. Abstract these calls to make your tests deterministic. See [Automated Tests](./automated-tests.mdx).
+- If a Core type genuinely needs to create other objects at runtime via the DI Container, use the Abstract Factory Pattern. Avoid injecting the container itself into services with other business logic, avoid the Service Locator Pattern.
+:::
