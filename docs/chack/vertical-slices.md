@@ -192,6 +192,8 @@ Here is what a grown `Orders` slice can look like after a few rounds of this:
 
 `OrderAggregate` groups the domain model with its O/R mapping configuration and the static query methods that several Sessions call. `PaymentProvider` holds what several slices need to talk to the payment provider's API. The parent folder `Orders` itself only holds its Module.
 
+You may also keep the whole domain model in a top-level folder of its own, like `DomainModel`, next to the feature slices. This works well when most entities are used by many features: every entity is easy to find, and the slices hold what is specific to them. The price is that the domain model no longer sits next to the features that use it. Both ways are fine - what helps most is choosing one and sticking with it, so that everybody knows where to look.
+
 ## Tests mirror the slices
 
 The test projects follow the same structure as the production code. The Unit Tests for `Orders/Queuing/CreateQueueItem` live in `Orders/Queuing/CreateQueueItem` of the test project, next to the Test Doubles they need. When a slice moves, its tests move with it, and whenever you look for the tests of a feature, you know right away where to find them.

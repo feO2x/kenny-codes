@@ -66,7 +66,44 @@ Middleware, `IEndpointFilter` implementations, and MediatR pipeline behaviors ar
 
 Design DTOs for what your business logic needs, not for what the deserializer might produce. If a property must not be `null` after validation, declare it as non-nullable and let the validator check it. A `required` property, or a record with a primary constructor, makes this explicit.
 
-Validation libraries keep the rules out of the DTOs themselves. [Light.PortableResults.Validation](https://github.com/feO2x/Light.PortableResults) and [FluentValidation](https://docs.fluentvalidation.net/) are both good choices.
+A validator can also act as an [anti-corruption layer](../building-blocks.md#validators-as-an-anti-corruption-layer): instead of only reporting errors, it hands back the domain object that the DTO describes.
+
+```csharp
+public sealed record NewMovieDto(string Title, DateOnly? ReleaseDate);
+
+public sealed class NewMovieDtoValidator
+{
+    public bool TryValidate(
+        NewMovieDto dto,
+        [NotNullWhen(true)] out Movie? movie,
+        out Dictionary<string, string[]> errors
+    )
+    {
+        errors = new Dictionary<string, string[]>();
+        var title = dto.Title?.Trim();
+        if (string.IsNullOrEmpty(title))
+        {
+            errors[nameof(dto.Title)] = ["The title must not be empty."];
+        }
+        else if (title.Length > Movie.MaximumTitleLength)
+        {
+            errors[nameof(dto.Title)] = [$"The title must not be longer than {Movie.MaximumTitleLength} characters."];
+        }
+
+        if (dto.ReleaseDate < Movie.MinimumReleaseDate)
+        {
+            errors[nameof(dto.ReleaseDate)] = ["The release date must not be before the invention of film."];
+        }
+
+        movie = errors.Count == 0 ? new Movie(title!, dto.ReleaseDate) : null;
+        return movie is not null;
+    }
+}
+```
+
+The endpoint then continues with a `Movie` that is guaranteed to be valid, and it never touches `dto.Title` again.
+
+Validation libraries keep the rules short and the error messages consistent. [FluentValidation](https://docs.fluentvalidation.net/) is a popular choice. [Light.PortableResults.Validation](https://github.com/feO2x/Light.PortableResults) supports the anti-corruption layer directly: derive your validator from `Validator<TSource, TValidated>`, and `Validate` returns either the errors or the domain object.
 
 ## Your `DbContext` is not part of the Core
 

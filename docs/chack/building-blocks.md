@@ -13,7 +13,7 @@ The four categories tell you where a piece of code belongs. When you build a bac
 |------------------------|------------------|-------------|
 | Endpoint               | Core             | Called directly by a framework to handle a request or a message. It receives the deserialized Request DTO and returns the response, if there is one. It is the preferred system under test of Unit Tests. |
 | Request / Response DTO | Core             | Inputs and outputs of an endpoint. Incoming DTOs are untrusted until they are validated. Make them immutable where possible. |
-| Validator              | Core             | Validates an incoming DTO. Called directly by the endpoint or the service. |
+| Validator              | Core             | Validates an incoming DTO. Called directly by the endpoint or the service. It may also turn the validated DTO into domain objects, acting as an anti-corruption layer. |
 | Service                | Core             | Contains the main, orchestrating business logic of a feature. Only introduce one when the logic would overload the endpoint. |
 | Domain Model           | Core             | Entities, value objects, and aggregates. Often shared between slices. |
 | Client                 | Humble Object    | Performs I/O calls to a third-party system without exposing transaction control to the Core. |
@@ -24,6 +24,10 @@ The four categories tell you where a piece of code belongs. When you build a bac
 Not every feature needs all of them. A feature without input has no Request DTO and no validator; a feature with little logic has no service; a feature that does not touch a third-party system has neither a Client nor a Session. Each building block you do write belongs to exactly one category, and the table tells you which.
 
 You might wonder where the route of an endpoint is defined. Mapping a route or a message subscription to an endpoint is part of the [Composition Root](./composition-root.mdx), and in practice, it often lives in the slice's Module.
+
+### Validators as an anti-corruption layer
+
+A validator can do more than answer "valid or not". When it turns a valid DTO directly into domain objects, it works as an anti-corruption layer, a term from Domain-Driven Design: the shape of the outside world - field names, optional values, formats - stops at the validator, and everything behind it works with domain objects that can't be in an invalid state. The endpoint never has to handle an unchecked value, and the domain model doesn't need to know what the request looked like.
 
 ## A complete slice
 
