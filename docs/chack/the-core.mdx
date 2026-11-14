@@ -66,12 +66,5 @@ Give each use case its own abstraction. For example, a single interface with a m
 There is one exception to "the Core owns its I/O abstractions": the Core can depend directly on I/O abstractions that a framework provides, as long as they are small, designed for substitution, and come with ready-made test doubles. A logger is the typical example. Your own logging abstraction on top of it would only add another layer without making anything easier to test.
 
 :::tip[In .NET Practice]
-- Keep `System.Text.Json` and Entity Framework Core attributes off your entities. Configure serialization with `JsonSerializerOptions` and persistence with `IEntityTypeConfiguration<T>` implementations. Both run in memory, so they are Core and can be unit-tested; a custom `JsonConverter<T>` is a good candidate for that.
-- Middleware, `IEndpointFilter` implementations, and MediatR pipeline behaviors that do not perform I/O are Core. Their registration and order are configured in the Composition Root.
-- `ILogger<T>` is the exception to Core-owned I/O abstractions: inject it directly and use `NullLogger<T>` in tests. `TimeProvider` serves the same purpose for the current time.
-- Your `DbContext` subclass performs I/O, so it is a Humble Object, even though it does not implement a Core abstraction.
-- Nothing in the Core should reference Data Access Dependencies directly, like `DbContext`, `HttpClient`, `IDbConnection` and related ADO.NET types, `File`, or a broker client.
-- For validation, [Light.PortableResults.Validation](https://github.com/feO2x/Light.PortableResults) or [FluentValidation](https://docs.fluentvalidation.net/) keep rules out of the DTOs themselves. Design DTOs for the needs of your business logic, not for what the deserializer might produce: if a property must not be null after validation, declare it non-nullable and let the validator enforce it.
-- Avoid tight-coupling to non-deterministic dependencies like `DateTime.UtcNow` or `Guid.NewGuid()`. Abstract these calls to make your tests deterministic. See [Automated Tests](./automated-tests.mdx).
-- If a Core type genuinely needs to create other objects at runtime via the DI Container, use the Abstract Factory Pattern. Avoid injecting the container itself into services with other business logic, avoid the Service Locator Pattern.
+[The Core in .NET](./dotnet/the-core.md) shows which framework types fit into the Core, how to keep persistence and serialization details off your entities, and how to make time testable.
 :::

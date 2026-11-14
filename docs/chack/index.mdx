@@ -42,7 +42,7 @@ Most arrows in the diagram are compile-time dependencies, like in UML:
 
 The Composition Root knows the Core; the Core does not know the Composition Root. Humble Objects and Test Doubles implement the I/O abstractions. The abstractions themselves belong to the Core according to the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf), which is why both boxes are blue. The one double-headed arrow on the left represents I/O calls happening at runtime.
 
-The placements along the process boundary are deliberate. The Humble Objects box sits **on** the boundary, because they make outgoing calls or receive incoming ones. Integration tests **straddle** the boundary: they may exercise the system under test inside or outside the test runner process. End-to-end tests sit **outside**, to the right of the boundary, because they usually start the system under test in another process (e.g., via Aspire or Docker Compose). Unit tests and their test doubles stay inside the test runner process. Every category may also use the frameworks and libraries it references, so those arrows are left out to keep the picture readable.
+The placements along the process boundary are deliberate. The Humble Objects box sits **on** the boundary, because they make outgoing calls or receive incoming ones. Integration tests **straddle** the boundary: they may exercise the system under test inside or outside the test runner process. End-to-end tests sit **outside**, to the right of the boundary, because they usually start the system under test in another process (e.g., via Docker Compose). Unit tests and their test doubles stay inside the test runner process. Every category may also use the frameworks and libraries it references, so those arrows are left out to keep the picture readable.
 
 All of this can happen in a single project, and **CHACK encourages you to keep the number of projects in your codebase small**.
 
@@ -71,18 +71,18 @@ You want to use the Mediator pattern in your codebase? Go ahead. CQRS, event sou
 
 There is nothing to install. CHACK is a way of introducing the right seams in your codebase. It works the same in an ASP.NET Core service, an Angular app, a WPF app, or a console tool. If you can answer "Which of the four categories does this piece of code **exclusively** belong to?", you are doing it.
 
-Because most of my work is in .NET, the concrete examples are C#. To keep the model itself language-neutral, these docs are written in two layers:
+Because most of my work is in .NET, the concrete examples are C#. To keep the model itself language-neutral, these docs come in two parts:
 
-- **The methodology** - the regular text on every page. It holds for any language and any framework.
-- **In .NET practice** - set apart in callouts like the one below. This is how the model looks in the stack I use every day: ASP.NET Core, Entity Framework Core, and the .NET base class library.
+- **The methodology** - the pages in the main section. They hold for any language and any framework.
+- **[CHACK in .NET](./dotnet/index.md)** - a section of its own that shows how the model looks in the stack I use every day: ASP.NET Core, Entity Framework Core, and the .NET base class library.
+
+Each methodology page ends with a callout like the one below, which takes you to its .NET counterpart:
 
 :::tip[In .NET Practice]
-Callouts like this one carry the .NET-specific advice: which base class to derive from, which framework mechanism to reach for, which NuGet package solves the problem.
-
-If you work in another ecosystem, skip them. Nothing in CHACK depends on them.
+[CHACK in .NET](./dotnet/index.md) gives you an overview of the .NET pages, the libraries that help, and a reference implementation.
 :::
 
-Two pages are the exception and are .NET-heavy throughout, because they are worked examples rather than model definitions: [Clients and Sessions](./clients-and-sessions.md) and [Building Blocks of a Backend Feature](./building-blocks.md).
+If you work in another ecosystem, you can skip these callouts. Nothing in CHACK depends on them.
 
 ## Why CHACK?
 
@@ -98,6 +98,7 @@ Consider how many books you need to read to understand and apply Hexagonal Archi
 - Want to organize your folders to match? [Vertical Slices](./vertical-slices.md) is not a fifth category, but it decides which folder each piece of code goes in.
 - Reviewing a codebase? [Reviewing for CHACK](./reviewing-for-chack.md) is the checklist I use.
 - Wondering how this relates to Hexagonal Architecture, Clean Architecture, or DDD? See [Relationship to Other Approaches](./relationship-to-other-approaches.md).
+- Working in .NET? [CHACK in .NET](./dotnet/index.md) shows all of this in C#.
 
 ## Sources
 

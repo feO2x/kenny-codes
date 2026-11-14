@@ -58,9 +58,5 @@ Three things follow from this rule:
 - The Composition Root is responsible for calling every Module whose registrations other Modules rely on.
 
 :::tip[In .NET Practice]
-- In ASP.NET Core, the Register phase is everything you do on `WebApplicationBuilder` before calling `Build()`. After `Build()`, the service provider is fixed. The Resolve and Release phases run per request, around the request scope; `IServiceScopeFactory` gives you the same cycle in background services.
-- Implement [Modules](#modules) as extension methods on `IServiceCollection` rather than one long `Program.cs`. [Building Blocks of a Backend Feature](./building-blocks.md#module) shows a complete one, including the route mapping.
-- Register humble objects against their Core abstraction: `services.AddScoped<IPlaceOrderSession, EfPlaceOrderSession>()`. The Core sees the interface; only this line knows Entity Framework Core is involved.
-- Get lifetimes right. A scoped dependency captured by a singleton is the classic bug - it keeps a `DbContext` alive for the life of the process. ASP.NET Core's scope validation catches this in development; leave it on.
-- Bind configuration to strongly typed options in the Composition Root and hand the Core plain settings objects. The Core should not know that a value came from an environment variable.
+[The Composition Root in .NET](./dotnet/composition-root.md) shows Register, Resolve, Release in ASP.NET Core, and Modules as extension methods.
 :::

@@ -32,7 +32,7 @@ This is easy to understand on day one and starts to hurt around month six:
 - Working on a single feature means editing files in three to seven directories. Under time pressure, that is how you accidentally touch something that belongs to another feature and introduce a subtle regression.
 - Where does a long-lived coordinating service go? Is `OrderQueueManager` a "service"? So is everything else.
 
-Vertical slices organize folders by feature instead, driven by the requirements:
+Vertical slices organize folders by feature instead, driven by the requirements. (The folder trees on these pages leave out file extensions, since they depend on your language.)
 
 ```text
 📁 WebApp
@@ -73,44 +73,16 @@ A slice can contain sub-slices, in the same way a feature can be broken down int
 |  |  |- 📁 DeleteQueueItem
 |  |  |- 📁 MoveQueueItem
 |  |  |- 📁 RemoveAllPendingItemsFromQueue
-|  |  |- 📄 QueuingModule.cs
-|  |- 📄 OrdersModule.cs
+|  |  |- 📄 QueuingModule
+|  |- 📄 OrdersModule
 |- 📁 Shipping
 |- 📁 ...
 ```
 
 Here, "Orders" has a sub-feature "Queuing", which in turn has four endpoints. This works well with a [one endpoint per file](https://ardalis.com/moving-from-controllers-and-actions-to-endpoints-with-mediatr/) approach, and it lines up with the advice from [Automated Tests](./automated-tests.mdx): the endpoint is the most abstract API of a leaf slice, and that is where the Unit Tests aim.
 
-Each folder can also bring its own registrations, in the form of a [Module](./composition-root.mdx#modules). A parent Module calls the Modules of its children, and the Composition Root only calls the top-level Modules. When you add a feature, you add its Module next to it and call it from the parent - there's no central registration file that everybody edits.
+Each folder can also bring its own registrations, in the form of a [Module](./composition-root.mdx#modules). `CreateQueueItemModule` registers the endpoint, the validator, and the Session of its slice. `QueuingModule` calls the Modules of its four children, `OrdersModule` calls `QueuingModule` and its other children, and the Composition Root only calls the top-level Modules. When you add a feature, you add its Module next to it and call it from the parent - there's no central registration file that everybody edits.
 
-:::tip[In .NET Practice]
-A Module is a static class with an extension method on `IServiceCollection`. A leaf Module registers the types of its own folder:
-
-```csharp
-public static class CreateQueueItemModule
-{
-    public static IServiceCollection AddCreateQueueItemModule(this IServiceCollection services) =>
-        services
-           .AddSingleton<NewQueueItemDtoValidator>()
-           .AddScoped<ICreateQueueItemSession, EfCreateQueueItemSession>()
-           .AddScoped<CreateQueueItemEndpoint>();
-}
-```
-
-A parent Module calls into its children:
-
-```csharp
-public static class QueuingModule
-{
-    public static IServiceCollection AddQueuingModule(this IServiceCollection services) =>
-        services
-           .AddCreateQueueItemModule()
-           .AddDeleteQueueItemModule()
-           .AddMoveQueueItemModule()
-           .AddRemoveAllPendingItemsFromQueueModule();
-}
-```
-:::
 
 ## Hierarchy and sharing
 
@@ -120,20 +92,20 @@ Sooner or later, two slices need the same code. Imagine two sub-features that tu
 📁 WebApp
 |- 📁 FeatureA
    |- 📁 SubFeatureA1
-   |  |- 📄 EfSubFeatureA1Session.cs
-   |  |- 📄 ISubFeatureA1Session.cs
-   |  |- 📄 SubFeatureA1Dto.cs
-   |  |- 📄 SubFeatureA1DtoValidator.cs
-   |  |- 📄 SubFeatureA1Endpoint.cs
-   |  |- 📄 SubFeatureA1Module.cs
+   |  |- 📄 SqlSubFeatureA1Session
+   |  |- 📄 SubFeatureA1Dto
+   |  |- 📄 SubFeatureA1DtoValidator
+   |  |- 📄 SubFeatureA1Endpoint
+   |  |- 📄 SubFeatureA1Module
+   |  |- 📄 SubFeatureA1Session
    |- 📁 SubFeatureA2
-   |  |- 📄 EfSubFeatureA2Session.cs
-   |  |- 📄 ISubFeatureA2Session.cs
-   |  |- 📄 SubFeatureA2Dto.cs
-   |  |- 📄 SubFeatureA2DtoValidator.cs
-   |  |- 📄 SubFeatureA2Endpoint.cs
-   |  |- 📄 SubFeatureA2Module.cs
-   |- 📄 FeatureAModule.cs
+   |  |- 📄 SqlSubFeatureA2Session
+   |  |- 📄 SubFeatureA2Dto
+   |  |- 📄 SubFeatureA2DtoValidator
+   |  |- 📄 SubFeatureA2Endpoint
+   |  |- 📄 SubFeatureA2Module
+   |  |- 📄 SubFeatureA2Session
+   |- 📄 FeatureAModule
 ```
 
 You can unify them and move the result up into the closest common parent:
@@ -142,21 +114,21 @@ You can unify them and move the result up into the closest common parent:
 📁 WebApp
 |- 📁 FeatureA
    |- 📁 SubFeatureA1
-   |  |- 📄 SubFeatureA1Dto.cs
-   |  |- 📄 SubFeatureA1DtoValidator.cs
-   |  |- 📄 SubFeatureA1Endpoint.cs
-   |  |- 📄 SubFeatureA1Module.cs
+   |  |- 📄 SubFeatureA1Dto
+   |  |- 📄 SubFeatureA1DtoValidator
+   |  |- 📄 SubFeatureA1Endpoint
+   |  |- 📄 SubFeatureA1Module
    |- 📁 SubFeatureA2
-   |  |- 📄 SubFeatureA2Dto.cs
-   |  |- 📄 SubFeatureA2DtoValidator.cs
-   |  |- 📄 SubFeatureA2Endpoint.cs
-   |  |- 📄 SubFeatureA2Module.cs
-   |- 📄 EfFeatureASession.cs
-   |- 📄 FeatureAModule.cs
-   |- 📄 IFeatureASession.cs
+   |  |- 📄 SubFeatureA2Dto
+   |  |- 📄 SubFeatureA2DtoValidator
+   |  |- 📄 SubFeatureA2Endpoint
+   |  |- 📄 SubFeatureA2Module
+   |- 📄 FeatureAModule
+   |- 📄 FeatureASession
+   |- 📄 SqlFeatureASession
 ```
 
-Both sub-features now reference `IFeatureASession`. Because the Session lives in `FeatureA`, `FeatureAModule` registers it, and the Modules of the two sub-features don't need to know about it.
+Both sub-features now reference `FeatureASession`. Because the Session lives in `FeatureA`, `FeatureAModule` registers it, and the Modules of the two sub-features don't need to know about it.
 
 A few ideas guide moves like this one:
 
@@ -173,11 +145,11 @@ Not every folder represents a feature. Some folders extend frameworks and librar
 📁 WebApp
 |- 📁 CompositionRoot
 |- 📁 DatabaseAccess
-|  |- 📄 AppDbContext.cs
-|  |- 📄 DatabaseAccessModule.cs
-|  |- 📄 DatabaseOptions.cs
-|  |- 📄 EfSession.cs
-|  |- 📄 IAsyncSession.cs
+|  |- 📄 AppDatabaseContext
+|  |- 📄 DatabaseAccessModule
+|  |- 📄 DatabaseOptions
+|  |- 📄 Session
+|  |- 📄 SqlSessionBase
 |- 📁 Messaging
 |- 📁 Orders
 |- 📁 ...
@@ -204,18 +176,18 @@ Here is what a grown `Orders` slice can look like after a few rounds of this:
 📁 Orders
 |- 📁 CancelOrder
 |- 📁 OrderAggregate
-|  |- 📄 Order.cs
-|  |- 📄 OrderConfiguration.cs
-|  |- 📄 OrderLine.cs
-|  |- 📄 OrderQueries.cs
-|  |- 📄 OrderStatus.cs
+|  |- 📄 Order
+|  |- 📄 OrderLine
+|  |- 📄 OrderMapping
+|  |- 📄 OrderQueries
+|  |- 📄 OrderStatus
 |- 📁 OrderHistory
 |- 📁 PaymentProvider
-|  |- 📄 PaymentProviderModule.cs
-|  |- 📄 PaymentProviderOptions.cs
-|  |- 📄 PaymentProviderRequests.cs
+|  |- 📄 PaymentProviderModule
+|  |- 📄 PaymentProviderOptions
+|  |- 📄 PaymentProviderRequests
 |- 📁 Queuing
-|- 📄 OrdersModule.cs
+|- 📄 OrdersModule
 ```
 
 `OrderAggregate` groups the domain model with its O/R mapping configuration and the static query methods that several Sessions call. `PaymentProvider` holds what several slices need to talk to the payment provider's API. The parent folder `Orders` itself only holds its Module.
@@ -229,6 +201,10 @@ The test projects follow the same structure as the production code. The Unit Tes
 |- 📁 Orders
    |- 📁 Queuing
       |- 📁 CreateQueueItem
-         |- 📄 CreateQueueItemEndpointTests.cs
-         |- 📄 CreateQueueItemSessionSpy.cs
+         |- 📄 CreateQueueItemEndpointTests
+         |- 📄 CreateQueueItemSessionSpy
 ```
+
+:::tip[In .NET Practice]
+[The Composition Root in .NET](./dotnet/composition-root.md#modules) shows how Modules for nested slices look as extension methods, and [A Complete Slice in ASP.NET Core](./dotnet/a-complete-slice.md) shows a slice folder with all its files.
+:::

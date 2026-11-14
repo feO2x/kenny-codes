@@ -5,10 +5,6 @@ title: Building Blocks of a Backend Feature
 
 # Building Blocks of a Backend Feature
 
-:::note[A worked example]
-The overview below holds for any backend stack. The example code is .NET throughout: ASP.NET Core Minimal APIs, Entity Framework Core, and xUnit.
-:::
-
 ## The building blocks
 
 The four categories tell you where a piece of code belongs. When you build a backend feature - an HTTP endpoint, or a handler for a message from a broker - you'll meet the same handful of building blocks again and again:
@@ -31,7 +27,7 @@ You might wonder where the route of an endpoint is defined. Mapping a route or a
 
 ## A complete slice
 
-The example feature adds an item to a to-do list. Organized as a [vertical slice](./vertical-slices.md), it looks like this:
+Let's walk through a small feature that adds an item to a to-do list. Organized as a [vertical slice](./vertical-slices.md), it looks like this:
 
 ```text
 📁 WebApp
@@ -39,224 +35,41 @@ The example feature adds an item to a to-do list. Organized as a [vertical slice
 |- 📁 DatabaseAccess
 |- 📁 ToDoItems
    |- 📁 AddToDoItem
-   |  |- 📄 AddToDoItemEndpoint.cs
-   |  |- 📄 AddToDoItemModule.cs
-   |  |- 📄 EfAddToDoItemSession.cs
-   |  |- 📄 IAddToDoItemSession.cs
-   |  |- 📄 NewToDoItemDto.cs
-   |  |- 📄 NewToDoItemDtoValidator.cs
-   |- 📄 ToDoItem.cs
-   |- 📄 ToDoItemsModule.cs
+   |  |- 📄 AddToDoItemEndpoint
+   |  |- 📄 AddToDoItemModule
+   |  |- 📄 AddToDoItemSession
+   |  |- 📄 NewToDoItemDto
+   |  |- 📄 NewToDoItemDtoValidator
+   |  |- 📄 SqlAddToDoItemSession
+   |- 📄 ToDoItem
+   |- 📄 ToDoItemsModule
 ```
 
-`ToDoItem` sits in the parent folder because other slices below `ToDoItems` use it, too. `DatabaseAccess` is a [folder that is not a slice](./vertical-slices.md#folders-that-are-not-slices): it contains the `AppDbContext`, the `EfSession<TDbContext>` base class, and the Module that registers them.
+`ToDoItem` sits in the parent folder because other slices below `ToDoItems` use it, too. `DatabaseAccess` is a [folder that is not a slice](./vertical-slices.md#folders-that-are-not-slices): it holds what all database Humble Objects share, and the Module that registers it.
 
-### Domain model
+Here's what each building block contributes:
 
-```csharp
-public sealed class ToDoItem
-{
-    private ToDoItem(string title, DateTimeOffset createdAtUtc)
-    {
-        Title = title;
-        CreatedAtUtc = createdAtUtc;
-    }
-
-    public int Id { get; private set; }
-    public string Title { get; private set; }
-    public DateTimeOffset CreatedAtUtc { get; private set; }
-    public bool IsDone { get; private set; }
-
-    public static ToDoItem Create(string title, DateTimeOffset createdAtUtc)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(title);
-        return new ToDoItem(title.Trim(), createdAtUtc);
-    }
-
-    public void MarkAsDone() => IsDone = true;
-}
-```
-
-The entity checks its preconditions, so nobody can create it in an invalid state. It carries no serialization or O/R mapping attributes; how it is stored is configured elsewhere (see [Frameworks and Libraries](./the-core.mdx#frameworks-and-libraries)). The database assigns the `Id` when the item is saved.
-
-### Request DTO and validator
-
-```csharp
-public sealed record NewToDoItemDto(string Title);
-
-public sealed class NewToDoItemDtoValidator
-{
-    public bool CheckForErrors(NewToDoItemDto dto, out Dictionary<string, string[]> errors)
-    {
-        errors = new Dictionary<string, string[]>();
-        if (string.IsNullOrWhiteSpace(dto.Title))
-        {
-            errors[nameof(dto.Title)] = ["The title must not be empty."];
-        }
-        else if (dto.Title.Length > 200)
-        {
-            errors[nameof(dto.Title)] = ["The title must not be longer than 200 characters."];
-        }
-
-        return errors.Count > 0;
-    }
-}
-```
-
-The DTO is immutable and untrusted until the validator has checked it. `Title` is declared non-nullable because that is what the business logic needs after validation - the deserializer may still produce `null`, and the validator catches it. In a real codebase, you would write the validator with a library like [Light.PortableResults.Validation](https://github.com/feO2x/Light.PortableResults) or [FluentValidation](https://docs.fluentvalidation.net/). The hand-written version keeps the example free of library details.
-
-### Session
-
-The feature changes data, and the endpoint decides when to commit, so its Humble Object is a Session. [Clients and Sessions](./clients-and-sessions.md) explains `IAsyncSession` and `EfSession<TDbContext>`:
-
-```csharp
-public interface IAddToDoItemSession : IAsyncSession
-{
-    void AddToDoItem(ToDoItem item);
-}
-
-public sealed class EfAddToDoItemSession(AppDbContext dbContext)
-    : EfSession<AppDbContext>(dbContext), IAddToDoItemSession
-{
-    public void AddToDoItem(ToDoItem item) => DbContext.ToDoItems.Add(item);
-}
-```
-
-### Endpoint
-
-```csharp
-public sealed class AddToDoItemEndpoint(
-    IAddToDoItemSession session,
-    NewToDoItemDtoValidator validator,
-    TimeProvider timeProvider
-)
-{
-    public async Task<Results<Created<int>, ValidationProblem>> AddToDoItemAsync(
-        NewToDoItemDto dto,
-        CancellationToken cancellationToken = default
-    )
-    {
-        if (validator.CheckForErrors(dto, out var errors))
-        {
-            return TypedResults.ValidationProblem(errors);
-        }
-
-        var item = ToDoItem.Create(dto.Title, timeProvider.GetUtcNow());
-        session.AddToDoItem(item);
-        await session.SaveChangesAsync(cancellationToken);
-        return TypedResults.Created($"/api/to-do-items/{item.Id}", item.Id);
-    }
-}
-```
+- **The domain model.** `ToDoItem` checks its preconditions when it is created - a title must not be empty - so nobody can create one in an invalid state. It knows nothing about how it's stored.
+- **The Request DTO and its validator.** `NewToDoItemDto` carries the title that the client sent. It's untrusted until `NewToDoItemDtoValidator` has checked it.
+- **The Session.** The feature changes data, and the endpoint decides when to commit, so its Humble Object is a Session. `AddToDoItemSession` is the abstraction that the Core owns: it can add an item and commit. `SqlAddToDoItemSession` implements it for the database.
+- **The endpoint.** `AddToDoItemEndpoint` receives the DTO, calls the validator, creates the `ToDoItem`, hands it to the Session, and commits.
+- **The Module.** `AddToDoItemModule` registers the endpoint, the validator, and the Session, and maps the route to the endpoint.
 
 A few things in here are worth a closer look:
 
-- **The endpoint calls the validator directly.** Both are Core types, so there is no abstraction between them. One Unit Test covers both.
-- **The current time comes from `TimeProvider`.** The endpoint doesn't call `DateTimeOffset.UtcNow` itself, so tests can decide what time it is.
-- **`TypedResults` is an ASP.NET Core type, and that's fine.** The result types run in memory and can be inspected in a test. What decides whether a type fits into the Core is I/O, not where the type comes from.
-- **There is no service.** The logic is small enough to live in the endpoint. When it grows - several entities, rules that depend on each other, calls to more than one Humble Object - you can move it into an `AddToDoItemService` that the endpoint calls directly. The tests stay the same, because they aim at the endpoint.
+- **The endpoint calls the validator directly.** Both are Core types, so there's no abstraction between them, and one Unit Test covers both.
+- **The current time comes from an abstraction.** The item records when it was created. The endpoint doesn't read the system clock itself, so tests can decide what time it is.
+- **There is no service.** The logic is small enough to live in the endpoint. When it grows - several entities, rules that depend on each other, calls to more than one Humble Object - you can move it into a service that the endpoint calls directly. The tests stay the same, because they aim at the endpoint.
+- **The Module doesn't register everything the slice needs.** The Session depends on the database connection, and the endpoint depends on the clock abstraction, but other parts of the application own them. If this Module registered them as well, they'd be registered twice, and the outcome would depend on the order in which the Modules run. [Modules](./composition-root.mdx#modules) explains this in more detail.
 
-### Module
+## Testing the slice
 
-```csharp
-public static class AddToDoItemModule
-{
-    public static IServiceCollection AddAddToDoItemModule(this IServiceCollection services) =>
-        services
-           .AddScoped<IAddToDoItemSession, EfAddToDoItemSession>()
-           .AddSingleton<NewToDoItemDtoValidator>()
-           .AddScoped<AddToDoItemEndpoint>();
+The Unit Tests aim at the endpoint and let the real validator and the real domain model take part. Only the Session is replaced. Since the tests want to observe what the endpoint did with it, the Test Double is a [Spy](./automated-tests.mdx#test-doubles), and its name says so: `AddToDoItemSessionSpy` records the added items and counts the commits.
 
-    public static IEndpointRouteBuilder MapAddToDoItemEndpoint(this IEndpointRouteBuilder app)
-    {
-        app.MapPost(
-            "/api/to-do-items",
-            (NewToDoItemDto dto, AddToDoItemEndpoint endpoint, CancellationToken cancellationToken) =>
-                endpoint.AddToDoItemAsync(dto, cancellationToken)
-        );
-        return app;
-    }
-}
-```
+One test sends a valid DTO and checks that exactly one item was added, with a trimmed title and the time the test chose, and that the Session was committed once. Another sends an empty title and checks that the endpoint reports a validation error and never touches the Session. These tests never leave memory, so you can add many more for edge and error cases - a title that is too long, or a Session Stub that reports a concurrency conflict - and your test suite stays fast.
 
-The Module physically lives in the slice folder, but it belongs to the Composition Root category. It's worth noticing what it does *not* register: `AppDbContext` and `TimeProvider`. The endpoint and the Session depend on them, but other parts of the application own them - `AppDbContext` is registered by the Module in `DatabaseAccess`, and `TimeProvider.System` by the Composition Root itself. If this Module registered them as well, they would be registered twice, and the outcome would depend on the order in which the Modules run. [Modules](./composition-root.mdx#modules) explains this in more detail.
+What the Unit Tests can't tell you is whether the Session, the database mapping, the Module, and the route mapping work together. That's the job of one Integration Test for the happy path: it starts the application with the real Composition Root and a real database, sends a request, and checks that the item ends up in the database. See [Automated Tests](./automated-tests.mdx) for the reasoning.
 
-The parent Module only calls into its children:
-
-```csharp
-public static class ToDoItemsModule
-{
-    public static IServiceCollection AddToDoItemsModule(this IServiceCollection services) =>
-        services
-           .AddAddToDoItemModule()
-           .AddCompleteToDoItemModule()
-           .AddGetToDoItemsModule();
-
-    public static IEndpointRouteBuilder MapToDoItemsEndpoints(this IEndpointRouteBuilder app) =>
-        app
-           .MapAddToDoItemEndpoint()
-           .MapCompleteToDoItemEndpoint()
-           .MapGetToDoItemsEndpoint();
-}
-```
-
-### Test Double and Unit Tests
-
-The tests aim at the endpoint and let the real validator and the real domain model take part. Only the Session is replaced. Since the test wants to observe what the endpoint did with it, the Test Double is a [Spy](./automated-tests.mdx#test-doubles), and its name says so:
-
-```csharp
-public sealed class AddToDoItemSessionSpy : IAddToDoItemSession
-{
-    public List<ToDoItem> AddedItems { get; } = [];
-    public int SaveChangesCallCount { get; private set; }
-
-    public void AddToDoItem(ToDoItem item) => AddedItems.Add(item);
-
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        SaveChangesCallCount++;
-        return Task.CompletedTask;
-    }
-}
-```
-
-```csharp
-public sealed class AddToDoItemEndpointTests
-{
-    private static readonly DateTimeOffset Now = new(2026, 11, 12, 9, 30, 0, TimeSpan.Zero);
-
-    private readonly AddToDoItemSessionSpy _session = new();
-    private readonly AddToDoItemEndpoint _endpoint;
-
-    public AddToDoItemEndpointTests() =>
-        _endpoint = new AddToDoItemEndpoint(_session, new NewToDoItemDtoValidator(), new FakeTimeProvider(Now));
-
-    [Fact]
-    public async Task AddToDoItemAsync_ValidDto_AddsItemAndCommits()
-    {
-        var result = await _endpoint.AddToDoItemAsync(new NewToDoItemDto("  Write the CHACK docs "));
-
-        Assert.IsType<Created<int>>(result.Result);
-        var item = Assert.Single(_session.AddedItems);
-        Assert.Equal("Write the CHACK docs", item.Title);
-        Assert.Equal(Now, item.CreatedAtUtc);
-        Assert.Equal(1, _session.SaveChangesCallCount);
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    public async Task AddToDoItemAsync_MissingTitle_ReturnsValidationProblemWithoutCommitting(string title)
-    {
-        var result = await _endpoint.AddToDoItemAsync(new NewToDoItemDto(title));
-
-        Assert.IsType<ValidationProblem>(result.Result);
-        Assert.Empty(_session.AddedItems);
-        Assert.Equal(0, _session.SaveChangesCallCount);
-    }
-}
-```
-
-`FakeTimeProvider` comes from the `Microsoft.Extensions.TimeProvider.Testing` package. These tests never leave memory, so you can add dozens more for edge and error cases - a title that is too long, or a Session Stub that throws a `ConcurrencyConflictException` - and your test suite stays fast.
-
-What the Unit Tests can't tell you is whether `EfAddToDoItemSession`, the EF Core mapping, the Module, and the route mapping work together. That is the job of one Integration Test for the happy path: it starts the application in-process with `WebApplicationFactory<Program>` and the real Composition Root, starts PostgreSQL via [Testcontainers](https://testcontainers.com/), sends a `POST` request, and checks that the item ends up in the database. See [Automated Tests](./automated-tests.mdx) for the reasoning.
+:::tip[In .NET Practice]
+[A Complete Slice in ASP.NET Core](./dotnet/a-complete-slice.md) shows this feature in code, from the entity to the Unit Tests.
+:::

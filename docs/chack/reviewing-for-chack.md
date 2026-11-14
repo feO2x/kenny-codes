@@ -23,7 +23,7 @@ Most of the time, the answer comes quickly. When it turns out to be "two of them
 - **A type that performs I/O shows up.** A database context, an HTTP client, a connection, a file API, a broker client - anything that waits on something outside the process. Once it's there, the code can no longer run in memory, and its tests need a real third-party system. An I/O abstraction owned by the Core brings that back. Small, substitutable framework abstractions like a logger are fine as they are.
 - **Domain types or DTOs carry framework attributes.** Serialization, O/R mapping, or DI container attributes mean that the type knows how it is stored, transmitted, or composed. Moving that knowledge into separate configuration types or into the Composition Root keeps the type focused on the domain.
 - **The DI container is injected.** The type now fetches its own dependencies, so neither the compiler, nor the reader, nor the test can see what it actually needs. If the type has to create objects at runtime, an abstract factory gives it that ability and keeps the dependencies visible.
-- **The current time, new GUIDs, or random numbers are obtained directly.** `DateTime.UtcNow`, `Guid.NewGuid()`, and `Random` give a different result on every run, and so do the tests that touch them. Getting these values through an abstraction like `TimeProvider` lets the tests decide what they are.
+- **The current time, new GUIDs, or random numbers are obtained directly.** The system clock, a GUID generator, or a random number generator give a different result on every run, and so do the tests that touch them. Getting these values through an abstraction lets the tests decide what they are.
 - **Mutable static state is used.** It couples code in ways nobody can see, breaks test isolation, and can lead to race conditions that only show up in production. Context objects passed via dependency injection do the same job openly.
 - **An abstraction has a single implementation and no Test Double behind it.** This is not necessarily wrong, but it's worth asking what it's for. If nothing varies, the code becomes easier to follow without the indirection.
 
@@ -32,7 +32,7 @@ Most of the time, the answer comes quickly. When it turns out to be "two of them
 - **Branches, loops, validation, or business rules appear.** An `if` that is neither a precondition check nor part of the mapping is usually a decision. In the Core, that decision could be covered by a Unit Test; in the Humble Object, only by slower Integration Tests.
 - **Mapping has grown to the point where you'd like to test it.** If it can run in memory, moving it into a static method in the Core makes that test possible. The Humble Object then simply calls it.
 - **A read-only Humble Object is called a Session.** If the Core cannot commit through it, it's a [Client](./clients-and-sessions.md), and the name helps readers know what to expect.
-- **A deferred query leaves the Humble Object.** When an `IQueryable<T>` or a similar type escapes, the query is composed in the Core and executed somewhere further away, and no Test Double can reproduce that faithfully. Materializing the results inside the Humble Object keeps the I/O in one place.
+- **A deferred query leaves the Humble Object.** When a query object that the caller can still extend escapes, the query is composed in the Core and executed somewhere further away, and no Test Double can reproduce that faithfully. Materializing the results inside the Humble Object keeps the I/O in one place.
 - **Two third-party systems are accessed.** Splitting the Humble Object into one per system keeps each of them simple, and each one can be replaced on its own in tests.
 - **One abstraction serves several features, like a Repository.** Every feature then depends on members it doesn't need, and transaction boundaries become hard to see. Giving each slice its own abstraction and sharing implementation code via static methods keeps the benefits without the coupling, see [Clients and Sessions](./clients-and-sessions.md#one-per-slice-not-one-per-entity).
 - **Resources are not disposed.** If the Humble Object owns a connection, a client, a stream, or a file handle, making it disposable and letting the Composition Root manage its lifetime ensures the resource is released reliably.
@@ -67,8 +67,12 @@ It's just as helpful to know what you don't need to worry about:
 
 - **Tight coupling between Core types.** An endpoint calling its validator directly is exactly what CHACK suggests.
 - **Core types that depend on framework or library types that run in memory** - including types of data access frameworks, like enums, value objects, or options types.
-- **Core types that depend on a small, substitutable framework abstraction like `ILogger<T>`.**
+- **Core types that depend on a small, substitutable I/O abstraction that a framework provides, like a logger.**
 - **Unit Tests for framework configuration and for pipes and filters that run in memory.** Serialization converters, O/R mapping configuration, and middleware without I/O are Core, and can be tested like Core.
 - **A Test Double for a Core type** when the real collaborator would make the test unreasonably complicated.
 - **A folder that adapts a framework or library instead of representing a slice.** `DatabaseAccess` and `CompositionRoot` folders are fine.
 - **An anemic or a rich domain model; Mediator, CQRS, Event Sourcing, or message buses.** CHACK is happy with all of them. It cares about where I/O happens and what tests aim at, not about how you design within the categories.
+
+:::tip[In .NET Practice]
+[CHACK in .NET](./dotnet/index.md) names the .NET types behind these items, like the ones that perform I/O and the abstractions that make time testable.
+:::
