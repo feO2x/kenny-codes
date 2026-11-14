@@ -45,7 +45,11 @@ Most of the time, the answer comes quickly. When it turns out to be "two of them
 - **The arrange phase is full of Test Doubles.** The test is probably aimed too low. Moving it up to the most abstract API of the slice lets the real Core collaborators take part, and most of the Test Doubles disappear.
 - **Unit Tests only cover the happy path.** Isolating the Core from I/O is what makes error and edge cases cheap to test. They are often where the most valuable tests are.
 - **A Test Double is named after the wrong kind.** A `FakeOrderSession` that returns hard-coded answers is a Stub; one that records calls is a Spy. An accurate name tells the reader how the test uses it, see [Test Doubles](./automated-tests.mdx#test-doubles).
-- **Tests depend on each other or on their execution order.** Such tests tend to pass locally and fail in the pipeline. Giving each test its own data and setup makes them reliable again.
+- **A Unit Test starts a host.** It then tests the framework pipeline along with your code and gets slower with it. Calling the endpoint method directly keeps the Unit Test in memory, and Integration Tests take care of the pipeline.
+- **Unit Tests depend on each other or on their execution order.** Such tests tend to pass locally and fail in the pipeline. Giving each test its own data and setup makes them reliable again.
+- **Integration or End-to-End Tests depend on each other without an explicit execution order.** A step-by-step scenario is fine when the order is visible in the code. Otherwise, the tests pass or fail depending on how the test runner happens to schedule them.
+- **An Integration or End-to-End Test repeats what other tests in the same context already cover.** It makes the suite slower without adding information. Merging it into the existing test, or turning the difference into a Unit Test, keeps the suite lean.
+- **A third-party system is started per test or per test class.** Starting it once per test run and isolating each test's data saves a lot of waiting.
 
 ## In the Composition Root
 

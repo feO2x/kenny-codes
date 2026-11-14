@@ -91,8 +91,6 @@ Every test belongs to exactly one of these categories. Here they are side by sid
 | Integration | A whole feature through the real Composition Root    | At least one real third-party system | Allowed for other third-party systems                                              |
 | End-to-End  | The whole system, running as it does in production   | All real                             | Not allowed                                                                        |
 
-Where possible, start the third-party systems inside the test run (typically using [Testcontainers](https://testcontainers.com/) for Integration tests and [Docker Compose](https://docs.docker.com/compose/) or a similar orchestration tool for E2E tests) so the suite is self-contained and reproducible. Running against a shared, always-available test environment also works, but be aware of the trade-off: if that environment is only reset periodically, data-manipulating tests will eventually collide with their own leftovers and the chance to encounter [flaky tests](https://en.wikipedia.org/wiki/Flaky_test) rises. The same idea applies within the suite: when tests don't depend on each other or on their execution order, each of them can run on its own and fail for exactly one reason.
-
 This approach is taken for two reasons:
 
 ### Performance Costs of Integration Tests
@@ -111,7 +109,7 @@ The second reason is coverage of the unhappy paths. Integration tests are excell
 
 The diagram at the top of this page splits the Automated Tests box into its parts, because the three kinds of tests do not point at the same things.
 
-**The system under test of a unit test is always in the Core.** Never a humble object, never a component of the Composition Root. Humble objects are replaced by test doubles that implement the same I/O abstraction; that is the entire reason those abstractions exist. Reusing a piece of the Composition Root inside a unit test is fine - for example, building a DI container in the setup phase to assemble the object graph - but the Composition Root is the fixture, not the system under test.
+**The system under test of a unit test is always in the Core.** Never a humble object, never a component of the Composition Root. Humble objects are replaced by test doubles that implement the same I/O abstraction; that is the entire reason those abstractions exist. Reusing a piece of the Composition Root inside a unit test is fine - for example, building a DI container in the setup phase to assemble the object graph - but the Composition Root is the fixture, not the system under test. Starting a host is a different matter, as you'll see in the next section.
 
 **Test doubles implement the I/O abstractions.** Because of them, the system under test can stay in-memory during a test run, and it is why the diagram draws the test doubles pointing at the I/O abstractions rather than at the humble objects. A test double is a second implementation of the same abstraction, written for the test.
 
@@ -131,9 +129,27 @@ CHACK does the opposite. **Write the test against the most abstract API of the s
 - You are free to refactor everything below the endpoint - split a service, merge two types, rename a method - without breaking a single test, as long as the observable behaviour is unchanged.
 - The test reads like a description of what the feature does, because it enters through the same door the outside world uses.
 
-Test doubles at the level of the slice's high-level API therefore stay coarse-grained on purpose. If some behaviour cannot be reached comfortably from the top - an intricate calculation, an awkward branch, a mapping routine - write individual tests against that lower-level API. Typical targets for those are guard clauses at the beginning of methods.
+**Call the endpoint directly.** A Unit Test calls the endpoint method itself, just like the framework would after it has received and deserialized a request. It doesn't start a host - no web server, no in-memory test server, no application host of any kind. A host brings routing, serialization, middleware, and the rest of the framework pipeline with it, and making sure that all of this works together is exactly what Integration and End-to-End Tests are for. Your Unit Tests stay fast and focused on the decisions your code makes.
+
+Test doubles at the level of the slice's high-level API therefore stay coarse-grained on purpose.
+
+**Close coverage gaps with Solitary Tests.** Some code is hard or impossible to reach from the endpoint. Guard clauses are the typical example: when the callers of a lower-level type make sure that they never pass invalid arguments, the guard clauses of that type are never hit by a Sociable Test. A Solitary Test calls the method directly and checks that the guard clause is in place. Intricate calculations with many edge cases are another good candidate, because testing each case through the endpoint would bury the interesting part under setup.
 
 Overall, strive to keep the number of test doubles low.
+
+## Keeping the test suite fast and reliable
+
+A test suite only helps you when you can trust it and don't mind running it. A few habits make a big difference here.
+
+**Start third-party systems inside the test run.** Tools like [Testcontainers](https://testcontainers.com/) for Integration Tests and [Docker Compose](https://docs.docker.com/compose/) for End-to-End Tests make your suite self-contained and reproducible: everything it needs comes up when the tests start. Running against a shared, always-available test environment also works, but be aware of the trade-off: if that environment is only reset periodically, data-manipulating tests will eventually collide with their own leftovers and the chance to encounter [flaky tests](https://en.wikipedia.org/wiki/Flaky_test) rises.
+
+**Start each system once per test run.** Starting a database or a message broker takes seconds. When every test or every test class starts its own, those seconds add up quickly, and the test run gets longer with every class you add. Start each third-party system once, before the first test needs it, and let all tests run against it.
+
+**Give each test its own data.** Tests that share a system shouldn't get in each other's way. Each test works with data of its own - unique IDs, its own database or schema, its own queue - so that it doesn't matter which other tests run before it or at the same time.
+
+**Keep tests independent.** Each Unit Test can run on its own, in any order, and fails for exactly one reason. The same is true for Integration and End-to-End Tests, with one exception: a scenario that proceeds step by step, where the outcome of one test is the setup for the next - say, registering a customer, then placing an order, then cancelling it. That's fine, as long as the execution order is made explicit, so that nobody has to guess it, and neither does the test runner.
+
+**Don't repeat what other tests already cover.** Within the same context - usually the same test class - each Integration or End-to-End Test adds something new. When two of them run through the same steps, the second one makes the suite slower without telling you more. Unit Tests are cheap enough to cover every edge case; Integration Tests are not, and they don't need to be, because the Unit Tests already do.
 
 ## Test Doubles
 
