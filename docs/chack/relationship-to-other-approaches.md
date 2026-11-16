@@ -37,7 +37,22 @@ The one pattern CHACK replaces is the **Repository**. In DDD, a Repository gives
 
 ## Vertical Slice Architecture
 
-Jimmy Bogard's [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/) organizes code by feature and minimizes coupling between slices. CHACK uses it for [organizing folders](./vertical-slices.md) and adds something that Vertical Slice Architecture deliberately leaves open: within a slice, the four categories still apply. Having everything in one folder makes a feature easy to find, and keeping its business rules apart from its I/O keeps it easy to test.
+CHACK's [Vertical Slices](./vertical-slices.md) and Jimmy Bogard's [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/) share a name and an idea, but they answer different questions.
+
+What they have in common:
+
+- **Code is organized around features**, not around technical concerns.
+- **Coupling stays low between slices and high within one.** Bogard puts it this way: "Minimize coupling between slices, and maximize coupling in a slice."
+- **No Repositories or services shared across features.** A new feature adds code instead of changing code that other features depend on.
+- **Start simple.** A service or a richer domain model comes in only when the code asks for it.
+- **Both work well with CQRS and the Mediator pattern.**
+
+And where they differ:
+
+- **Scope.** Vertical Slice Architecture is an architecture: each request decides for itself how it is fulfilled, down to how it accesses data. CHACK's Vertical Slices only decide which folder a piece of code goes in. What that code *is* comes from the four categories, and they still apply within every slice.
+- **I/O.** In Vertical Slice Architecture, a slice may use its tools directly - an O/R mapper's Unit of Work, for example. In CHACK, every I/O call goes through an abstraction that the Core owns, so the business rules of every slice can be tested in memory.
+- **Structure.** Bogard leaves the folder layout open. CHACK adds rules for nesting slices, sharing code between them, registering them via Modules, and mirroring them in the tests.
+- **Required or not.** CHACK works with any folder structure. Its per-feature abstractions come from the [Interface Segregation Principle](https://www.cs.utexas.edu/~fares/papers/ISP.pdf), not from the folders: an abstraction is designed for one consumer, and a slice just happens to be the usual one. Vertical Slices make this visible, which is why CHACK recommends them.
 
 ## The classic three-layer architecture
 

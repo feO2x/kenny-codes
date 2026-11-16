@@ -5,8 +5,8 @@ title: Vertical Slices
 
 # Organizing Code with Vertical Slices
 
-:::info[Not a fifth category]
-The four categories tell you what a piece of code *is*. Vertical slices help you decide which *folder* it goes in. That's why a slice folder usually contains code from three categories: Core, Humble Objects, and the slice's part of the Composition Root.
+:::info[Recommended, not required]
+CHACK works with any folder structure, but it prefers vertical slices. The four categories tell you what a piece of code *is*. Vertical slices help you decide which *folder* it goes in. That's why a slice folder usually contains code from three categories: Core, Humble Objects, and the slice's part of the Composition Root.
 :::
 
 ## Organize by feature, not by technical concern
@@ -56,7 +56,7 @@ The problems above go away:
 
 There is one cost: as the application grows, you will spend a little more time refactoring the folder structure than you would with fixed technical folders. In my experience, that time is well spent, and [Keeping slices clean](#keeping-slices-clean) shows how to make it a habit.
 
-Vertical slices were described by Jimmy Bogard in [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/).
+CHACK's Vertical Slices borrow their name and their main idea from Jimmy Bogard's [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/), but they are only about organizing code. [Relationship to Other Approaches](./relationship-to-other-approaches.md#vertical-slice-architecture) compares the two.
 
 ## Slices nest
 
