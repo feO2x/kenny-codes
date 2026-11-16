@@ -61,6 +61,39 @@ app.MapShippingEndpoints();
 await app.RunAsync();
 ```
 
+## Registering HTTP Clients
+
+A Client that calls a web service, like the `HttpShippingRatesClient` from [Clients and Sessions in .NET](./clients-and-sessions.md#implementing-a-client), is registered as a typed `HttpClient`. `IHttpClientFactory` then manages the underlying connections, and the Module sets the base address from configuration:
+
+```csharp
+public sealed class ShippingRatesOptions
+{
+    public Uri BaseAddress { get; set; } = null!;
+}
+
+public static class ShippingRatesModule
+{
+    public static IServiceCollection AddShippingRatesModule(this IServiceCollection services)
+    {
+        services
+           .AddOptions<ShippingRatesOptions>()
+           .BindConfiguration("ShippingRates")
+           .Validate(options => options.BaseAddress is not null, "ShippingRates:BaseAddress is missing.")
+           .ValidateOnStart();
+        services.AddHttpClient<IShippingRatesClient, HttpShippingRatesClient>(
+            (serviceProvider, httpClient) =>
+                httpClient.BaseAddress = serviceProvider
+                   .GetRequiredService<IOptions<ShippingRatesOptions>>()
+                   .Value
+                   .BaseAddress
+        );
+        return services;
+    }
+}
+```
+
+Let the base address end with a slash, like `https://rates.example.com/api/`. Otherwise, the last segment is dropped when the Client appends a relative URL like `rates?country=DE`.
+
 ## Guidelines
 
 - **Register Humble Objects against their Core abstraction:** `services.AddScoped<IPlaceOrderSession, EfPlaceOrderSession>()`. The Core sees the interface; only this line knows that Entity Framework Core is involved.

@@ -21,7 +21,7 @@ If you're new to CHACK, it's worth reading the methodology page first. The .NET 
 
 ## About the code samples
 
-You can copy every sample into your project as it is. Apart from ASP.NET Core, Entity Framework Core, and the test packages a page mentions, none of them needs an additional package.
+Apart from ASP.NET Core, Entity Framework Core, and the test packages a page mentions, the samples don't need any additional package.
 
 Some of the base types you'll see are also available ready-made in my libraries. When that's the case, the page tells you at the end, so you can decide whether you'd rather write them yourself or take them from a package.
 

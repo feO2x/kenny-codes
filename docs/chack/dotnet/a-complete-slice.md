@@ -65,11 +65,12 @@ public sealed class NewToDoItemDtoValidator
     public bool CheckForErrors(NewToDoItemDto dto, out Dictionary<string, string[]> errors)
     {
         errors = new Dictionary<string, string[]>();
-        if (string.IsNullOrWhiteSpace(dto.Title))
+        var title = dto.Title?.Trim();
+        if (string.IsNullOrEmpty(title))
         {
             errors[nameof(dto.Title)] = ["The title must not be empty."];
         }
-        else if (dto.Title.Length > 200)
+        else if (title.Length > 200)
         {
             errors[nameof(dto.Title)] = ["The title must not be longer than 200 characters."];
         }

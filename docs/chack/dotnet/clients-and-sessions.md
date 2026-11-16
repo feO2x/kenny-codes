@@ -36,12 +36,14 @@ public interface IOrderQueueClient : IAsyncDisposable
 }
 ```
 
-:::info[`ISession` in ASP.NET Core projects]
+:::info[ISession in ASP.NET Core projects]
 ASP.NET Core has an `ISession` interface of its own, for HTTP session state, and the Web SDK imports its namespace `Microsoft.AspNetCore.Http` implicitly. When a file sees both, the compiler can't tell them apart. A global using alias settles this once for the whole project:
 
 ```csharp
 global using ISession = MyApp.DatabaseAccess.ISession;
 ```
+
+Better yet: disable Implicit Usings and you won't face this problem.
 :::
 
 ## Why the abstractions are disposable
@@ -179,7 +181,7 @@ public sealed class HttpShippingRatesClient(HttpClient httpClient) : IShippingRa
 }
 ```
 
-This Client owns nothing that it would have to release: `IHttpClientFactory` manages the lifetime of the underlying connections. So here, the abstraction doesn't need to be disposable.
+This Client owns nothing that it would have to release: `IHttpClientFactory` manages the lifetime of the underlying connections. So here, the abstraction doesn't need to be disposable. [The Composition Root in .NET](./composition-root.md#registering-http-clients) shows how to register it.
 
 ## A transaction for the Client's whole lifetime
 
@@ -230,6 +232,10 @@ public sealed class EfOrderReportClient(AppDbContext dbContext) : IOrderReportCl
     }
 }
 ```
+
+This Client doesn't derive from `EfClient<TDbContext>`, because it has to dispose its transaction before the `DbContext`, and the base class doesn't know about the transaction. The [ready-made base types](#ready-made-base-types) at the end of this page take care of both.
+
+Which isolation level makes several reads agree depends on your database. On PostgreSQL, Repeatable Read works on a snapshot taken at the first query, so the report above sees one consistent state. On SQL Server, Repeatable Read still lets rows appear that were inserted in between; there, you'd choose `IsolationLevel.Snapshot`, after enabling snapshot isolation for the database.
 
 Disposing a transaction that was never committed rolls it back, and for a Client that only reads, that's exactly right. A Session can work the same way when it needs a specific isolation level: it begins the transaction lazily, commits it in `SaveChangesAsync` after saving the changes, and disposes it at the end. Keep the cost of an open transaction in mind, which the [methodology page](../clients-and-sessions.md#who-controls-the-transaction) describes.
 
@@ -302,7 +308,7 @@ public sealed class EfCancelOrderSession(AppDbContext dbContext)
 - **Call `SaveChangesAsync` once per Session.** One commit means one transaction: either the whole business transaction succeeds, or none of it does.
 - **Never let `IQueryable<T>` leave a Humble Object.** As soon as a caller adds to the query, the Core decides which SQL runs, and the query executes somewhere a Test Double can't imitate. Return a `List<T>`, an array, or a DTO instead.
 - **Translate exceptions the Core cares about.** Entity Framework Core reports a concurrency conflict with a `DbUpdateConcurrencyException`. If the Core wants to react to it, catch it in the Humble Object and throw an exception of the Core, or return a result. If several Sessions need this, a base class of your own is a good home for it.
-- **Register Clients and Sessions as scoped services.** They are not thread-safe, so a singleton is not an option. Transient disposable services are kept alive by the container until the scope ends anyway, so scoped says what actually happens.
+- **Register Clients and Sessions as scoped services.** They are not thread-safe, so a singleton is not an option. Transient disposable services are kept alive by the container until the scope ends anyway, so scoped says what actually happens. A typed `HttpClient` is the exception: `AddHttpClient` registers it as transient, and that's fine, because it owns nothing that the scope would have to release.
 - **Give your `DbContext` a home outside the slices.** It's a Humble Object, too, and so are the base classes above. A [folder that is not a slice](../vertical-slices.md#folders-that-are-not-slices), like `DatabaseAccess`, is a good place for them.
 
 If you'd like to see a Session in action - used by an endpoint, registered in a Module, and replaced by a Spy in a Unit Test - continue with [A Complete Slice in ASP.NET Core](./a-complete-slice.md).
