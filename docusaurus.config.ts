@@ -243,8 +243,13 @@ const config: Config = {
           items: [
             {
               type: "docSidebar",
-              sidebarId: "tutorialSidebar",
+              sidebarId: "guidedCodingSidebar",
               label: "Guided Coding & Guided Learning",
+            },
+            {
+              type: "docSidebar",
+              sidebarId: "chackSidebar",
+              label: "CHACK",
             },
           ],
         },
