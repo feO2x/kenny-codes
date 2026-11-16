@@ -29,7 +29,7 @@ This is easy to understand on day one and starts to hurt around month six:
 
 - The folder names express no intent. Looking at the top level tells a newcomer nothing about what the application does.
 - You cannot see how much code belongs to a feature, because it is scattered across folders.
-- Working on a single feature means editing files in three to seven directories. Under time pressure, that is how you accidentally touch something that belongs to another feature and introduce a subtle regression.
+- Working on a single feature means editing files in three to seven directories. Under time pressure, that is how you accidentally touch something that belongs to another feature and introduce a subtle regression if your test suite cannot catch it.
 - Where does a long-lived coordinating service go? Is `OrderQueueManager` a "service"? So is everything else.
 
 Vertical slices organize folders by feature instead, driven by the requirements. (The folder trees on these pages leave out file extensions, since they depend on your language.)
