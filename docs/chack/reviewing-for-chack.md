@@ -62,7 +62,8 @@ Most of the time, the answer comes quickly. When it turns out to be "two of them
 ## In Vertical Slices
 
 - **The code of a feature is spread across technical folders.** `Services`, `Interfaces`, `Dtos`, and `Validators` folders hide what the application does. Grouping by feature brings it back into view.
-- **Loose types accumulate in a parent folder.** Types that belong to a concept feel at home in a sibling folder named after it, and types that only one child uses can move down into that child.
+- **Loose types accumulate in a parent folder.** More than seven shared files besides the Module are hard to take in at a glance. Types that belong to a concept feel at home in a sibling folder named after it, and types that only one child uses can move down into that child.
+- **A folder is named after a technical concern, like `Shared`, `Common`, or `Helpers`.** It collects leftovers instead of a concept. Naming it after what its contents represent, or moving them to the slices that use them, brings the domain language back.
 - **Slices reference each other cyclically.** The cycle shows that some code belongs to neither slice. Moving it into a common parent or a new sibling folder resolves it.
 
 ## What is not a violation
