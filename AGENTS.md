@@ -7,16 +7,6 @@ This is Kenny Pflug's website where he blogs, announces talks and workshops, and
 - Never run the dev server. Assume it is already running.
 - When you create git commit, always sign off and use Conventional Commits messages. Decide whether a message body is required.
 
-## When you implement a plan
-
-Plans in `ai-plans/` are frozen once their Planning Phase ends. The only edit you may make to a plan
-is flipping an acceptance criterion from `- [ ]` to `- [x]`.
-
-- Check a criterion only after the implementation exists and the relevant feedback loops verify it.
-- Leave unmet criteria unchecked, and never change the wording of a criterion.
-- When the implementation materially departs from an explicit decision in the plan, write a Plan
-  Deviations document instead of editing the frozen plan.
-
 ## Feedback loops
 
 - `npm run typecheck` - runs `tsc` over the TypeScript sources (site components, Docusaurus config,
@@ -40,8 +30,8 @@ previews. To check a change locally, run
 
 ## How to write plans
 
-See ai-plans/AGENTS.md for details on how to write plans.
+See [ai-plans/AGENTS.md](ai-plans/AGENTS.md) on how to handle plans and plan deviation documents in the ai-plans folder.
 
 ## This is your space
 
-If you find something noteworthy while you work with the codebase, feel free to add it here. I will discuss with you whether this will become an additional rule in AGENTS.md.
+If you find something noteworthy while you work with this codebase, feel free to add it here. I will discuss your points afterwards and we'll see if they become additional rules for agents.
