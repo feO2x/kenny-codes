@@ -37,7 +37,6 @@ export default function AnimatedImage({src, still, alt, width, height}: Animated
       <button
         type="button"
         className={styles.toggle}
-        aria-pressed={!playing}
         onClick={() => setPlaying((value) => !value)}>
         {playing ? 'Pause animation' : 'Play animation'}
       </button>

@@ -4,11 +4,16 @@ import Heading from '@theme/Heading';
 import Link from '@docusaurus/Link';
 import type {Props} from '@theme/BlogTagsPostsPage';
 import EventsListing from '@site/src/components/EventsListing';
+import {groupEvents} from '@site/src/utils/eventUtils';
+import {useToday} from '@site/src/utils/dateFormatting';
 import {EventsContact} from '@site/src/theme/BlogListPage/EventsBlogListContent';
 import styles from '@site/src/theme/BlogListPage/styles.module.css';
 
 export default function EventsBlogTagsPostsContent({items, tag}: Props): ReactNode {
   const title = `Talks and workshops on ${tag.label}`;
+  // Count what the listing shows: cancelled sessions disappear once their date has passed.
+  const {upcomingEvents, pastEvents} = groupEvents(items, useToday());
+  const sessionCount = upcomingEvents.length + pastEvents.length;
 
   return (
     <Layout title={title} description={`Talks and workshops by Kenny Pflug tagged ${tag.label}`}>
@@ -22,7 +27,7 @@ export default function EventsBlogTagsPostsContent({items, tag}: Props): ReactNo
               {tag.label}
             </Heading>
             <p className={styles.lede}>
-              {tag.count === 1 ? 'One session' : `${tag.count} sessions`} tagged “{tag.label}”.
+              {sessionCount === 1 ? 'One session' : `${sessionCount} sessions`} tagged “{tag.label}”.
             </p>
             <EventsContact />
           </div>

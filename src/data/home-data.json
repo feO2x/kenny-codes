@@ -27,7 +27,7 @@
       "title": "More on Design by Contract - Assertions and Inheritance",
       "date": "2016-05-07",
       "link": "/blog/2016-05-07-assertions-and-inheritance",
-      "excerpt": "My previous two posts about Bertrand Meyer's Design by Contract (DbC) were mainly introductions to pre- and post-conditions and class invariants and how they can be implemented in C– in this one we'll...",
+      "excerpt": "My previous two posts about Bertrand Meyer's Design by Contract (DbC) were mainly introductions to pre- and post-conditions and class invariants and how they can be implemented in C# – in this one we'...",
       "tags": [
         "csharp",
         "dotnet",
@@ -49,17 +49,11 @@
       ]
     }
   ],
-  "recentEvents": [
+  "events": [
     {
       "title": "Forget Vibe Coding, Switch to Guided Coding",
       "date": "2026-09-17",
       "link": "/events/2026-09-17-dodnedder-guided-coding",
-      "excerpt": "In this talk, we'll explore Guided Coding, an approach that I developed in early 2026 during the development of Light.PortableResults to improve my development speed with Coding Agents while staying i...",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Guided-Coding"
-      ],
       "type": "Talk",
       "location": "Nürnberg, Germany",
       "duration": "2h",
@@ -71,12 +65,6 @@
       "title": "Guided Coding: Agentic Coding Without Loss of Control",
       "date": "2026-08-14",
       "link": "/events/2026-08-14-guided-coding-agentic-coding-without-loss-of-control",
-      "excerpt": "In this talk, we'll explore Guided Coding: the basics as well as all the new Agent skills that come with version 2.0.0",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Guided-Coding"
-      ],
       "type": "Talk",
       "location": "Online",
       "duration": "4h",
@@ -87,12 +75,6 @@
       "title": "Guided Coding - Staying in Control While Coding with AI Agents",
       "date": "2026-06-17",
       "link": "/events/2026-06-17-oth-hof-guided-coding",
-      "excerpt": "In this talk, we'll explore Guided Coding, an approach that I developed in early 2026 during the development of Light.PortableResults to improve my development speed with Coding Agents while staying i...",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Guided-Coding"
-      ],
       "type": "Talk",
       "location": "University of Applied Sciences Hof",
       "duration": "2h",
@@ -104,281 +86,535 @@
       "title": "Forget Vibe Coding, Switch to Guided Coding",
       "date": "2026-05-06",
       "link": "/events/2026-05-06-adc-forget-vibe-coding-use-guided-coding",
-      "excerpt": "In this talk, we'll explore Guided Coding, an approach that I developed in early 2026 during the development of Light.PortableResults to improve my development speed with Coding Agents while staying i...",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Guided-Coding"
-      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "1h",
       "language": "German",
       "country": "Germany",
       "event": "Advanced Developers Conference 2026"
-    }
-  ],
-  "eventTimeline": [
-    {
-      "title": "Fast and Fluent UI in WPF",
-      "date": "2014-02-24",
-      "link": "/events/2014-02-24-dotnet-regensburg-fast-and-fluent-ui-in-wpf"
     },
     {
-      "title": "Automated Testing in TDD with Visual Studio",
-      "date": "2015-01-26",
-      "link": "/events/2015-01-26-dotnet-regensburg-automated-testing"
-    },
-    {
-      "title": "Design by Contract",
-      "date": "2016-01-25",
-      "link": "/events/2016-01-25-dotnet-regensburg-design-by-contract"
-    },
-    {
-      "title": "Check Parameters Easily with Light.GuardClauses",
-      "date": "2016-05-30",
-      "link": "/events/2016-05-30-dotnet-regensburg-light-guardclauses"
-    },
-    {
-      "title": ".NET Threading in Detail",
-      "date": "2017-01-30",
-      "link": "/events/2017-01-30-dotnet-regensburg-dotnet-threading-in-detail"
-    },
-    {
-      "title": ".NET Threading in Detail",
-      "date": "2017-03-15",
-      "link": "/events/2017-03-15-dotnet-ulm-dotnet-threading-in-detail"
-    },
-    {
-      "title": ".NET Threading in Detail",
-      "date": "2017-06-12",
-      "link": "/events/2017-06-12-dotnet-ingolstadt-dotnet-threading-in-detail"
-    },
-    {
-      "title": "Dependency Injection in .NET",
-      "date": "2017-06-28",
-      "link": "/events/2017-06-28-dotnet-regensburg-dependency-injection"
-    },
-    {
-      "title": "Multithreading and async await in ASP.NET Core",
-      "date": "2017-09-18",
-      "link": "/events/2017-09-18-adc-multithreading-async-await"
-    },
-    {
-      "title": "Designing ASP.NET Core Applications with Dependency Injection in Mind",
-      "date": "2017-09-19",
-      "link": "/events/2017-09-19-adc-dependency-injection-aspnetcore"
-    },
-    {
-      "title": "Introduction to git - and Everything Else about Version Control",
-      "date": "2018-01-16",
-      "link": "/events/2018-01-16-dotnet-regensburg-introduction-to-git"
-    },
-    {
-      "title": "Writing Open Source Software in .NET - With BenchmarkDotNet, Roslyn Source Generators and MSBuild Multitargeting",
-      "date": "2018-12-10",
-      "link": "/events/2018-12-10-dotnet-regensburg-open-source"
-    },
-    {
-      "title": ".NET Garbage Collector Internals",
-      "date": "2019-05-08",
-      "link": "/events/2019-05-08-dotnet-regensburg-dotnet-gc-internals"
-    },
-    {
-      "title": ".NET GC Internals: How the Garbage Collector Works Under the Covers",
-      "date": "2019-05-22",
-      "link": "/events/2019-05-22-adc-dotnet-gc-internals"
-    },
-    {
-      "title": "Introduction to Performance Optimization in .NET",
-      "date": "2019-05-23",
-      "link": "/events/2019-05-23-adc-introduction-to-performance-optimization"
-    },
-    {
-      "title": "High Perf - .NET Performance Benchmarking and Garbage Collector in Detail",
-      "date": "2019-12-11",
-      "link": "/events/2019-12-11-mdug-graz-high-perf"
-    },
-    {
-      "title": "Async Await Internals: Understand the Async State Machine from a Memory Perspective",
-      "date": "2020-10-12",
-      "link": "/events/2020-10-12-adc-async-await-memory-perspective"
-    },
-    {
-      "title": "JSON Serialization in ASP.NET Core",
-      "date": "2020-10-13",
-      "link": "/events/2020-10-13-adc-json-serialization-in-aspnetcore"
-    },
-    {
-      "title": "Design Principles vs. Performance",
-      "date": "2021-02-16",
-      "link": "/events/2021-02-16-dcn-design-principles-vs-performance"
-    },
-    {
-      "title": "Design Principles vs. Performance",
-      "date": "2021-03-02",
-      "link": "/events/2021-03-02-mdug-graz-design-principles-vs-performance"
-    },
-    {
-      "title": "Design Principles vs. Performance",
-      "date": "2021-11-30",
-      "link": "/events/2021-11-30-adc-design-principles-vs-performance"
-    },
-    {
-      "title": "Old Apps with New .NET Features",
-      "date": "2022-05-24",
-      "link": "/events/2022-05-24-adc-old-apps-with-new-dotnet-features"
-    },
-    {
-      "title": "ASP.NET Core Minimal APIs in Practice",
-      "date": "2022-05-25",
-      "link": "/events/2022-05-25-adc-minimal-apis-in-practice"
-    },
-    {
-      "title": "ASP.NET Core Minimal APIs in Practice",
-      "date": "2022-12-13",
-      "link": "/events/2022-12-13-dcn-minimal-apis-in-practice"
-    },
-    {
-      "title": ".NET Async Await - In Depth",
-      "date": "2023-04-07",
-      "link": "/events/2023-04-07-coding-zone-async-await-in-depth"
-    },
-    {
-      "title": "Cloud-Native for .NET developers: Modern End-to-End Architectures",
-      "date": "2023-04-28",
-      "link": "/events/2023-04-28-dotnet-day-franken-cloud-native-workshop"
-    },
-    {
-      "title": "Cloud-Native for .NET developers: Modern End-to-End Architectures",
-      "date": "2023-06-26",
-      "link": "/events/2023-06-26-dwx-cloud-native-workshop"
-    },
-    {
-      "title": "Cloud-Native in Practice: Modern End-to-End Architectures",
-      "date": "2023-09-25",
-      "link": "/events/2023-09-25-basta-autumn-cloud-native-workshop"
-    },
-    {
-      "title": "Private GPT LLMs: Securely Deploying Azure OpenAI Service with Terraform",
-      "date": "2024-02-12",
-      "link": "/events/2024-02-12-basta-spring-azure-openai-terraform"
-    },
-    {
-      "title": "Scalable .NET Apps with async await – Fundamentals & Practical Tips",
-      "date": "2024-02-12",
-      "link": "/events/2024-02-12-basta-spring-async-await"
-    },
-    {
-      "title": "Securely Deploying Private OpenAI LLMs in Azure with Terraform",
-      "date": "2024-02-27",
-      "link": "/events/2024-02-27-dcn-azure-openai-terraform"
-    },
-    {
-      "title": ".NET Native AOT – Overview and Performance",
-      "date": "2024-03-06",
-      "link": "/events/2024-03-06-webinar-native-aot-overview"
-    },
-    {
-      "title": ".NET Native AOT – Data Access without EF Core, Using Humble Objects Instead",
-      "date": "2024-03-20",
-      "link": "/events/2024-03-20-webinar-native-aot-data-access"
-    },
-    {
-      "title": "Web APIs with ASP.NET Core Native AOT",
-      "date": "2024-05-06",
-      "link": "/events/2024-05-06-adc-native-aot-web-apis"
-    },
-    {
-      "title": "Scalable .NET Apps with async await",
-      "date": "2024-05-06",
-      "link": "/events/2024-05-06-adc-async-await"
-    },
-    {
-      "title": "Web APIs with ASP.NET Core Native AOT",
-      "date": "2024-07-01",
-      "link": "/events/2024-07-01-dwx-native-aot-web-apis"
-    },
-    {
-      "title": "Private GPT LLMs: Securely Deploying Azure OpenAI Service with Terraform",
-      "date": "2024-07-01",
-      "link": "/events/2024-07-01-dwx-azure-openai-terraform"
-    },
-    {
-      "title": ".NET Native AOT – Ready for My Web APIs?",
-      "date": "2024-09-16",
-      "link": "/events/2024-09-16-basta-autumn-native-aot"
-    },
-    {
-      "title": "Async Workshop: Clarity in Asynchrony – async await Internals and Expert Knowledge for Scalable .NET Apps",
-      "date": "2024-09-16",
-      "link": "/events/2024-09-16-basta-autumn-async-workshop"
-    },
-    {
-      "title": "Integrate Multimodal Language Models into .NET Backends with OpenAI .NET API and .NET Aspire",
-      "date": "2024-10-17",
-      "link": "/events/2024-10-17-gen-ai-openai-with-aspire"
-    },
-    {
-      "title": "How to async – async await Internals and Expert Knowledge for Scalable .NET Apps",
-      "date": "2025-05-05",
-      "link": "/events/2025-05-05-adc-async-await-workshop"
-    },
-    {
-      "title": "Access Multimodal LLMs from .NET Backends with Microsoft.Extensions.AI and .NET Aspire",
-      "date": "2025-05-07",
-      "link": "/events/2025-05-07-adc-access-multimodal-llms-from-dotnet-backends-with-mea-and-aspire"
-    },
-    {
-      "title": "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI",
-      "date": "2025-09-24",
-      "link": "/events/2025-09-24-dotnet-regensburg-cloud-native-meets-ai"
-    },
-    {
-      "title": "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI",
-      "date": "2025-09-30",
-      "link": "/events/2025-09-30-dcn-cloud-native-meets-ai"
-    },
-    {
-      "title": "Guided Coding instead of Vibe Coding in Java",
-      "date": "2026-02-26",
-      "link": "/events/2026-02-26-guided-coding-in-java"
-    },
-    {
-      "title": "Forget Vibe Coding, Switch to Guided Coding",
-      "date": "2026-04-14",
-      "link": "/events/2026-04-14-dcn-forget-vibe-coding-use-guided-coding"
+      "title": "Cloud-Native Meets AI: Modern Backends with Aspire and Microsoft.Extensions.AI",
+      "date": "2026-05-05",
+      "link": "/events/2026-05-05-adc-cloud-native-meets-ai",
+      "type": "Talk",
+      "location": "Regensburg, Germany",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference"
     },
     {
       "title": "AI-powered Cloud-Native Backends with Aspire and Microsoft.Extensions.AI",
       "date": "2026-05-04",
       "link": "/events/2026-05-04-adc-workshop-ai-powered-cloud-native-backends-with-aspire-and-mea",
+      "type": "Workshop",
+      "location": "Regensburg",
+      "duration": "8h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2026",
       "cancelled": true
     },
     {
-      "title": "Cloud-Native Meets AI: Modern Backends with Aspire and Microsoft.Extensions.AI",
-      "date": "2026-05-05",
-      "link": "/events/2026-05-05-adc-cloud-native-meets-ai"
-    },
-    {
       "title": "Forget Vibe Coding, Switch to Guided Coding",
-      "date": "2026-05-06",
-      "link": "/events/2026-05-06-adc-forget-vibe-coding-use-guided-coding"
+      "date": "2026-04-14",
+      "link": "/events/2026-04-14-dcn-forget-vibe-coding-use-guided-coding",
+      "type": "Talk",
+      "location": "Weiden in der Oberpfalz",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Digital Craftsmanship Nordoberpfalz"
     },
     {
-      "title": "Guided Coding - Staying in Control While Coding with AI Agents",
-      "date": "2026-06-17",
-      "link": "/events/2026-06-17-oth-hof-guided-coding"
+      "title": "Guided Coding instead of Vibe Coding in Java",
+      "date": "2026-02-26",
+      "link": "/events/2026-02-26-guided-coding-in-java",
+      "type": "Talk",
+      "location": "Online",
+      "duration": "2h",
+      "language": "English",
+      "event": "LinkedIn Live"
     },
     {
-      "title": "Guided Coding: Agentic Coding Without Loss of Control",
-      "date": "2026-08-14",
-      "link": "/events/2026-08-14-guided-coding-agentic-coding-without-loss-of-control"
+      "title": "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI",
+      "date": "2025-09-30",
+      "link": "/events/2025-09-30-dcn-cloud-native-meets-ai",
+      "type": "Talk",
+      "location": "Weiden in der Oberpfalz",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Digital Craftsmanship Nordoberpfalz"
     },
     {
-      "title": "Forget Vibe Coding, Switch to Guided Coding",
-      "date": "2026-09-17",
-      "link": "/events/2026-09-17-dodnedder-guided-coding"
+      "title": "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI",
+      "date": "2025-09-24",
+      "link": "/events/2025-09-24-dotnet-regensburg-cloud-native-meets-ai",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET User Group Regensburg"
+    },
+    {
+      "title": "Access Multimodal LLMs from .NET Backends with Microsoft.Extensions.AI and .NET Aspire",
+      "date": "2025-05-07",
+      "link": "/events/2025-05-07-adc-access-multimodal-llms-from-dotnet-backends-with-mea-and-aspire",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2025"
+    },
+    {
+      "title": "How to async – async await Internals and Expert Knowledge for Scalable .NET Apps",
+      "date": "2025-05-05",
+      "link": "/events/2025-05-05-adc-async-await-workshop",
+      "type": "Workshop",
+      "location": "Regensburg",
+      "duration": "8h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2025"
+    },
+    {
+      "title": "Integrate Multimodal Language Models into .NET Backends with OpenAI .NET API and .NET Aspire",
+      "date": "2024-10-17",
+      "link": "/events/2024-10-17-gen-ai-openai-with-aspire",
+      "type": "Talk",
+      "location": "Karlsruhe",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Generation AI - Rhein Neckar Kreis und Karlsruhe"
+    },
+    {
+      "title": "Async Workshop: Clarity in Asynchrony – async await Internals and Expert Knowledge for Scalable .NET Apps",
+      "date": "2024-09-16",
+      "link": "/events/2024-09-16-basta-autumn-async-workshop",
+      "type": "Workshop",
+      "location": "Mainz",
+      "duration": "8h",
+      "language": "German",
+      "country": "Germany",
+      "event": "BASTA! Autumn 2024"
+    },
+    {
+      "title": ".NET Native AOT – Ready for My Web APIs?",
+      "date": "2024-09-16",
+      "link": "/events/2024-09-16-basta-autumn-native-aot",
+      "type": "Talk",
+      "location": "Mainz",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "BASTA! Autumn 2024"
+    },
+    {
+      "title": "Private GPT LLMs: Securely Deploying Azure OpenAI Service with Terraform",
+      "date": "2024-07-01",
+      "link": "/events/2024-07-01-dwx-azure-openai-terraform",
+      "type": "Talk",
+      "location": "Nuremberg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "DWX 2024"
+    },
+    {
+      "title": "Web APIs with ASP.NET Core Native AOT",
+      "date": "2024-07-01",
+      "link": "/events/2024-07-01-dwx-native-aot-web-apis",
+      "type": "Talk",
+      "location": "Nuremberg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "DWX 2024"
+    },
+    {
+      "title": "Scalable .NET Apps with async await",
+      "date": "2024-05-06",
+      "link": "/events/2024-05-06-adc-async-await",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2024"
+    },
+    {
+      "title": "Web APIs with ASP.NET Core Native AOT",
+      "date": "2024-05-06",
+      "link": "/events/2024-05-06-adc-native-aot-web-apis",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2024"
+    },
+    {
+      "title": ".NET Native AOT – Data Access without EF Core, Using Humble Objects Instead",
+      "date": "2024-03-20",
+      "link": "/events/2024-03-20-webinar-native-aot-data-access",
+      "type": "Webinar",
+      "location": "Online",
+      "duration": "1h",
+      "language": "German",
+      "event": "Thinktecture Webinar"
+    },
+    {
+      "title": ".NET Native AOT – Overview and Performance",
+      "date": "2024-03-06",
+      "link": "/events/2024-03-06-webinar-native-aot-overview",
+      "type": "Webinar",
+      "location": "Online",
+      "duration": "1h",
+      "language": "German",
+      "event": "Thinktecture Webinar"
+    },
+    {
+      "title": "Securely Deploying Private OpenAI LLMs in Azure with Terraform",
+      "date": "2024-02-27",
+      "link": "/events/2024-02-27-dcn-azure-openai-terraform",
+      "type": "Talk",
+      "location": "Online",
+      "duration": "1h",
+      "language": "German",
+      "event": "Digital Craftsmanship Nordoberpfalz"
+    },
+    {
+      "title": "Scalable .NET Apps with async await – Fundamentals & Practical Tips",
+      "date": "2024-02-12",
+      "link": "/events/2024-02-12-basta-spring-async-await",
+      "type": "Talk",
+      "location": "Frankfurt",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "BASTA! Spring 2024"
+    },
+    {
+      "title": "Private GPT LLMs: Securely Deploying Azure OpenAI Service with Terraform",
+      "date": "2024-02-12",
+      "link": "/events/2024-02-12-basta-spring-azure-openai-terraform",
+      "type": "Talk",
+      "location": "Frankfurt",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "BASTA! Spring 2024"
+    },
+    {
+      "title": "Cloud-Native in Practice: Modern End-to-End Architectures",
+      "date": "2023-09-25",
+      "link": "/events/2023-09-25-basta-autumn-cloud-native-workshop",
+      "type": "Workshop",
+      "location": "Mainz",
+      "duration": "8h",
+      "language": "German",
+      "country": "Germany",
+      "event": "BASTA! Autumn 2023"
+    },
+    {
+      "title": "Cloud-Native for .NET developers: Modern End-to-End Architectures",
+      "date": "2023-06-26",
+      "link": "/events/2023-06-26-dwx-cloud-native-workshop",
+      "type": "Workshop",
+      "location": "Nuremberg",
+      "duration": "8h",
+      "language": "German",
+      "country": "Germany",
+      "event": "DWX 2023"
+    },
+    {
+      "title": "Cloud-Native for .NET developers: Modern End-to-End Architectures",
+      "date": "2023-04-28",
+      "link": "/events/2023-04-28-dotnet-day-franken-cloud-native-workshop",
+      "type": "Workshop",
+      "location": "Nuremberg",
+      "duration": "8h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET Day Franken 2023"
+    },
+    {
+      "title": ".NET Async Await - In Depth",
+      "date": "2023-04-07",
+      "link": "/events/2023-04-07-coding-zone-async-await-in-depth",
+      "type": "Talk",
+      "location": "Online",
+      "duration": "5h",
+      "language": "German",
+      "event": "My Coding Zone"
+    },
+    {
+      "title": "ASP.NET Core Minimal APIs in Practice",
+      "date": "2022-12-13",
+      "link": "/events/2022-12-13-dcn-minimal-apis-in-practice",
+      "type": "Talk",
+      "location": "Online",
+      "duration": "2h",
+      "language": "German",
+      "event": "Digital Craftsmanship Nordoberpfalz"
+    },
+    {
+      "title": "ASP.NET Core Minimal APIs in Practice",
+      "date": "2022-05-25",
+      "link": "/events/2022-05-25-adc-minimal-apis-in-practice",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2022"
+    },
+    {
+      "title": "Old Apps with New .NET Features",
+      "date": "2022-05-24",
+      "link": "/events/2022-05-24-adc-old-apps-with-new-dotnet-features",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2022"
+    },
+    {
+      "title": "Design Principles vs. Performance",
+      "date": "2021-11-30",
+      "link": "/events/2021-11-30-adc-design-principles-vs-performance",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2021"
+    },
+    {
+      "title": "Design Principles vs. Performance",
+      "date": "2021-03-02",
+      "link": "/events/2021-03-02-mdug-graz-design-principles-vs-performance",
+      "type": "Talk",
+      "location": "Online",
+      "duration": "2h",
+      "language": "English",
+      "country": "Austria",
+      "event": "Microsoft Developer User Group Graz"
+    },
+    {
+      "title": "Design Principles vs. Performance",
+      "date": "2021-02-16",
+      "link": "/events/2021-02-16-dcn-design-principles-vs-performance",
+      "type": "Talk",
+      "location": "Online",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Digital Craftsmanship Nordoberpfalz"
+    },
+    {
+      "title": "JSON Serialization in ASP.NET Core",
+      "date": "2020-10-13",
+      "link": "/events/2020-10-13-adc-json-serialization-in-aspnetcore",
+      "type": "Talk",
+      "location": "Munich",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2020"
+    },
+    {
+      "title": "Async Await Internals: Understand the Async State Machine from a Memory Perspective",
+      "date": "2020-10-12",
+      "link": "/events/2020-10-12-adc-async-await-memory-perspective",
+      "type": "Talk",
+      "location": "Munich",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2020"
+    },
+    {
+      "title": "High Perf - .NET Performance Benchmarking and Garbage Collector in Detail",
+      "date": "2019-12-11",
+      "link": "/events/2019-12-11-mdug-graz-high-perf",
+      "type": "Talk",
+      "location": "Graz",
+      "duration": "3h",
+      "language": "German",
+      "country": "Austria",
+      "event": "Microsoft Developer User Group Graz"
+    },
+    {
+      "title": "Introduction to Performance Optimization in .NET",
+      "date": "2019-05-23",
+      "link": "/events/2019-05-23-adc-introduction-to-performance-optimization",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2019"
+    },
+    {
+      "title": ".NET GC Internals: How the Garbage Collector Works Under the Covers",
+      "date": "2019-05-22",
+      "link": "/events/2019-05-22-adc-dotnet-gc-internals",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2019"
+    },
+    {
+      "title": ".NET Garbage Collector Internals",
+      "date": "2019-05-08",
+      "link": "/events/2019-05-08-dotnet-regensburg-dotnet-gc-internals",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET User Group Regensburg"
+    },
+    {
+      "title": "Writing Open Source Software in .NET - With BenchmarkDotNet, Roslyn Source Generators and MSBuild Multitargeting",
+      "date": "2018-12-10",
+      "link": "/events/2018-12-10-dotnet-regensburg-open-source",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET User Group Regensburg"
+    },
+    {
+      "title": "Introduction to git - and Everything Else about Version Control",
+      "date": "2018-01-16",
+      "link": "/events/2018-01-16-dotnet-regensburg-introduction-to-git",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "3h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET User Group Regensburg"
+    },
+    {
+      "title": "Designing ASP.NET Core Applications with Dependency Injection in Mind",
+      "date": "2017-09-19",
+      "link": "/events/2017-09-19-adc-dependency-injection-aspnetcore",
+      "type": "Talk",
+      "location": "Cologne",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2017"
+    },
+    {
+      "title": "Multithreading and async await in ASP.NET Core",
+      "date": "2017-09-18",
+      "link": "/events/2017-09-18-adc-multithreading-async-await",
+      "type": "Talk",
+      "location": "Cologne",
+      "duration": "1h",
+      "language": "German",
+      "country": "Germany",
+      "event": "Advanced Developers Conference 2017"
+    },
+    {
+      "title": "Dependency Injection in .NET",
+      "date": "2017-06-28",
+      "link": "/events/2017-06-28-dotnet-regensburg-dependency-injection",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET User Group Regensburg"
+    },
+    {
+      "title": ".NET Threading in Detail",
+      "date": "2017-06-12",
+      "link": "/events/2017-06-12-dotnet-ingolstadt-dotnet-threading-in-detail",
+      "type": "Talk",
+      "location": "Ingolstadt",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET Developer Group Ingolstadt"
+    },
+    {
+      "title": ".NET Threading in Detail",
+      "date": "2017-03-15",
+      "link": "/events/2017-03-15-dotnet-ulm-dotnet-threading-in-detail",
+      "type": "Talk",
+      "location": "Ulm",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET Developer Group Ulm"
+    },
+    {
+      "title": ".NET Threading in Detail",
+      "date": "2017-01-30",
+      "link": "/events/2017-01-30-dotnet-regensburg-dotnet-threading-in-detail",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET User Group Regensburg"
+    },
+    {
+      "title": "Check Parameters Easily with Light.GuardClauses",
+      "date": "2016-05-30",
+      "link": "/events/2016-05-30-dotnet-regensburg-light-guardclauses",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET User Group Regensburg"
+    },
+    {
+      "title": "Design by Contract",
+      "date": "2016-01-25",
+      "link": "/events/2016-01-25-dotnet-regensburg-design-by-contract",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET User Group Regensburg"
+    },
+    {
+      "title": "Automated Testing in TDD with Visual Studio",
+      "date": "2015-01-26",
+      "link": "/events/2015-01-26-dotnet-regensburg-automated-testing",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET User Group Regensburg"
+    },
+    {
+      "title": "Fast and Fluent UI in WPF",
+      "date": "2014-02-24",
+      "link": "/events/2014-02-24-dotnet-regensburg-fast-and-fluent-ui-in-wpf",
+      "type": "Talk",
+      "location": "Regensburg",
+      "duration": "2h",
+      "language": "German",
+      "country": "Germany",
+      "event": ".NET User Group Regensburg"
     }
   ],
   "venues": [

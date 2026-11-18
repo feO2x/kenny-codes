@@ -88,6 +88,7 @@ export default function EventsListing<T extends ListingItem>({
             <div key={year} id={`year-${year}`} className={styles.year}>
               <h3 className={styles.yearLabel}>
                 {year}
+                <span className={styles.srOnly}>, </span>
                 <span className={styles.yearCount}>{sessionsLabel(pastEventsByYear[year].length)}</span>
               </h3>
               <div className={styles.rows}>{pastEventsByYear[year].map((item) => renderRow(item, false))}</div>

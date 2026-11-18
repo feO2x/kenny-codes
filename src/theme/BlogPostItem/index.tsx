@@ -6,6 +6,8 @@ import BlogPostItemHeader from '@theme/BlogPostItem/Header';
 import BlogPostItemContent from '@theme/BlogPostItem/Content';
 import BlogPostItemFooter from '@theme/BlogPostItem/Footer';
 import type {Props} from '@theme/BlogPostItem';
+import EventInvite from '@site/src/components/EventInvite';
+import {isEventPage} from '@site/src/utils/eventUtils';
 
 // apply a bottom margin in list view
 function useContainerClassName() {
@@ -15,10 +17,12 @@ function useContainerClassName() {
 
 export default function BlogPostItem({children, className}: Props): ReactNode {
   const containerClassName = useContainerClassName();
+  const {metadata, isBlogPostPage} = useBlogPost();
   return (
     <BlogPostItemContainer className={clsx(containerClassName, className)}>
       <BlogPostItemHeader />
       <BlogPostItemContent>{children}</BlogPostItemContent>
+      {isBlogPostPage && isEventPage(metadata) && <EventInvite />}
       <BlogPostItemFooter />
     </BlogPostItemContainer>
   );

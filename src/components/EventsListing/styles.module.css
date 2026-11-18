@@ -19,7 +19,16 @@
 .empty {
   max-width: 60ch;
   color: var(--kc-muted);
-  padding: 1.5rem 0 0.5rem;
+  padding: 0.25rem 0 0;
+}
+
+.empty a {
+  color: var(--kc-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--kc-line-strong);
 }
 
 .empty p:last-child {
@@ -75,4 +84,13 @@
     font-size: 1.6rem;
     margin: 0.5rem 0 0.25rem;
   }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }

@@ -37,6 +37,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
   }));
   const delivered = sessions.filter((s) => !s.cancelled && s.date.slice(0, 10) < today);
   const firstYear = Math.min(...sessions.map((s) => Number(s.date.slice(0, 4))));
+  const hasUpcoming = sessions.some((s) => s.date.slice(0, 10) >= today);
   const germanShare = delivered.filter((s) => s.language === 'German').length / Math.max(1, delivered.length);
 
   return (
@@ -54,7 +55,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
             </p>
             <EventsContact />
             <nav className={styles.jump} aria-label="On this page">
-              <Link to="#upcoming">Upcoming</Link>
+              {hasUpcoming && <Link to="#upcoming">Upcoming</Link>}
               <Link to="#past">Past sessions</Link>
               <Link to="/events/tags">Browse by topic</Link>
             </nav>
@@ -84,7 +85,11 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
             emptyUpcoming={
               <p>
                 No public sessions are scheduled right now. New dates appear here first, and I
-                announce them on LinkedIn.
+                announce them on{' '}
+                <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+                  LinkedIn
+                </a>
+                .
               </p>
             }
           />

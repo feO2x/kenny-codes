@@ -79,7 +79,7 @@ export default function SpeakingRecord({
             <span
               key={i}
               className={clsx(styles.square, i >= column.delivered && styles.squareUpcoming)}
-              style={{'--i': i, '--col': col} as CSSProperties}
+              style={{'--i': i} as CSSProperties}
             />
           ));
           const body = (
@@ -96,7 +96,10 @@ export default function SpeakingRecord({
             </>
           );
           return (
-            <li key={column.year} className={styles.column}>
+            <li
+              key={column.year}
+              className={styles.column}
+              style={{'--col': col, '--t': col / Math.max(1, columns.length - 1)} as CSSProperties}>
               {total > 0 ? (
                 <Link
                   to={column.delivered > 0 ? yearLink(column.year) : upcomingLink}

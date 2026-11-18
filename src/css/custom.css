@@ -189,6 +189,20 @@ hr {
   padding-block: clamp(3rem, 2rem + 3vw, 5rem);
 }
 
+.kc-wide-page {
+  max-width: var(--ifm-container-width-xl);
+}
+
+.kc-tag-cloud {
+  gap: 0.6rem;
+  max-width: 64rem;
+}
+
+.kc-tag-cloud .kc-tag {
+  font-size: 0.95rem;
+  padding: 0.45rem 0.9rem;
+}
+
 /* ---------- Buttons ---------- */
 
 .button {
@@ -262,12 +276,16 @@ hr {
   color: var(--kc-ink);
 }
 
-/* Active section: a strip of the logo gradient. */
+/* Active section: solid primary in light mode (contrast), a strip of the logo gradient in dark. */
 .navbar__items:not(.navbar__items--right) .navbar__link--active {
-  background-image: var(--kc-gradient);
+  background-image: linear-gradient(var(--ifm-color-primary), var(--ifm-color-primary));
   background-size: 100% 2px;
   background-position: 0 100%;
   background-repeat: no-repeat;
+}
+
+[data-theme='dark'] .navbar__items:not(.navbar__items--right) .navbar__link--active {
+  background-image: var(--kc-gradient);
 }
 
 .navbar-sidebar .navbar__link--active,
@@ -363,19 +381,37 @@ hr {
 
   .footer__links .footer__col {
     margin: 0;
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .footer__links {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 /* ---------- Long-form content (docs and blog) ---------- */
 
 .markdown {
-  --ifm-h1-font-size: clamp(2.1rem, 1.6rem + 2vw, 2.9rem);
+  --ifm-h1-font-size: clamp(2.1rem, 1.7rem + 1.4vw, 2.75rem);
   --ifm-h2-font-size: 1.75rem;
   --ifm-h3-font-size: 1.3rem;
   --ifm-h4-font-size: 1.1rem;
   --ifm-heading-vertical-rhythm-top: 2.25;
   font-size: 1.0625rem;
   line-height: 1.7;
+}
+
+/* Give the page title room before the first section (docs wrap it in a <header>). */
+.markdown > header:first-child + h2,
+.markdown > h1:first-child + h2 {
+  margin-top: 2.25rem;
+}
+
+.markdown > header:first-child h1 {
+  margin-bottom: 0;
 }
 
 .markdown h1:first-child {
@@ -466,6 +502,11 @@ hr {
 
 [data-theme='dark'] .markdown svg rect[fill="#D6D6D6"] {
   fill: #cdd6e4;
+}
+
+/* Diagrams that put no text on the plate can use a dark plate in dark mode. */
+[data-theme='dark'] .markdown svg rect.kc-diagram-plate {
+  fill: var(--kc-surface-raised);
 }
 
 code {
@@ -600,6 +641,11 @@ pre code,
   font-stretch: 106%;
 }
 
+.pagination-nav__link--prev .pagination-nav__label::before,
+.pagination-nav__link--next .pagination-nav__label::after {
+  content: none;
+}
+
 /* ---------- Blog chrome ---------- */
 
 .blog-wrapper aside nav {
@@ -672,18 +718,42 @@ pre code,
   color: var(--kc-muted);
 }
 
-/* Author social icons: at least 32px targets. */
+/* Author card: let the title wrap and give the social icons 32px targets in one colour. */
+.avatar__intro small {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  line-height: 1.35;
+  margin-top: 0.15rem;
+}
+
+.avatar__intro div:has(> a > svg) {
+  height: auto;
+  overflow: visible;
+  display: flex;
+  gap: 0.15rem;
+  margin: 0.2rem 0 0 -0.45rem;
+}
+
 .avatar__intro a:has(> svg) {
   display: inline-grid;
   place-items: center;
-  min-width: 2rem;
-  min-height: 2rem;
-  margin-right: 0.15rem;
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
   border-radius: 6px;
+  color: var(--kc-muted);
+}
+
+.avatar__intro a:has(> svg) svg {
+  fill: currentColor;
+  color: currentColor;
 }
 
 .avatar__intro a:has(> svg):hover {
   background: var(--kc-surface-raised);
+  color: var(--kc-ink);
 }
 
 .avatar__name {

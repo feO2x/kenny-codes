@@ -22,10 +22,10 @@ function joinList(items: string[]): string {
 }
 
 export default function HeroSection(): ReactNode {
-  const {eventTimeline, venues} = homeData;
+  const {events, venues} = homeData;
   const today = useToday();
-  const delivered = eventTimeline.filter((e) => !e.cancelled && e.date < today);
-  const firstYear = eventTimeline[0]?.date.slice(0, 4);
+  const delivered = events.filter((e) => !e.cancelled && e.date < today);
+  const firstYear = events[events.length - 1]?.date.slice(0, 4);
 
   return (
     <header className={styles.hero}>
@@ -44,7 +44,8 @@ export default function HeroSection(): ReactNode {
               <a href="https://gwvs.de/" target="_blank" rel="noopener noreferrer">
                 TELIS/GWVS
               </a>
-              , conference speaker, and consultant from Regensburg, Germany.
+              , conference speaker, and consultant from Regensburg, Germany. Book me for talks,
+              in-house workshops, or consulting on cloud-native .NET and AI-assisted development.
             </p>
             <div className={styles.heroActions}>
               <a className="button button--primary button--lg" href={CONTACT_MAILTO}>
@@ -90,7 +91,7 @@ export default function HeroSection(): ReactNode {
             </Link>
           </div>
           <SpeakingRecord
-            events={eventTimeline}
+            events={events}
             yearLink={(year) => `/events#year-${year}`}
             upcomingLink="/events#upcoming"
             className={styles.recordChart}

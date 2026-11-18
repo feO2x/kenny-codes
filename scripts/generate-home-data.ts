@@ -28,17 +28,15 @@ interface ContentItem {
   cancelled?: boolean;
 }
 
-interface TimelineEvent {
-  title: string;
-  date: string;
-  link: string;
-  cancelled?: boolean;
-}
+type HomeEvent = Omit<ContentItem, "excerpt" | "tags">;
 
 interface HomeData {
   recentPosts: ContentItem[];
-  recentEvents: ContentItem[];
-  eventTimeline: TimelineEvent[];
+  /**
+   * Every event, newest first. Which ones are upcoming depends on the visitor's date, so the
+   * home page classifies them in the browser instead of relying on a build-time shortlist.
+   */
+  events: HomeEvent[];
   venues: string[];
 }
 
@@ -179,15 +177,6 @@ function readAllContent(dir: string, type: string): ContentItem[] {
   return items;
 }
 
-function takeRecent(items: ContentItem[], type: string): ContentItem[] {
-  // For events, take 4 + N where N is cancelled count in top 4
-  if (type === "events") {
-    const top4 = items.slice(0, 4);
-    const cancelledInTop4 = top4.filter(item => item.cancelled).length;
-    return items.slice(0, 4 + cancelledInTop4);
-  }
-  return items.slice(0, 4);
-}
 
 // Strips years and seasons so "BASTA! Spring 2024" and "BASTA! Autumn 2024" count as one venue.
 function normalizeVenue(event: string): string {
@@ -217,16 +206,8 @@ const allPosts = readAllContent(BLOG_DIR, "blog");
 const allEvents = readAllContent(EVENTS_DIR, "events");
 
 const output: HomeData = {
-  recentPosts: takeRecent(allPosts, "blog"),
-  recentEvents: takeRecent(allEvents, "events"),
-  eventTimeline: allEvents
-    .map(({ title, date, link, cancelled }) => ({
-      title,
-      date,
-      link,
-      ...(cancelled ? { cancelled: true } : {}),
-    }))
-    .reverse(),
+  recentPosts: allPosts.slice(0, 4),
+  events: allEvents.map(({ excerpt: _excerpt, tags: _tags, ...event }) => event),
   venues: rankVenues(allEvents),
 };
 

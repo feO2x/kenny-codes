@@ -36,6 +36,10 @@ export default function NavbarMobileSidebarWrapper(props: Props): ReactNode {
     }
 
     wasShown.current = true;
+    const drawer = document.querySelector<HTMLElement>('.navbar-sidebar');
+    drawer?.setAttribute('role', 'dialog');
+    drawer?.setAttribute('aria-modal', 'true');
+    drawer?.setAttribute('aria-label', 'Site navigation');
     const background = backgroundElements();
     background.forEach((el) => el.setAttribute('inert', ''));
     // The drawer is still `visibility: hidden` for the first frames of its slide-in transition,
@@ -52,12 +56,35 @@ export default function NavbarMobileSidebarWrapper(props: Props): ReactNode {
     frame = requestAnimationFrame(focusClose);
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') sidebar.toggle();
+      if (event.key === 'Escape') {
+        sidebar.toggle();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      // Keep Tab cycling inside the drawer instead of escaping to the browser chrome.
+      const focusable = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '.navbar-sidebar a[href], .navbar-sidebar button:not([disabled])',
+        ),
+      ).filter((el) => el.offsetParent !== null && !el.closest('[inert]'));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('keydown', onKeyDown);
 
     return () => {
       cancelAnimationFrame(frame);
+      drawer?.removeAttribute('role');
+      drawer?.removeAttribute('aria-modal');
+      drawer?.removeAttribute('aria-label');
       background.forEach((el) => el.removeAttribute('inert'));
       document.removeEventListener('keydown', onKeyDown);
     };

@@ -19,7 +19,7 @@ export default function GuidedCodingDiagram({ highlight }: GuidedCodingDiagramPr
     <svg viewBox="0 0 870 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby={titleId} style={{maxWidth: '870px', width: '100%', margin: '1.5rem auto', display: 'block'}}>
       <title id={titleId}>{descriptions[highlight ?? 'default']}</title>
       {/* Background */}
-      <rect x="0" y="0" width="870" height="200" rx="8" fill="#D6D6D6" />
+      <rect x="0" y="0" width="870" height="200" rx="8" fill="#D6D6D6" className="kc-diagram-plate" />
 
       {/* Arrow marker definitions */}
       <defs>

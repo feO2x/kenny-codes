@@ -115,8 +115,8 @@
   }
 
   .photo img {
-    aspect-ratio: 16 / 9;
-    max-height: 22rem;
-    object-position: 50% 60%;
+    aspect-ratio: 16 / 7;
+    max-height: 17rem;
+    object-position: 50% 64%;
   }
 }

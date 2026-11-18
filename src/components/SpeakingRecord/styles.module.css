@@ -67,11 +67,8 @@ a.columnLink:hover {
   width: var(--square);
   height: var(--square);
   border-radius: 5px;
-  background: color-mix(
-    in oklab,
-    var(--record-to) calc(var(--i, 0) * 9%),
-    var(--record-from)
-  );
+  /* Colour follows time: the oldest year is blue, the latest mint. */
+  background: color-mix(in oklab, var(--record-to) calc(var(--t, 0.5) * 100%), var(--record-from));
   animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   animation-delay: calc(var(--col, 0) * 45ms + var(--i, 0) * 28ms);
 }
@@ -112,7 +109,6 @@ a.columnLink:hover .square:not(.squareUpcoming) {
 }
 
 .legendItem .square {
-  --i: 6;
   animation: none;
   width: 12px;
   height: 12px;
@@ -158,9 +154,16 @@ a.columnLink:hover .square:not(.squareUpcoming) {
   }
 }
 
-@media (max-width: 380px) {
+/* On the narrowest phones, use the full screen width so each year stays a 24px target. */
+@media (max-width: 400px) {
   .record {
-    --square: 10px;
+    --square: 11px;
+    --gap: 3px;
+    margin-inline: -1rem;
+  }
+
+  .legend {
+    padding-inline: 1rem;
   }
 }
 

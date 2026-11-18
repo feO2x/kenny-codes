@@ -7,6 +7,7 @@ import type {Props} from '@theme/BlogPostItem/Header/Info';
 import {isEventPage} from '@site/src/utils/eventUtils';
 import {formatDate} from '@site/src/utils/dateFormatting';
 
+import {FiClock} from 'react-icons/fi';
 import styles from './styles.module.css';
 
 // Very simple pluralization: probably good enough for now
@@ -44,9 +45,6 @@ function DateTime({
   return <time dateTime={date}>{formattedDate}</time>;
 }
 
-function Spacer() {
-  return <>{' · '}</>;
-}
 
 export default function BlogPostItemHeaderInfo({className}: Props): ReactNode {
   const {metadata} = useBlogPost();
@@ -61,10 +59,10 @@ export default function BlogPostItemHeaderInfo({className}: Props): ReactNode {
     <div className={clsx(styles.container, 'margin-vert--md', className)}>
       <DateTime date={date} formattedDate={formatDate(date)} />
       {typeof readingTime !== 'undefined' && (
-        <>
-          <Spacer />
+        <span className={styles.readingTime}>
+          <FiClock aria-hidden="true" />
           <ReadingTime readingTime={readingTime} />
-        </>
+        </span>
       )}
     </div>
   );

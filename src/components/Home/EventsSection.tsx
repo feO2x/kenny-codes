@@ -26,13 +26,14 @@ const topics = [
 ];
 
 export default function EventsSection(): ReactNode {
-  const recentEvents = homeData.recentEvents as HomeEvent[];
+  const events = homeData.events as HomeEvent[];
   const today = useToday();
 
-  // Cancelled events stay visible while they are upcoming so visitors learn about the change.
-  const visibleEvents = recentEvents
-    .filter((event) => !(event.date < today && event.cancelled))
-    .slice(0, 4);
+  // Nearest upcoming sessions first (cancelled ones included so visitors learn about the
+  // change), then the most recent delivered sessions fill the remaining rows.
+  const upcoming = events.filter((event) => event.date >= today).reverse();
+  const recent = events.filter((event) => event.date < today && !event.cancelled);
+  const visibleEvents = [...upcoming, ...recent].slice(0, 4);
 
   return (
     <section className={styles.section} aria-labelledby="talks-title">
@@ -58,7 +59,11 @@ export default function EventsSection(): ReactNode {
 
           <div className={styles.splitList}>
             <p className={styles.listCaption}>
-              {visibleEvents.some((event) => event.date >= today) ? 'Next and recent sessions' : 'Recent sessions'}
+              {upcoming.length === 0
+                ? 'Recent sessions'
+                : upcoming.length >= visibleEvents.length
+                  ? 'Next sessions'
+                  : 'Next and recent sessions'}
             </p>
             {visibleEvents.map((event) => (
               <EventRow

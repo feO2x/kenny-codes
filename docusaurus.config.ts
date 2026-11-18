@@ -255,11 +255,13 @@ const config: Config = {
               type: "docSidebar",
               sidebarId: "guidedCodingSidebar",
               label: "Guided Coding & Guided Learning",
+              activeBaseRegex: "^/docs/guided-coding(/|$)",
             },
             {
               type: "docSidebar",
               sidebarId: "chackSidebar",
               label: "CHACK",
+              activeBaseRegex: "^/docs/chack(/|$)",
             },
           ],
         },
@@ -299,12 +301,9 @@ const config: Config = {
             { label: "X", href: "https://x.com/feO2x" },
           ],
         },
-        {
-          title: "Kenny Codes",
-          items: [{ label: "Legal notice", to: "/legal-notice" }],
-        },
       ],
-      copyright: `© ${new Date().getFullYear()} Kenny Pflug, Regensburg, Germany`,
+      // Rendered as HTML, so the link goes through baseUrl to keep working in PR previews.
+      copyright: `© ${new Date().getFullYear()} Kenny Pflug, Regensburg, Germany. <a class="footer__link-item" href="${baseUrl}legal-notice">Legal notice</a>`,
     },
     prism: {
       theme: prismThemes.github,
