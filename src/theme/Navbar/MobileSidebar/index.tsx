@@ -6,6 +6,15 @@ import {useNavbarMobileSidebar} from '@docusaurus/theme-common/internal';
 
 type Props = WrapperProps<typeof NavbarMobileSidebarType>;
 
+/** Visible, focusable elements inside the drawer's active panel and header. */
+function drawerFocusables(): HTMLElement[] {
+  return Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '.navbar-sidebar a[href], .navbar-sidebar button:not([disabled])',
+    ),
+  ).filter((el) => el.offsetParent !== null && !el.closest('[inert]'));
+}
+
 /** Everything on the page except the open drawer, which must not receive focus meanwhile. */
 function backgroundElements(): HTMLElement[] {
   const root = document.getElementById('__docusaurus');
@@ -62,15 +71,14 @@ export default function NavbarMobileSidebarWrapper(props: Props): ReactNode {
       }
       if (event.key !== 'Tab') return;
       // Keep Tab cycling inside the drawer instead of escaping to the browser chrome.
-      const focusable = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          '.navbar-sidebar a[href], .navbar-sidebar button:not([disabled])',
-        ),
-      ).filter((el) => el.offsetParent !== null && !el.closest('[inert]'));
+      const focusable = drawerFocusables();
       if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      if (!focusable.includes(document.activeElement as HTMLElement)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
@@ -80,7 +88,23 @@ export default function NavbarMobileSidebarWrapper(props: Props): ReactNode {
     };
     document.addEventListener('keydown', onKeyDown);
 
+    // Switching between the main menu and the docs panel hides the focused button. Move focus to
+    // the first item of the panel that is now visible.
+    const onClick = () => {
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          const focusable = drawerFocusables();
+          if (!focusable.includes(document.activeElement as HTMLElement)) {
+            const panelItem = focusable.find((el) => el.closest('.navbar-sidebar__items'));
+            (panelItem ?? focusable[0])?.focus();
+          }
+        }),
+      );
+    };
+    drawer?.addEventListener('click', onClick);
+
     return () => {
+      drawer?.removeEventListener('click', onClick);
       cancelAnimationFrame(frame);
       drawer?.removeAttribute('role');
       drawer?.removeAttribute('aria-modal');

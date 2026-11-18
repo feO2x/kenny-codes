@@ -75,7 +75,7 @@
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1;
   object-fit: cover;
   object-position: 50% 62%;
   border-radius: var(--kc-radius-lg);
@@ -94,6 +94,12 @@
 
 .listing {
   padding-bottom: clamp(4rem, 3rem + 3vw, 6rem);
+}
+
+.backLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
 }
 
 .back {

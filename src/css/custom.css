@@ -293,8 +293,26 @@ hr {
   background-image: none;
 }
 
-.navbar__items .navbar__item.navbar__link {
+.navbar__items .navbar__item.navbar__link,
+.navbar__item.dropdown > .navbar__link {
   padding-block: calc((var(--ifm-navbar-height) - 2rem - 1.5rem) / 2);
+}
+
+/* Give the Learn dropdown the same box as Blog and Events so their active markers line up,
+   and make its whole area the button's hit target. */
+.navbar__items .navbar__item.dropdown {
+  padding: 0;
+}
+
+.navbar__item.dropdown > .navbar__link {
+  display: block;
+  padding-inline: var(--ifm-navbar-item-padding-horizontal);
+  /* Infima disables pointer events on href-less dropdown links; ours is a real button. */
+  pointer-events: auto;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: var(--ifm-line-height-base);
 }
 
 .dropdown__menu {
@@ -463,8 +481,7 @@ hr {
 }
 
 .markdown table {
-  display: table;
-  width: 100%;
+  /* Infima keeps tables display: block so wide ones scroll on their own instead of the page. */
   border-collapse: collapse;
   font-size: 0.95rem;
 }
@@ -639,6 +656,24 @@ pre code,
 .pagination-nav__label {
   font-weight: 650;
   font-stretch: 106%;
+}
+
+@media (max-width: 576px) {
+  .pagination-nav {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pagination-nav__link--next {
+    grid-column: 1;
+    text-align: left;
+  }
+}
+
+/* Event pages have no sidebar or TOC: start the column on the container edge like /events. */
+.kc-event-page main.col {
+  --ifm-col-width: 100%;
+  margin-left: 0;
+  max-width: 54rem;
 }
 
 .pagination-nav__link--prev .pagination-nav__label::before,

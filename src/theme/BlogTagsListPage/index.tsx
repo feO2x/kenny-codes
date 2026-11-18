@@ -4,25 +4,26 @@ import {
   PageMetadata,
   HtmlClassNameProvider,
   ThemeClassNames,
-  translateTagsPageTitle,
 } from '@docusaurus/theme-common';
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import BlogLayout from '@theme/BlogLayout';
 import SearchMetadata from '@theme/SearchMetadata';
 import Heading from '@theme/Heading';
-import Tag from '@site/src/theme/Tag';
+import Tag from '@theme/Tag';
+import homeData from '@site/src/data/home-data.json';
+import {useToday} from '@site/src/utils/dateFormatting';
 import type {Props} from '@theme/BlogTagsListPage';
 import {isEventPage} from '@site/src/utils/eventUtils';
 
 type TagItem = Props['tags'][number];
 
-function TagCloud({tags, hideCounts = false}: {tags: ReadonlyArray<TagItem>; hideCounts?: boolean}): ReactNode {
+function TagCloud({tags}: {tags: ReadonlyArray<TagItem>}): ReactNode {
   return (
     <ul className="kc-tags__list kc-tag-cloud">
       {tags.map((tag) => (
         <li key={tag.permalink}>
-          <Tag {...tag} hideCount={hideCounts} />
+          <Tag {...tag} />
         </li>
       ))}
     </ul>
@@ -31,10 +32,27 @@ function TagCloud({tags, hideCounts = false}: {tags: ReadonlyArray<TagItem>; hid
 
 const byCountThenLabel = (a: TagItem, b: TagItem) =>
   b.count - a.count || a.label.localeCompare(b.label, 'en', {sensitivity: 'base'});
-const byLabel = (a: TagItem, b: TagItem) =>
-  a.label.localeCompare(b.label, 'en', {sensitivity: 'base'});
+
+/**
+ * Docusaurus counts every event with a tag, including cancelled ones that the archive hides once
+ * their date has passed. Recount with the archive's rule so the numbers match the topic pages.
+ */
+function useVisibleTopicCounts(): Map<string, number> {
+  const today = useToday();
+  const counts = new Map<string, number>();
+  for (const event of homeData.events) {
+    if (event.cancelled && event.date < today) continue;
+    for (const tag of event.tags ?? []) counts.set(tag, (counts.get(tag) ?? 0) + 1);
+  }
+  return counts;
+}
 
 function EventTopics({tags}: {tags: ReadonlyArray<TagItem>}): ReactNode {
+  const counts = useVisibleTopicCounts();
+  const topics = tags
+    .map((tag) => ({...tag, count: counts.get(tag.label) ?? 0}))
+    .filter((tag) => tag.count > 0)
+    .sort(byCountThenLabel);
   return (
     <Layout title="Topics" description="Talks and workshops by Kenny Pflug, by topic">
       <main className="container kc-narrow-page kc-wide-page">
@@ -47,21 +65,20 @@ function EventTopics({tags}: {tags: ReadonlyArray<TagItem>}): ReactNode {
           </Heading>
           <p className="kc-page-lede">Talks and workshops by topic, most frequent first.</p>
         </header>
-        {/* Tag counts include cancelled sessions that the archive hides, so they are left out. */}
-        <TagCloud tags={[...tags].sort(byCountThenLabel)} hideCounts />
+        <TagCloud tags={topics} />
       </main>
     </Layout>
   );
 }
 
 export default function BlogTagsListPage({tags, sidebar}: Props): ReactNode {
-  const title = translateTagsPageTitle();
+  const title = 'Topics';
   const isEvents = tags.length > 0 && isEventPage({permalink: tags[0].permalink});
 
   return (
     <HtmlClassNameProvider
       className={clsx(ThemeClassNames.wrapper.blogPages, ThemeClassNames.page.blogTagsListPage)}>
-      <PageMetadata title={isEvents ? 'Topics' : title} />
+      <PageMetadata title={title} />
       <SearchMetadata tag="blog_tags_list" />
       {isEvents ? (
         <EventTopics tags={tags} />
@@ -74,8 +91,9 @@ export default function BlogTagsListPage({tags, sidebar}: Props): ReactNode {
             <Heading as="h1" className="kc-page-title">
               {title}
             </Heading>
+            <p className="kc-page-lede">Articles by topic, most frequent first.</p>
           </header>
-          <TagCloud tags={[...tags].sort(byLabel)} />
+          <TagCloud tags={[...tags].sort(byCountThenLabel)} />
         </BlogLayout>
       )}
     </HtmlClassNameProvider>

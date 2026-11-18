@@ -48,7 +48,9 @@ export default function HeroSection(): ReactNode {
               in-house workshops, or consulting on cloud-native .NET and AI-assisted development.
             </p>
             <div className={styles.heroActions}>
-              <a className="button button--primary button--lg" href={CONTACT_MAILTO}>
+              <a
+                className="button button--primary button--lg"
+                href={`${CONTACT_MAILTO}?subject=Speaking%20or%20consulting%20inquiry`}>
                 Get in touch
               </a>
               <Link className="button button--secondary button--lg" to="/events">

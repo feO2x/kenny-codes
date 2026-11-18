@@ -2,7 +2,7 @@
   --square: 18px;
   --gap: 4px;
   --record-from: #0066d6;
-  --record-to: #00a38c;
+  --record-to: #008f7a;
   margin: 0;
 }
 
@@ -36,6 +36,11 @@
   color: var(--kc-muted);
   text-decoration: none;
   position: relative;
+}
+
+/* Inset focus ring so the outermost columns are not clipped at the screen edge. */
+a.columnLink:focus-visible {
+  outline-offset: -2px;
 }
 
 a.columnLink:hover {

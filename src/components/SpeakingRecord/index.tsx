@@ -67,7 +67,9 @@ export default function SpeakingRecord({
   const hasUpcoming = columns.some((c) => c.upcoming > 0);
 
   return (
-    <figure className={clsx(styles.record, className)}>
+    <figure
+      className={clsx(styles.record, className)}
+      aria-label="Talks, workshops, and webinars per year">
       <ol className={styles.chart} style={{'--rows': tallest} as CSSProperties}>
         {columns.map((column, col) => {
           const total = column.delivered + column.upcoming;

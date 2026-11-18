@@ -58,12 +58,14 @@ function BlogPostPageContent({
 
 export default function BlogPostPage(props: Props): ReactNode {
   const BlogPostContent = props.content;
+  const isEvent = isEventPage(props.content.metadata);
   return (
     <BlogPostProvider content={props.content} isBlogPostPage>
       <HtmlClassNameProvider
         className={clsx(
           ThemeClassNames.wrapper.blogPages,
           ThemeClassNames.page.blogPostPage,
+          isEvent && 'kc-event-page',
         )}>
         <BlogPostPageMetadata />
         <BlogPostPageStructuredData />

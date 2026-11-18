@@ -40,7 +40,8 @@ function renderRow(item: ListingItem, isUpcoming: boolean): ReactNode {
       event={fm.event}
       videoUrl={fm.videoUrl}
       cancelled={isUpcoming ? fm.cancelled : false}
-      isUpcoming={isUpcoming}
+      // Rows already sit under the "Upcoming" heading, so they need no badge of their own.
+      isUpcoming={false}
       headingLevel={isUpcoming ? 'h3' : 'h4'}
       showYear={isUpcoming}
     />

@@ -20,9 +20,14 @@ export default function EventsBlogTagsPostsContent({items, tag}: Props): ReactNo
       <main className="container">
         <header className={styles.header}>
           <div className={styles.headerText}>
-            <Link to="/events" className={styles.back}>
-              All talks and workshops
-            </Link>
+            <nav className={styles.backLinks} aria-label="Events">
+              <Link to="/events" className={styles.back}>
+                All talks and workshops
+              </Link>
+              <Link to="/events/tags" className={styles.back}>
+                All topics
+              </Link>
+            </nav>
             <Heading as="h1" className={styles.title}>
               {tag.label}
             </Heading>

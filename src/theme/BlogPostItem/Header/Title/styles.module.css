@@ -1,10 +1,18 @@
 .title {
-  font-size: clamp(2.1rem, 1.5rem + 2.4vw, 3.1rem);
+  font-size: clamp(2.1rem, 1.3rem + 2.2vw, 3.1rem);
   font-weight: 750;
   font-stretch: 118%;
   letter-spacing: -0.028em;
   line-height: 1.08;
   margin-bottom: 0.75rem;
+}
+
+/* Between tablet and wide desktop the post column is narrow; tighten the width axis. */
+@media (min-width: 997px) and (max-width: 1279px) {
+  .title {
+    font-stretch: 106%;
+    font-size: 2.35rem;
+  }
 }
 
 /* Titles in the blog list are links and slightly smaller than on the post page. */

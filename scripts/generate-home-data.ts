@@ -28,7 +28,7 @@ interface ContentItem {
   cancelled?: boolean;
 }
 
-type HomeEvent = Omit<ContentItem, "excerpt" | "tags">;
+type HomeEvent = Omit<ContentItem, "excerpt">;
 
 interface HomeData {
   recentPosts: ContentItem[];
@@ -207,7 +207,7 @@ const allEvents = readAllContent(EVENTS_DIR, "events");
 
 const output: HomeData = {
   recentPosts: allPosts.slice(0, 4),
-  events: allEvents.map(({ excerpt: _excerpt, tags: _tags, ...event }) => event),
+  events: allEvents.map(({ excerpt: _excerpt, ...event }) => event),
   venues: rankVenues(allEvents),
 };
 
