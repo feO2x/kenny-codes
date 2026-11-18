@@ -11,7 +11,7 @@ There is no single right structure. The Guided Coding skills ship two, and you c
 
 ## The default structure
 
-The default structure organizes this information into three sections:
+The default structure organizes the why, what, and how into three sections:
 
 1. **Rationale** - the problem and the goal of this work.
 2. **Acceptance Criteria** - observable, verifiable outcomes as unchecked Markdown tasks (`- [ ]`). They describe results, not implementation steps.

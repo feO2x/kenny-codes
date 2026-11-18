@@ -13,13 +13,13 @@ Guided Coding is a way to develop software with AI coding agents in three phases
 
 <GuidedCodingDiagram />
 
-- **Plan** with the agent, revising the approach together. Before you finish, ask "Would you change anything about the plan?" Repeat until the plan is stable, then freeze it and commit it to git. A **frozen** plan records what you decided at that point. Afterwards, the only permitted edit is checking off acceptance criteria after verification.
+- **Plan** with the agent, revising the approach together. Before you finish, ask "Would you change anything about the plan?" Repeat until the plan is stable, then freeze it and commit it to git. A **frozen** plan records what you decided at that point. From then on, the only permitted edit is checking off verified acceptance criteria.
 - **Implement** by giving the agent one focused plan in a fresh conversation. Automated feedback loops, such as tests, linters, and benchmarks, help it verify its work.
 - **Guide** by reviewing all generated code. This is where you spend most of your time. **Understand the code** and check that it meets the plan. Request small fixes with a targeted prompt. For larger changes, write a follow-up plan with the agent. Write a **Plan Deviations** document whenever follow-up plans exist or the finished code materially changes or rejects an explicit decision in the accepted plans.
 
-You guide the work throughout all three phases. During Planning, you discuss the approach with the agent. During Implementing, the plan and your feedback loops guide its work. During Guiding, you review the result yourself.
+You guide the work throughout all three phases: directly in the Planning and Guiding Phases, and through the plan and feedback loops in the Implementing Phase.
 
-Use [rules files](./rules-files.md) for team decisions and information agents should not have to rediscover. Adjust [plan size](./finding-the-right-plan-size.md) based on your experience with the models you use. Review the result for correctness, performance, and security.
+Keep [rules files](./rules-files.md) limited to information agents cannot reliably discover from the code or should not have to rediscover, such as team workflow rules, feedback-loop commands, and rules against repeated mistakes. Adjust [plan size](./finding-the-right-plan-size.md) based on your experience with the models you use. Review the result for correctness, performance, and security.
 
 **Guided Learning** is a variant for developers who are still learning the domain a plan touches: in the Implementing Phase, you write the code yourself while the agent teaches you, ideally with a senior developer at your side during Planning and Guiding. See [Guided Learning: Getting Started](./guided-learning-getting-started.mdx).
 
@@ -27,9 +27,7 @@ Use [rules files](./rules-files.md) for team decisions and information agents sh
 
 You can practice Guided Coding with Markdown files, git, and the coding agent you already use. No additional tools are required.
 
-These docs include the plan structure, filenames, commit timing, and [Agent Skills](https://github.com/feO2x/guided-coding) I use every day. You can adopt this setup or adapt it to your own workflow.
-
-These docs have two layers:
+These docs explain the method alongside the plan structure, filenames, commit timing, and [Agent Skills](https://github.com/feO2x/guided-coding) I use every day. You can adopt this setup or adapt it to your own workflow. The two layers are:
 
 - **The method** - the regular text explains the approach and why it works, regardless of your language, issue tracker, or agent.
 - **The Opinionated Path** - callouts show **how I work**, including the prompts, filenames, and skills I use. These details are optional.

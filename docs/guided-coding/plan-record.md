@@ -25,9 +25,9 @@ The `ai-plans/` directory answers questions that git history alone answers badly
 
 **A plan freezes when its Planning Phase ends** - in practice, right before you commit it.
 
-From that moment, exactly one edit is permitted: ticking an acceptance criterion from `- [ ]` to `- [x]`. And even that comes with conditions:
+From that moment, exactly one edit is permitted: checking off an acceptance criterion from `- [ ]` to `- [x]`. These conditions apply:
 
-- Tick a criterion only after the implementation exists *and* the relevant feedback loops verify it.
+- Check off a criterion only after the implementation satisfies it *and* the relevant feedback loops verify the result.
 - Leave unmet criteria unchecked. An unmet criterion is information; hiding it is not.
 - A criterion met only through a workaround also stays unchecked until a reviewer accepts the workaround. The reviewer may then check it off. See [Workarounds and Reported Problems](./guiding-phase.mdx#workarounds-and-reported-problems).
 - Never reword, add, remove, or reorder criteria in a frozen plan.
