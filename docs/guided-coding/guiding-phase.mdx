@@ -24,7 +24,7 @@ This is the most important and time-consuming phase. You review all the generate
 - **Make manual changes if needed.** Your coding agent doesn't need to do all the work - use it as a tool to write the code you would write yourself, just faster.
 - **Close the record.** Follow-up plans always require a Plan Deviations document; with a single plan, write one only for material departures. When the review of the pull request leads to another follow-up plan, update that document.
 
-You remain responsible for reviewing and accepting the code. An agent's review can help you find problems, but you must understand the changes yourself.
+No Guided Coding skill performs this review for you. An agent's review provides a second opinion; you decide whether to accept the code.
 
 ## How to Review
 
@@ -36,7 +36,7 @@ You remain responsible for reviewing and accepting the code. An agent's review c
 - **Check for regressions.** Look beyond the feature itself. Did the agent accidentally change something unrelated? A quick scan of the full diff helps catch unintended side effects.
 - **Verify non-functional aspects.** Depending on the feature, check performance characteristics, logging, error messages, and security boundaries. These are easy for agents to overlook or handle superficially.
 
-It takes experience to review the code produced by a Coding Agent. Educate yourself to become a better reviewer over time, don't be afraid to ask your (non-AI) colleagues if something is unclear and you think the coding agent is hallucinating.
+Reviewing an agent's code takes practice. Learn unfamiliar concepts and ask colleagues for help when something is unclear or you suspect the agent is wrong.
 
 :::tip[The Opinionated Path]
 I review the changes myself first, then optionally open a **fresh conversation** and have another agent review the outcome of the Implementing Phase. Two independent passes catch different things: I catch design and intent problems, the agent catches the mechanical ones I skimmed past at file number thirty.

@@ -13,11 +13,13 @@ Guided Coding is a way to develop software with AI coding agents in three phases
 
 <GuidedCodingDiagram />
 
-- **Plan** with the agent, revising the approach together. Before you finish, ask "Would you change anything about the plan?" Repeat until the plan is stable, then freeze it and commit it to git. A **frozen** plan records what you decided at that point.
+- **Plan** with the agent, revising the approach together. Before you finish, ask "Would you change anything about the plan?" Repeat until the plan is stable, then freeze it and commit it to git. A **frozen** plan records what you decided at that point. Afterwards, the only permitted edit is checking off acceptance criteria after verification.
 - **Implement** by giving the agent one focused plan in a fresh conversation. Automated feedback loops, such as tests, linters, and benchmarks, help it verify its work.
-- **Guide** by reviewing all generated code. This is where you spend most of your time. **Understand the code** and check that it meets the plan. Request small fixes with a targeted prompt. For larger changes, write a follow-up plan with the agent. Write a **Plan Deviations** document whenever follow-up plans exist or the finished code significantly changes an explicit decision in the accepted plans.
+- **Guide** by reviewing all generated code. This is where you spend most of your time. **Understand the code** and check that it meets the plan. Request small fixes with a targeted prompt. For larger changes, write a follow-up plan with the agent. Write a **Plan Deviations** document whenever follow-up plans exist or the finished code materially changes or rejects an explicit decision in the accepted plans.
 
-Keep rules files short. Adjust plan size based on your experience with the models you use. Review the result for correctness, performance, and security.
+You guide the work throughout all three phases. During Planning, you discuss the approach with the agent. During Implementing, the plan and your feedback loops guide its work. During Guiding, you review the result yourself.
+
+Use [rules files](./rules-files.md) for team decisions and information agents should not have to rediscover. Adjust [plan size](./finding-the-right-plan-size.md) based on your experience with the models you use. Review the result for correctness, performance, and security.
 
 **Guided Learning** is a variant for developers who are still learning the domain a plan touches: in the Implementing Phase, you write the code yourself while the agent teaches you, ideally with a senior developer at your side during Planning and Guiding. See [Guided Learning: Getting Started](./guided-learning-getting-started.mdx).
 
@@ -27,7 +29,7 @@ You can practice Guided Coding with Markdown files, git, and the coding agent yo
 
 These docs include the plan structure, filenames, commit timing, and [Agent Skills](https://github.com/feO2x/guided-coding) I use every day. You can adopt this setup or adapt it to your own workflow.
 
-So these docs are written in two layers:
+These docs have two layers:
 
 - **The method** - the regular text explains the approach and why it works, regardless of your language, issue tracker, or agent.
 - **The Opinionated Path** - callouts show **how I work**, including the prompts, filenames, and skills I use. These details are optional.
@@ -45,8 +47,6 @@ Andrej Karpathy, co-founder of OpenAI, [coined the term Vibe Coding in February 
 [![Andrej Karpathy's Vibe Coding post](./vibe-coding-post.png)](https://x.com/karpathy/status/1886192184808149383)
 
 Vibe Coding can be fun for personal projects and useful for rapid prototyping. For production software, you need to understand how the code works and be able to maintain it. I developed Guided Coding to work faster with agents while keeping that understanding and control.
-
-That's what Guided Coding is about.
 
 ## Where to Go Next
 

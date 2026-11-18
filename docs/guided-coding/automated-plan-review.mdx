@@ -95,7 +95,7 @@ Reviewers may raise new findings. They may repeat a rejected finding only if the
 
 ### Finding classes
 
-- **`blocking`** - a false premise, an open decision, an acceptance criterion that cannot be verified, or a contradiction with the code.
+- **`blocking`** - a false assumption, an open decision, an acceptance criterion that cannot be verified, or a contradiction with the code.
 - **`gap`** - a missing scenario or fact.
 - **`nit`** - everything else.
 
@@ -105,7 +105,7 @@ The planner addresses findings in every class. It follows the `collect` or `paus
 
 Apart from your explicit decisions, the planner may change anything in the plan, including decisions it made alone and the scope. That freedom is what makes the rounds useful, and it is also why the report lists those changes separately for you.
 
-Revisions must follow the selected plan structure. The planner keeps review commentary out of the plan and does not turn minor suggestions into new rules.
+Revisions must follow the selected plan structure. The planner keeps review commentary out of the plan and does not turn `nit` findings into new rules.
 
 ### When the run stops
 
@@ -124,7 +124,7 @@ The report is where your review begins. Start with the **list of decision and sc
 Then go through the rest:
 
 - **Every finding** with its round, class, a one-line summary, and its resolution: applied, rejected with the reason, or open for you. Read the rejected ones, too. A rejection you disagree with is a discussion worth having.
-- **The reviewers and the models actually used.** A configured model that was unavailable shows up here, together with the harness default it was replaced by.
+- **The reviewers and the models actually used.** If a configured model was unavailable, the report names the coding agent's default model used in its place.
 - **The plan's word count** before and after review. A plan that grew a lot deserves a second look at its level of detail.
 - **Whether the plan changed after the last round.** The independent reviewers have not checked those changes.
 
@@ -132,7 +132,7 @@ Then go through the rest:
 
 Some outcomes are not a completed review, and the report says so:
 
-- **No independent reviewers are available.** Reviewers must not share the planning conversation, so they run as subagents, threads, or separate sessions. If your harness offers none of these, the skill reports the plan path, states that no review ran, and stops. It never reviews the plan in its own context instead. Run `guided-coding-review-plan` in a fresh session.
+- **No independent reviewers are available.** Reviewers must not share the planning conversation, so they run as subagents, threads, or separate sessions. If your coding agent offers none of these, the skill reports the plan path, states that no review ran, and stops. It never reviews the plan in its own context instead. Run `guided-coding-review-plan` in a fresh session.
 - **`guided-coding-write-plan` cannot be invoked.** The skill never writes a plan without it, so it stops and asks you to run `guided-coding-write-plan` first. Afterwards, run `guided-coding-plan-and-review` again, and it picks up the draft.
 - **A round is incomplete.** If a reviewer fails or times out, the skill starts one replacement. If that fails too, the skill addresses the findings it already has, reports the incomplete round, and stops.
 - **The plan changed after the last round.** The independent reviewers have not checked the planner's final revisions. Read them with particular care.

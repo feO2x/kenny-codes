@@ -36,7 +36,7 @@ Both approaches agree on the fundamentals:
 - **Iteration model**: In Guided Coding, the guiding phase can send you back to planning (for large issues) or back to implementation (for small ones). Vise Coding iterates at a smaller scale - change by change.
 - **Feedback loops**: Guided Coding uses automated feedback loops (tests, linters, benchmarks) to let the agent work autonomously for longer stretches. Vise Coding keeps the developer involved in every change.
 
-Vise Coding gives detailed instructions for each change. Guided Coding structures the work into phases and gives the agent more freedom during implementation.
+In Vise Coding, you constrain each change in detail. Guided Coding structures the work into phases and gives the agent more freedom during implementation.
 
 ## Spec-Driven Development
 
@@ -69,20 +69,20 @@ Spec Kit puts the specification at the center as a "source of truth" that drives
 - **Specification depth**: Spec Kit's specify phase focuses on user journeys, experiences, and outcomes - a product-level document. Guided Coding plans are technical documents with rationale, acceptance criteria, and implementation details. They're written *by* developers *for* developers (and agents).
 - **Review phase**: Guided Coding has an explicit guiding phase where you spend the majority of your time reviewing code, evaluating design, and deciding whether to iterate. Spec Kit's review happens at phase boundaries but doesn't formalize the code review as a distinct, time-intensive phase.
 - **Iteration**: Guided Coding explicitly encourages going back - from guiding to planning, from guiding to implementation. The feedback arrows are central to the methodology. Spec Kit's phases are more sequential, though it does mention refining specs.
-- **Weight**: Spec Kit covers more of the development process, with its `specify` CLI, commands or skills, templates, and generated files. Guided Coding keeps plans, follow-up plans when needed, and a Plan Deviations document when required.
-- **Adoption**: Guided Coding can be adopted incrementally with minimal setup. You start writing plans in markdown and reviewing code more thoroughly. Spec Kit requires buying into its toolchain and artifact structure.
+- **Weight**: Spec Kit covers more of the development process, with its `specify` CLI, commands or skills, templates, and generated files. Guided Coding records decisions in plans, follow-up plans when needed, and a Plan Deviations document when required.
+- **Adoption**: Guided Coding can be adopted incrementally with minimal setup. You start writing plans in Markdown and reviewing code more thoroughly. Spec Kit requires buying into its toolchain and artifact structure.
 - **Record**: Spec Kit's spec is a living source of truth kept in sync with the system. Guided Coding's `ai-plans/` is an append-only record of decisions: plans freeze, and corrections are appended rather than merged in. One optimizes for describing the system as it is, the other for explaining how it got that way.
 
 Guided Coding's [optional skills](https://github.com/feO2x/guided-coding) write and review plans, freeze them with timestamped filenames, and record deviations. The approaches differ in how much of the development process they document for agents to read.
 
-Spec Kit creates a constitution, specification, plan, and task list, along with instructions for using them. [BMad](https://github.com/bmad-code-org/BMAD-METHOD) also covers product planning, architecture, UX, development, and testing. These documents can help larger teams work consistently and trace decisions. They also give agents more information to read and usually increase token use. Guided Coding records the plans and decision changes for each piece of work, leaving the rest of the development process to your team.
+Spec Kit creates a constitution, specification, plan, and task list, along with instructions for using them. [BMad](https://github.com/bmad-code-org/BMAD-METHOD) also covers product planning, architecture, UX, development, and testing. These documents can help larger teams work consistently and trace decisions. They also give agents more information to read and usually increase token use. Guided Coding keeps the documents agents read focused on plans and decision changes for each piece of work.
 
 ## At a glance
 
 | | **Vibe Coding** | **Vise Coding** | **Spec-Driven (Spec Kit)** | **Guided Coding** |
 |---|---|---|---|---|
 | **Core idea** | Accept everything, never read the code | Constrain every change via rules and review | Spec as source of truth, agent generates artifacts | Plan iteratively, implement autonomously, guide thoroughly |
-| **Planning** | None | Via rules and prompts | Constitution → specify → plan → tasks pipeline | Collaborative markdown plans committed to git |
+| **Planning** | None | Via rules and prompts | Constitution → specify → plan → tasks pipeline | Collaborative Markdown plans committed to git |
 | **Change size** | Unbounded | Small, one at a time | Task-sized chunks | Plan-sized (hundreds to thousands of lines) |
 | **Review** | None (look at the running app) | Every change, including docs | At phase boundaries | Dedicated guiding phase (most time spent here) |
 | **Iteration** | Forward only | Change-level iteration | Phase-level refinement | Explicit loops back to planning or implementation |
@@ -93,6 +93,6 @@ Spec Kit creates a constitution, specification, plan, and task list, along with 
 
 ## They're not mutually exclusive
 
-These approaches aren't in competition - they address different aspects of the problem. You could combine Vise Coding's per-change discipline with Guided Coding's planning and guiding phases. You could use Spec Kit's specification process to feed into Guided Coding plans. The key insight all three share is the same: **you are responsible for the code, not the agent.**
+These approaches address different aspects of the problem and can be combined. You could use Vise Coding's per-change discipline with Guided Coding's planning and guiding phases, or use Spec Kit's specifications as input to Guided Coding plans. All three emphasize that **you are responsible for the code.**
 
-Pick what works for your team, your project, and your workflow. Guided Coding's strength is that it's lean enough to adopt quickly, even for devs with less experience, while structured enough to scale to enterprise codebases.
+Pick what works for your team, your project, and your workflow. You can start practicing Guided Coding with a small change and use the same approach as your codebase grows.

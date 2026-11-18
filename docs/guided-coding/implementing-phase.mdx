@@ -20,7 +20,7 @@ The agent verifies that the plan is frozen and checks its assumptions against th
 
 ## The plan stays frozen
 
-The agent receives a committed plan and implements the decisions it records.
+The agent receives a committed plan and implements the decisions it records. It leaves the plan's text unchanged.
 
 The one exception is the acceptance criteria. As each criterion is genuinely satisfied - implemented *and* verified by the relevant feedback loop - it gets ticked from `- [ ]` to `- [x]`. Nothing else about the plan changes. Criteria are never reworded to match what was built, and unmet criteria stay unchecked so you can see them during review.
 
@@ -51,7 +51,7 @@ What the agent finds falls into one of three cases:
   4. No test is weakened or removed.
 - **Anything else.** The agent doesn't work around the problem. It stops the work that depends on the broken part, finishes the work that doesn't, and reports what the plan says, what it observed and how, and the options it sees.
 
-These conditions limit which changes the agent can make without asking you. The workaround addresses the error while preserving the plan's Rationale and its other decisions. You review it afterwards. If no workaround is allowed, the agent can still finish work that is unaffected by the problem.
+These conditions limit which changes the agent can make on its own. Evidence must confirm the error, and the workaround must preserve the plan's Rationale and its other decisions. You review the workaround afterwards. If no workaround is allowed, the agent can still finish work that is unaffected by the problem.
 
 An acceptance criterion that is met only through a workaround stays unchecked. Whether the workaround is acceptable is your call in the [Guiding Phase](./guiding-phase.mdx#workarounds-and-reported-problems), not the agent's. If you accept it, you check the criterion off yourself.
 

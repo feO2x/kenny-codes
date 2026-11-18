@@ -9,13 +9,13 @@ The three phases describe how you work on a change. The plans you keep explain h
 
 ## Append-only by design
 
-Updating a plan to match the implementation erases the original decisions and the reasons they changed.
+If you update a plan to match the implementation, the original decisions disappear from the document. Without a separate record, a reader cannot tell why they changed.
 
 In Guided Coding, a frozen plan records the decisions you and the agent made with the information available at the time. If those decisions change, you add a new document explaining what changed and why.
 
 This is similar to Event Sourcing: you preserve earlier events and record each change as a new event. The code shows the current implementation. The plans explain why you chose an abstraction, accepted a trade-off, or rejected an alternative.
 
-Concretely, the directory answers questions that git history alone answers badly:
+The `ai-plans/` directory answers questions that git history alone answers badly:
 
 - Why does this component exist in this shape?
 - Was this design considered and rejected, or never considered at all?
@@ -130,7 +130,7 @@ The skills refuse to overwrite or reuse an existing plan or Plan Deviations file
 - `/guided-coding-plan-and-review` writes the draft with `guided-coding-write-plan` and improves it through rounds of independent reviews before I read it. See [Automated Plan Review](./automated-plan-review.mdx).
 - `/guided-coding-freeze-plan` ends the Planning Phase: it renames the draft with a UTC timestamp and the optional ticket ID, inserts the `*Frozen at ...*` line, and stops. I commit the frozen plan afterwards.
 - `/guided-coding-implement` implements a frozen plan. It checks off an acceptance criterion only after the implementation satisfies it and the relevant feedback loop verifies the result.
-- `/guided-coding-write-deviations` always writes a document when follow-up plans exist. With a single plan, it reports "no material deviations" rather than inventing entries when the implementation matched. Run again before the merge, it renames and rewrites the existing document. The skill only writes the file. After reviewing and accepting it, I commit it, create the pull request, and use its contents as the PR description with a normal prompt.
+- `/guided-coding-write-deviations` always writes a document when follow-up plans exist. With a single plan, it reports "no material deviations" rather than inventing entries when the implementation matched. When run again before the merge, it renames and rewrites the existing document. The skill only writes the file. After reviewing and accepting it, I commit it, create the pull request, and use its contents as the PR description with a normal prompt.
 
 See [Guided Coding: Getting Started](./guided-coding-getting-started.mdx) for the full sequence.
 :::

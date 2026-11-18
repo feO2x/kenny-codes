@@ -27,7 +27,7 @@ Add a rule when you see the **same avoidable error across multiple tasks**. For 
 
 This is empirical knowledge: a specific response to observed behavior, not a generic attempt to predict everything an agent might do wrong. Keep the rule focused on the desired outcome and let the codebase provide the surrounding context.
 
-Revisit these rules after changing models, agent harnesses, or project conventions. If the mistake no longer occurs, remove the rule.
+Revisit these rules after changing models, coding agents, or project conventions. If the mistake no longer occurs, remove the rule.
 
 ## Keep the scope narrow
 

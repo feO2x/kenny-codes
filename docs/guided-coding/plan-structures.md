@@ -11,7 +11,7 @@ There is no single right structure. The Guided Coding skills ship two, and you c
 
 ## The default structure
 
-The default structure has exactly the three sections the questions above call for:
+The default structure organizes this information into three sections:
 
 1. **Rationale** - the problem and the goal of this work.
 2. **Acceptance Criteria** - observable, verifiable outcomes as unchecked Markdown tasks (`- [ ]`). They describe results, not implementation steps.
@@ -45,7 +45,7 @@ Before recording a Decision, check its assumptions against the code. This includ
 
 Sometimes an important assumption can't be verified during planning. Then the Decision says so, along with what follows if the assumption is wrong and what would resolve it. When a check disproves an assumption, the agent revises its own Decision. If the Decision was yours, it asks you first.
 
-The implementing skills check these assumptions again before they start. See the [Implementing Phase](./implementing-phase.mdx#when-the-plan-is-wrong). Finding an incorrect assumption during planning lets you fix it before writing code.
+The implementing skills check these assumptions again before they start. See the [Implementing Phase](./implementing-phase.mdx#when-the-plan-is-wrong). During planning, you can correct an assumption by revising the draft. Discovering the same error during implementation may require a workaround or a follow-up plan.
 
 ### Each section adds information
 
@@ -75,7 +75,7 @@ You can choose a structure for a single plan, for a whole repository, or write y
 A structure named in your command takes precedence over `ai-plans/AGENTS.md`, which takes precedence over the default. If a named file doesn't exist, the skill stops and reports it.
 
 :::tip[The Opinionated Path]
-I use RDAT for every plan. The line ``Use the RDAT plan structure (`rdat-plan-structure.md`).`` sits in the `ai-plans/AGENTS.md` of each of my repositories, so I never have to name it when I invoke a skill. `/guided-coding-setup` doesn't add it for you - [Getting Started](./guided-coding-getting-started.mdx#step-0-set-up-the-repository) shows where it goes.
+I use RDAT for every plan. The line ``Use the RDAT plan structure (`rdat-plan-structure.md`).`` sits in the `ai-plans/AGENTS.md` of each of my repositories, so I never have to name it when I run a skill. `/guided-coding-setup` doesn't add it for you - [Getting Started](./guided-coding-getting-started.mdx#step-0-set-up-the-repository) shows where it goes.
 
 The Decisions section changed how I review plans. I read it first and ask myself whether I would approve it as it stands. Only then do I check whether the criteria really verify each Decision.
 :::

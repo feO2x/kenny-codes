@@ -13,11 +13,11 @@ import GuidedCodingDiagram from '@site/src/components/GuidedCodingDiagram';
 
 Start a new conversation with your coding agent and work out a plan together. Discuss the requirements and the technical approach:
 
-- **Don't use your Coding Agent's "planning mode"**. I don't use the built-in "planning mode" of coding agents. There is no iteration involved, and plans typically do not end up in your git repo. The default Agent mode is enough, you steer the conversation actively.
+- **Don't use your coding agent's "planning mode".** I don't use the built-in "planning mode" of coding agents. There is no iteration involved, and plans typically do not end up in your git repo. The default agent mode is enough; you steer the conversation actively.
 - **Give the agent a role.** I use something like "As an experienced .NET architect" in my first prompt of the planning phase. This focuses the agent on planning rather than jumping into implementation. Assigning roles tends to produce better results in my experience.
 - **Discuss the feature.** Ask the agent how it would approach the problem. Review its suggestions about elements like design, refactorings, testing, and performance. Bring your own thoughts and questions to the table - this is a conversation, not delegation.
 - **End with repeated sanity checks.** At the end of the planning phase, I typically ask *"Would you change anything about the plan?"* This often catches things I didn't think of. Do this repeatedly until the plan stabilizes.
-- **Commit the plan as a markdown file in the git repo.** Plans serve as a project-specific decision record. They form a history, similar to Event Sourcing.
+- **Commit the plan as a Markdown file in the git repo.** Plans serve as a project-specific decision record. They form a history, similar to Event Sourcing.
 
 :::tip[The Opinionated Path]
 I open a **fresh conversation** and describe the context, then ask for an investigation rather than a solution:
@@ -45,8 +45,6 @@ A plan is not an epic, a user story, or an initiative - it should contain techni
 :::tip[The Opinionated Path]
 Once the approach is settled, I run `/guided-coding-write-plan` in the same conversation. It writes the draft to `ai-plans/<short-title>.md`, using the plan structure named in `ai-plans/AGENTS.md` - [RDAT](./plan-structures.md#rdat) in all my repositories. Freezing the plan adds the timestamp to its filename.
 
-The skill records the approach you have already discussed. Settle that approach before asking it to write the plan.
-
 I run it **once per plan**. I request revisions with ordinary prompts, such as "tighten the third acceptance criterion" or "we discussed X but it's missing". I run the skill again when I need a new plan, such as a follow-up after the Guiding Phase.
 
 For larger plans, I run `/guided-coding-plan-and-review` instead. It calls `guided-coding-write-plan` itself and then has the draft reviewed before I read it - more on that in the next section.
@@ -68,15 +66,15 @@ So review it properly:
 
 ### Letting independent reviewers go first
 
-Independent reviewers can review the draft before you read it. These agents have not seen your planning conversation. After each round, the planner addresses their findings. If another round is needed, new reviewers check the revised draft. You then review the plan and a report of what was found and changed.
+Independent agents can review the draft before you read it. They have not seen your planning conversation. After each round, the planner addresses their findings. If another round is needed, new reviewers check the revised draft. You then review the plan and a report of what was found and changed.
 
 This never replaces your own review. The reviewers can check a plan against the code. They cannot tell whether it solves the problem you actually have, and they don't know which decisions you made deliberately. So two rules keep you in charge: the agent never changes a decision you made explicitly without your approval, and the automated review ends where your review begins.
 
 ### A cycle, not a checklist
 
-Discuss, review, and revise the draft as often as needed. Use ordinary prompts to request changes. The Planning Phase ends when you agree that the plan is ready for implementation.
+Discuss, review, and revise the draft as often as needed. Use ordinary prompts to request changes. When you and the agent stop finding useful changes, freeze the plan to end the Planning Phase.
 
-If that sounds like a lot of conversation for one markdown file, it is. That is where the 30 to 90 minutes go, and it is the cheapest hour in the whole workflow.
+If that sounds like a lot of conversation for one Markdown file, it is. That is where the 30 to 90 minutes go, and it is the cheapest hour in the whole workflow.
 
 :::tip[The Opinionated Path]
 For larger or tougher plans, I use `/guided-coding-review-plan` in a **fresh conversation** with another coding agent. It reports findings only and never edits the plan - it checks acceptance criteria for verifiability, validates claims about existing code, and judges whether relevant risks like error handling, migration, performance, and security boundaries were considered.
@@ -92,7 +90,7 @@ The Planning Phase ends with a deliberate act: you freeze the plan and commit it
 
 That moment matters more than it looks. Up to that point the plan is a draft and anything can change. After it, the plan is **frozen** - a record of what you decided at that moment. You do not edit it later to match what actually happened. If the decision turns out to be wrong, you write a follow-up plan that supersedes it. If the implementation ends up somewhere else, you write a Plan Deviations document that explains why.
 
-The only edit permitted on a frozen plan is ticking an acceptance criterion from `- [ ]` to `- [x]`, and only once the implementation genuinely satisfies it.
+The only permitted edit to a frozen plan is checking off an acceptance criterion from `- [ ]` to `- [x]`, after the implementation satisfies it and the relevant feedback loops verify the result.
 
 This is what makes `ai-plans/` a decision record rather than a pile of stale documents. [The Plan Record](./plan-record.md) explains the rules and the reasoning in full.
 
