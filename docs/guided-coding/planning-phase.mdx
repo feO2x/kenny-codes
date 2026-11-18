@@ -30,24 +30,26 @@ Then I discuss this with the agent until I have understood the suggested approac
 
 ## Plan Structure
 
-After some experimentation, I settled on three sections which are quite common in Agile Development:
+Whatever structure you choose, a plan needs at least three sections, which are quite common in Agile Development:
 
 1. **Rationale** - Why do we want to build this? Why is this feature needed or why does this bug need fixing? This gives the agent context for the greater goal.
 2. **Acceptance Criteria** - Bullet points that must be fulfilled for the feature to be approved. The agent in the Implementing Phase will use these to check off each aspect of the feature after it's been implemented.
 3. **Technical Details** - Important parts of the codebase, extension points, types to modify or add, and design direction.
 
-Of course, you are free to use your own structure. What matters is that the plan states *why*, states *what must be true when it's done* in a way you can actually verify, and gives enough technical direction that a senior engineer - or a competent agent - can implement it without guessing at your intent.
+These three are the minimum, not the limit. What matters is that the plan states *why*, states *what must be true when it's done* in a way you can actually verify, and gives enough technical direction that a senior engineer - or a competent agent - can implement it without guessing at your intent. Once plans grow, it helps to pull the important choices into a section of their own, so a reviewer can approve the plan by reading just that. [Plan Structures](./plan-structures.md) describes the default structure, RDAT with its numbered Decisions, and how to bring your own.
 
 Keep plans focused. With Anthropic models in particular (Opus, Sonnet), plans tend to become very detailed with implementation phases and step-by-step instructions that the agent doesn't actually need. The models are smart enough to figure out the implementation order themselves. A plan that's too detailed can actually steer the agent in the wrong direction, because if you missed something, the overly prescriptive structure leaves no room for the agent to adapt. Therefore, use AGENTS.md or a skill to limit the plan size.
 
 A plan is not an epic, a user story, or an initiative - it should contain technical details. You should have technical knowledge to discuss and review these plans effectively.
 
 :::tip[The Opinionated Path]
-Once the approach is settled, I run `/guided-coding-write-plan` in the same conversation. It writes the plan into `ai-plans/<short-title>.md` with the three sections above. The plain short title marks a mutable draft; the timestamp is added only when the plan freezes.
+Once the approach is settled, I run `/guided-coding-write-plan` in the same conversation. It writes the plan into `ai-plans/<short-title>.md`, using the plan structure named in `ai-plans/AGENTS.md` - [RDAT](./plan-structures.md#rdat) in all my repositories. The plain short title marks a mutable draft; the timestamp is added only when the plan freezes.
 
 The skill is explicitly not allowed to *start* the planning conversation - it records the outcome of one. If you invoke it before you have discussed the approach, you get exactly the kind of plan this methodology is trying to avoid: one nobody thought about.
 
 I invoke it **once per plan**. Every revision that follows is a plain prompt - "tighten the third acceptance criterion", "we discussed X but it's missing" - and the agent edits the draft like any other file. I only reach for the skill again for a genuinely new document, such as a follow-up plan after the Guiding Phase.
+
+For larger plans, I run `/guided-coding-plan-and-review` instead. It calls `guided-coding-write-plan` itself and then has the draft reviewed before I read it - more on that in the next section.
 
 The filename convention and the reasoning behind it live on [The Plan Record](./plan-record.md) page.
 :::
@@ -64,6 +66,14 @@ So review it properly:
 - **Get a second opinion.** For larger or riskier plans, I open a fresh conversation with another agent and have it review the draft. An agent that just wrote a plan is a poor judge of it; a fresh one is far more likely to notice that an acceptance criterion is unfalsifiable or that a whole failure mode went unaddressed.
 - **Ask the closing question, repeatedly.** *"With you being the expert, would you change anything about the plan?"* Keep asking until the answer stops producing changes.
 
+### Letting independent reviewers go first
+
+A second opinion doesn't have to wait for you. Independent reviewers - agents in fresh contexts that never saw your conversation - can review the draft in rounds before you read it. After each round, the agent that wrote the plan addresses their findings, and the next round reviews the revised draft. You start your own review with a plan that has already lost its most obvious problems, plus a report of what was found and changed.
+
+This never replaces your own review. The reviewers can check a plan against the code. They cannot tell whether it solves the problem you actually have, and they don't know which decisions you made deliberately. So two rules keep you in charge: the agent never changes a decision you made explicitly without your approval, and the automated review ends where your review begins.
+
+### A cycle, not a checklist
+
 None of this is a linear checklist. Discussing, reviewing, and revising form a cycle you go around several times: the review turns up findings, the findings turn into discussion, the discussion turns into a revised draft, and that draft deserves another look. The draft itself gets written only once, at the start - from then on you change it by asking, the same way you change any other file. The phase is over when the cycle stops producing changes, not when you have performed each step once.
 
 If that sounds like a lot of conversation for one markdown file, it is. That is where the 30 to 90 minutes go, and it is the cheapest hour in the whole workflow.
@@ -72,6 +82,8 @@ If that sounds like a lot of conversation for one markdown file, it is. That is 
 For larger or tougher plans, I use `/guided-coding-review-plan` in a **fresh conversation** with another coding agent. It reports findings only and never edits the plan - it checks acceptance criteria for verifiability, validates claims about existing code, and judges whether relevant risks like error handling, migration, performance, and security boundaries were considered.
 
 Then it's back to the main conversation for another round. There is a constant back and forth between me and the main agent until both of us are satisfied.
+
+When I want the reviewers to go first, I run `/guided-coding-plan-and-review` right after the discussion, **in the same conversation**, in place of `/guided-coding-write-plan`. It writes the draft, runs review rounds with reviewers in fresh contexts, and stops with a report. It never changes a decision I made explicitly without asking me, and it never freezes the plan: my own review begins where it ends. I start with the report's list of decision and scope changes, then read the plan as usual. [Automated Plan Review](./automated-plan-review.mdx) covers configuration, cost, and how to read the report.
 :::
 
 ## Ending the Phase

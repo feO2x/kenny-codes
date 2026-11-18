@@ -1,5 +1,5 @@
 ---
-sidebar_position: 8
+sidebar_position: 10
 title: What Belongs in a Rules File
 ---
 
@@ -37,7 +37,11 @@ Put only repository-wide instructions in the root rules file. When your agent su
 - `tests/AGENTS.md` for testing conventions; and
 - `ai-plans/AGENTS.md` for the plans.
 
-This keeps a planning conversation from paying for test-layout rules and keeps a documentation change from loading production-code details. Check how your agent discovers nested instructions before relying on this structure; clients do not all implement scoping in exactly the same way.
+This keeps a planning conversation from paying for test-layout rules and keeps a documentation change from loading production-code details.
+
+`ai-plans/AGENTS.md` shows how much a scoped file can absorb. Besides the filename conventions and the frozen-plan rules, it is the natural home for every repository-wide choice about plans: which [plan structure](./plan-structures.md) your plans use, or a `## Plan Review` section that configures [automated plan review](./automated-plan-review.mdx#configuration). None of this matters to an agent fixing a bug in a test, so none of it belongs in the root file.
+
+Check how your agent discovers nested instructions before relying on this structure; clients do not all implement scoping in exactly the same way, and some don't read nested files at all. A one-line link in the root file covers those agents without bringing the rules back into permanent context: the agent follows the link only when its task touches what the linked file governs. The `## Guided Coding` section in the example below works that way.
 
 ## Treat agent notes as proposals
 
@@ -46,7 +50,7 @@ I keep a `## This is your space` section where an agent can record something unu
 Review those notes after the task. Promote a note into a rule only when later experience confirms it, move durable knowledge to the documentation where it belongs, and delete the rest. Otherwise the section slowly becomes the oversized context file this page is warning against.
 
 :::tip[The Opinionated Path]
-`/guided-coding-setup` creates or updates two sections of root guidance: the repository's confirmed feedback-loop commands, and the rules for implementing frozen plans with a link to `ai-plans/AGENTS.md`. It matches existing sections by meaning and changes nothing unrelated, so your own rules and a "This is your space" section survive a re-run.
+`/guided-coding-setup` creates or updates two sections of root guidance: the repository's confirmed feedback-loop commands, and a `## Guided Coding` section that only links to `ai-plans/AGENTS.md`, where the frozen-plan rules live. It matches existing sections by meaning and changes nothing unrelated, so your own rules and a "This is your space" section survive a re-run.
 
 The skill discovers candidate commands from build manifests, task runners, scripts, and CI configuration and lists only those that are immediately executable in the repository. It also creates the scoped `ai-plans/AGENTS.md` and preserves project-specific instructions when run again after an upgrade.
 :::
@@ -64,14 +68,10 @@ This repository contains a high-performance .NET library. Runtime performance ta
 
 - Do not use nested test classes. Keep test classes at namespace scope.
 
-## When you implement a plan
+## Guided Coding
 
-Plans in `ai-plans/` are frozen once their Planning Phase ends. The only edit you may make
-to a plan is flipping an acceptance criterion from `- [ ]` to `- [x]`.
-
-- Check a criterion only after the implementation exists and the relevant feedback loops verify it.
-- Leave unmet criteria unchecked, and never change the wording of a criterion.
-- Record material departures in a Plan Deviations document instead of editing the frozen plan.
+[ai-plans/AGENTS.md](ai-plans/AGENTS.md) holds the file naming conventions for plans and the rules for
+working with Frozen Plans. Read it before you write, review, or implement a plan.
 
 ## Feedback loops
 
@@ -82,7 +82,6 @@ to a plan is flipping an acceptance criterion from `- [ ]` to `- [x]`.
 
 - Read `src/AGENTS.md` for production-code conventions.
 - Read `tests/AGENTS.md` for testing conventions.
-- Read `ai-plans/AGENTS.md` before writing plans.
 
 ## This is your space
 

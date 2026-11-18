@@ -1,5 +1,5 @@
 ---
-sidebar_position: 12
+sidebar_position: 14
 title: "Comparison: Vise Coding & Spec-Driven Development"
 ---
 
@@ -73,7 +73,7 @@ Spec Kit puts the specification at the center as a "source of truth" that drives
 - **Adoption**: Guided Coding can be adopted incrementally with minimal setup. You start writing plans in markdown and reviewing code more thoroughly. Spec Kit requires buying into its toolchain and artifact structure.
 - **Record**: Spec Kit's spec is a living source of truth kept in sync with the system. Guided Coding's `ai-plans/` is an append-only record of decisions: plans freeze, and corrections are appended rather than merged in. One optimizes for describing the system as it is, the other for explaining how it got that way.
 
-Guided Coding does ship [optional skills](https://github.com/feO2x/guided-coding) that automate the bookkeeping - creating the issue, naming and committing the plan, and closing the record. The distinction is not that one approach is "real" only when its CLI is installed. It is the amount of the software-development process each approach carries forward as repository context.
+Guided Coding does ship [optional skills](https://github.com/feO2x/guided-coding) that automate the bookkeeping - writing and reviewing the plan, freezing it with a timestamped filename, and closing the record. The distinction is not that one approach is "real" only when its CLI is installed. It is the amount of the software-development process each approach carries forward as repository context.
 
 Spec Kit intentionally materializes a constitution, specification, plan, tasks, and the instructions that move between them. [BMad](https://github.com/bmad-code-org/BMAD-METHOD) takes a similarly broad view, carrying product, architecture, UX, development, and testing context across specialized workflows. That can provide valuable standardization and traceability, especially across a larger team, but the additional artifacts and instructions also give agents more persistent context to read and usually increase token use. Guided Coding keeps a much narrower record, closer to Vise Coding in weight: enough to preserve the decisions around a change, while leaving the rest of the software-development process outside the agent workflow.
 
