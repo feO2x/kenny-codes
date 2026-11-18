@@ -24,7 +24,7 @@ This is the most important and time-consuming phase. You review all the generate
 - **Make manual changes if needed.** Your coding agent doesn't need to do all the work - use it as a tool to write the code you would write yourself, just faster.
 - **Close the record.** Follow-up plans always require a Plan Deviations document; with a single plan, write one only for material departures. When the review of the pull request leads to another follow-up plan, update that document.
 
-**There is no skill for the review itself, and there never will be.** An agent can give you a second opinion, and a useful one. It cannot take responsibility for the code. That transfer is the thing Guided Coding exists to prevent.
+You remain responsible for reviewing and accepting the code. An agent's review can help you find problems, but you must understand the changes yourself.
 
 ## How to Review
 
@@ -51,7 +51,7 @@ When the plan turned out to be wrong somewhere, the implementing agent either wo
 **For each workaround**, look at the decision it departs from, the evidence the agent gave, and what it did instead. Then decide:
 
 - **Accept it** if it solves the problem within what you approved. Check off the acceptance criteria the agent left unchecked because of it - they are unchecked precisely so that this decision is yours.
-- **Reject it** if it doesn't. Write a follow-up plan that makes the decision the workaround tried to avoid.
+- **Reject it** if it doesn't. Write a follow-up plan that explains how to resolve the problem and which earlier decision must change.
 
 **For each problem the agent did not work around**, ask whether solving it changes a plan decision:
 
@@ -81,7 +81,7 @@ The aim is a specific promise to whoever reviews the PR: **reading the issue's f
 The cycle doesn't necessarily end when you open the pull request. A reviewer may find something large enough for another follow-up plan. Then the Plan Deviations document has to cover that plan, too, which is why it stays editable until the pull request is merged. Write the follow-up plan, implement and review it as usual, and update the Plan Deviations document afterwards.
 
 :::tip[The Opinionated Path]
-I run `/guided-coding-write-deviations`. It reads every plan for the issue and inspects the complete implementation delta. Follow-up plans always produce a document. With a single plan and no material deviations, the skill says so and writes nothing.
+I run `/guided-coding-write-deviations`. It reads every plan for the issue and inspects all implementation changes. Follow-up plans always require a document. With a single plan and no material deviations, the skill says so and writes nothing.
 
 The skill writes the document and stops. I review it and request corrections with ordinary prompts until I accept it. Then I commit it, create the pull request, and use its contents as the PR description - either manually or with a normal prompt to the agent.
 

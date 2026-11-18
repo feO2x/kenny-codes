@@ -16,7 +16,7 @@ It does not replace your own review. It ends exactly where your review begins: i
 
 ## When to run it
 
-Run it **after the discussion, in the same conversation** - at the point where you would otherwise run `guided-coding-write-plan`. The planner, the agent running the skill, needs that conversation: it is where your explicit decisions live, and it uses them to tell your decisions apart from its own. The reviewers never see the conversation. They judge the plan on what it says, the same way an implementing agent will later.
+Run it **after the discussion, in the same conversation**, in place of `guided-coding-write-plan`. The agent running the skill is the **planner**. It needs the conversation to identify which decisions you made explicitly. The reviewers do not see the conversation; they assess the written plan, just as the implementing agent will.
 
 <Tabs groupId="guided-coding-install">
 <TabItem value="skills" label="Agent Skills" default>
@@ -37,7 +37,7 @@ Run it **after the discussion, in the same conversation** - at the point where y
 
 Without a draft, the skill invokes `guided-coding-write-plan` to write one and passes on any plan structure you named. If you already have a draft, name it. Otherwise the skill picks up an uncommitted draft in `ai-plans/` only if it clearly belongs to the work you discussed, and asks you when several could match.
 
-Anything you add to the invocation overrides the configuration below for this run. For example, to pause on findings against your decisions this time:
+Options you specify when running the skill override the configuration for that run. For example, to pause when a reviewer challenges one of your decisions:
 
 <Tabs groupId="guided-coding-install">
 <TabItem value="skills" label="Agent Skills" default>
@@ -68,11 +68,11 @@ The skill reads an optional `## Plan Review` section in `ai-plans/AGENTS.md`:
 - User decisions: collect
 ```
 
-Model names are harness-specific, so write them the way your agent's harness names them. If a configured model isn't available, that reviewer runs on the harness default model, and the report tells you so.
+Use the model names supported by your coding agent. If a configured model isn't available, the reviewer uses the agent's default model, and the report tells you so.
 
 Reviewers on different models tend to notice different things, which is why the example uses two.
 
-Without a configuration, the skill uses one reviewer on the harness default model, a round limit of 3, and `collect`. Each value you leave out of both the invocation and the configuration falls back to its default.
+The defaults are one reviewer on the coding agent's default model, a round limit of 3, and `collect`. Any option you omit from both the command and the configuration uses its default.
 
 ### Your decisions: `collect` or `pause`
 
@@ -85,7 +85,13 @@ Reviewers sometimes challenge a decision you made explicitly in the conversation
 
 ## How a run works
 
-Each round starts a fresh reviewer for every configured reviewer, in parallel where the harness allows it. A reviewer from an earlier round is never reused. Each reviewer runs `guided-coding-review-plan` on the draft, gets the paths of earlier documents for the same work, and classifies every finding. From round 2 on, it also gets every earlier finding with its resolution. That is context, not a limit: a reviewer may report anything, but it repeats a rejected finding only with a new argument.
+Each round starts a new agent for each configured reviewer, running them in parallel when supported. Agents from earlier rounds are never reused. Each reviewer receives:
+
+- The instruction to run `guided-coding-review-plan` on the draft and classify every finding.
+- The paths of earlier documents for the same work.
+- From round 2 onwards, all earlier findings and how the planner addressed them.
+
+Reviewers may raise new findings. They may repeat a rejected finding only if they give a new reason for it.
 
 ### Finding classes
 
@@ -95,15 +101,15 @@ Each round starts a fresh reviewer for every configured reviewer, in parallel wh
 
 ### Addressing findings
 
-The planner addresses every finding of every class. It either changes the plan or rejects the finding with a one-line reason. When findings contradict each other, it applies at most one. When several say the same thing, it treats them as one, with the highest class among them.
+The planner addresses findings in every class. It follows the `collect` or `pause` policy for findings that challenge your explicit decisions. For other findings, it either changes the plan or rejects the finding with a one-line reason. When findings contradict each other, it applies at most one. It combines duplicate findings and keeps the most severe classification: `blocking`, then `gap`, then `nit`.
 
 Apart from your explicit decisions, the planner may change anything in the plan, including decisions it made alone and the scope. That freedom is what makes the rounds useful, and it is also why the report lists those changes separately for you.
 
-The plan keeps following its plan structure. Review commentary stays out of it, and a `nit` doesn't turn into a new rule.
+Revisions must follow the selected plan structure. The planner keeps review commentary out of the plan and does not turn minor suggestions into new rules.
 
 ### When the run stops
 
-A round without `blocking` or `gap` findings ends the run. `nit`s alone never start another round. Otherwise, the next round starts, until the round limit is reached.
+After addressing the findings, the planner ends the run if that round reported no `blocking` or `gap` findings. Otherwise, it starts another round unless it has reached the round limit. Findings classified only as `nit` do not trigger another round.
 
 Reaching the round limit can leave substantive findings open. The report tells you, and those are the first findings to look at.
 
@@ -120,7 +126,7 @@ Then go through the rest:
 - **Every finding** with its round, class, a one-line summary, and its resolution: applied, rejected with the reason, or open for you. Read the rejected ones, too. A rejection you disagree with is a discussion worth having.
 - **The reviewers and the models actually used.** A configured model that was unavailable shows up here, together with the harness default it was replaced by.
 - **The plan's word count** before and after review. A plan that grew a lot deserves a second look at its level of detail.
-- **Whether the plan changed after the last round.** Those changes are unreviewed.
+- **Whether the plan changed after the last round.** The independent reviewers have not checked those changes.
 
 ### When the run doesn't complete a review
 
@@ -129,7 +135,7 @@ Some outcomes are not a completed review, and the report says so:
 - **No independent reviewers are available.** Reviewers must not share the planning conversation, so they run as subagents, threads, or separate sessions. If your harness offers none of these, the skill reports the plan path, states that no review ran, and stops. It never reviews the plan in its own context instead. Run `guided-coding-review-plan` in a fresh session.
 - **`guided-coding-write-plan` cannot be invoked.** The skill never writes a plan without it, so it stops and asks you to run `guided-coding-write-plan` first. Afterwards, run `guided-coding-plan-and-review` again, and it picks up the draft.
 - **A round is incomplete.** If a reviewer fails or times out, the skill starts one replacement. If that fails too, the skill addresses the findings it already has, reports the incomplete round, and stops.
-- **The plan changed after the last round.** Changes the planner made while addressing the final round's findings were never reviewed. Read them with particular care.
+- **The plan changed after the last round.** The independent reviewers have not checked the planner's final revisions. Read them with particular care.
 
 ## After the run
 

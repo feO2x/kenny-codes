@@ -5,15 +5,15 @@ title: The Plan Record
 
 # The Plan Record
 
-The three phases describe how you work on one change. This page describes what those changes leave behind: a directory of plans that, read in order, explains how the codebase came to look the way it does.
+The three phases describe how you work on a change. The plans you keep explain how and why the codebase changed over time.
 
 ## Append-only by design
 
-The natural instinct with a plan is to keep it up to date. Something changes during implementation, so you go back and edit the plan to match. After a few rounds, the plan describes the code - which the code already did, for free.
+Updating a plan to match the implementation erases the original decisions and the reasons they changed.
 
-Guided Coding does the opposite. A plan is **an event, not a state**. It records a decision made at a point in time, by you and the agent, with the information you had then. It is never rewritten to match reality. If reality diverges, you append another document saying so.
+In Guided Coding, a frozen plan records the decisions you and the agent made with the information available at the time. If those decisions change, you add a new document explaining what changed and why.
 
-This is the same idea as Event Sourcing: you don't overwrite the current value, you append the change that produced it. The current state of the codebase is in the codebase. What the codebase cannot tell you is *why* - why this abstraction and not that one, why this trade-off, why the obvious approach was rejected. That is what the record holds.
+This is similar to Event Sourcing: you preserve earlier events and record each change as a new event. The code shows the current implementation. The plans explain why you chose an abstraction, accepted a trade-off, or rejected an alternative.
 
 Concretely, the directory answers questions that git history alone answers badly:
 
@@ -76,15 +76,17 @@ A good follow-up summary identifies the original decision, the exact follow-up p
 - **Why** - what caused the change. Never omit this; it is the entire point of the document.
 - **Impact** - trade-offs, consequences, deferred work.
 
-A work item has **one** Plan Deviations document, and its filename sorts after all plans for that work item, so it is the last thing a reader finds. Unlike a plan, it doesn't freeze when you first write it. A pull request review can still lead to another follow-up plan, and the closing document has to cover that plan, too. So the document stays editable until it is merged into the target branch. Each update gives it a new timestamp in its filename, which keeps it sorted after the newest plan, and rewrites it as a whole instead of appending to it.
+A work item has **at most one** Plan Deviations document. Its lifecycle is:
+
+- It stays editable until it is merged into the target branch.
+- If a pull request review leads to another follow-up plan, update the document after implementing that plan.
+- With each update, rewrite the whole document and give it a new timestamp. Its filename must sort after all plans for the work item.
 
 Once merged, it is frozen like everything else in the record. If you ever need to redo a merged document, delete it and write it again from scratch.
 
 ## The reviewer contract
 
-Here is the practical payoff, and the reason the deviations document is worth writing.
-
-A pull request produced this way comes with a promise: **a reviewer needs to read the issue's first plan and, when one exists, the Plan Deviations document, and they have the whole picture.** The first plan explains the original intent. The closing document summarizes every follow-up and every material implementation departure. If there was only one plan and the implementation matched it, that plan already is the whole picture.
+A reviewer should be able to understand the intent and decisions behind a change by reading **the issue's first plan and, when one exists, the Plan Deviations document**. The first plan explains the original intent. The deviations document summarizes every follow-up plan and every material implementation deviation. If the implementation matches a single plan, that plan is enough.
 
 Without that pair, a reviewer facing a few thousand lines of diff has to reverse-engineer intent from code. With it, they can spend their attention on judging decisions instead of reconstructing them.
 
@@ -112,7 +114,7 @@ Before it freezes, a draft is simply `<short-title>.md`. The timestamp is **UTC*
 
 When the Plan Deviations document is updated, it gets a new timestamp, for example `2026-08-15-1105-42-plan-deviations.md`, so it still sorts after the newest plan.
 
-Version 1 numbered files by issue and sequence (`0015-0-feature.md`). The timestamp prefix replaced it so the directory sorts chronologically no matter how the tracker numbers things, and so two documents for the same issue can never collide. **Don't rename historical documents** to match the new format - they are frozen too, and a decision record that gets retroactively tidied isn't one.
+Version 1 numbered files by issue and sequence (`0015-0-feature.md`). Timestamp prefixes let the directory sort chronologically regardless of the tracker's issue numbers and reduce filename collisions. **Don't rename historical documents** to match the new format; they are frozen too.
 
 ### Guardrails
 
@@ -127,7 +129,7 @@ The skills refuse to overwrite or reuse an existing plan or Plan Deviations file
 - `/guided-coding-review-plan` reviews a draft against the codebase in a fresh conversation. It reports findings and never edits anything.
 - `/guided-coding-plan-and-review` writes the draft with `guided-coding-write-plan` and improves it through rounds of independent reviews before I read it. See [Automated Plan Review](./automated-plan-review.mdx).
 - `/guided-coding-freeze-plan` ends the Planning Phase: it renames the draft with a UTC timestamp and the optional ticket ID, inserts the `*Frozen at ...*` line, and stops. I commit the frozen plan afterwards.
-- `/guided-coding-implement` implements a frozen plan. It only ticks an acceptance criterion once a feedback loop genuinely satisfies it.
+- `/guided-coding-implement` implements a frozen plan. It checks off an acceptance criterion only after the implementation satisfies it and the relevant feedback loop verifies the result.
 - `/guided-coding-write-deviations` always writes a document when follow-up plans exist. With a single plan, it reports "no material deviations" rather than inventing entries when the implementation matched. Run again before the merge, it renames and rewrites the existing document. The skill only writes the file. After reviewing and accepting it, I commit it, create the pull request, and use its contents as the PR description with a normal prompt.
 
 See [Guided Coding: Getting Started](./guided-coding-getting-started.mdx) for the full sequence.

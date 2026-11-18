@@ -9,12 +9,12 @@ import GuidedCodingSkillTimeline from '@site/src/components/GuidedCodingSkillTim
 
 # Guided Coding: Getting Started
 
-This page walks through **the Opinionated Path** - my own setup, packaged as seven Agent Skills that live at [github.com/feO2x/guided-coding](https://github.com/feO2x/guided-coding). Two more skills let you implement a plan yourself while the agent teaches you - see [Guided Learning: Getting Started](./guided-learning-getting-started.mdx).
+This page walks through **the Opinionated Path**: the setup I use, with seven Agent Skills available at [github.com/feO2x/guided-coding](https://github.com/feO2x/guided-coding). Two more skills let you implement a plan yourself while the agent teaches you. See [Guided Learning: Getting Started](./guided-learning-getting-started.mdx).
 
 :::info[Read this first]
-The skills are optional. Guided Coding is a methodology, and everything below can be done by hand with markdown files and git. What the skills give you is consistency: the same plan structure, the same filenames, and a frozen, timestamped plan at exactly the moment the Planning Phase ends.
+The skills are optional. You can follow these steps by hand with Markdown files and git. The skills keep plan structure, filenames, and freezing consistent.
 
-They are also opinionated. They follow the [append-only plan record](./plan-record.md) and write plans in one of the [plan structures](./plan-structures.md) they ship, or in a structure you describe yourself. If you want a different workflow, don't fight the skills - write your own instructions instead, and read the phase pages for the reasoning behind each rule.
+The skills follow the [plan record rules](./plan-record.md) and support both [bundled and custom plan structures](./plan-structures.md). If you want a different workflow, write your own instructions. The phase pages explain the reasoning behind the rules.
 
 Above all: no skill reviews code for you. The Guiding Phase is still yours.
 :::
@@ -24,7 +24,7 @@ Above all: no skill reviews code for you. The Guiding Phase is still yours.
 <Tabs groupId="guided-coding-install">
 <TabItem value="skills" label="Agent Skills" default>
 
-Install the skills with the GitHub CLI. The `--agent` flag decides where they land. Claude Code reads skills only from its own `.claude/skills` directory, while all other major agents share the `.agents/skills` directory:
+Install the skills with the GitHub CLI. The `--agent` flag selects the installation directory. Claude Code reads skills only from its own `.claude/skills` directory, while all other major agents share the `.agents/skills` directory:
 
 ```sh
 # Claude Code
@@ -81,7 +81,7 @@ Restart Claude Code after updating. Only then does it pick up the updated skills
 
 The repository is also a package for the [Agent Plugins standard](https://agent-plugins.org/). Clients that support the standard can install it directly; the installation and marketplace commands are client-specific. These clients use the skills' full names, so pick the **Agent Skills** tab.
 
-Every skill invocation further down this page offers the same two tabs, and they all follow the choice you make here. Pick your install method once and the walkthrough spells each skill the way *your* agent expects it.
+Every skill command below offers the same two tabs. Select your installation method here, and the rest of the walkthrough will show the matching commands.
 
 :::note[Skills run when you ask for them]
 Guided Coding depends on you choosing the moment each phase ends, so every skill's description asks the agent to run it only when you explicitly request it. `guided-coding-write-plan` and `guided-coding-review-plan` also accept requests from another Guided Coding skill, because `guided-coding-plan-and-review` invokes them.
@@ -106,13 +106,11 @@ The Planning Phase comes in two variants. On the **manual path**, one skill writ
 </TabItem>
 </Tabs>
 
-Filled dots are skills. Hollow dots are the parts you do yourself - which, not coincidentally, are the parts that matter most.
+Filled dots are skills. Hollow dots are the parts you do yourself.
 
-The two arrows on the right are the same iteration loops as in the phase diagram. A small issue sends you back into the Implementing Phase with a targeted prompt. A large one sends you back to the *top* of the Planning Phase - not to the skill that writes the plan, but to the discussion, because a follow-up plan deserves the same conversation the first one got.
+The arrows show how to respond to problems found during review. Request small fixes with a targeted prompt in the Implementing Phase. For larger changes, return to the Planning Phase and discuss the approach before writing a follow-up plan.
 
-Notice how much of the Planning Phase is conversation. The skills bracket the discussion; they don't replace it. If your Planning Phase consists of running three skills back to back, you have automated the paperwork and skipped the work.
-
-On the manual path, `guided-coding-write-plan` runs **once** per plan. The repetition in the Planning Phase is conversational: you revise the draft by prompting the agent, exactly as you would ask it to change any other file in the repository. On the plan-and-review path, `guided-coding-plan-and-review` takes its place, and the repetition is reading the report and the plan, discussing them, and revising by prompt - plus an optional re-run of the skill after larger revisions. The other skills run at the transitions described below.
+Both paths require you to discuss and review the plan. Use ordinary prompts to request revisions. The walkthrough below shows when to run each skill.
 
 ## The Walkthrough
 
@@ -137,16 +135,22 @@ Run this once per repository, and again after upgrading to a new Guided Coding v
 </TabItem>
 </Tabs>
 
-The skill reads your existing instruction files, build manifests, scripts, and CI configuration to discover the feedback loops that already exist. It then ensures two sections in the root `AGENTS.md`: the confirmed feedback-loop commands with what each one verifies, and a `## Guided Coding` section that links to `ai-plans/AGENTS.md`. It also creates `ai-plans/` with its own `AGENTS.md`, which holds the filename conventions and the rules for frozen plans and Plan Deviations documents. The root section only links to those rules, so agents that don't read nested instruction files on their own still find them - the [Implementing Phase](./implementing-phase.mdx#the-plan-stays-frozen) explains why that matters. Running it again after an upgrade brings outdated sections up to date and leaves everything else untouched, including your own rules and existing plans.
+The skill reads your instruction files, build manifests, scripts, and CI configuration. It then:
 
-It does not invent commands. It lists only commands that are immediately executable in the repository, and it tells you when it could not find any feedback loops at all. Take that warning seriously: `guided-coding-write-plan` refuses to write a plan until at least one feedback loop is listed.
+- Documents the available feedback-loop commands and what each verifies in the root `AGENTS.md`.
+- Creates `ai-plans/AGENTS.md` with the filename conventions and rules for frozen plans and Plan Deviations documents.
+- Adds a `## Guided Coding` section to the root `AGENTS.md`, linking to those rules.
+
+When you run it again after an upgrade, it updates outdated Guided Coding instructions and preserves your own rules and existing plans. The [Implementing Phase](./implementing-phase.mdx#the-plan-stays-frozen) explains why the root link is needed.
+
+It lists only commands that can run in the repository. If it finds no feedback loops, it tells you. At least one must be documented before `guided-coding-write-plan` can write a plan.
 
 The defaults are a starting point, and the skill ends with the same customization tips you see here:
 
 - **Plan structure.** `guided-coding-write-plan` uses Rationale, Acceptance Criteria, and Technical Details by default. It also ships the RDAT structure (`rdat-plan-structure.md`), which adds numbered Decisions as a summary for the reviewer. Name a structure file when you invoke `guided-coding-write-plan`, or name it or describe your own structure in `ai-plans/AGENTS.md`. See [Plan Structures](./plan-structures.md).
 - **Filenames.** The skills build names from `<timestamp>` (UTC, `YYYY-MM-DD-HHMM`), `<ticket-id>`, and `<short-title>`. Conventions such as a ticket ID format or a maximum length for the short title belong in `ai-plans/AGENTS.md`.
 - **Feedback loops.** Plans reference the feedback loops in the root `AGENTS.md` to make acceptance criteria verifiable. Adding or removing one later only means updating that list.
-- **Plan review.** Configure `guided-coding-plan-and-review` in an optional `## Plan Review` section in `ai-plans/AGENTS.md`: a list of reviewers with a model preference for each, a round limit (default 3), and what happens with findings that challenge your explicit decisions - `collect` (default) reports them as open for you, `pause` stops the round and asks you. Each round starts one subagent per reviewer. See [Automated Plan Review](./automated-plan-review.mdx#configuration).
+- **Plan review.** An optional `## Plan Review` section in `ai-plans/AGENTS.md` sets the reviewers, their preferred models, and the round limit (default 3). It also controls how to handle findings that challenge your decisions: `collect` (default) reports them for you to decide later; `pause` asks you during the run. See [Automated Plan Review](./automated-plan-review.mdx#configuration).
 - **Deviations.** The threshold for what counts as a material deviation can be tightened or relaxed in `ai-plans/AGENTS.md`.
 
 Repository-specific conventions in your `AGENTS.md` files take precedence over the skills' defaults.
@@ -161,9 +165,9 @@ Read the resulting diff before you commit it. This file steers every future conv
 
 ### Step 1: Discuss the approach
 
-**The Planning Phase starts with a conversation, not a skill.** Start a fresh one, describe the context, and ask for an investigation rather than an implementation:
+Start the Planning Phase in a fresh conversation. Describe the context and ask the agent to investigate the codebase before proposing an implementation:
 
-> *"With you being an expert .NET architect, can you please investigate the codebase and report back how you would tackle this problem?"*
+> *"As an experienced .NET architect, investigate the codebase and explain how you would approach this problem."*
 
 Now discuss. Ask why. Push back. Propose alternatives. Ask what it considered and discarded. Keep going until you understand the suggested approach well enough to defend it to a colleague.
 
@@ -192,21 +196,21 @@ Still in the same conversation:
 </TabItem>
 </Tabs>
 
-The skill writes the approach you already agreed on into `ai-plans/<short-title>.md`, using the plan structure named in `ai-plans/AGENTS.md` - [RDAT](./plan-structures.md#rdat), if you added the line from step 0. The plain short title is deliberate: it identifies a mutable draft on the file level. The timestamp is added only when the plan freezes in step 6. The skill is explicitly *not* meant to start or replace the planning conversation - it records its outcome.
+The skill records the approach you discussed in `ai-plans/<short-title>.md`. It uses the plan structure named in `ai-plans/AGENTS.md`: [RDAT](./plan-structures.md#rdat), if you added the line from step 0. The draft has no timestamp until you freeze it in step 6.
 
-**Invoke this once per plan.** Everything that follows is ordinary conversation: you ask for changes and the agent edits the draft in place. Re-running the skill is neither needed nor wanted - it would write a fresh draft instead of revising the one you are working on. You reach for it again only when starting a genuinely new document, such as a follow-up plan after the Guiding Phase or the initial plan for a new feature.
+**Run this skill once per plan.** Request revisions with ordinary prompts. Run it again when you need a new plan, such as a follow-up after the Guiding Phase or a plan for another feature.
 
 ### Step 3: Further discussion
 
-The draft is a starting point, not a result. Read it properly and go back at it with plain prompts - no skill involved:
+Read the draft and discuss any problems with the agent:
 
 - Would you approve the plan after reading only its Decisions?
 - Does every acceptance criterion describe something you could actually verify?
-- Did anything discussed in step 1 quietly not make it into the plan?
+- Is anything discussed in step 1 missing from the plan?
 - Does it reference types, files, or extension points that really exist?
 - Is it prescribing implementation steps a senior engineer wouldn't need?
 
-Prompt the agent to revise the draft as you go, the same way you would ask it to change any other file. The plan is still an ordinary working file at this point - it does not freeze until step 6. Expect several rounds here.
+Ask the agent to revise the draft as you go. Expect several rounds of discussion and revision before the plan is ready to freeze.
 
 ### Step 4: Review the plan
 
@@ -235,11 +239,11 @@ The fresh conversation matters: an agent that just wrote a plan is a poor judge 
 
 Take those findings back to the main conversation and work through them. Then ask, repeatedly:
 
-> *"With you being the expert, would you change anything about the plan?"*
+> *"Would you change anything about the plan?"*
 
-This one question has caught more things for me than any review checklist. Ask it until the answer stops producing changes you care about. If it does, loop back to step 3.
+This question has caught more problems for me than any review checklist. If the answer suggests useful changes, return to step 3 to discuss and revise the plan. Repeat until you are satisfied.
 
-Steps 3 through 5 are a cycle, not a checklist. Note what is *not* in that cycle: `guided-coding-write-plan` ran once, back in step 2. The loop is discussion, review, and revision by prompt. You are done when you and the agent both stop finding things.
+Repeat steps 3 through 5 as needed. Continue until you and the agent stop finding useful changes to make.
 
 ### Alternative to steps 2 to 5: plan and review
 
@@ -262,9 +266,11 @@ Instead of writing the plan and asking for a second opinion yourself, you can le
 </TabItem>
 </Tabs>
 
-The skill uses `guided-coding-write-plan` to write the draft. Then it starts reviewers in fresh contexts, each running `guided-coding-review-plan`, so step 4 is dropped. After each round, it addresses every finding: it changes the plan or rejects the finding with a reason. The run ends after a round without `blocking` or `gap` findings, or at the round limit. The skill never changes a decision you made explicitly without your approval, and it never freezes the plan. It stops with a report, and that is where your own review begins.
+The skill writes the draft using `guided-coding-write-plan`, then runs independent reviews in place of step 4. After each round, it addresses every finding by changing the plan or rejecting the finding with a reason. It then stops if that round reported no `blocking` or `gap` findings, or if it reached the round limit.
 
-What remains of the cycle is yours. Read the report, starting with its list of the decision and scope changes the planner applied, then read the plan. Go back into further discussion as in steps 3 and 5, and revise the plan with plain prompts. Repeat until it stabilizes.
+The skill never changes a decision you made explicitly without your approval, and it never freezes the plan. It ends with a report for you to review.
+
+Read the report's list of decision and scope changes first, then read the plan. Discuss and revise them as in steps 3 and 5 until the plan is stable.
 
 After larger revisions, you can run `guided-coding-plan-and-review` again on the existing draft. A re-run starts at round 1 with a fresh round limit and cost, and its reviewers don't see the earlier findings, so a finding you rejected can come back.
 
@@ -320,19 +326,19 @@ Start a fresh conversation and hand over the committed plan:
 </TabItem>
 </Tabs>
 
-When you don't name a plan, the skill picks one on its own only when exactly one plan has all acceptance criteria unchecked and that plan also has the latest timestamp. Otherwise, it asks for the path. It refuses to start on a plan that isn't frozen.
+If you omit the plan path, the skill selects a plan only when exactly one plan has every acceptance criterion unchecked and it has the latest timestamp among all plans in `ai-plans/`. Otherwise, it asks for the path. It refuses to start on a plan that isn't frozen.
 
-Before it writes any code, it checks the plan's premises: do the types, members, and files the plan describes as existing really exist, and does the existing code behave the way the plan claims? When reading the code isn't enough, it uses temporary tests or projects and removes them again. Then it implements the plan, verifies the changes with your feedback loops, and ticks an acceptance criterion only when a feedback loop verifies it.
+Before writing code, the skill checks the plan's assumptions against the existing code. It uses temporary tests or projects when needed, then removes them. It implements the plan and checks off acceptance criteria only after the relevant feedback loops verify them.
 
-When a plan decision or factual claim turns out to be wrong, or a criterion can't be met as written, the skill works around it only if all four conditions hold: evidence confirms the error, the Rationale and all other decisions stay unchanged, no public API, scope, or dependency changes go beyond the plan, and no test is weakened or removed. A criterion met only through a workaround stays unchecked, so you decide about it in step 8. In every other case, the skill stops the work that depends on the problem, finishes the rest, and reports it. The [Implementing Phase](./implementing-phase.mdx#when-the-plan-is-wrong) explains the reasoning.
+If the plan contains an error, the skill may use a workaround under the [four conditions described in the Implementing Phase](./implementing-phase.mdx#when-the-plan-is-wrong). Criteria met through a workaround stay unchecked for your decision in step 8. When no workaround is allowed, the skill stops the affected work, finishes the rest, and reports the problem.
 
 At the end, it reports what it implemented, which feedback loops ran, which criteria remain unchecked and why, each workaround, and each problem it did not work around. It does not commit anything or open a pull request unless you ask it to.
 
 You can also use a plain prompt:
 
-> *"With you being an expert .NET developer, could you please implement plan `ai-plans/2026-08-13-1420-42-cancelled-events.md` for me?"*
+> *"As an experienced .NET developer, implement plan `ai-plans/2026-08-13-1420-42-cancelled-events.md`."*
 
-That works, too. What the skill adds is the premise check and a consistent way of handling a plan that turns out to be wrong, which makes its report easier to review.
+The skill adds a check of the plan's assumptions and consistent rules for handling errors in the plan. Its report makes these problems easier to review.
 
 Then let it run. The frozen plan and your feedback loops are what keep the agent on track - see the [Implementing Phase](./implementing-phase.mdx).
 
@@ -373,7 +379,7 @@ Once you are satisfied with the implementation, run:
 </TabItem>
 </Tabs>
 
-The skill reads every plan for the issue, inspects the full implementation delta and commit history, and decides what record is required:
+The skill reads every plan for the issue, inspects all implementation changes and the commit history, and decides whether a Plan Deviations document is needed:
 
 - If follow-up plans exist, it **always** writes a Plan Deviations document that summarizes which earlier decisions they superseded and where the implementation ended up.
 - With a single plan, it writes one only when the implementation materially departed from an explicit decision. Routine implementation choices still don't count.
