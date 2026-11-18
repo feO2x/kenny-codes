@@ -11,7 +11,7 @@ Rules files such as `AGENTS.md` consume context on every task to which they appl
 
 The lesson is not that rules files are useless. It is that they should contain information an agent cannot reliably discover - or should not have to rediscover - from the repository itself:
 
-- **Workflow invariants** that exist because your team decided on them, such as freezing a plan when its Planning Phase ends. See [The Plan Record](./plan-record.md).
+- **Team workflow rules**, such as freezing a plan when its Planning Phase ends. See [The Plan Record](./plan-record.md).
 - **Feedback loops**, by exact command and what each one verifies. These give the agent the supervision it needs during the [Implementing Phase](./implementing-phase.mdx).
 - **Empirical rules** that prevent mistakes your agents have actually repeated in this codebase.
 
@@ -27,7 +27,7 @@ Add a rule when you see the **same avoidable error across multiple tasks**. For 
 
 This is empirical knowledge: a specific response to observed behavior, not a generic attempt to predict everything an agent might do wrong. Keep the rule focused on the desired outcome and let the codebase provide the surrounding context.
 
-Revisit these rules after changing models, agent harnesses, or project conventions. If the mistake no longer occurs, remove the rule.
+Revisit these rules after changing models, coding agents, or project conventions. If the mistake no longer occurs, remove the rule.
 
 ## Keep the scope narrow
 
@@ -45,7 +45,7 @@ Check how your agent discovers nested instructions before relying on this struct
 
 ## Treat agent notes as proposals
 
-I keep a `## This is your space` section where an agent can record something unusual it discovers in the repository. This is an observation buffer, not an invitation to create permanent policy.
+I keep a `## This is your space` section for an agent to record unusual things it discovers in the repository. These are temporary notes for me to review before deciding whether they belong in the documentation or rules.
 
 Review those notes after the task. Promote a note into a rule only when later experience confirms it, move durable knowledge to the documentation where it belongs, and delete the rest. Otherwise the section slowly becomes the oversized context file this page is warning against.
 

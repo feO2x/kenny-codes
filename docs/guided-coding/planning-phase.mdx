@@ -11,18 +11,18 @@ import GuidedCodingDiagram from '@site/src/components/GuidedCodingDiagram';
 
 ## Let the agent plan with you
 
-Start a new conversation with your coding agent and iteratively create a plan together. This is essentially breaking down requirements into technical tasks with the agent's help:
+Start a new conversation with your coding agent and work out a plan together. Discuss the requirements and the technical approach:
 
-- **Don't use your Coding Agent's "planning mode"**. I don't use the built-in "planning mode" of coding agents. There is no iteration involved, and plans typically do not end up in your git repo. The default Agent mode is enough, you steer the conversation actively.
-- **Give the agent a role.** I use something like "With you being an expert .NET architect" in my first prompt of the planning phase. This focuses the agent on planning rather than jumping into implementation. Assigning roles tends to produce better results in my experience.
+- **Don't use your coding agent's "planning mode".** I don't use the built-in "planning mode" of coding agents. There is no iteration involved, and plans typically do not end up in your git repo. The default agent mode is enough; you steer the conversation actively.
+- **Give the agent a role.** I use something like "As an experienced .NET architect" in my first prompt of the planning phase. This focuses the agent on planning rather than jumping into implementation. Assigning roles tends to produce better results in my experience.
 - **Discuss the feature.** Ask the agent how it would approach the problem. Review its suggestions about elements like design, refactorings, testing, and performance. Bring your own thoughts and questions to the table - this is a conversation, not delegation.
 - **End with repeated sanity checks.** At the end of the planning phase, I typically ask *"Would you change anything about the plan?"* This often catches things I didn't think of. Do this repeatedly until the plan stabilizes.
-- **Commit the plan as a markdown file in the git repo.** Plans serve as a project-specific decision record. They form a history, similar to Event Sourcing.
+- **Commit the plan as a Markdown file in the git repo.** Plans serve as a project-specific decision record. They form a history, similar to Event Sourcing.
 
 :::tip[The Opinionated Path]
 I open a **fresh conversation** and describe the context, then ask for an investigation rather than a solution:
 
-> *"With you being an expert .NET architect, can you please investigate the codebase and report back how you would tackle this problem?"*
+> *"As an experienced .NET architect, investigate the codebase and explain how you would approach this problem."*
 
 Then I discuss this with the agent until I have understood the suggested approach. Nothing is created during this conversation - no issue, no branch, no file. Sometimes it ends with the conclusion that the change isn't worth making, and then an untouched repository is exactly what I want to be left with.
 
@@ -43,11 +43,9 @@ Keep plans focused. With Anthropic models in particular (Opus, Sonnet), plans te
 A plan is not an epic, a user story, or an initiative - it should contain technical details. You should have technical knowledge to discuss and review these plans effectively.
 
 :::tip[The Opinionated Path]
-Once the approach is settled, I run `/guided-coding-write-plan` in the same conversation. It writes the plan into `ai-plans/<short-title>.md`, using the plan structure named in `ai-plans/AGENTS.md` - [RDAT](./plan-structures.md#rdat) in all my repositories. The plain short title marks a mutable draft; the timestamp is added only when the plan freezes.
+Once the approach is settled, I run `/guided-coding-write-plan` in the same conversation. It writes the draft to `ai-plans/<short-title>.md`, using the plan structure named in `ai-plans/AGENTS.md` - [RDAT](./plan-structures.md#rdat) in all my repositories. Freezing the plan adds the timestamp to its filename.
 
-The skill is explicitly not allowed to *start* the planning conversation - it records the outcome of one. If you invoke it before you have discussed the approach, you get exactly the kind of plan this methodology is trying to avoid: one nobody thought about.
-
-I invoke it **once per plan**. Every revision that follows is a plain prompt - "tighten the third acceptance criterion", "we discussed X but it's missing" - and the agent edits the draft like any other file. I only reach for the skill again for a genuinely new document, such as a follow-up plan after the Guiding Phase.
+I run it **once per plan**. I request revisions with ordinary prompts, such as "tighten the third acceptance criterion" or "we discussed X but it's missing". I run the skill again when I need a new plan, such as a follow-up after the Guiding Phase.
 
 For larger plans, I run `/guided-coding-plan-and-review` instead. It calls `guided-coding-write-plan` itself and then has the draft reviewed before I read it - more on that in the next section.
 
@@ -63,20 +61,20 @@ So review it properly:
 - **Read it yourself.** Do you understand every technical decision in it? If not, ask the agent to explain, and keep asking until you do.
 - **Check that acceptance criteria are verifiable.** "The API is fast" is not a criterion. "The benchmark shows no additional allocations on the happy path" is.
 - **Check the claims.** Agents confidently reference types, files, and extension points that don't exist. Verify the ones the design hinges on.
-- **Get a second opinion.** For larger or riskier plans, I open a fresh conversation with another agent and have it review the draft. An agent that just wrote a plan is a poor judge of it; a fresh one is far more likely to notice that an acceptance criterion is unfalsifiable or that a whole failure mode went unaddressed.
-- **Ask the closing question, repeatedly.** *"With you being the expert, would you change anything about the plan?"* Keep asking until the answer stops producing changes.
+- **Get a second opinion.** For larger or riskier plans, I open a fresh conversation with another agent and have it review the draft. A fresh agent can catch problems the planner missed, such as an acceptance criterion that cannot be verified or an unhandled failure case.
+- **Ask the closing question, repeatedly.** *"Would you change anything about the plan?"* Keep asking until the answer stops producing useful changes.
 
 ### Letting independent reviewers go first
 
-A second opinion doesn't have to wait for you. Independent reviewers - agents in fresh contexts that never saw your conversation - can review the draft in rounds before you read it. After each round, the agent that wrote the plan addresses their findings, and the next round reviews the revised draft. You start your own review with a plan that has already lost its most obvious problems, plus a report of what was found and changed.
+Independent agents can review the draft before you read it. They have not seen your planning conversation. After each round, the planner addresses their findings. If another round is needed, new reviewers check the revised draft. You then review the plan and a report of what was found and changed.
 
 This never replaces your own review. The reviewers can check a plan against the code. They cannot tell whether it solves the problem you actually have, and they don't know which decisions you made deliberately. So two rules keep you in charge: the agent never changes a decision you made explicitly without your approval, and the automated review ends where your review begins.
 
 ### A cycle, not a checklist
 
-None of this is a linear checklist. Discussing, reviewing, and revising form a cycle you go around several times: the review turns up findings, the findings turn into discussion, the discussion turns into a revised draft, and that draft deserves another look. The draft itself gets written only once, at the start - from then on you change it by asking, the same way you change any other file. The phase is over when the cycle stops producing changes, not when you have performed each step once.
+Discuss, review, and revise the draft as often as needed. Use ordinary prompts to request changes. When you and the agent stop finding useful changes, the plan is ready to freeze. See [Ending the Phase](#ending-the-phase).
 
-If that sounds like a lot of conversation for one markdown file, it is. That is where the 30 to 90 minutes go, and it is the cheapest hour in the whole workflow.
+If that sounds like a lot of conversation for one Markdown file, it is. That is where the 30 to 90 minutes go, and it is the cheapest hour in the whole workflow.
 
 :::tip[The Opinionated Path]
 For larger or tougher plans, I use `/guided-coding-review-plan` in a **fresh conversation** with another coding agent. It reports findings only and never edits the plan - it checks acceptance criteria for verifiability, validates claims about existing code, and judges whether relevant risks like error handling, migration, performance, and security boundaries were considered.
@@ -92,7 +90,7 @@ The Planning Phase ends with a deliberate act: you freeze the plan and commit it
 
 That moment matters more than it looks. Up to that point the plan is a draft and anything can change. After it, the plan is **frozen** - a record of what you decided at that moment. You do not edit it later to match what actually happened. If the decision turns out to be wrong, you write a follow-up plan that supersedes it. If the implementation ends up somewhere else, you write a Plan Deviations document that explains why.
 
-The only edit permitted on a frozen plan is ticking an acceptance criterion from `- [ ]` to `- [x]`, and only once the implementation genuinely satisfies it.
+The only permitted edit to a frozen plan is checking off an acceptance criterion from `- [ ]` to `- [x]`, after the implementation satisfies it and the relevant feedback loops verify the result.
 
 This is what makes `ai-plans/` a decision record rather than a pile of stale documents. [The Plan Record](./plan-record.md) explains the rules and the reasoning in full.
 

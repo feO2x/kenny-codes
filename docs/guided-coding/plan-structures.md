@@ -5,13 +5,13 @@ title: Plan Structures
 
 # Plan Structures
 
-Every plan answers three questions: *why* are we doing this, *what* must be true when it's done, and *how* should a senior engineer - or a competent agent - approach it without guessing at your intent. The [Planning Phase](./planning-phase.mdx) explains why these three matter. This page is about the shape you give them.
+Every plan explains *why* the work is needed, *what* the result must satisfy, and *how* to approach the implementation. The [Planning Phase](./planning-phase.mdx) explains why these matter. This page describes how to organize them.
 
 There is no single right structure. The Guided Coding skills ship two, and you can bring your own. What they share is that a plan stays short and that each section carries information the others don't.
 
 ## The default structure
 
-The default structure has exactly the three sections the questions above call for:
+The default structure organizes the why, what, and how into three sections:
 
 1. **Rationale** - the problem and the goal of this work.
 2. **Acceptance Criteria** - observable, verifiable outcomes as unchecked Markdown tasks (`- [ ]`). They describe results, not implementation steps.
@@ -41,18 +41,18 @@ The last Decision may list what the ticket or the discussion mentioned and the p
 
 ### Checking assumptions against the code
 
-A Decision is only as good as the assumptions behind it. Before a Decision goes into the plan, its assumptions are checked against the code: claims made in the ticket, and the actual behavior of existing code the plan wants to reuse. When reading the code isn't enough, a temporary test or project shows what really happens. A simulation in the agent's head doesn't count as a check.
+Before recording a Decision, check its assumptions against the code. This includes relevant claims in the ticket and the behavior of existing code the plan will reuse. When reading the code isn't enough, use a temporary test or project to check the behavior. Reasoning alone does not verify it.
 
 Sometimes an important assumption can't be verified during planning. Then the Decision says so, along with what follows if the assumption is wrong and what would resolve it. When a check disproves an assumption, the agent revises its own Decision. If the Decision was yours, it asks you first.
 
-This is the same premise check the implementing skills run before they start - see the [Implementing Phase](./implementing-phase.mdx#when-the-plan-is-wrong). Catching a false premise while planning costs a sentence. Catching it during implementation costs a workaround or a follow-up plan.
+The implementing skills check these assumptions again before they start. See the [Implementing Phase](./implementing-phase.mdx#when-the-plan-is-wrong). During planning, you can correct an assumption by revising the draft. Discovering the same error during implementation may require a workaround or a follow-up plan.
 
 ### Each section adds information
 
 RDAT states each fact once:
 
 - **Acceptance Criteria** explain how to verify the Decisions: test inputs, expected results, and failure cases. Every Decision except the Out-of-Scope Decision has at least one criterion. Criteria never introduce behavior, contracts, or scope that no Decision mentions. Criteria that need a human - documentation quality, say, or platform behavior no feedback loop covers - state what is checked and who checks it.
-- **Technical Details** contain only what an implementer who hasn't seen the planning conversation can't quickly find in the code: where a change goes when it isn't obvious, existing code to follow, interactions, pitfalls, and how to structure the tests. Nothing in this section adds a behavior, a contract, or an exclusion. If it does, it is a Decision.
+- **Technical Details** provide guidance that is difficult to discover from the code alone. Assume the implementer has not seen the planning conversation. Include relevant locations, existing code to follow, interactions, pitfalls, and guidance on structuring tests. New behavior, contracts, or exclusions belong in Decisions.
 
 General rules that already live in your `AGENTS.md` files are referenced, not copied. The history of how the agent investigated the problem stays out entirely.
 
@@ -68,14 +68,14 @@ The section is optional. `guided-coding-write-plan` adds it only when the planni
 
 You can choose a structure for a single plan, for a whole repository, or write your own:
 
-- **For one plan**, name the structure when you invoke `/guided-coding-write-plan` or `/guided-coding-plan-and-review`, for example `/guided-coding-write-plan rdat-plan-structure.md`. A bare filename refers to a structure bundled with the skill. Any other path is resolved from the repository root.
+- **For one plan**, name the structure when you run `/guided-coding-write-plan` or `/guided-coding-plan-and-review`, for example `/guided-coding-write-plan rdat-plan-structure.md`. A bare filename refers to a structure bundled with the skill. Any other path is resolved from the repository root.
 - **For a repository**, name it in `ai-plans/AGENTS.md`, for example: ``Use the RDAT plan structure (`rdat-plan-structure.md`).``
 - **Your own structure** can live in a Markdown file that you name in either of these ways. You can also describe it directly in `ai-plans/AGENTS.md`.
 
-A structure named at invocation wins over `ai-plans/AGENTS.md`, which wins over the default. If a named file doesn't exist, the skill stops and tells you instead of falling back to another structure, so you never end up with a plan in a structure you didn't choose.
+A structure named in your command takes precedence over `ai-plans/AGENTS.md`, which takes precedence over the default. If a named file doesn't exist, the skill stops and reports it.
 
 :::tip[The Opinionated Path]
-I use RDAT for every plan. The line ``Use the RDAT plan structure (`rdat-plan-structure.md`).`` sits in the `ai-plans/AGENTS.md` of each of my repositories, so I never have to name it when I invoke a skill. `/guided-coding-setup` doesn't add it for you - [Getting Started](./guided-coding-getting-started.mdx#step-0-set-up-the-repository) shows where it goes.
+I use RDAT for every plan. The line ``Use the RDAT plan structure (`rdat-plan-structure.md`).`` sits in the `ai-plans/AGENTS.md` of each of my repositories, so I never have to name it when I run a skill. `/guided-coding-setup` doesn't add it for you - [Getting Started](./guided-coding-getting-started.mdx#step-0-set-up-the-repository) shows where it goes.
 
 The Decisions section changed how I review plans. I read it first and ask myself whether I would approve it as it stands. Only then do I check whether the criteria really verify each Decision.
 :::
