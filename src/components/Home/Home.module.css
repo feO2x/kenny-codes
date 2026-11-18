@@ -12,13 +12,12 @@
 }
 
 .heroName {
-  font-size: clamp(3.1rem, 1.6rem + 5.4vw, 6.25rem);
+  font-size: clamp(2.75rem, 1.6rem + 5.4vw, 6.25rem);
   font-stretch: 125%;
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 0.92;
   margin: 0 0 1.75rem;
-  text-wrap: nowrap;
 }
 
 .heroStatement {
@@ -67,7 +66,8 @@
   display: flex;
   gap: 0.25rem;
   list-style: none;
-  margin: 0 0 0 0.5rem;
+  /* Pull the 44px hit areas left so the glyphs line up with the text edge. */
+  margin: 1rem 0 0 -0.7rem;
   padding: 0;
 }
 
@@ -228,10 +228,21 @@
   background: var(--kc-gradient);
 }
 
+.listCaption {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--kc-muted);
+  margin: 0.5rem 0 0.75rem;
+}
+
 /* ---------- Methods ---------- */
 
 .methodsBand {
   background: var(--kc-surface);
+}
+
+.method {
+  container-type: inline-size;
 }
 
 .methods {
@@ -357,18 +368,27 @@
   transition: background-color 0.15s ease;
 }
 
-.post + .post {
-  box-shadow: 0 -1px 0 var(--kc-line);
-}
-
 .post:hover,
 .post:focus-within {
   background: var(--kc-surface);
 }
 
-.post:hover,
-.post:hover + .post {
-  box-shadow: none;
+/* Dividers align with the content edge, not with the hover background. */
+.post + .post::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 1rem;
+  height: 1px;
+  background: var(--kc-line);
+  transition: opacity 0.15s ease;
+}
+
+.post:hover::before,
+.post:focus-within::before,
+.post:hover + .post::before,
+.post:focus-within + .post::before {
+  opacity: 0;
 }
 
 .postDate {
@@ -452,7 +472,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 680px) {
   .heroGrid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -467,11 +487,9 @@
   .heroName {
     margin-bottom: 1.25rem;
   }
+}
 
-  .socials {
-    margin-left: 0;
-    width: 100%;
-  }
+@media (max-width: 640px) {
 
   .heroActions :global(.button) {
     flex: 1 1 auto;
@@ -481,12 +499,27 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+}
+
+/* Five columns need room for "Composition root"; narrower cards list the letters instead. */
+@container (max-width: 30rem) {
   .chack {
-    gap: 0.5rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+
+  .chackItem {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .chackLetter {
+    font-size: 1.75rem;
+    width: 2rem;
   }
 
   .chackWord {
-    font-size: 0.75rem;
-    hyphens: auto;
+    font-size: 0.95rem;
   }
 }

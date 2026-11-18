@@ -2,11 +2,13 @@ import React, {type ReactNode} from 'react';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import Link from '@docusaurus/Link';
 import type {Props} from '@theme/BlogListPage';
 import type {EventFrontMatter} from '@site/src/types/event';
 import SpeakingRecord from '@site/src/components/SpeakingRecord';
 import EventsListing from '@site/src/components/EventsListing';
-import {todayIsoDate} from '@site/src/utils/dateFormatting';
+import {useToday} from '@site/src/utils/dateFormatting';
+import {CONTACT_EMAIL, CONTACT_MAILTO, LINKEDIN_URL} from '@site/src/utils/contact';
 import styles from './styles.module.css';
 
 type EventsBlogListContentProps = {
@@ -17,8 +19,8 @@ export function EventsContact(): ReactNode {
   return (
     <p className={styles.contact}>
       Want me at your conference, user group, or company? Write to{' '}
-      <a href="mailto:info@kenny-codes.net">info@kenny-codes.net</a> or message me on{' '}
-      <a href="https://www.linkedin.com/in/kenny-pflug-7a1012123/" target="_blank" rel="noopener noreferrer">
+      <a href={CONTACT_MAILTO}>{CONTACT_EMAIL}</a> or message me on{' '}
+      <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
         LinkedIn
       </a>
       .
@@ -27,7 +29,7 @@ export function EventsContact(): ReactNode {
 }
 
 export default function EventsBlogListContent({items}: EventsBlogListContentProps): ReactNode {
-  const today = todayIsoDate();
+  const today = useToday();
   const sessions = items.map((item) => ({
     date: item.content.metadata.date,
     cancelled: (item.content.frontMatter as EventFrontMatter).cancelled,
@@ -51,6 +53,11 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
               {germanShare > 0.5 ? ', most of them in German' : ''}.
             </p>
             <EventsContact />
+            <nav className={styles.jump} aria-label="On this page">
+              <Link to="#upcoming">Upcoming</Link>
+              <Link to="#past">Past sessions</Link>
+              <Link to="/events/tags">Browse by topic</Link>
+            </nav>
           </div>
           <figure className={styles.photo}>
             <img
@@ -64,7 +71,11 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
         </header>
 
         <section className={styles.record} aria-label="Sessions per year">
-          <SpeakingRecord events={sessions} yearLink={(year) => `#year-${year}`} />
+          <SpeakingRecord
+            events={sessions}
+            yearLink={(year) => `#year-${year}`}
+            upcomingLink="#upcoming"
+          />
         </section>
 
         <div className={styles.listing}>

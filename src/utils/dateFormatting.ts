@@ -1,3 +1,6 @@
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import useIsBrowser from '@docusaurus/useIsBrowser';
+
 /**
  * Formats a date string to a human-readable format using UTC timezone.
  * 
@@ -36,4 +39,15 @@ export function dateParts(dateString: string): {month: string; day: string; year
     day: date.toLocaleDateString('en-US', {day: 'numeric', timeZone: 'UTC'}),
     year: date.toLocaleDateString('en-US', {year: 'numeric', timeZone: 'UTC'}),
   };
+}
+
+/**
+ * Today's date as `YYYY-MM-DD`, safe for server rendering: the static HTML and the first browser
+ * render use the build date, and the visitor's local date takes over right after hydration.
+ */
+export function useToday(): string {
+  const {siteConfig} = useDocusaurusContext();
+  const isBrowser = useIsBrowser();
+  const buildDate = siteConfig.customFields?.buildDate as string | undefined;
+  return isBrowser || !buildDate ? todayIsoDate() : buildDate;
 }

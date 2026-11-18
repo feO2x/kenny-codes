@@ -117,7 +117,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "ss01" off;
+  /* Keeps anchor targets and focused elements clear of the sticky navbar. */
+  scroll-padding-top: calc(var(--ifm-navbar-height) + 1rem);
 }
 
 body {
@@ -150,6 +151,42 @@ p, li {
 
 hr {
   border-color: var(--kc-line);
+}
+
+/* Wider side margins on laptop widths, where Infima drops to 1rem. */
+@media (min-width: 997px) {
+  .container {
+    padding-inline: clamp(1.5rem, 3.5vw, 3rem);
+  }
+}
+
+/* ---------- Page headers (blog list, legal notice) ---------- */
+
+.kc-page-header {
+  margin-bottom: 2.5rem;
+}
+
+.kc-page-title {
+  font-size: clamp(2.6rem, 1.6rem + 4vw, 4.5rem);
+  font-weight: 800;
+  font-stretch: 125%;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  margin: 0 0 1rem;
+}
+
+.kc-page-lede {
+  font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.4rem);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--kc-muted);
+  max-width: 40ch;
+  margin: 0;
+}
+
+.kc-narrow-page {
+  max-width: 48rem;
+  padding-block: clamp(3rem, 2rem + 3vw, 5rem);
 }
 
 /* ---------- Buttons ---------- */
@@ -225,8 +262,17 @@ hr {
   color: var(--kc-ink);
 }
 
+/* Active section: a strip of the logo gradient. */
 .navbar__items:not(.navbar__items--right) .navbar__link--active {
-  box-shadow: inset 0 -2px 0 var(--ifm-color-primary);
+  background-image: var(--kc-gradient);
+  background-size: 100% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+}
+
+.navbar-sidebar .navbar__link--active,
+.navbar-sidebar .menu__link--active {
+  background-image: none;
 }
 
 .navbar__items .navbar__item.navbar__link {
@@ -248,6 +294,23 @@ hr {
 
 .navbar-sidebar {
   background-color: var(--kc-bg);
+}
+
+.navbar-sidebar__close {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-right: -0.6rem;
+  border-radius: 8px;
+}
+
+.navbar-sidebar__close:hover {
+  background: var(--kc-surface-raised);
+}
+
+.navbar-sidebar .menu__link {
+  padding-block: 0.65rem;
 }
 
 /* ---------- Footer ---------- */
@@ -291,6 +354,18 @@ hr {
   color: #8796ae;
 }
 
+@media (max-width: 996px) {
+  .footer__links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 1rem;
+  }
+
+  .footer__links .footer__col {
+    margin: 0;
+  }
+}
+
 /* ---------- Long-form content (docs and blog) ---------- */
 
 .markdown {
@@ -331,6 +406,18 @@ hr {
   text-decoration-color: currentColor;
 }
 
+/* Keep running text at a comfortable measure; figures, code, and tables use the full column. */
+.markdown > p,
+.markdown > ul,
+.markdown > ol,
+.markdown > blockquote,
+.markdown > h2,
+.markdown > h3,
+.markdown > h4,
+.markdown .theme-admonition {
+  max-width: 70ch;
+}
+
 .markdown blockquote {
   border-left: 3px solid var(--ifm-color-primary);
   background: var(--kc-surface-raised);
@@ -369,6 +456,16 @@ hr {
 
 .markdown img {
   border-radius: var(--kc-radius);
+}
+
+/* Article diagrams are drawn on a neutral grey plate (#D6D6D6). Retint it to the palette;
+   it stays light in dark mode because the diagrams put dark text on it. */
+.markdown svg rect[fill="#D6D6D6"] {
+  fill: #e3e9f2;
+}
+
+[data-theme='dark'] .markdown svg rect[fill="#D6D6D6"] {
+  fill: #cdd6e4;
 }
 
 code {
@@ -509,39 +606,84 @@ pre code,
   font-size: 0.92rem;
 }
 
-.blog-list-page article {
+.blog-list-page main > article {
   padding-bottom: 2.5rem;
+  margin-bottom: 2.5rem !important;
   border-bottom: 1px solid var(--kc-line);
 }
 
-.blog-list-page article:last-of-type {
+.blog-list-page main > article:last-of-type {
   border-bottom: 0;
 }
 
-.tag-list,
-[class*="tags_"] {
-  gap: 0.4rem;
+/* One author writes every post, so the list does not repeat the author card. */
+.blog-list-page main > article .avatar {
+  display: none;
 }
 
-.tag-list li,
-[class*="tags_"] li {
+/* Tags (see src/theme/Tag and src/theme/TagsListInline) */
+.kc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.kc-tags__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--kc-muted);
+}
+
+.kc-tags__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.kc-tags__list li {
   margin: 0;
 }
 
-a[class*="tag_"] {
-  border: 1px solid var(--kc-line-strong);
+.kc-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   border-radius: 999px;
-  background: transparent;
-  color: var(--kc-muted);
-  font-size: 0.8rem;
+  box-shadow: inset 0 0 0 1px var(--kc-line-strong);
+  color: var(--kc-ink);
+  font-size: 0.85rem;
   font-weight: 500;
-  padding: 0.15rem 0.65rem;
+  line-height: 1.2;
+  padding: 0.3rem 0.75rem;
 }
 
-a[class*="tag_"]:hover {
-  border-color: var(--ifm-color-primary);
+.kc-tag:hover {
+  box-shadow: inset 0 0 0 1px var(--ifm-color-primary);
   color: var(--kc-ink);
   text-decoration: none;
+}
+
+.kc-tag__count {
+  font-size: 0.75rem;
+  color: var(--kc-muted);
+}
+
+/* Author social icons: at least 32px targets. */
+.avatar__intro a:has(> svg) {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  margin-right: 0.15rem;
+  border-radius: 6px;
+}
+
+.avatar__intro a:has(> svg):hover {
+  background: var(--kc-surface-raised);
 }
 
 .avatar__name {
@@ -568,4 +710,17 @@ a[class*="tag_"]:hover {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+.kc-back-link {
+  display: inline-block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--kc-muted);
+  margin-bottom: 1rem;
+}
+
+.kc-back-link:hover {
+  color: var(--kc-ink);
+  text-decoration: none;
 }

@@ -43,6 +43,30 @@
   text-decoration-color: var(--ifm-color-primary);
 }
 
+.jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.75rem;
+}
+
+.jump a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--kc-line-strong);
+  color: var(--kc-ink);
+  font-size: 0.925rem;
+  font-weight: 600;
+}
+
+.jump a:hover {
+  box-shadow: inset 0 0 0 1px var(--ifm-color-primary);
+  text-decoration: none;
+}
+
 .photo {
   margin: 0;
 }
@@ -91,6 +115,8 @@
   }
 
   .photo img {
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 9;
+    max-height: 22rem;
+    object-position: 50% 60%;
   }
 }

@@ -6,13 +6,14 @@ import {FaGithub, FaLinkedinIn} from 'react-icons/fa';
 import {FaXTwitter} from 'react-icons/fa6';
 import homeData from '@site/src/data/home-data.json';
 import SpeakingRecord from '../SpeakingRecord';
-import {todayIsoDate} from '@site/src/utils/dateFormatting';
+import {useToday} from '@site/src/utils/dateFormatting';
+import {CONTACT_MAILTO, GITHUB_URL, LINKEDIN_URL, X_URL} from '@site/src/utils/contact';
 import styles from './Home.module.css';
 
 const socials = [
-  {label: 'LinkedIn', href: 'https://www.linkedin.com/in/kenny-pflug-7a1012123/', Icon: FaLinkedinIn},
-  {label: 'GitHub', href: 'https://github.com/feO2x', Icon: FaGithub},
-  {label: 'X', href: 'https://x.com/feO2x', Icon: FaXTwitter},
+  {label: 'LinkedIn', href: LINKEDIN_URL, Icon: FaLinkedinIn},
+  {label: 'GitHub', href: GITHUB_URL, Icon: FaGithub},
+  {label: 'X', href: X_URL, Icon: FaXTwitter},
 ];
 
 function joinList(items: string[]): string {
@@ -22,7 +23,7 @@ function joinList(items: string[]): string {
 
 export default function HeroSection(): ReactNode {
   const {eventTimeline, venues} = homeData;
-  const today = todayIsoDate();
+  const today = useToday();
   const delivered = eventTimeline.filter((e) => !e.cancelled && e.date < today);
   const firstYear = eventTimeline[0]?.date.slice(0, 4);
 
@@ -46,22 +47,22 @@ export default function HeroSection(): ReactNode {
               , conference speaker, and consultant from Regensburg, Germany.
             </p>
             <div className={styles.heroActions}>
-              <Link className="button button--primary button--lg" to="/events">
+              <a className="button button--primary button--lg" href={CONTACT_MAILTO}>
+                Get in touch
+              </a>
+              <Link className="button button--secondary button--lg" to="/events">
                 See talks and workshops
               </Link>
-              <Link className="button button--secondary button--lg" to="/blog">
-                Read the blog
-              </Link>
-              <ul className={styles.socials}>
-                {socials.map(({label, href, Icon}) => (
-                  <li key={label}>
-                    <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}>
-                      <Icon aria-hidden="true" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
             </div>
+            <ul className={styles.socials} aria-label="Kenny Pflug elsewhere">
+              {socials.map(({label, href, Icon}) => (
+                <li key={label}>
+                  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}>
+                    <Icon aria-hidden="true" />
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className={styles.portraitFrame}>
@@ -78,9 +79,9 @@ export default function HeroSection(): ReactNode {
 
         <section className={styles.record} aria-labelledby="speaking-record-title">
           <div className={styles.recordIntro}>
-            <Heading as="h2" id="speaking-record-title" className={styles.recordTitle}>
+            <h2 id="speaking-record-title" className={styles.recordTitle}>
               {delivered.length} talks, workshops, and webinars since {firstYear}
-            </Heading>
+            </h2>
             <p className={styles.recordText}>
               Regular speaker at {joinList(venues.slice(0, 5))}.
             </p>
@@ -91,6 +92,7 @@ export default function HeroSection(): ReactNode {
           <SpeakingRecord
             events={eventTimeline}
             yearLink={(year) => `/events#year-${year}`}
+            upcomingLink="/events#upcoming"
             className={styles.recordChart}
           />
         </section>

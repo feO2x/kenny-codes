@@ -20,9 +20,9 @@ export default function BlogSection(): ReactNode {
       <div className="container">
         <div className={styles.split}>
           <div className={styles.splitIntro}>
-            <Heading as="h2" id="writing-title" className={styles.sectionTitle}>
+            <h2 id="writing-title" className={styles.sectionTitle}>
               Writing
-            </Heading>
+            </h2>
             <p className={styles.sectionLede}>
               Articles on AI-assisted development, software design, and .NET.
             </p>

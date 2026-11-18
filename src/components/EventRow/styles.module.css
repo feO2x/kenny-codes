@@ -10,21 +10,36 @@
   transition: background-color 0.15s ease;
 }
 
-.row + .row {
-  box-shadow: 0 -1px 0 var(--kc-line);
-}
-
-.row:hover {
-  background: var(--kc-surface);
-}
-
-.row:hover + .row,
-.row:hover {
-  box-shadow: none;
-}
-
+.row:hover,
 .row:focus-within {
   background: var(--kc-surface);
+}
+
+/* Dividers align with the content edge, not with the hover background. */
+.row + .row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 1rem;
+  height: 1px;
+  background: var(--kc-line);
+  transition: opacity 0.15s ease;
+}
+
+.row:hover::before,
+.row:focus-within::before,
+.row:hover + .row::before,
+.row:focus-within + .row::before {
+  opacity: 0;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 .date {
@@ -192,7 +207,12 @@
   .row {
     grid-template-columns: 3.25rem minmax(0, 1fr);
     gap: 0.25rem 1rem;
-    padding-block: 1.1rem;
+    padding: 1.1rem 0.75rem;
+    margin-inline: -0.75rem;
+  }
+
+  .row + .row::before {
+    inset-inline: 0.75rem;
   }
 
   .day {

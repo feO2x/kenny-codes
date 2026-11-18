@@ -35,6 +35,12 @@ const config: Config = {
   organizationName: "feO2x", // Usually your GitHub org/user name.
   projectName: "kenny-codes", // Usually your repo name.
 
+  // The day the site was built. Date-dependent components render with it first so the
+  // browser's first render matches the static HTML, then switch to the visitor's date.
+  customFields: {
+    buildDate: new Date().toISOString().slice(0, 10),
+  },
+
   onBrokenLinks: "throw",
   markdown: {
     format: "detect",
@@ -229,7 +235,7 @@ const config: Config = {
     navbar: {
       title: "Kenny Codes",
       logo: {
-        alt: "Kenny Codes Logo",
+        alt: "",
         src: "img/logo-light.svg",
         srcDark: "img/logo-dark.svg",
       },

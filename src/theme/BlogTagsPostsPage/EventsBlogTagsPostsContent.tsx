@@ -29,10 +29,7 @@ export default function EventsBlogTagsPostsContent({items, tag}: Props): ReactNo
         </header>
 
         <div className={styles.listing}>
-          <EventsListing
-            items={items}
-            emptyUpcoming={<p>No upcoming sessions on this topic right now.</p>}
-          />
+          <EventsListing items={items} />
         </div>
       </main>
     </Layout>

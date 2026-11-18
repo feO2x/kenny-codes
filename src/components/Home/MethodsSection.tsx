@@ -23,9 +23,9 @@ export default function MethodsSection(): ReactNode {
     <section className={clsx(styles.section, styles.methodsBand)} aria-labelledby="methods-title">
       <div className="container">
         <div className={styles.sectionHead}>
-          <Heading as="h2" id="methods-title" className={styles.sectionTitle}>
+          <h2 id="methods-title" className={styles.sectionTitle}>
             Methods I teach
-          </Heading>
+          </h2>
           <p className={styles.sectionLede}>
             Free, complete documentation for the approaches I use in my own projects and teach in
             workshops.
@@ -60,7 +60,7 @@ export default function MethodsSection(): ReactNode {
             </Heading>
             <p className={styles.methodText}>
               A simple way to structure an application: every piece of code belongs to exactly one
-              of four categories.
+              of four categories. The K is for Kenny.
             </p>
             <ul className={styles.chack}>
               {chack.map(({letter, word}, index) => (

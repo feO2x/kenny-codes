@@ -1,7 +1,7 @@
 import React, {type CSSProperties, type ReactNode} from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
-import {todayIsoDate} from '@site/src/utils/dateFormatting';
+import {useToday} from '@site/src/utils/dateFormatting';
 import styles from './styles.module.css';
 
 export interface RecordEvent {
@@ -12,8 +12,10 @@ export interface RecordEvent {
 
 interface SpeakingRecordProps {
   events: ReadonlyArray<RecordEvent>;
-  /** Where a year column links to, for example an anchor on the events page. */
+  /** Where a year column with past sessions links to, for example an anchor on the events page. */
   yearLink: (year: number) => string;
+  /** Where a year column with only upcoming sessions links to. */
+  upcomingLink: string;
   className?: string;
 }
 
@@ -54,8 +56,13 @@ function sessionsLabel(count: number): string {
  * Every talk, workshop, and webinar as one square, stacked per year.
  * Delivered sessions are filled, upcoming ones are outlined.
  */
-export default function SpeakingRecord({events, yearLink, className}: SpeakingRecordProps): ReactNode {
-  const columns = buildColumns(events, todayIsoDate());
+export default function SpeakingRecord({
+  events,
+  yearLink,
+  upcomingLink,
+  className,
+}: SpeakingRecordProps): ReactNode {
+  const columns = buildColumns(events, useToday());
   const tallest = Math.max(1, ...columns.map((c) => c.delivered + c.upcoming));
   const hasUpcoming = columns.some((c) => c.upcoming > 0);
 
@@ -78,8 +85,10 @@ export default function SpeakingRecord({events, yearLink, className}: SpeakingRe
           const body = (
             <>
               <span className={styles.srOnly}>{label}</span>
-              <span className={styles.count} aria-hidden="true">{total > 0 ? total : ''}</span>
-              <span className={styles.stack} aria-hidden="true">{squares}</span>
+              <span className={styles.stack} aria-hidden="true">
+                {squares}
+                {total > 0 && <span className={styles.count}>{total}</span>}
+              </span>
               <span className={styles.year} aria-hidden="true">
                 <span className={styles.yearLong}>{column.year}</span>
                 <span className={styles.yearShort}>’{String(column.year).slice(2)}</span>
@@ -89,7 +98,9 @@ export default function SpeakingRecord({events, yearLink, className}: SpeakingRe
           return (
             <li key={column.year} className={styles.column}>
               {total > 0 ? (
-                <Link to={yearLink(column.year)} className={styles.columnLink}>
+                <Link
+                  to={column.delivered > 0 ? yearLink(column.year) : upcomingLink}
+                  className={styles.columnLink}>
                   {body}
                 </Link>
               ) : (

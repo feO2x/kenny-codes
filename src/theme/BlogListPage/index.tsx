@@ -13,6 +13,7 @@ import SearchMetadata from '@theme/SearchMetadata';
 import type {Props} from '@theme/BlogListPage';
 import BlogPostItems from '@theme/BlogPostItems';
 import BlogListPageStructuredData from '@theme/BlogListPage/StructuredData';
+import Heading from '@theme/Heading';
 import EventsBlogListContent from './EventsBlogListContent';
 import {isEventsBlogList} from '@site/src/utils/eventUtils';
 
@@ -41,8 +42,19 @@ function BlogListPageContent(props: Props): ReactNode {
   }
 
   // Default blog layout for regular blog
+  const isFirstPage = !metadata.previousPage;
   return (
     <BlogLayout sidebar={sidebar}>
+      <header className="kc-page-header">
+        <Heading as="h1" className="kc-page-title">
+          Writing
+        </Heading>
+        {isFirstPage && (
+          <p className="kc-page-lede">
+            Articles on AI-assisted development, software design, and .NET.
+          </p>
+        )}
+      </header>
       <BlogPostItems items={items} />
       <BlogListPaginator metadata={metadata} />
     </BlogLayout>

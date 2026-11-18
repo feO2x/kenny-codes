@@ -43,53 +43,32 @@ function isCancelled(frontMatter?: Record<string, unknown>): boolean {
 
 /**
  * Groups events into upcoming and past events, and groups past events by year.
- * 
+ * Cancelled events are kept while upcoming so visitors learn about the change, and dropped once past.
+ *
  * @param items - List of blog posts/events
+ * @param today - Today's date as `YYYY-MM-DD` (see `useToday`)
  * @returns Object containing upcoming events, past events, grouped past events, and years
  */
-export function groupEvents<T extends EventItem>(items: ReadonlyArray<T>) {
-  // Normalize to UTC midnight for consistent date comparisons
-  const now = new Date();
-  const nowUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+export function groupEvents<T extends EventItem>(items: ReadonlyArray<T>, today: string) {
+  // Day-level comparison on `YYYY-MM-DD` strings avoids timezone pitfalls.
+  const day = (item: T) => item.content.metadata.date.slice(0, 10);
 
-  // Pre-calculate timestamps to avoid repeated Date parsing during sort
-  const processedItems = items.map(item => ({
-    item,
-    timestamp: new Date(item.content.metadata.date).getTime()
-  }));
+  const upcomingEvents = items
+    .filter((item) => day(item) >= today)
+    .sort((a, b) => day(a).localeCompare(day(b)));
+  const pastEvents = items
+    .filter((item) => day(item) < today && !isCancelled(item.content.frontMatter))
+    .sort((a, b) => day(b).localeCompare(day(a)));
 
-  const upcomingProcessed = processedItems.filter(p => p.timestamp >= nowUtc);
-  const pastProcessed = processedItems
-    .filter(p => p.timestamp < nowUtc)
-    .filter(p => !isCancelled(p.item.content.frontMatter));
+  const pastEventsByYear: Record<number, T[]> = {};
+  for (const item of pastEvents) {
+    const year = Number(day(item).slice(0, 4));
+    (pastEventsByYear[year] ??= []).push(item);
+  }
 
-  // Sort upcoming earliest first, past most recent first
-  upcomingProcessed.sort((a, b) => a.timestamp - b.timestamp);
-  pastProcessed.sort((a, b) => b.timestamp - a.timestamp);
-
-  // Unwrap items
-  const upcomingEvents = upcomingProcessed.map(p => p.item);
-  const pastEvents = pastProcessed.map(p => p.item);
-
-  // Group past events by year
-  const pastEventsByYear = pastProcessed.reduce((acc, p) => {
-    const year = new Date(p.timestamp).getFullYear();
-    if (!acc[year]) {
-      acc[year] = [];
-    }
-    acc[year].push(p.item);
-    return acc;
-  }, {} as Record<number, T[]>);
-
-  // Get years in descending order
   const years = Object.keys(pastEventsByYear)
     .map(Number)
     .sort((a, b) => b - a);
 
-  return {
-    upcomingEvents,
-    pastEvents,
-    pastEventsByYear,
-    years
-  };
+  return {upcomingEvents, pastEvents, pastEventsByYear, years};
 }

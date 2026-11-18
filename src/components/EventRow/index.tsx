@@ -13,6 +13,8 @@ export interface EventRowProps extends EventFrontMatter {
   date: string;
   isUpcoming?: boolean;
   headingLevel?: 'h3' | 'h4';
+  /** Hide the year when the row already sits under a year heading. */
+  showYear?: boolean;
 }
 
 /** Joins location and country without repeating the country ("Nürnberg, Germany" + "Germany"). */
@@ -40,6 +42,7 @@ export default function EventRow({
   cancelled,
   isUpcoming = false,
   headingLevel = 'h3',
+  showYear = true,
 }: EventRowProps): ReactNode {
   const {month, day, year} = dateParts(date);
   const place = formatPlace(location, country);
@@ -51,7 +54,11 @@ export default function EventRow({
       <time className={styles.date} dateTime={date.slice(0, 10)}>
         <span className={styles.month}>{month}</span>
         <span className={styles.day}>{day}</span>
-        <span className={styles.year}>{year}</span>
+        {showYear ? (
+          <span className={styles.year}>{year}</span>
+        ) : (
+          <span className={styles.srOnly}>{year}</span>
+        )}
       </time>
 
       <div className={styles.body}>

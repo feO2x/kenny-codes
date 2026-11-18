@@ -1,9 +1,8 @@
 import React, {type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
-import Heading from '@theme/Heading';
 import homeData from '@site/src/data/home-data.json';
 import EventRow from '../EventRow';
-import {todayIsoDate} from '@site/src/utils/dateFormatting';
+import {useToday} from '@site/src/utils/dateFormatting';
 import styles from './Home.module.css';
 
 interface HomeEvent {
@@ -28,7 +27,7 @@ const topics = [
 
 export default function EventsSection(): ReactNode {
   const recentEvents = homeData.recentEvents as HomeEvent[];
-  const today = todayIsoDate();
+  const today = useToday();
 
   // Cancelled events stay visible while they are upcoming so visitors learn about the change.
   const visibleEvents = recentEvents
@@ -40,9 +39,9 @@ export default function EventsSection(): ReactNode {
       <div className="container">
         <div className={styles.split}>
           <div className={styles.splitIntro}>
-            <Heading as="h2" id="talks-title" className={styles.sectionTitle}>
+            <h2 id="talks-title" className={styles.sectionTitle}>
               Talks and workshops
-            </Heading>
+            </h2>
             <p className={styles.sectionLede}>
               Conference sessions, in-house workshops, and user group talks, mostly in German.
               I speak about:
@@ -58,6 +57,9 @@ export default function EventsSection(): ReactNode {
           </div>
 
           <div className={styles.splitList}>
+            <p className={styles.listCaption}>
+              {visibleEvents.some((event) => event.date >= today) ? 'Next and recent sessions' : 'Recent sessions'}
+            </p>
             {visibleEvents.map((event) => (
               <EventRow
                 key={event.link}
