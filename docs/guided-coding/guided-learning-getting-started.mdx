@@ -48,13 +48,38 @@ If you are the senior developer, join before the plan freezes, not after the pul
 
 ## When to Call What
 
-<GuidedLearningSkillTimeline />
+<Tabs groupId="guided-coding-planning-variant">
+<TabItem value="manual" label="Manual path" default>
+
+<GuidedLearningSkillTimeline variant="manual" />
+
+</TabItem>
+<TabItem value="plan-and-review" label="Plan-and-review path">
+
+<GuidedLearningSkillTimeline variant="plan-and-review" />
+
+</TabItem>
+</Tabs>
 
 As in [Guided Coding: Getting Started](./guided-coding-getting-started.mdx), filled dots are skills and hollow dots are the parts you do yourself. The Planning and Guiding Phases are the same as in Guided Coding - only the people around the table change. The Implementing Phase is where Guided Learning differs: you start a fresh conversation, invoke the skill that matches your learning progress, and work through what the agent lays out, step-by-step.
 
+The two tabs show the two ways through the Planning Phase. Writing the plan together with your senior developer, on the manual path, is the better option: you learn from the discussion, and the plan's decisions are ones you understood as they were made. When your senior can't be there for the whole discussion, the plan-and-review path saves time. `guided-coding-plan-and-review` writes the plan and lets independent reviewers improve it in rounds, and your senior checks the reviewed plan and its report before the plan freezes. [Automated Plan Review](./automated-plan-review.mdx) explains how it works.
+
+If you know during planning that you will implement the plan yourself, say so in the conversation. With the [RDAT plan structure](./plan-structures.md#notes-for-the-guided-learning-teacher), `guided-coding-write-plan` then adds a `## Notes for the Guided Learning Teacher` section: topics worth teaching along the way, such as SOLID, TDD, or the internals of a technology the plan touches. It adds the section only when the planning conversation says the plan will be taught.
+
 ## The Implementing Phase, Taught
 
-Both skills start the same way. They verify that the plan is frozen, read your [learning profile](#the-learning-profile), and present a roadmap of milestones before any code is written. Every milestone ends in a compilable codebase whose feedback loops pass, including its tests. You tick the acceptance criteria the milestone fully satisfies and commit - the agent never changes your repository.
+Both skills start the same way. They verify that the plan is frozen, read your [learning profile](#the-learning-profile), and present a roadmap of milestones before any code is written. Every milestone ends in a compilable codebase whose feedback loops pass, including its tests. You tick the acceptance criteria the milestone fully satisfies and commit - the agent makes no lasting changes to your repository.
+
+When you don't name a plan, the skills pick one on their own only when exactly one plan has all acceptance criteria unchecked and that plan also has the latest timestamp. Otherwise, they ask you for the path.
+
+### When the plan is wrong
+
+Before it presents the roadmap, the agent checks the plan's premises: do the types, members, and files the plan describes as existing really exist, and does the existing code behave the way the plan claims? When reading the code isn't enough, it writes temporary tests or projects and removes them again before showing you the roadmap.
+
+If a check shows that a plan decision or claim is wrong, the agent may suggest a workaround under the same four conditions as in [regular Guided Coding](./implementing-phase.mdx#when-the-plan-is-wrong). It discusses the workaround with you before it goes into the code, and then teaches it like any other part of the plan. A criterion met only through a workaround stays unchecked, so your senior developer can decide about it in the Guiding Phase. When no workaround is allowed, the agent tells you what the plan says, what it observed, and the options it sees. Then it pauses the affected work and asks you how to proceed - a good moment to bring in your senior developer.
+
+After the last milestone, the agent summarizes what you accomplished. The summary lists each workaround and each problem that was not worked around, together with what you decided, so whoever reviews your work in the Guiding Phase sees them right away.
 
 ### Show Me: for the Beginning stage
 
@@ -124,7 +149,7 @@ Both skills remember what you learned across sessions in `~/.guided-learning/pro
 - **Automated testing** `Advancing`
 ```
 
-The agent uses the profile to decide how large to make the milestones, how much to explain, and how much help to offer at the start. It is a rough starting point: what the agent observes in the session always wins. After each milestone, it records what it saw. A stage moves up at most one step per plan, and only on evidence - for example, when you carried a milestone in an area without being handed the implementation. The show-me skill never moves an area beyond Beginning, because it hands you the code; when you seem ready for more, it suggests switching to coach-me instead.
+The agent uses the profile to decide how large to make the milestones, how much to explain, and how much help to offer at the start. It is a rough starting point: what the agent observes in the session always wins. After each milestone, it records what it saw. A stage moves up at most one step per plan, and only on evidence - for example, when you carried a milestone in an area without being handed the implementation. The show-me skill never moves an area beyond Beginning, because it hands you the code.
 
 On first use, the agent creates `~/.guided-learning/` as a local git repository and commits every update with a message that says what it observed. That history is your learning record. It never ends up in your project repository and is never pushed. If you want to share it across machines, push it to a private repository yourself. You can edit or delete the profile at any time.
 

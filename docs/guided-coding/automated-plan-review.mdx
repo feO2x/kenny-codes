@@ -1,0 +1,144 @@
+---
+sidebar_position: 9
+title: Automated Plan Review
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Automated Plan Review
+
+The [Planning Phase](./planning-phase.mdx#reviewing-the-plan) recommends a second opinion from an agent in a fresh conversation, because an agent that just wrote a plan is a poor judge of it. Doing that by hand means opening a new session, running the review, carrying the findings back, and starting over after larger revisions.
+
+`guided-coding-plan-and-review` automates that loop. It writes the plan draft, has independent reviewers in fresh contexts review it in rounds, addresses their findings, and reports back. You read a plan that has already been through several reviews.
+
+It does not replace your own review. It ends exactly where your review begins: it never freezes the plan, and it never changes a decision you made explicitly without your approval.
+
+## When to run it
+
+Run it **after the discussion, in the same conversation** - at the point where you would otherwise run `guided-coding-write-plan`. The planner, the agent running the skill, needs that conversation: it is where your explicit decisions live, and it uses them to tell your decisions apart from its own. The reviewers never see the conversation. They judge the plan on what it says, the same way an implementing agent will later.
+
+<Tabs groupId="guided-coding-install">
+<TabItem value="skills" label="Agent Skills" default>
+
+```text
+/guided-coding-plan-and-review
+```
+
+</TabItem>
+<TabItem value="claude" label="Claude Code plugin">
+
+```text
+/guided-coding:plan-and-review
+```
+
+</TabItem>
+</Tabs>
+
+Without a draft, the skill invokes `guided-coding-write-plan` to write one and passes on any plan structure you named. If you already have a draft, name it. Otherwise the skill picks up an uncommitted draft in `ai-plans/` only if it clearly belongs to the work you discussed, and asks you when several could match.
+
+Anything you add to the invocation overrides the configuration below for this run. For example, to pause on findings against your decisions this time:
+
+<Tabs groupId="guided-coding-install">
+<TabItem value="skills" label="Agent Skills" default>
+
+```text
+/guided-coding-plan-and-review Use pause for user decisions in this run.
+```
+
+</TabItem>
+<TabItem value="claude" label="Claude Code plugin">
+
+```text
+/guided-coding:plan-and-review Use pause for user decisions in this run.
+```
+
+</TabItem>
+</Tabs>
+
+## Configuration
+
+The skill reads an optional `## Plan Review` section in `ai-plans/AGENTS.md`:
+
+```md
+## Plan Review
+
+- Reviewers: two, one on GPT-6.1-Sol High and one on Opus 5.5 High
+- Round limit: 3
+- User decisions: collect
+```
+
+Model names are harness-specific, so write them the way your agent's harness names them. If a configured model isn't available, that reviewer runs on the harness default model, and the report tells you so.
+
+Reviewers on different models tend to notice different things, which is why the example uses two.
+
+Without a configuration, the skill uses one reviewer on the harness default model, a round limit of 3, and `collect`. Each value you leave out of both the invocation and the configuration falls back to its default.
+
+### Your decisions: `collect` or `pause`
+
+Reviewers sometimes challenge a decision you made explicitly in the conversation. The planner never changes such a decision on its own. What happens instead depends on the policy:
+
+- **`collect`** (default) - the run continues, and the finding is reported as open for you to decide.
+- **`pause`** - the round stops, the planner asks you, and it continues after you answer.
+
+`collect` lets the run finish while you do something else. `pause` costs you attention during the run, but the remaining rounds review the plan with your answer already in it.
+
+## How a run works
+
+Each round starts a fresh reviewer for every configured reviewer, in parallel where the harness allows it. A reviewer from an earlier round is never reused. Each reviewer runs `guided-coding-review-plan` on the draft, gets the paths of earlier documents for the same work, and classifies every finding. From round 2 on, it also gets every earlier finding with its resolution. That is context, not a limit: a reviewer may report anything, but it repeats a rejected finding only with a new argument.
+
+### Finding classes
+
+- **`blocking`** - a false premise, an open decision, an acceptance criterion that cannot be verified, or a contradiction with the code.
+- **`gap`** - a missing scenario or fact.
+- **`nit`** - everything else.
+
+### Addressing findings
+
+The planner addresses every finding of every class. It either changes the plan or rejects the finding with a one-line reason. When findings contradict each other, it applies at most one. When several say the same thing, it treats them as one, with the highest class among them.
+
+Apart from your explicit decisions, the planner may change anything in the plan, including decisions it made alone and the scope. That freedom is what makes the rounds useful, and it is also why the report lists those changes separately for you.
+
+The plan keeps following its plan structure. Review commentary stays out of it, and a `nit` doesn't turn into a new rule.
+
+### When the run stops
+
+A round without `blocking` or `gap` findings ends the run. `nit`s alone never start another round. Otherwise, the next round starts, until the round limit is reached.
+
+Reaching the round limit can leave substantive findings open. The report tells you, and those are the first findings to look at.
+
+### Cost
+
+Every reviewer in every round is a separate subagent run with its own context, and each one reads the plan, your repository instructions, and the code the plan discusses. A run therefore costs at most **reviewers × rounds** subagent runs, plus one replacement for each reviewer that fails. Two reviewers and a round limit of 3 mean up to six reviews. A run that stops early costs less.
+
+## Reading the report
+
+The report is where your review begins. Start with the **list of decision and scope changes the planner applied**. It is separate from the findings, so you can confirm each change without comparing versions of the plan. It includes changes you approved during a `pause`. Confirming these is part of your own review: they are choices the planner made after you last read the plan.
+
+Then go through the rest:
+
+- **Every finding** with its round, class, a one-line summary, and its resolution: applied, rejected with the reason, or open for you. Read the rejected ones, too. A rejection you disagree with is a discussion worth having.
+- **The reviewers and the models actually used.** A configured model that was unavailable shows up here, together with the harness default it was replaced by.
+- **The plan's word count** before and after review. A plan that grew a lot deserves a second look at its level of detail.
+- **Whether the plan changed after the last round.** Those changes are unreviewed.
+
+### When the run doesn't complete a review
+
+Some outcomes are not a completed review, and the report says so:
+
+- **No independent reviewers are available.** Reviewers must not share the planning conversation, so they run as subagents, threads, or separate sessions. If your harness offers none of these, the skill reports the plan path, states that no review ran, and stops. It never reviews the plan in its own context instead. Run `guided-coding-review-plan` in a fresh session.
+- **`guided-coding-write-plan` cannot be invoked.** The skill never writes a plan without it, so it stops and asks you to run `guided-coding-write-plan` first. Afterwards, run `guided-coding-plan-and-review` again, and it picks up the draft.
+- **A round is incomplete.** If a reviewer fails or times out, the skill starts one replacement. If that fails too, the skill addresses the findings it already has, reports the incomplete round, and stops.
+- **The plan changed after the last round.** Changes the planner made while addressing the final round's findings were never reviewed. Read them with particular care.
+
+## After the run
+
+From here on, the Planning Phase continues as usual: you read the report and the plan, discuss them, and ask the agent to revise the plan with plain prompts. The closing question still applies: *"Would you change anything about the plan?"*
+
+After larger revisions, you can run `guided-coding-plan-and-review` again on the existing draft. A re-run starts at round 1 with a fresh round limit and the same cost as a first run. Its reviewers don't see the findings of earlier runs, so a finding you rejected before can come back. Treat it like any other finding: if your reason still holds, reject it again.
+
+Once the plan is stable, freeze it as described in [Guided Coding: Getting Started](./guided-coding-getting-started.mdx#step-6-freeze-the-plan).
+
+:::warning
+The reviewers are subagents that run with your permissions. See [Security: Be Vigilant](./security.md).
+:::

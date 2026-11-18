@@ -1,80 +1,45 @@
 ---
-description: Write a Guided Coding plan or follow-up plan after its approach has been discussed. Run only when explicitly requested by the user.
+description: Write a Guided Coding plan or follow-up plan after its approach has been discussed. Run only when explicitly requested by the user or by another Guided Coding skill.
 license: MIT
 metadata:
     github-path: skills/guided-coding-write-plan
-    github-ref: refs/heads/main
+    github-ref: refs/tags/2.1.0
     github-repo: https://github.com/feO2x/guided-coding
-    github-tree-sha: a4f2460317872e658ae15c3074140d8f432e75d3
+    github-tree-sha: 5e3b94a66a8886d8a1d88a9f65663224aa3ab4c7
 name: guided-coding-write-plan
 ---
 # Write a Plan
 
-Write the agreed approach into `ai-plans/`. Do not use this skill to begin or replace the
-planning conversation. Read the repository instructions, including `ai-plans/AGENTS.md`, first.
+Your goal is to write an Initial Plan or Follow-Up Plan into the `ai-plans/` folder at the repository root. After writing, report the plan path and stop. When another Guided Coding skill invoked this one, return to it instead of stopping.
 
-After writing, report the plan path and stop.
+## Plan File Name
 
-## File name
+Name the draft `<short-title>.md`, using a shortened kebab-case version of the ticket title. If no ticket title is available, derive one from the discussion. Ask the user for a title only if you cannot derive one.
 
-Use:
+## Plan Structure
 
-```text
-YYYY-MM-DD-HHMM-<issue-id>-<kebab-case-description>.md
-```
+Use the first plan structure that applies:
 
-Omit `<issue-id>-` when the work has no tracker issue. Obtain the current UTC timestamp from the
-shell; never infer it from conversation context. For example:
+1. A plan structure the user names when invoking this skill: a path to a Markdown file, or the name of a file in `assets/` relative to this skill file, such as `rdat-plan-structure.md`.
+2. A plan structure that `ai-plans/AGENTS.md` names in the same way or describes itself.
+3. `assets/default-plan-structure.md` relative to this skill file.
 
-```sh
-date -u +%F-%H%M
-```
+A bare filename refers to a file in `assets/` relative to this skill file. Resolve other relative paths from the repository root. If the selected file does not exist, stop and report it. Do not fall back to another structure.
 
-In PowerShell, use `(Get-Date).ToUniversalTime().ToString("yyyy-MM-dd-HHmm")`.
+## What Happens After Writing a Plan?
 
-Normalize the tracker identifier for filenames: convert it to lowercase, remove a leading `#`,
-replace each run of characters other than `a-z` and `0-9` with one hyphen, trim leading and trailing
-hyphens, and do not add zero padding. Stop if normalization produces an empty identifier. If the
-work requires an issue but none exists, stop and suggest the Guided Coding issue-preparation skill
-instead of creating a temporary filename.
+The user reviews the draft and may request changes. Once you and the user agree it is ready for implementation, it can be frozen. The only permitted edits after freezing are checking off acceptance criteria.
 
-Resolve the complete destination path before writing and confirm it does not exist. Never
-overwrite or reuse an existing plan or Plan Deviations document; report a collision and stop.
+Freezing renames the file to `<timestamp>-<ticket-id>-<short-title>.md`, or `<timestamp>-<short-title>.md` when there is no ticket ID. It also adds a `*Frozen at ...*` line directly below the title. Do not freeze the plan while running this skill.
 
-## Structure
+## Follow-up Plans
 
-Start with `# Title`, followed by exactly these `##` sections in order:
+A Follow-Up Plan supersedes decisions of a Frozen Plan. The decision to write one is made in the Guiding Phase, when the review of the implementation calls for larger changes.
 
-1. `## Rationale`: briefly state the problem and overarching goal.
-2. `## Acceptance Criteria`: list observable, verifiable outcomes as unticked Markdown tasks
-   (`- [ ]`). Describe results, not implementation steps.
-3. `## Technical Details`: record important decisions, constraints, affected components, and
-   non-obvious interactions. Give a senior engineer room to implement.
+Use the plan structure selected above and the same file naming convention. Read every earlier document for the ticket. In the opening section of the plan (`## Rationale` in the default structure), name the plans this one follows by exact filename.
 
-Use minimal code examples only when they clarify an important contract, such as an API
-signature, interface, or DTO shape. Say whether an example is exact or illustrative when
-unclear. Avoid method bodies, step-by-step instructions, exhaustive file lists, and routine
-background.
+Record only the changed decisions and outcomes. State exactly which earlier decisions this plan supersedes and why. Do not repeat unchanged decisions or contradict earlier plans silently.
 
-When behavior changes, require appropriate automated test coverage in the acceptance criteria.
-Require benchmarks only when performance is a material risk or requirement.
+## Most Importantly
 
-Discover feedback loops from repository instructions, build files, scripts, and CI configuration.
-Look for:
-
-- compilers, type checkers, static analyzers, and linters;
-- automated tests, code coverage, and mutation tests;
-- benchmarks and performance tests; and
-- security scans.
-
-Use the relevant feedback loops to make acceptance criteria verifiable. Do not require every
-available loop or claim that tooling exists without confirming it. If the change requires a
-missing feedback loop, make adding it explicit in the plan.
-
-## Follow-up plans
-
-Use the same format and issue identifier with a later timestamp. Read every earlier document for
-the issue. In the Rationale, name the plans this one follows by exact filename.
-
-Record only the changed decisions and outcomes. State exactly which earlier decisions this plan
-supersedes and why. Do not repeat unchanged decisions or contradict earlier plans silently.
+Keep plans concise. Use plain language.

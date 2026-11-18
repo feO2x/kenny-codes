@@ -23,12 +23,13 @@ Concretely, the directory answers questions that git history alone answers badly
 
 ## Freezing a plan
 
-**A plan freezes when its Planning Phase ends** - in practice, when you commit it.
+**A plan freezes when its Planning Phase ends** - in practice, right before you commit it.
 
 From that moment, exactly one edit is permitted: ticking an acceptance criterion from `- [ ]` to `- [x]`. And even that comes with conditions:
 
 - Tick a criterion only after the implementation exists *and* the relevant feedback loops verify it.
 - Leave unmet criteria unchecked. An unmet criterion is information; hiding it is not.
+- A criterion met only through a workaround also stays unchecked until a reviewer accepts the workaround. The reviewer may then check it off. See [Workarounds and Reported Problems](./guiding-phase.mdx#workarounds-and-reported-problems).
 - Never reword, add, remove, or reorder criteria in a frozen plan.
 
 Everything else - new decisions, corrected decisions, abandoned decisions - is appended as a new document.
@@ -75,7 +76,9 @@ A good follow-up summary identifies the original decision, the exact follow-up p
 - **Why** - what caused the change. Never omit this; it is the entire point of the document.
 - **Impact** - trade-offs, consequences, deferred work.
 
-Like plans, these documents freeze once committed.
+A work item has **one** Plan Deviations document, and its filename sorts after all plans for that work item, so it is the last thing a reader finds. Unlike a plan, it doesn't freeze when you first write it. A pull request review can still lead to another follow-up plan, and the closing document has to cover that plan, too. So the document stays editable until it is merged into the target branch. Each update gives it a new timestamp in its filename, which keeps it sorted after the newest plan, and rewrites it as a whole instead of appending to it.
+
+Once merged, it is frozen like everything else in the record. If you ever need to redo a merged document, delete it and write it again from scratch.
 
 ## The reviewer contract
 
@@ -87,7 +90,9 @@ Without that pair, a reviewer facing a few thousand lines of diff has to reverse
 
 ## In the repository
 
-The record lives in `ai-plans/` alongside an `AGENTS.md` that tells agents how to write into it. Keeping the instructions next to the documents means every agent that touches a plan reads the rules first, without those rules taking up space in your root instruction file.
+The record lives in `ai-plans/` alongside an `AGENTS.md` that tells agents how to write into it: the filename conventions, the rules for frozen plans, and the rules for the Plan Deviations document. It is also the place for repository-wide choices about plans, such as the [plan structure](./plan-structures.md#choosing-a-structure) you use or the configuration for [automated plan review](./automated-plan-review.mdx#configuration).
+
+Keeping the instructions next to the documents means they don't take up space in your root instruction file. Agents that don't read nested instruction files on their own find them through a short `## Guided Coding` section in the root `AGENTS.md` that only links to `ai-plans/AGENTS.md` - see the [Implementing Phase](./implementing-phase.mdx#the-plan-stays-frozen) for why that link matters.
 
 :::tip[The Opinionated Path]
 ### Filenames
@@ -105,19 +110,25 @@ Before it freezes, a draft is simply `<short-title>.md`. The timestamp is **UTC*
 2026-08-14-0930-42-plan-deviations.md
 ```
 
+When the Plan Deviations document is updated, it gets a new timestamp, for example `2026-08-15-1105-42-plan-deviations.md`, so it still sorts after the newest plan.
+
 Version 1 numbered files by issue and sequence (`0015-0-feature.md`). The timestamp prefix replaced it so the directory sorts chronologically no matter how the tracker numbers things, and so two documents for the same issue can never collide. **Don't rename historical documents** to match the new format - they are frozen too, and a decision record that gets retroactively tidied isn't one.
 
 ### Guardrails
 
 The skills refuse to overwrite or reuse an existing plan or Plan Deviations filename; a collision stops the run and gets reported. The skills do not commit anything. Committing a frozen plan or an accepted Plan Deviations document is your step, and keeping that commit to the document alone keeps the record readable.
 
+`/guided-coding-write-deviations` renames and rewrites an unmerged Plan Deviations document and never changes a merged one. To find out which is which, it fetches the target branch and checks whether the document's path exists there. It stops without changing anything when it finds several Plan Deviations documents for the work item, when the new filename collides with an existing one, or when it cannot fetch or resolve the target branch - a stale branch cannot prove that a document is unmerged.
+
 ### Skills
 
 - `/guided-coding-setup` creates `ai-plans/` and writes its `AGENTS.md`. Run it again to upgrade; it preserves your project-specific additions and never touches existing plans.
 - `/guided-coding-write-plan` handles both first plans and follow-up plans, reading every earlier document for the issue before writing.
+- `/guided-coding-review-plan` reviews a draft against the codebase in a fresh conversation. It reports findings and never edits anything.
+- `/guided-coding-plan-and-review` writes the draft with `guided-coding-write-plan` and improves it through rounds of independent reviews before I read it. See [Automated Plan Review](./automated-plan-review.mdx).
 - `/guided-coding-freeze-plan` ends the Planning Phase: it renames the draft with a UTC timestamp and the optional ticket ID, inserts the `*Frozen at ...*` line, and stops. I commit the frozen plan afterwards.
 - `/guided-coding-implement` implements a frozen plan. It only ticks an acceptance criterion once a feedback loop genuinely satisfies it.
-- `/guided-coding-write-deviations` always writes a document when follow-up plans exist. With a single plan, it reports "no material deviations" rather than inventing entries when the implementation matched. The skill only writes the file. After reviewing and accepting it, I commit it, create the pull request, and use its contents as the PR description with a normal prompt.
+- `/guided-coding-write-deviations` always writes a document when follow-up plans exist. With a single plan, it reports "no material deviations" rather than inventing entries when the implementation matched. Run again before the merge, it renames and rewrites the existing document. The skill only writes the file. After reviewing and accepting it, I commit it, create the pull request, and use its contents as the PR description with a normal prompt.
 
 See [Guided Coding: Getting Started](./guided-coding-getting-started.mdx) for the full sequence.
 :::

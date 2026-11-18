@@ -1,5 +1,5 @@
 ---
-sidebar_position: 10
+sidebar_position: 12
 title: "Security: Be Vigilant"
 ---
 
@@ -13,4 +13,5 @@ My advice:
 - **Disable MCP servers you don't need.** Saves context window space and reduces attack surface.
 - **Be aware of supply chain attacks.** There have been cases where hyped tools referenced nonexistent npm packages, and attackers simply created those packages with malicious code.
 - **Consider sandboxing.** Running your coding agent in a VM or container limits the blast radius of any malicious actions.
-- **Read the skills you install.** A skill is a set of instructions your agent will follow with your permissions. That applies to [the Guided Coding skills](https://github.com/feO2x/guided-coding) as much as to anyone else's: they are short, they are plain markdown, and you should read all five before installing them. "It's from the author of the methodology" is not a security argument.
+- **Read the skills you install.** A skill is a set of instructions your agent will follow with your permissions. That applies to [the Guided Coding skills](https://github.com/feO2x/guided-coding) as much as to anyone else's: they are short, they are plain markdown, and you should read all nine before installing them. "It's from the author of the methodology" is not a security argument.
+- **Know which skills start other agents.** `guided-coding-plan-and-review` starts reviewer subagents, and they run with your permissions, too. Whatever sandbox you run your main agent in should contain them as well.

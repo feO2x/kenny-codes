@@ -19,19 +19,23 @@ interface Card {
   loop?: Loop;
 }
 
-const cards: Card[] = [
-  {
-    color: '#4B5563',
-    header: 'ONCE PER REPOSITORY',
-    steps: [
-      {
-        kind: 'skill',
-        title: 'guided-coding-setup',
-        description: 'Writes AGENTS.md and ai-plans/, records feedback loops.',
-      },
-    ],
-  },
-  {
+export type TimelineVariant = 'manual' | 'plan-and-review';
+
+const setupCard: Card = {
+  color: '#4B5563',
+  header: 'ONCE PER REPOSITORY',
+  steps: [
+    {
+      kind: 'skill',
+      title: 'guided-coding-setup',
+      description: 'Writes AGENTS.md and ai-plans/, records feedback loops.',
+    },
+  ],
+};
+
+// Only the Planning Phase differs between the variants.
+const planningCards: Record<TimelineVariant, Card> = {
+  manual: {
     color: '#0078D4',
     header: '1. PLANNING PHASE',
     loop: {from: 2, to: 4, label: ['repeat until', 'it stabilizes']},
@@ -68,6 +72,41 @@ const cards: Card[] = [
       },
     ],
   },
+  'plan-and-review': {
+    color: '#0078D4',
+    header: '1. PLANNING PHASE',
+    loop: {from: 2, to: 3, label: ['repeat until', 'it stabilizes']},
+    steps: [
+      {
+        kind: 'manual',
+        title: 'Discuss the approach',
+        description: '"As an expert architect, how would you tackle this?"',
+      },
+      {
+        kind: 'skill',
+        title: 'guided-coding-plan-and-review',
+        description: 'Writes the draft; fresh reviewers refine it in rounds.',
+      },
+      {
+        kind: 'manual',
+        title: 'Read the report and the plan',
+        description: 'Confirm the decision and scope changes it lists.',
+      },
+      {
+        kind: 'manual',
+        title: 'Further discussion',
+        description: '"Would you change anything about the plan?"',
+      },
+      {
+        kind: 'skill',
+        title: 'guided-coding-freeze-plan',
+        description: 'Create any ticket first. Commit the frozen plan afterwards.',
+      },
+    ],
+  },
+};
+
+const laterCards: Card[] = [
   {
     color: '#E88A00',
     header: '2. IMPLEMENTING PHASE',
@@ -113,6 +152,10 @@ const cards: Card[] = [
   },
 ];
 
+function cardsFor(variant: TimelineVariant): Card[] {
+  return [setupCard, planningCards[variant], ...laterCards];
+}
+
 const HEADER_HEIGHT = 34;
 const STEP_HEIGHT = 46;
 const CARD_PADDING = 22;
@@ -132,23 +175,50 @@ const OUTER_CORRIDOR_X = 644;
 // Where a head stops, just right of the longest text it points at.
 const ARROW_TIP_X = 430;
 
-const description =
-  'Timeline of the Guided Coding skills. Run guided-coding-setup once per repository. ' +
-  'The Planning Phase starts with a discussion of the approach. Once you agree on the direction, run ' +
-  'guided-coding-write-plan once to produce the draft. ' +
-  'Discuss the draft further and prompt the agent to revise it directly, optionally run ' +
-  'guided-coding-review-plan in a fresh conversation, and discuss again. Discussion, review, and ' +
-  'revision repeat until the plan stabilizes. Create a ticket if the work needs one, then ' +
-  'guided-coding-freeze-plan timestamps and freezes the plan, and you commit it. ' +
-  'In the Implementing Phase, run guided-coding-implement ' +
-  'with the frozen plan in a fresh conversation. In the Guiding Phase, review every changed file, then run ' +
-  'guided-coding-write-deviations whenever follow-up plans exist ' +
-  'or the code materially departs from the plans. Two arrows lead ' +
-  'back from the Guiding Phase: a small issue returns to the Implementing Phase, and a large issue ' +
-  'returns to the start of the Planning Phase. Finally, review the record and use a normal prompt ' +
-  'to commit it and create the pull request.';
+const planningDescriptions: Record<TimelineVariant, string> = {
+  manual:
+    'The Planning Phase starts with a discussion of the approach. Once you agree on the direction, run ' +
+    'guided-coding-write-plan once to produce the draft. ' +
+    'Discuss the draft further and prompt the agent to revise it directly, optionally run ' +
+    'guided-coding-review-plan in a fresh conversation, and discuss again. Discussion, review, and ' +
+    'revision repeat until the plan stabilizes. ',
+  'plan-and-review':
+    'The Planning Phase starts with a discussion of the approach. Once you agree on the direction, run ' +
+    'guided-coding-plan-and-review in the same conversation: it produces the draft and has independent ' +
+    'reviewers in fresh contexts review it in rounds, then reports every finding and the decision and scope ' +
+    'changes it applied. Read the report and the plan, discuss them further, and prompt the agent to revise ' +
+    'the plan directly. Reading, discussion, and revision repeat until the plan stabilizes. ',
+};
 
-export default function GuidedCodingSkillTimeline() {
+// Each variant gets its own title ID, because Tabs keep both variants in the DOM.
+const titleIds: Record<TimelineVariant, string> = {
+  manual: 'guided-coding-skill-timeline-title',
+  'plan-and-review': 'guided-coding-skill-timeline-plan-and-review-title',
+};
+
+function describe(variant: TimelineVariant): string {
+  return (
+    'Timeline of the Guided Coding skills. Run guided-coding-setup once per repository. ' +
+    planningDescriptions[variant] +
+    'Create a ticket if the work needs one, then ' +
+    'guided-coding-freeze-plan timestamps and freezes the plan, and you commit it. ' +
+    'In the Implementing Phase, run guided-coding-implement ' +
+    'with the frozen plan in a fresh conversation. In the Guiding Phase, review every changed file, then run ' +
+    'guided-coding-write-deviations whenever follow-up plans exist ' +
+    'or the code materially departs from the plans. Two arrows lead ' +
+    'back from the Guiding Phase: a small issue returns to the Implementing Phase, and a large issue ' +
+    'returns to the start of the Planning Phase. Finally, review the record and use a normal prompt ' +
+    'to commit it and create the pull request.'
+  );
+}
+
+export default function GuidedCodingSkillTimeline({
+  variant = 'manual',
+}: {
+  variant?: TimelineVariant;
+}) {
+  const cards = cardsFor(variant);
+  const titleId = titleIds[variant];
   let y = 20;
   const markerPositions: number[][] = [];
   const rendered = cards.map((card, cardIndex) => {
@@ -333,10 +403,10 @@ export default function GuidedCodingSkillTimeline() {
       viewBox={`0 0 ${SVG_WIDTH} ${totalHeight}`}
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-labelledby="guided-coding-skill-timeline-title"
+      aria-labelledby={titleId}
       style={{maxWidth: `${SVG_WIDTH}px`, width: '100%', margin: '1.5rem auto', display: 'block'}}
     >
-      <title id="guided-coding-skill-timeline-title">{description}</title>
+      <title id={titleId}>{describe(variant)}</title>
       <rect x="0" y="0" width={SVG_WIDTH} height={totalHeight} rx="8" fill="#D6D6D6" />
       {rendered}
       {iterationArrows}
