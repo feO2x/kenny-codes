@@ -1,66 +1,50 @@
 .eventDetails {
-  background: var(--ifm-color-emphasis-100);
-  border-left: 4px solid var(--ifm-color-primary);
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-  border-radius: var(--kc-border-radius-small);
+  margin: 1.75rem 0 2.25rem;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--kc-line);
+  border-radius: var(--kc-radius);
+  background: var(--kc-surface);
 }
 
 .cancelledBanner {
-  background: var(--kc-color-cancelled);
-  color: var(--kc-color-cancelled-text);
-  padding: 0.75rem 1rem;
-  border-radius: var(--kc-border-radius-small);
-  font-weight: 700;
-  font-size: 1rem;
-  text-align: center;
-  margin-bottom: 1rem;
-  letter-spacing: 0.03em;
+  margin: 0 0 1.25rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--kc-radius-sm);
+  font-weight: 650;
+  color: var(--kc-cancelled);
+  box-shadow: inset 0 0 0 1px currentColor;
 }
 
-.eventDetailsGrid {
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1.25rem 2rem;
+  margin: 0;
 }
 
-.eventDetailItem {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.item {
+  min-width: 0;
 }
 
-.eventDetailLabel {
+.label {
   font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: var(--kc-letter-spacing-wide);
-  color: var(--ifm-color-emphasis-700);
-}
-
-.eventDetailValue {
-  font-size: 1rem;
-  color: var(--ifm-color-content);
   font-weight: 500;
+  color: var(--kc-muted);
+  margin-bottom: 0.2rem;
 }
 
-/* Dark mode adjustments */
-[data-theme='dark'] .eventDetails {
-  background: var(--ifm-color-emphasis-200);
+.value {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
-[data-theme='dark'] .eventDetailLabel {
-  color: var(--ifm-color-emphasis-600);
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .eventDetailsGrid {
-    grid-template-columns: 1fr;
+@media (max-width: 576px) {
+  .eventDetails {
+    padding: 1.25rem;
   }
 
-  .eventDetails {
-    padding: 1rem;
-    margin: 1rem 0;
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

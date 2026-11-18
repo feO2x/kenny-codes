@@ -28,9 +28,18 @@ interface ContentItem {
   cancelled?: boolean;
 }
 
+interface TimelineEvent {
+  title: string;
+  date: string;
+  link: string;
+  cancelled?: boolean;
+}
+
 interface HomeData {
   recentPosts: ContentItem[];
   recentEvents: ContentItem[];
+  eventTimeline: TimelineEvent[];
+  venues: string[];
 }
 
 function parseFrontmatter(content: string): Frontmatter {
@@ -81,7 +90,7 @@ function getExcerpt(content: string): string {
   // Ignore top-level MDX imports/exports so generated previews stay content-focused.
   excerpt = excerpt.replace(/^(?:(?:import|export)\s.+;\n)+/u, "").trim();
   // Remove markdown headings for cleaner excerpt
-  excerpt = excerpt.replace(/#+\s/g, "");
+  excerpt = excerpt.replace(/^#+\s/gm, "");
   // Remove links [text](url) -> text
   excerpt = excerpt.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
   return excerpt.substring(0, 200) + (excerpt.length > 200 ? "..." : "");
@@ -103,7 +112,7 @@ function getAllFiles(dirPath: string, arrayOfFiles: string[] = []): string[] {
   return arrayOfFiles;
 }
 
-function processContent(dir: string, type: string): ContentItem[] {
+function readAllContent(dir: string, type: string): ContentItem[] {
   if (!fs.existsSync(dir)) return [];
 
   const files = getAllFiles(dir);
@@ -167,7 +176,10 @@ function processContent(dir: string, type: string): ContentItem[] {
 
   // Sort desc
   items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return items;
+}
 
+function takeRecent(items: ContentItem[], type: string): ContentItem[] {
   // For events, take 4 + N where N is cancelled count in top 4
   if (type === "events") {
     const top4 = items.slice(0, 4);
@@ -177,12 +189,45 @@ function processContent(dir: string, type: string): ContentItem[] {
   return items.slice(0, 4);
 }
 
-const recentPosts = processContent(BLOG_DIR, "blog");
-const recentEvents = processContent(EVENTS_DIR, "events");
+// Strips years and seasons so "BASTA! Spring 2024" and "BASTA! Autumn 2024" count as one venue.
+function normalizeVenue(event: string): string {
+  return event
+    .replace(/\b(19|20)\d{2}\b/g, "")
+    .replace(/\b(Spring|Autumn|Fall|Summer|Winter)\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+// Venues ordered by how often Kenny spoke there; one-off formats such as
+// webinars or lectures are left out because they are not recognizable venues.
+function rankVenues(events: ContentItem[]): string[] {
+  const counts = new Map<string, number>();
+  for (const item of events) {
+    if (!item.event || item.cancelled) continue;
+    const venue = normalizeVenue(item.event);
+    if (/webinar|lecture|linkedin/i.test(venue)) continue;
+    counts.set(venue, (counts.get(venue) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([venue]) => venue);
+}
+
+const allPosts = readAllContent(BLOG_DIR, "blog");
+const allEvents = readAllContent(EVENTS_DIR, "events");
 
 const output: HomeData = {
-  recentPosts,
-  recentEvents,
+  recentPosts: takeRecent(allPosts, "blog"),
+  recentEvents: takeRecent(allEvents, "events"),
+  eventTimeline: allEvents
+    .map(({ title, date, link, cancelled }) => ({
+      title,
+      date,
+      link,
+      ...(cancelled ? { cancelled: true } : {}),
+    }))
+    .reverse(),
+  venues: rankVenues(allEvents),
 };
 
 fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2));

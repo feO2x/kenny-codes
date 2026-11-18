@@ -1,51 +1,100 @@
-import React from 'react';
-import clsx from 'clsx';
+import React, {type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import { FaLinkedin } from 'react-icons/fa';
-import { FaXTwitter } from 'react-icons/fa6';
-import { FaGithub } from 'react-icons/fa';
-import styles from './HeroSection.module.css';
+import {FaGithub, FaLinkedinIn} from 'react-icons/fa';
+import {FaXTwitter} from 'react-icons/fa6';
+import homeData from '@site/src/data/home-data.json';
+import SpeakingRecord from '../SpeakingRecord';
+import {todayIsoDate} from '@site/src/utils/dateFormatting';
+import styles from './Home.module.css';
 
-export default function HeroSection() {
+const socials = [
+  {label: 'LinkedIn', href: 'https://www.linkedin.com/in/kenny-pflug-7a1012123/', Icon: FaLinkedinIn},
+  {label: 'GitHub', href: 'https://github.com/feO2x', Icon: FaGithub},
+  {label: 'X', href: 'https://x.com/feO2x', Icon: FaXTwitter},
+];
+
+function joinList(items: string[]): string {
+  if (items.length <= 1) return items.join('');
+  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+}
+
+export default function HeroSection(): ReactNode {
+  const {eventTimeline, venues} = homeData;
+  const today = todayIsoDate();
+  const delivered = eventTimeline.filter((e) => !e.cancelled && e.date < today);
+  const firstYear = eventTimeline[0]?.date.slice(0, 4);
+
   return (
-    <section className={styles.heroSection}>
-      <div className={clsx('container', styles.heroContainer)}>
-        <div className={styles.heroText}>
-          <Heading as="h1" className={styles.heroTitle}>
-            Hi, I'm Kenny
-          </Heading>
-          <p className={styles.heroSubtitle}>
-            Engineering Manager at <a href="https://gwvs.de/" target='_blank' rel='noopener noreferrer'>TELIS/GWVS</a>,<br />
-            Conference Speaker and Consultant
-          </p>
-          <ul className={styles.bioList}>
-            <li>Cloud Native Systems with AI integration</li>
-            <li>AI-assisted development and modern tooling</li>
-            <li>.NET Runtime Internals (Memory Management, Asynchronous Programming and Threading)</li>
-            <li>.NET Framework internals (ASP.NET Core, DI Containers, ORMs, Serializers)</li>
-          </ul>
-          <div className={styles.ctaButtons}>
-            <Link className="button button--primary button--lg" to="https://www.linkedin.com/in/kenny-pflug-7a1012123/" target="_blank" rel="noopener noreferrer">
-              <FaLinkedin className={styles.icon} /> LinkedIn
-            </Link>
-            <Link className="button button--info button--lg" to="https://x.com/feO2x" target="_blank" rel="noopener noreferrer">
-              <FaXTwitter className={styles.icon} /> Follow
-            </Link>
-            <Link className="button button--info button--lg" to="https://github.com/feO2x" target="_blank" rel="noopener noreferrer">
-              <FaGithub className={styles.icon} /> GitHub
-            </Link>
+    <header className={styles.hero}>
+      <div className="container">
+        <div className={styles.heroGrid}>
+          <div className={styles.heroText}>
+            <Heading as="h1" className={styles.heroName}>
+              Kenny Pflug
+            </Heading>
+            <p className={styles.heroStatement}>
+              I build cloud-native .NET systems and help teams stay in control when AI agents
+              write the code.
+            </p>
+            <p className={styles.heroRole}>
+              Engineering Manager at{' '}
+              <a href="https://gwvs.de/" target="_blank" rel="noopener noreferrer">
+                TELIS/GWVS
+              </a>
+              , conference speaker, and consultant from Regensburg, Germany.
+            </p>
+            <div className={styles.heroActions}>
+              <Link className="button button--primary button--lg" to="/events">
+                See talks and workshops
+              </Link>
+              <Link className="button button--secondary button--lg" to="/blog">
+                Read the blog
+              </Link>
+              <ul className={styles.socials}>
+                {socials.map(({label, href, Icon}) => (
+                  <li key={label}>
+                    <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}>
+                      <Icon aria-hidden="true" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className={styles.portraitFrame}>
+            <img
+              src={useBaseUrl('/img/kenny-smiles.jpg')}
+              alt="Portrait of Kenny Pflug"
+              className={styles.portrait}
+              width={1600}
+              height={1200}
+              fetchPriority="high"
+            />
           </div>
         </div>
-        <div className={styles.heroImageContainer}>
-          <img
-            src={useBaseUrl('/img/kenny-smiles.jpg')}
-            alt="Kenny Pflug smiling"
-            className={styles.heroImage}
+
+        <section className={styles.record} aria-labelledby="speaking-record-title">
+          <div className={styles.recordIntro}>
+            <Heading as="h2" id="speaking-record-title" className={styles.recordTitle}>
+              {delivered.length} talks, workshops, and webinars since {firstYear}
+            </Heading>
+            <p className={styles.recordText}>
+              Regular speaker at {joinList(venues.slice(0, 5))}.
+            </p>
+            <Link to="/events" className={styles.textLink}>
+              Browse all events
+            </Link>
+          </div>
+          <SpeakingRecord
+            events={eventTimeline}
+            yearLink={(year) => `/events#year-${year}`}
+            className={styles.recordChart}
           />
-        </div>
+        </section>
       </div>
-    </section>
+    </header>
   );
 }

@@ -1,107 +1,84 @@
-import React from "react";
-import Layout from "@theme/Layout";
-import HeaderWithImage from "@site/src/components/HeaderWithImage";
-import EventCard from "@site/src/components/EventCard";
-import type { Props } from "@theme/BlogListPage";
-import type { EventFrontMatter } from "@site/src/types/event";
-import { formatDate } from "@site/src/utils/dateFormatting";
-import styles from "@site/src/css/events.module.css";
-
-import { groupEvents } from "@site/src/utils/eventUtils";
-import EventStats from "@site/src/components/EventStats";
+import React, {type ReactNode} from 'react';
+import Layout from '@theme/Layout';
+import Heading from '@theme/Heading';
+import useBaseUrl from '@docusaurus/useBaseUrl';
+import type {Props} from '@theme/BlogListPage';
+import type {EventFrontMatter} from '@site/src/types/event';
+import SpeakingRecord from '@site/src/components/SpeakingRecord';
+import EventsListing from '@site/src/components/EventsListing';
+import {todayIsoDate} from '@site/src/utils/dateFormatting';
+import styles from './styles.module.css';
 
 type EventsBlogListContentProps = {
-  items: Props["items"];
+  items: Props['items'];
 };
 
-type BlogListItem = EventsBlogListContentProps["items"][number];
+export function EventsContact(): ReactNode {
+  return (
+    <p className={styles.contact}>
+      Want me at your conference, user group, or company? Write to{' '}
+      <a href="mailto:info@kenny-codes.net">info@kenny-codes.net</a> or message me on{' '}
+      <a href="https://www.linkedin.com/in/kenny-pflug-7a1012123/" target="_blank" rel="noopener noreferrer">
+        LinkedIn
+      </a>
+      .
+    </p>
+  );
+}
 
-export default function EventsBlogListContent({
-  items,
-}: EventsBlogListContentProps) {
-  const { upcomingEvents, pastEvents, pastEventsByYear, years } =
-    groupEvents<BlogListItem>(items);
-
-  const cancelledUpcomingCount = upcomingEvents.filter(
-    item => (item.content.frontMatter as EventFrontMatter).cancelled
-  ).length;
+export default function EventsBlogListContent({items}: EventsBlogListContentProps): ReactNode {
+  const today = todayIsoDate();
+  const sessions = items.map((item) => ({
+    date: item.content.metadata.date,
+    cancelled: (item.content.frontMatter as EventFrontMatter).cancelled,
+    language: (item.content.frontMatter as EventFrontMatter).language,
+  }));
+  const delivered = sessions.filter((s) => !s.cancelled && s.date.slice(0, 10) < today);
+  const firstYear = Math.min(...sessions.map((s) => Number(s.date.slice(0, 4))));
+  const germanShare = delivered.filter((s) => s.language === 'German').length / Math.max(1, delivered.length);
 
   return (
-    <Layout title="Events" description="Past and upcoming events">
-      <HeaderWithImage title="Events" imageUrl="/img/events.jpg" />
-
-      <div className={styles.eventsContainer}>
-        <EventStats
-          totalEvents={upcomingEvents.length - cancelledUpcomingCount + pastEvents.length}
-          upcomingEvents={upcomingEvents.length - cancelledUpcomingCount}
-          pastEvents={pastEvents.length}
-        />
-
-        {upcomingEvents.length > 0 && (
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Upcoming Events</h2>
-            <div className={styles.cardList}>
-              {upcomingEvents.map((item, index) => {
-                const frontMatter = item.content
-                  .frontMatter as EventFrontMatter;
-                return (
-                  <EventCard
-                    key={index}
-                    title={item.content.metadata.title}
-                    permalink={item.content.metadata.permalink}
-                    date={item.content.metadata.date}
-                    formattedDate={formatDate(item.content.metadata.date)}
-                    type={frontMatter.type}
-                    duration={frontMatter.duration}
-                    language={frontMatter.language}
-                    location={frontMatter.location}
-                    country={frontMatter.country}
-                    event={frontMatter.event}
-                    description={item.content.metadata.description}
-                    tags={item.content.metadata.tags}
-                    videoUrl={frontMatter.videoUrl}
-                    isUpcoming={true}
-                    cancelled={frontMatter.cancelled}
-                  />
-                );
-              })}
-            </div>
+    <Layout title="Events" description="Past and upcoming talks, workshops, and webinars by Kenny Pflug">
+      <main className="container">
+        <header className={styles.header}>
+          <div className={styles.headerText}>
+            <Heading as="h1" className={styles.title}>
+              Talks and workshops
+            </Heading>
+            <p className={styles.lede}>
+              Since {firstYear}, I have given {delivered.length} talks, workshops, and webinars at
+              conferences, user groups, and universities
+              {germanShare > 0.5 ? ', most of them in German' : ''}.
+            </p>
+            <EventsContact />
           </div>
-        )}
+          <figure className={styles.photo}>
+            <img
+              src={useBaseUrl('/img/conference.jpg')}
+              alt="Kenny Pflug on stage in front of a full room of developers with laptops"
+              width={800}
+              height={1066}
+            />
+            <figcaption>Teaching a workshop at BASTA!</figcaption>
+          </figure>
+        </header>
 
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Past Events</h2>
-          {years.map((year) => (
-            <div key={year}>
-              <h3 className={styles.yearHeader}>{year}</h3>
-              <div className={styles.cardList}>
-                {pastEventsByYear[year].map((item, index) => {
-                  const frontMatter = item.content.frontMatter as EventFrontMatter;
-                  return (
-                    <EventCard
-                      key={index}
-                      title={item.content.metadata.title}
-                      permalink={item.content.metadata.permalink}
-                      date={item.content.metadata.date}
-                      formattedDate={formatDate(item.content.metadata.date)}
-                      type={frontMatter.type}
-                      duration={frontMatter.duration}
-                      language={frontMatter.language}
-                      location={frontMatter.location}
-                      country={frontMatter.country}
-                      event={frontMatter.event}
-                      description={item.content.metadata.description}
-                      tags={item.content.metadata.tags}
-                      videoUrl={frontMatter.videoUrl}
-                      isUpcoming={false}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+        <section className={styles.record} aria-label="Sessions per year">
+          <SpeakingRecord events={sessions} yearLink={(year) => `#year-${year}`} />
+        </section>
+
+        <div className={styles.listing}>
+          <EventsListing
+            items={items}
+            emptyUpcoming={
+              <p>
+                No public sessions are scheduled right now. New dates appear here first, and I
+                announce them on LinkedIn.
+              </p>
+            }
+          />
         </div>
-      </div>
+      </main>
     </Layout>
   );
 }

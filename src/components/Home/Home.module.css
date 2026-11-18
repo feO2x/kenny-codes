@@ -1,0 +1,492 @@
+/* ---------- Hero ---------- */
+
+.hero {
+  padding: clamp(3rem, 2rem + 4vw, 6rem) 0 clamp(3rem, 2rem + 3vw, 5rem);
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: clamp(2rem, 1rem + 4vw, 5rem);
+  align-items: center;
+}
+
+.heroName {
+  font-size: clamp(3.1rem, 1.6rem + 5.4vw, 6.25rem);
+  font-stretch: 125%;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 0.92;
+  margin: 0 0 1.75rem;
+  text-wrap: nowrap;
+}
+
+.heroStatement {
+  font-size: clamp(1.35rem, 1.1rem + 0.9vw, 1.8rem);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--kc-ink);
+  max-width: 30ch;
+  margin: 0 0 1.25rem;
+}
+
+.heroRole {
+  font-size: 1.0625rem;
+  color: var(--kc-muted);
+  max-width: 48ch;
+  margin: 0 0 2.25rem;
+}
+
+.heroRole a {
+  color: var(--kc-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--kc-line-strong);
+}
+
+.heroRole a:hover {
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.heroActions :global(.button--lg) {
+  font-size: 1rem;
+  padding: 0.75rem 1.4rem;
+}
+
+.socials {
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0 0 0 0.5rem;
+  padding: 0;
+}
+
+.socials a {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 8px;
+  color: var(--kc-muted);
+  font-size: 1.2rem;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.socials a:hover {
+  color: var(--kc-ink);
+  background: var(--kc-surface-raised);
+}
+
+/* The portrait sits in the logo's squircle, framed by the logo's gradient. */
+.portraitFrame {
+  justify-self: end;
+  width: min(100%, 25rem);
+  padding: 5px;
+  border-radius: 31%;
+  background: var(--kc-gradient);
+  box-shadow: var(--kc-shadow);
+}
+
+.portrait {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: 60% 45%;
+  border-radius: calc(31% - 1px);
+  background: var(--kc-surface-raised);
+}
+
+/* ---------- Speaking record ---------- */
+
+.record {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 2.5rem clamp(2rem, 1rem + 4vw, 5rem);
+  align-items: end;
+  margin-top: clamp(3.5rem, 2rem + 4vw, 6rem);
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--kc-line);
+}
+
+.recordTitle {
+  font-size: clamp(1.4rem, 1.2rem + 0.8vw, 1.85rem);
+  font-weight: 700;
+  font-stretch: 112%;
+  line-height: 1.15;
+  margin: 0 0 0.9rem;
+}
+
+.recordText {
+  color: var(--kc-muted);
+  margin: 0 0 1.25rem;
+  max-width: 40ch;
+}
+
+.recordChart {
+  min-width: 0;
+}
+
+/* ---------- Sections ---------- */
+
+.section {
+  padding: clamp(4rem, 2.5rem + 4vw, 7rem) 0;
+  border-top: 1px solid var(--kc-line);
+}
+
+.sectionHead {
+  max-width: 44rem;
+  margin-bottom: 3rem;
+}
+
+.sectionTitle {
+  font-size: clamp(1.9rem, 1.4rem + 1.6vw, 2.75rem);
+  font-weight: 750;
+  font-stretch: 116%;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  margin: 0 0 1rem;
+}
+
+.sectionLede {
+  font-size: 1.0625rem;
+  color: var(--kc-muted);
+  max-width: 44ch;
+  margin: 0 0 1.25rem;
+}
+
+.textLink {
+  display: inline-block;
+  font-weight: 600;
+  color: var(--kc-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+.textLink:hover {
+  color: var(--ifm-color-primary-darkest);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+:global([data-theme='dark']) .textLink:hover {
+  color: var(--ifm-color-primary);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 2rem clamp(2rem, 1rem + 4vw, 5rem);
+  align-items: start;
+}
+
+.splitIntro {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 2rem);
+}
+
+.splitList {
+  min-width: 0;
+}
+
+.topics {
+  list-style: none;
+  margin: 0 0 1.75rem;
+  padding: 0;
+}
+
+.topics li {
+  position: relative;
+  padding-left: 1.4rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.975rem;
+  line-height: 1.45;
+}
+
+/* Same square as in the speaking record. */
+.topics li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.38em;
+  width: 9px;
+  height: 9px;
+  border-radius: 2.5px;
+  background: var(--kc-gradient);
+}
+
+/* ---------- Methods ---------- */
+
+.methodsBand {
+  background: var(--kc-surface);
+}
+
+.methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.method {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  border: 1px solid var(--kc-line);
+  border-radius: var(--kc-radius-lg);
+  background: var(--kc-bg);
+}
+
+.methodName {
+  font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem);
+  font-weight: 750;
+  font-stretch: 120%;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+}
+
+.methodText {
+  color: var(--kc-muted);
+  max-width: 42ch;
+  margin: 0 0 2rem;
+}
+
+.methodLink {
+  composes: textLink;
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.phases {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  list-style: none;
+  counter-reset: phase;
+  margin: 0 0 2.25rem;
+  padding: 0;
+}
+
+.phase {
+  counter-increment: phase;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--kc-line-strong);
+  margin: 0;
+}
+
+.phase:first-child {
+  border-top-color: var(--ifm-color-primary);
+}
+
+.phaseName {
+  font-weight: 700;
+  font-stretch: 110%;
+}
+
+.phaseName::before {
+  content: counter(phase) " ";
+  color: var(--kc-muted);
+  font-variant-numeric: tabular-nums;
+  margin-right: 0.15rem;
+}
+
+.phaseText {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--kc-muted);
+}
+
+.chack {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0 0 2.25rem;
+  padding: 0;
+}
+
+.chackItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.chackLetter {
+  font-size: clamp(2.2rem, 1.6rem + 1.6vw, 3.25rem);
+  font-weight: 800;
+  font-stretch: 125%;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--kc-ink);
+}
+
+.chackItem:last-child .chackLetter {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--kc-muted);
+}
+
+.chackWord {
+  font-size: 0.85rem;
+  line-height: 1.3;
+  color: var(--kc-muted);
+}
+
+/* ---------- Writing ---------- */
+
+.post {
+  position: relative;
+  padding: 1.5rem 1rem;
+  margin-inline: -1rem;
+  border-radius: var(--kc-radius);
+  transition: background-color 0.15s ease;
+}
+
+.post + .post {
+  box-shadow: 0 -1px 0 var(--kc-line);
+}
+
+.post:hover,
+.post:focus-within {
+  background: var(--kc-surface);
+}
+
+.post:hover,
+.post:hover + .post {
+  box-shadow: none;
+}
+
+.postDate {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--kc-muted);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.4rem;
+}
+
+.postTitle {
+  font-size: 1.3rem;
+  font-weight: 650;
+  font-stretch: 106%;
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+}
+
+.postLink {
+  color: var(--kc-ink);
+}
+
+.postLink:hover {
+  color: var(--kc-ink);
+  text-decoration: none;
+}
+
+.post:hover .postLink {
+  color: var(--ifm-color-primary-darkest);
+}
+
+:global([data-theme='dark']) .post:hover .postLink {
+  color: var(--ifm-color-primary);
+}
+
+.postLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.postLink:focus-visible {
+  outline: none;
+}
+
+.postLink:focus-visible::after {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.postExcerpt {
+  color: var(--kc-muted);
+  margin: 0;
+  max-width: 68ch;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 996px) {
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 15rem);
+    align-items: start;
+  }
+
+  .record,
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .splitIntro {
+    position: static;
+  }
+
+  .methods {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .portraitFrame {
+    grid-row: 1;
+    justify-self: start;
+    width: 8.5rem;
+    padding: 3px;
+  }
+
+  .heroName {
+    margin-bottom: 1.25rem;
+  }
+
+  .socials {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .heroActions :global(.button) {
+    flex: 1 1 auto;
+  }
+
+  .phases {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chack {
+    gap: 0.5rem;
+  }
+
+  .chackWord {
+    font-size: 0.75rem;
+    hyphens: auto;
+  }
+}

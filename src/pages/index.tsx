@@ -2,8 +2,9 @@ import type {ReactNode} from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HeroSection from '../components/Home/HeroSection';
-import BlogSection from '../components/Home/BlogSection';
 import EventsSection from '../components/Home/EventsSection';
+import MethodsSection from '../components/Home/MethodsSection';
+import BlogSection from '../components/Home/BlogSection';
 
 export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
@@ -14,6 +15,7 @@ export default function Home(): ReactNode {
       <main>
         <HeroSection />
         <EventsSection />
+        <MethodsSection />
         <BlogSection />
       </main>
     </Layout>

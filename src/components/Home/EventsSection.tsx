@@ -1,17 +1,15 @@
-import React from 'react';
+import React, {type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
-import styles from '@site/src/css/section.module.css';
 import homeData from '@site/src/data/home-data.json';
-import EventCard from '../EventCard';
-import {formatDate} from '@site/src/utils/dateFormatting';
+import EventRow from '../EventRow';
+import {todayIsoDate} from '@site/src/utils/dateFormatting';
+import styles from './Home.module.css';
 
 interface HomeEvent {
   title: string;
   date: string;
   link: string;
-  excerpt: string;
-  tags?: string[];
   type?: string;
   location?: string;
   duration?: string;
@@ -21,59 +19,62 @@ interface HomeEvent {
   cancelled?: boolean;
 }
 
-export default function EventsSection() {
+const topics = [
+  'Cloud-native systems with AI integration',
+  'AI-assisted development with coding agents',
+  '.NET runtime internals: memory management, async programming, and threading',
+  '.NET framework internals: ASP.NET Core, DI containers, ORMs, and serializers',
+];
+
+export default function EventsSection(): ReactNode {
   const recentEvents = homeData.recentEvents as HomeEvent[];
+  const today = todayIsoDate();
 
-  // Derive today as YYYY-MM-DD in the user's local timezone.
-  // String comparison against the event's YYYY-MM-DD date avoids
-  // all Date-object timezone pitfalls for day-level logic.
-  const now = new Date();
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
-  // Filter out cancelled past events, then take first 4
+  // Cancelled events stay visible while they are upcoming so visitors learn about the change.
   const visibleEvents = recentEvents
-    .filter((event) => {
-      const isPast = event.date < todayStr;
-      return !(isPast && event.cancelled);
-    })
+    .filter((event) => !(event.date < today && event.cancelled))
     .slice(0, 4);
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} aria-labelledby="talks-title">
       <div className="container">
-        <Heading as="h2" className={styles.sectionTitle}>
-          Upcoming & Recent Events
-        </Heading>
-        <div className={styles.cardGrid}>
-          {visibleEvents.map((event, idx) => {
-            const isUpcoming = event.date >= todayStr;
-            
-            return (
-              <EventCard
-                key={idx}
+        <div className={styles.split}>
+          <div className={styles.splitIntro}>
+            <Heading as="h2" id="talks-title" className={styles.sectionTitle}>
+              Talks and workshops
+            </Heading>
+            <p className={styles.sectionLede}>
+              Conference sessions, in-house workshops, and user group talks, mostly in German.
+              I speak about:
+            </p>
+            <ul className={styles.topics}>
+              {topics.map((topic) => (
+                <li key={topic}>{topic}</li>
+              ))}
+            </ul>
+            <Link to="/events" className={styles.textLink}>
+              All talks and workshops
+            </Link>
+          </div>
+
+          <div className={styles.splitList}>
+            {visibleEvents.map((event) => (
+              <EventRow
+                key={event.link}
                 title={event.title}
                 permalink={event.link}
                 date={event.date}
-                formattedDate={formatDate(event.date)}
                 type={event.type}
                 duration={event.duration}
                 language={event.language}
                 location={event.location}
                 country={event.country}
                 event={event.event}
-                description={event.excerpt}
-                tags={event.tags?.map(tag => ({ label: tag, permalink: '' }))}
-                isUpcoming={isUpcoming}
+                isUpcoming={event.date >= today}
                 cancelled={event.cancelled}
               />
-            );
-          })}
-        </div>
-        <div className="text--center margin-top--lg">
-
-          <Link to="/events" className="button button--info button--lg">
-            View All Events
-          </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>

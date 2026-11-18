@@ -69,7 +69,11 @@ const config: Config = {
           onUntruncatedBlogPosts: "warn",
         },
         theme: {
-          customCss: "./src/css/custom.css",
+          customCss: [
+            "./node_modules/@fontsource-variable/mona-sans/wdth.css",
+            "./node_modules/@fontsource-variable/mona-sans/wdth-italic.css",
+            "./src/css/custom.css",
+          ],
         },
       } satisfies Preset.Options,
     ],
@@ -264,25 +268,18 @@ const config: Config = {
       style: "dark",
       links: [
         {
-          title: "Kenny Pflug - Kenny Codes",
+          title: "Read and learn",
           items: [
-            {
-              label: "Legal Notice",
-              to: "/legal-notice",
-            },
+            { label: "Blog", to: "/blog" },
+            { label: "Guided Coding", to: "/docs/guided-coding" },
+            { label: "CHACK", to: "/docs/chack" },
           ],
         },
         {
-          title: "Read my stuff and meet me",
+          title: "Meet me",
           items: [
-            {
-              label: "Blog",
-              to: "/blog",
-            },
-            {
-              label: "Events",
-              to: "/events",
-            },
+            { label: "Talks and workshops", to: "/events" },
+            { label: "Email", href: "mailto:info@kenny-codes.net" },
           ],
         },
         {
@@ -292,22 +289,20 @@ const config: Config = {
               label: "LinkedIn",
               href: "https://www.linkedin.com/in/kenny-pflug-7a1012123/",
             },
-            {
-              label: "GitHub",
-              href: "https://github.com/feO2x/",
-            },
-            {
-              label: "X",
-              href: "https://x.com/feO2x",
-            },
+            { label: "GitHub", href: "https://github.com/feO2x/" },
+            { label: "X", href: "https://x.com/feO2x" },
           ],
         },
+        {
+          title: "Kenny Codes",
+          items: [{ label: "Legal notice", to: "/legal-notice" }],
+        },
       ],
-      copyright: `Copyright © 2025 Kenny Pflug. Built with Docusaurus.`,
+      copyright: `© ${new Date().getFullYear()} Kenny Pflug, Regensburg, Germany`,
     },
     prism: {
-      theme: prismThemes.vsLight,
-      darkTheme: prismThemes.vsDark,
+      theme: prismThemes.github,
+      darkTheme: prismThemes.nightOwl,
       additionalLanguages: ["csharp"],
     },
   } satisfies Preset.ThemeConfig,

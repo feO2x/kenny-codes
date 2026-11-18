@@ -1,0 +1,169 @@
+.record {
+  --square: 18px;
+  --gap: 4px;
+  --record-from: #0066d6;
+  --record-to: #00a38c;
+  margin: 0;
+}
+
+:global([data-theme='dark']) .record {
+  --record-from: #3393ff;
+  --record-to: #33ffdc;
+}
+
+.chart {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--kc-line-strong);
+}
+
+.column {
+  margin: 0;
+  min-width: 0;
+}
+
+.columnLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+  border-radius: var(--kc-radius-sm);
+  color: var(--kc-muted);
+  text-decoration: none;
+  position: relative;
+}
+
+a.columnLink:hover {
+  color: var(--kc-ink);
+  text-decoration: none;
+  background: var(--kc-accent-soft);
+}
+
+.count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  min-height: 0.75rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--gap);
+  height: calc(var(--rows) * (var(--square) + var(--gap)) - var(--gap));
+  justify-content: flex-start;
+}
+
+.square {
+  display: inline-block;
+  flex: none;
+  width: var(--square);
+  height: var(--square);
+  border-radius: 5px;
+  background: color-mix(
+    in oklab,
+    var(--record-to) calc(var(--i, 0) * 9%),
+    var(--record-from)
+  );
+  animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--col, 0) * 45ms + var(--i, 0) * 28ms);
+}
+
+.squareUpcoming {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--kc-upcoming);
+}
+
+a.columnLink:hover .square:not(.squareUpcoming) {
+  filter: brightness(1.12) saturate(1.1);
+}
+
+.year {
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.5rem 0 0.6rem;
+  line-height: 1;
+}
+
+.yearShort {
+  display: none;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  color: var(--kc-muted);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legendItem .square {
+  --i: 6;
+  animation: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.6);
+  }
+}
+
+@media (max-width: 640px) {
+  .record {
+    --square: 12px;
+    --gap: 3px;
+  }
+
+  .yearLong {
+    display: none;
+  }
+
+  .yearShort {
+    display: inline;
+  }
+
+  .count,
+  .year {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .record {
+    --square: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .square {
+    animation: none;
+  }
+}
