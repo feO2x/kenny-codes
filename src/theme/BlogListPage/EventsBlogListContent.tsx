@@ -42,7 +42,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
 
   return (
     <Layout title="Events" description="Past and upcoming talks, workshops, and webinars by Kenny Pflug">
-      <main className="container">
+      <main className="container kc-page">
         <header className={styles.header}>
           <div className={styles.headerText}>
             <Heading as="h1" className={styles.title}>
@@ -79,7 +79,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
           />
         </section>
 
-        <div className={styles.listing}>
+        <div>
           <EventsListing
             items={items}
             emptyUpcoming={

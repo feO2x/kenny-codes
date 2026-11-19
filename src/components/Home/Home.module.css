@@ -120,6 +120,10 @@
   border-top: 1px solid var(--kc-line);
 }
 
+.recordIntro {
+  align-self: start;
+}
+
 .recordTitle {
   font-size: clamp(1.4rem, 1.2rem + 0.8vw, 1.85rem);
   font-weight: 700;

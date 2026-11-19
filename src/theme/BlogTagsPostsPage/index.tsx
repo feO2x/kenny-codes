@@ -1,6 +1,5 @@
 import React, {type ReactNode} from 'react';
 import clsx from 'clsx';
-import Translate from '@docusaurus/Translate';
 import {
   PageMetadata,
   HtmlClassNameProvider,
@@ -40,15 +39,13 @@ function BlogTagsPostsPageContent(props: Props): ReactNode {
   return (
     <BlogLayout sidebar={sidebar}>
       {tag.unlisted && <Unlisted />}
-      <header className="margin-bottom--xl">
-        <Heading as="h1">{title}</Heading>
-        {tag.description && <p>{tag.description}</p>}
-        <Link href={tag.allTagsPath}>
-          <Translate
-            id="theme.tags.tagsPageLink"
-            description="The label of the link targeting the tag list page">
-            View All Tags
-          </Translate>
+      <header className="kc-page-header kc-page-header--divided">
+        <Heading as="h1" className="kc-page-title">
+          {title}
+        </Heading>
+        {tag.description && <p className="kc-page-lede">{tag.description}</p>}
+        <Link href={tag.allTagsPath} className="kc-text-link">
+          All topics
         </Link>
       </header>
       <BlogPostItems items={items} />

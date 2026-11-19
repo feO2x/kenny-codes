@@ -34,28 +34,47 @@ const byCountThenLabel = (a: TagItem, b: TagItem) =>
   b.count - a.count || a.label.localeCompare(b.label, 'en', {sensitivity: 'base'});
 
 /**
- * Docusaurus counts every event with a tag, including cancelled ones that the archive hides once
- * their date has passed. Recount with the archive's rule so the numbers match the topic pages.
+ * Approximates lodash's kebabCase, which Docusaurus uses to turn inline tags into permalinks, so
+ * "performance" and "Performance" or "async await" and "async-await" land on the same topic.
  */
-function useVisibleTopicCounts(): Map<string, number> {
+function tagSlug(tag: string): string {
+  return tag
+    .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+    .toLowerCase()
+    .split(/[^a-z\d]+/)
+    .filter(Boolean)
+    .join('-');
+}
+
+/**
+ * Docusaurus counts every event with a tag, including cancelled ones that the archive hides once
+ * their date has passed. Subtract those so the numbers match what each topic page lists.
+ */
+function useHiddenSessionsBySlug(): Map<string, number> {
   const today = useToday();
-  const counts = new Map<string, number>();
+  const hidden = new Map<string, number>();
   for (const event of homeData.events) {
-    if (event.cancelled && event.date < today) continue;
-    for (const tag of event.tags ?? []) counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    if (!(event.cancelled && event.date < today)) continue;
+    for (const slug of new Set((event.tags ?? []).map(tagSlug))) {
+      hidden.set(slug, (hidden.get(slug) ?? 0) + 1);
+    }
   }
-  return counts;
+  return hidden;
 }
 
 function EventTopics({tags}: {tags: ReadonlyArray<TagItem>}): ReactNode {
-  const counts = useVisibleTopicCounts();
+  const hidden = useHiddenSessionsBySlug();
   const topics = tags
-    .map((tag) => ({...tag, count: counts.get(tag.label) ?? 0}))
+    .map((tag) => {
+      const slug = tag.permalink.split('/').filter(Boolean).pop() ?? '';
+      return {...tag, count: tag.count - (hidden.get(slug) ?? 0)};
+    })
     .filter((tag) => tag.count > 0)
     .sort(byCountThenLabel);
   return (
     <Layout title="Topics" description="Talks and workshops by Kenny Pflug, by topic">
-      <main className="container kc-narrow-page kc-wide-page">
+      <main className="container kc-page">
         <header className="kc-page-header">
           <Link to="/events" className="kc-back-link">
             All talks and workshops

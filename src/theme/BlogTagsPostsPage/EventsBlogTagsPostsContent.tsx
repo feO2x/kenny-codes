@@ -17,7 +17,7 @@ export default function EventsBlogTagsPostsContent({items, tag}: Props): ReactNo
 
   return (
     <Layout title={title} description={`Talks and workshops by Kenny Pflug tagged ${tag.label}`}>
-      <main className="container">
+      <main className="container kc-page">
         <header className={styles.header}>
           <div className={styles.headerText}>
             <nav className={styles.backLinks} aria-label="Events">
@@ -28,7 +28,7 @@ export default function EventsBlogTagsPostsContent({items, tag}: Props): ReactNo
                 All topics
               </Link>
             </nav>
-            <Heading as="h1" className={styles.title}>
+            <Heading as="h1" className="kc-page-title">
               {tag.label}
             </Heading>
             <p className={styles.lede}>
@@ -38,7 +38,7 @@ export default function EventsBlogTagsPostsContent({items, tag}: Props): ReactNo
           </div>
         </header>
 
-        <div className={styles.listing}>
+        <div>
           <EventsListing items={items} />
         </div>
       </main>

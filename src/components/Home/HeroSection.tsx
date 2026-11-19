@@ -96,6 +96,7 @@ export default function HeroSection(): ReactNode {
             events={events}
             yearLink={(year) => `/events#year-${year}`}
             upcomingLink="/events#upcoming"
+            focusableColumns={false}
             className={styles.recordChart}
           />
         </section>

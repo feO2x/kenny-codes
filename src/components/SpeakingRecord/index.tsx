@@ -16,6 +16,11 @@ interface SpeakingRecordProps {
   yearLink: (year: number) => string;
   /** Where a year column with only upcoming sessions links to. */
   upcomingLink: string;
+  /**
+   * Whether each year is a keyboard tab stop. Pages that link to the archive elsewhere can turn
+   * this off to spare keyboard users 13 stops; the links still work with a pointer.
+   */
+  focusableColumns?: boolean;
   className?: string;
 }
 
@@ -60,6 +65,7 @@ export default function SpeakingRecord({
   events,
   yearLink,
   upcomingLink,
+  focusableColumns = true,
   className,
 }: SpeakingRecordProps): ReactNode {
   const columns = buildColumns(events, useToday());
@@ -105,6 +111,7 @@ export default function SpeakingRecord({
               {total > 0 ? (
                 <Link
                   to={column.delivered > 0 ? yearLink(column.year) : upcomingLink}
+                  tabIndex={focusableColumns ? undefined : -1}
                   className={styles.columnLink}>
                   {body}
                 </Link>

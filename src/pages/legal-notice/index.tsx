@@ -8,13 +8,13 @@ export default function LegalNotice() {
       title="Legal Notice"
       description="Legal Notice and Contact Information"
     >
-      <main className="container kc-narrow-page">
+      <main className="container kc-page">
         <header className="kc-page-header">
           <Heading as="h1" className="kc-page-title">
             Legal notice
           </Heading>
         </header>
-        <div className="markdown">
+        <div className="markdown kc-measure">
           <h2>Contact in English</h2>
           <p>
             Information according to §5 TMG <br />

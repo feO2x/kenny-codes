@@ -64,6 +64,9 @@ export default function DropdownNavbarItemDesktop({
   const openedByHover = useRef(false);
   const onPointer = (shouldOpen: boolean) => (event: React.PointerEvent) => {
     if (event.pointerType !== 'mouse') return;
+    // Keyboard users may be inside the menu while the pointer wanders off; keep it open for them.
+    const focusInMenu = containerRef.current?.querySelector('.dropdown__menu')?.contains(document.activeElement);
+    if (!shouldOpen && focusInMenu) return;
     openedByHover.current = shouldOpen;
     setOpen(shouldOpen);
   };

@@ -2,8 +2,7 @@
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
   gap: clamp(2rem, 1rem + 4vw, 5rem);
-  align-items: center;
-  padding-top: clamp(3rem, 2rem + 3vw, 5rem);
+  align-items: start;
 }
 
 .title {
@@ -92,9 +91,7 @@
   margin-top: clamp(3rem, 2rem + 3vw, 4.5rem);
 }
 
-.listing {
-  padding-bottom: clamp(4rem, 3rem + 3vw, 6rem);
-}
+
 
 .backLinks {
   display: flex;
@@ -104,6 +101,7 @@
 
 .back {
   display: inline-block;
+  /* Same as .kc-back-link in custom.css */
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--kc-muted);

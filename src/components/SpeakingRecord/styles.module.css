@@ -83,7 +83,8 @@ a.columnLink:hover {
   box-shadow: inset 0 0 0 2px var(--kc-upcoming);
 }
 
-a.columnLink:hover .square:not(.squareUpcoming) {
+/* Dark mode can brighten on hover; light mode keeps its contrast and relies on the column tint. */
+:global([data-theme='dark']) a.columnLink:hover .square:not(.squareUpcoming) {
   filter: brightness(1.12) saturate(1.1);
 }
 

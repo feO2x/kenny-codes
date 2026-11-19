@@ -31,6 +31,9 @@
   --kc-display-stretch: 118%;
   --kc-heading-stretch: 108%;
 
+  /* Space between the navbar and the first line of pages without a sidebar */
+  --kc-page-top: clamp(2.5rem, 1.5rem + 3vw, 4.5rem);
+
   /* Radii */
   --kc-radius-sm: 6px;
   --kc-radius: 10px;
@@ -145,8 +148,11 @@ h1 {
   letter-spacing: -0.022em;
 }
 
-p, li {
-  text-wrap: pretty;
+/* Balanced rag on wider screens; on phones it leaves visibly short lines. */
+@media (min-width: 768px) {
+  p, li {
+    text-wrap: pretty;
+  }
 }
 
 hr {
@@ -160,10 +166,50 @@ hr {
   }
 }
 
-/* ---------- Page headers (blog list, legal notice) ---------- */
+/* ---------- Page shell and headers ---------- */
+
+/* Pages without a sidebar (events, topics, legal notice, 404) share one top edge. */
+.kc-page {
+  padding-top: var(--kc-page-top);
+  padding-bottom: clamp(4rem, 3rem + 3vw, 6rem);
+}
+
+/* Event detail pages render through BlogLayout; align their first line with the other pages. */
+.kc-event-page .main-wrapper > .container {
+  padding-top: calc(var(--kc-page-top) - 2rem);
+}
+
+/* Readable measure for text-only pages such as the legal notice. */
+.kc-text-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 600;
+  color: var(--kc-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+.kc-text-link:hover {
+  color: var(--kc-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+.kc-measure {
+  max-width: 48rem;
+}
 
 .kc-page-header {
   margin-bottom: 2.5rem;
+}
+
+/* The blog list intro is set apart from the first post like posts are from each other. */
+.kc-page-header--divided {
+  padding-bottom: 2.5rem;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid var(--kc-line);
 }
 
 .kc-page-title {
@@ -182,15 +228,6 @@ hr {
   color: var(--kc-muted);
   max-width: 40ch;
   margin: 0;
-}
-
-.kc-narrow-page {
-  max-width: 48rem;
-  padding-block: clamp(3rem, 2rem + 3vw, 5rem);
-}
-
-.kc-wide-page {
-  max-width: var(--ifm-container-width-xl);
 }
 
 .kc-tag-cloud {
@@ -315,6 +352,11 @@ hr {
   line-height: var(--ifm-line-height-base);
 }
 
+/* Visibility switches instantly so the links are focusable as soon as the menu is expanded. */
+.kc-disclosure .dropdown__menu {
+  transition-property: opacity, transform;
+}
+
 .dropdown__menu {
   border: 1px solid var(--kc-line);
   border-radius: var(--kc-radius);
@@ -343,6 +385,24 @@ hr {
 
 .navbar-sidebar__close:hover {
   background: var(--kc-surface-raised);
+}
+
+.navbar-sidebar__close svg,
+.navbar__toggle svg {
+  color: var(--kc-muted);
+}
+
+/* A 44px target for the menu button; Infima only shows it below 997px. */
+@media (max-width: 996px) {
+  .navbar__toggle {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-left: -0.5rem;
+    margin-right: 0.25rem;
+    border-radius: 8px;
+  }
 }
 
 .navbar-sidebar .menu__link {
@@ -429,7 +489,7 @@ hr {
 }
 
 .markdown > header:first-child h1 {
-  margin-bottom: 0;
+  margin-bottom: 1.25rem;
 }
 
 .markdown h1:first-child {
@@ -637,6 +697,30 @@ pre code,
   color: var(--kc-ink);
 }
 
+/* On small screens the current page repeats the h1 right below it; keep it to one line. */
+@media (max-width: 996px) {
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .breadcrumbs__item--active {
+    min-width: 0;
+  }
+
+  .breadcrumbs__item--active .breadcrumbs__link {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .theme-doc-markdown {
+    margin-top: 1.25rem;
+  }
+}
+
 .pagination-nav__link {
   border: 1px solid var(--kc-line);
   background: var(--kc-surface);
@@ -687,6 +771,14 @@ pre code,
   font-size: 0.92rem;
 }
 
+/* Year labels in the blog sidebar (paragraphs, see src/theme/BlogSidebar/Content). */
+.blog-wrapper aside [role="group"] > p {
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--kc-muted);
+  margin: 1.5rem 0 0.5rem;
+}
+
 .blog-list-page main > article {
   padding-bottom: 2.5rem;
   margin-bottom: 2.5rem !important;
@@ -695,6 +787,15 @@ pre code,
 
 .blog-list-page main > article:last-of-type {
   border-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .blog-list-page main > article footer .text--right {
+    flex-basis: 100%;
+    max-width: 100%;
+    text-align: left !important;
+    margin-top: 1rem;
+  }
 }
 
 /* One author writes every post, so the list does not repeat the author card. */
@@ -828,4 +929,11 @@ pre code,
 .kc-back-link:hover {
   color: var(--kc-ink);
   text-decoration: none;
+}
+
+/* Long doc titles on phones: a narrower width axis keeps them to fewer lines. */
+@media (max-width: 576px) {
+  .markdown h1:first-child {
+    font-stretch: 106%;
+  }
 }
