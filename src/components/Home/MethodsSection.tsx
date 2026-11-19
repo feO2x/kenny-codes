@@ -4,17 +4,32 @@ import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import styles from './Home.module.css';
 
-const phases = [
-  {name: 'Plan', text: 'Agree on the approach with the agent and freeze the plan in git.'},
-  {name: 'Implement', text: 'The agent implements one focused plan, verified by feedback loops.'},
-  {name: 'Guide', text: 'You review every change and steer with fixes or follow-up plans.'},
-];
+const LEVELS = 3;
 
-const stages = [
-  {name: 'Beginning', mode: 'Show me', text: 'the agent shows complete code for you to type in and discuss.'},
-  {name: 'Advancing', mode: 'Coach me', text: 'you write the code; the agent reviews it and hints when you’re stuck.'},
-  {name: 'Mastering', mode: 'Guided Coding', text: 'the agent writes the code; you plan and guide.'},
-];
+/** Who writes the code in the Implementing Phase depends on how well you know the domain. */
+const implementers = {
+  coding: {name: 'Mastering', level: 3, text: 'The agent writes the code.'},
+  learning: [
+    {name: 'Advancing', level: 2, text: 'You write the code; the agent coaches you.'},
+    {name: 'Beginning', level: 1, text: 'The agent shows the code; you type it in.'},
+  ],
+};
+
+function Level({name, level, text}: {name: string; level: number; text: string}): ReactNode {
+  return (
+    <li className={styles.level}>
+      {/* The speaking record's square as a meter: filled up to how well you know the domain. */}
+      <span className={styles.meter} aria-hidden="true">
+        {Array.from({length: LEVELS}, (_, square) => (
+          <span key={square} className={square < level ? styles.meterOn : undefined} />
+        ))}
+      </span>
+      <span className={styles.levelText}>
+        <strong>{name}:</strong> {text}
+      </span>
+    </li>
+  );
+}
 
 /** Solid arrows reference the Core; the dashed one implements the Core's I/O abstractions. */
 function Arrow({up = false, implementsAbstraction = false}: {up?: boolean; implementsAbstraction?: boolean}): ReactNode {
@@ -83,48 +98,51 @@ export default function MethodsSection(): ReactNode {
             </Heading>
             <p className={styles.methodText}>
               Write enterprise-grade software with coding agents without losing control of your
-              codebase.
+              codebase. New to a domain? Guided Learning lets you write the code yourself while
+              the agent teaches you.
             </p>
             <ol className={clsx(styles.methodVisual, styles.phases)}>
-              {phases.map((phase) => (
-                <li key={phase.name} className={styles.phase}>
-                  <span className={styles.phaseName}>{phase.name}</span>
-                  <span className={styles.phaseText}>{phase.text}</span>
-                </li>
-              ))}
+              <li className={styles.phase}>
+                <span className={styles.phaseName}>Plan</span>
+                <span className={styles.phaseText}>
+                  Agree on the approach with the agent and freeze the plan in git.
+                </span>
+              </li>
+              <li className={styles.phase}>
+                <span className={styles.phaseName}>Implement</span>
+                <span className={styles.phaseText}>
+                  One focused plan, verified by feedback loops. Who writes the code depends on how
+                  well you know the domain:
+                </span>
+                <div className={styles.implementers}>
+                  <ul className={styles.levels}>
+                    <Level {...implementers.coding} />
+                  </ul>
+                  <div className={styles.learning}>
+                    <span className={styles.learningLabel}>Guided Learning</span>
+                    <ul className={styles.levels}>
+                      {implementers.learning.map((level) => (
+                        <Level key={level.name} {...level} />
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </li>
+              <li className={styles.phase}>
+                <span className={styles.phaseName}>Guide</span>
+                <span className={styles.phaseText}>
+                  You review every change and steer with fixes or follow-up plans.
+                </span>
+              </li>
             </ol>
-            <Link to="/docs/guided-coding" className={styles.methodLink}>
-              Read the Guided Coding guide
-            </Link>
-          </article>
-
-          <article className={styles.method}>
-            <Heading as="h3" className={styles.methodName}>
-              Guided Learning
-            </Heading>
-            <p className={styles.methodText}>
-              Guided Coding for developers new to a domain: the agent teaches you to write the code
-              yourself and steps back as you grow.
-            </p>
-            {/* The meter fills as you grow; the agent's help changes with it. */}
-            <ol className={clsx(styles.methodVisual, styles.stages)}>
-              {stages.map((stage, index) => (
-                <li key={stage.name} className={styles.stage}>
-                  <span className={styles.meter} aria-hidden="true">
-                    {stages.map((_, square) => (
-                      <span key={square} className={square <= index ? styles.meterOn : undefined} />
-                    ))}
-                  </span>
-                  <span className={styles.stageName}>{stage.name}</span>
-                  <span className={styles.phaseText}>
-                    <span className={styles.stageMode}>{stage.mode}:</span> {stage.text}
-                  </span>
-                </li>
-              ))}
-            </ol>
-            <Link to="/docs/guided-coding/guided-learning-getting-started" className={styles.methodLink}>
-              Read the Guided Learning guide
-            </Link>
+            <div className={styles.methodLinks}>
+              <Link to="/docs/guided-coding" className={styles.textLink}>
+                Read the Guided Coding guide
+              </Link>
+              <Link to="/docs/guided-coding/guided-learning-getting-started" className={styles.textLink}>
+                Start with Guided Learning
+              </Link>
+            </div>
           </article>
 
           <article className={styles.method}>
@@ -135,12 +153,14 @@ export default function MethodsSection(): ReactNode {
               A simple way to structure an application: every piece of code belongs to one of four
               categories. And the K? That’s me.
             </p>
-            <div className={styles.methodVisual}>
+            <div className={clsx(styles.methodVisual, styles.chackVisual)}>
               <ChackMap />
             </div>
-            <Link to="/docs/chack" className={styles.methodLink}>
-              Read the CHACK guide
-            </Link>
+            <div className={styles.methodLinks}>
+              <Link to="/docs/chack" className={styles.textLink}>
+                Read the CHACK guide
+              </Link>
+            </div>
           </article>
         </div>
       </div>

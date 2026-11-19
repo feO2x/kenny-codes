@@ -295,11 +295,8 @@
 }
 
 .methods {
-  /* Titles size against the card grid (cqi), not the card: containment on the card would
-     turn off its subgrid. */
-  container-type: inline-size;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   gap: 1.5rem;
 }
 
@@ -326,10 +323,11 @@
   margin: 0 0 2rem;
 }
 
-.methodLink {
-  composes: textLink;
+.methodLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.75rem;
   margin-top: auto;
-  align-self: flex-start;
 }
 
 .phases {
@@ -394,32 +392,62 @@
   color: var(--kc-muted);
 }
 
-.stages {
+/* Implement branches by who writes the code; the Guided Learning rows sit in their own box. */
+.implementers {
+  grid-column: 2;
+  margin-top: 0.75rem;
+}
+
+.levels {
   list-style: none;
-  margin: 0 0 2.25rem;
+  margin: 0;
   padding: 0;
 }
 
-.stage {
+.level {
   display: grid;
-  /* Same 2rem marker column as the Guided Coding steps, so the text lines up across cards. */
   grid-template-columns: 2rem minmax(0, 1fr);
-  column-gap: 0.9rem;
+  column-gap: 0.75rem;
   margin: 0;
-  padding-bottom: 1.1rem;
+  padding: 0.2rem 0;
+  font-size: 0.975rem;
+  line-height: 1.5;
+  color: var(--kc-muted);
 }
 
-.stage:last-child {
-  padding-bottom: 0;
+.level strong {
+  font-weight: 650;
+  color: var(--kc-ink);
 }
 
-/* Three squares per stage, filled up to the level: the speaking record's square, as a meter. */
+.learning {
+  position: relative;
+  margin-top: 0.9rem;
+  padding: 0.85rem 0.9rem 0.6rem;
+  /* Solid, so it doesn't read like CHACK's dashed process boundary. */
+  border: 1px solid var(--kc-line-strong);
+  border-radius: var(--kc-radius);
+}
+
+.learningLabel {
+  position: absolute;
+  top: 0;
+  left: 0.65rem;
+  translate: 0 -50%;
+  padding: 0 0.35rem;
+  background: var(--kc-bg);
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--kc-ink);
+}
+
 .meter {
-  grid-row: span 2;
   display: flex;
   gap: 2.5px;
-  height: 2rem;
-  align-items: center;
+  /* Centred on the first line, also when the text wraps. */
+  align-self: start;
+  margin-top: calc((1.5em - 9px) / 2);
 }
 
 .meter > span {
@@ -441,17 +469,6 @@
 
 .meter > .meterOn:nth-child(3) {
   background: var(--kc-ramp-to);
-}
-
-.stageName {
-  font-weight: 700;
-  font-stretch: 110%;
-  line-height: 2rem;
-}
-
-.stageMode {
-  font-weight: 600;
-  color: var(--kc-ink);
 }
 
 /* CHACK in miniature: the dashed box is the process boundary, Humble Objects straddle it. */
@@ -661,8 +678,8 @@
   }
 }
 
-/* Three columns: title, text, visual, and link share rows across the cards. */
-@media (min-width: 1100px) {
+/* Two columns: title, text, visual, and links share rows across the cards. */
+@media (min-width: 997px) {
   .methods {
     grid-template-rows: auto auto auto 1fr;
   }
@@ -674,38 +691,45 @@
     row-gap: 0;
   }
 
-  /* "Guided Learning" stays on one line in a third of the grid. */
-  .methodName {
-    font-size: min(clamp(1.6rem, 1.3rem + 1vw, 2.1rem), 2.8cqi);
+  .methodLinks {
+    align-self: end;
   }
 
-  .methodLink {
-    align-self: end;
+  /* The Guided Coding steps set the row height; the diagram sits in its middle. */
+  .chackVisual {
+    align-self: center;
   }
 }
 
-/* Three cards need room; below that, each card lays its visual beside the text. */
-@media (max-width: 1099px) {
+/* Below that, the cards stack and each lays its visual beside the text. */
+@media (max-width: 996px) {
   .methods {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
-@media (min-width: 768px) and (max-width: 1099px) {
+@media (min-width: 768px) and (max-width: 996px) {
   .method {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     grid-template-rows: auto auto 1fr;
     grid-template-areas:
       "name visual"
       "text visual"
-      "link visual";
+      "links visual";
     column-gap: clamp(2rem, 4vw, 3.5rem);
   }
 
   .methodName { grid-area: name; }
   .methodText { grid-area: text; }
-  .methodLink { grid-area: link; align-self: start; margin-top: 0; }
+
+  .methodLinks {
+    grid-area: links;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: start;
+    margin-top: 0;
+  }
 
   .methodVisual {
     grid-area: visual;
