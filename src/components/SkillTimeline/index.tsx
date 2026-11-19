@@ -4,12 +4,15 @@ import {DiagramFrame} from '../Diagram';
 import {methodNames, phasesFor, type Method, type Phase, type Span, type TimelineVariant} from './data';
 import styles from './styles.module.css';
 
-/** A bracket beside steps `from` to `to`; a loop gets an arrowhead pointing back at `from`. */
+/**
+ * A bracket beside steps `from` to `to`, from marker to marker. A loop instead runs from the end
+ * of its last step back up to the first, with an arrowhead pointing at it.
+ */
 function SpanMark({span, loop}: {span: Span; loop?: boolean}): ReactNode {
   return (
     <li
       className={clsx(styles.span, loop && styles.loop)}
-      style={{gridRow: `${span.from + 1} / ${span.to + 1}`}}
+      style={{gridRow: `${span.from + 1} / ${span.to + (loop ? 2 : 1)}`}}
       aria-hidden="true">
       <span className={styles.spanLine}>
         <span className={styles.spanLabel}>
@@ -34,9 +37,6 @@ interface ArrowBox {
 }
 
 type Ends = Record<'small' | 'large', ArrowBox>;
-
-/** Half the arrows' stroke width: the stroke's centre lines run through the measured points. */
-const HALF_STROKE = 2;
 
 /**
  * Measures the back arrows, because the step rows wrap differently at every width. Each arrow
@@ -63,11 +63,13 @@ function useBackArrowEnds(list: React.RefObject<HTMLOListElement | null>): Ends 
       const cardBox = card.getBoundingClientRect();
       const left = cardBox.right - parseFloat(getComputedStyle(card).paddingRight) - origin.left;
       const iterate = markerY('iterate');
+      // The strokes' centre lines run through the measured points.
+      const halfStroke = parseFloat(getComputedStyle(root).getPropertyValue('--arrow-width')) / 2 || 0;
       const box = (target: string, offset: number): ArrowBox => {
-        const top = markerY(target) - HALF_STROKE;
-        return {top, height: iterate + offset + HALF_STROKE - top, left};
+        const top = markerY(target) - halfStroke;
+        return {top, height: iterate + offset + halfStroke - top, left};
       };
-      const next: Ends = {small: box('implementing', -7), large: box('planning', 7)};
+      const next: Ends = {small: box('implementing', -8), large: box('planning', 8)};
       if (Object.values(next).every(({top, height}) => Number.isFinite(top) && Number.isFinite(height) && height > 0)) {
         setEnds(next);
       }

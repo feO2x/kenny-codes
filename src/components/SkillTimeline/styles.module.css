@@ -12,10 +12,12 @@
   /* The iteration arrows run over the right edge of the middle cards: a band of the card
      (--reserve plus the card padding) stays free of text, with the two vertical runs at
      --small-inset and --large-inset from the card edge. */
-  --reserve: 5.75rem;
-  --small-inset: 3.4rem;
-  --large-inset: 1.5rem;
-  --arrow-width: 4px;
+  --reserve: 6.75rem;
+  --small-inset: 4.3rem;
+  --large-inset: 2.1rem;
+  --arrow-width: 5px;
+  /* Space between an arrow and its label. */
+  --label-gap: 0.6rem;
   margin: 0;
 }
 
@@ -97,7 +99,7 @@
 
 /* Steps: marker | text | optional bracket column. */
 .steps {
-  --span-w: 7.5rem;
+  --span-w: 9rem;
   display: grid;
   grid-template-columns: 1.25rem minmax(0, 1fr);
   column-gap: 0.65rem;
@@ -166,6 +168,7 @@
 }
 
 .spanLine {
+  --bracket: 1rem;
   position: absolute;
   top: var(--marker-y);
   bottom: calc(-1 * (var(--step-gap) + var(--marker-y)));
@@ -173,35 +176,41 @@
   right: 0;
   display: flex;
   align-items: center;
-  padding-left: 1.35rem;
+  padding-left: calc(var(--bracket) + var(--label-gap));
 }
 
 .spanLine::before {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
-  width: 0.85rem;
+  width: var(--bracket);
   border: 2px solid var(--phase);
   border-left: 0;
   border-radius: 0 8px 8px 0;
 }
 
-/* A loop is iteration: as heavy as the arrows back from the Guiding Phase, pointing back at
-   its first step. */
+/* A loop is iteration: as heavy as the arrows back from the Guiding Phase, with long arms and a
+   generous curve, pointing back at its first step. */
+.loop .spanLine {
+  --bracket: 2rem;
+  bottom: 0.15rem;
+  left: -1rem;
+}
+
 .loop .spanLine::before {
   inset-block: calc(var(--arrow-width) / -2);
   border-width: var(--arrow-width);
   border-left: 0;
-  border-radius: 0 11px 11px 0;
+  border-radius: 0 18px 18px 0;
 }
 
 .loop .spanLine::after {
   content: "";
   position: absolute;
   top: 0;
-  left: -5px;
-  width: 15px;
-  height: 15px;
+  left: -6px;
+  width: 19px;
+  height: 19px;
   translate: 0 -50%;
   background: var(--phase);
   clip-path: polygon(0 50%, 100% 0, 100% 100%);
@@ -221,11 +230,12 @@
 /* Narrow cards: the bracket labels turn sideways so the step text keeps its width. */
 @container (max-width: 27rem) {
   .steps {
-    --span-w: 2.6rem;
+    --span-w: 3.4rem;
   }
 
-  .spanLine {
-    padding-left: 1.1rem;
+  .loop .spanLine {
+    --bracket: 1.25rem;
+    left: -0.25rem;
   }
 
   .spanLabel {
@@ -245,7 +255,7 @@
   margin: 0;
   border: var(--arrow-width) solid var(--arrow);
   border-left: 0;
-  border-radius: 0 14px 14px 0;
+  border-radius: 0 20px 20px 0;
   pointer-events: none;
 }
 
@@ -253,9 +263,9 @@
   content: "";
   position: absolute;
   top: calc(var(--arrow-width) / -2);
-  left: -4px;
-  width: 16px;
-  height: 16px;
+  left: -6px;
+  width: 19px;
+  height: 19px;
   translate: 0 -50%;
   background: var(--arrow);
   clip-path: polygon(0 50%, 100% 0, 100% 100%);
@@ -275,7 +285,7 @@
 .backLabel {
   position: absolute;
   top: 50%;
-  left: calc(100% + 0.3rem);
+  left: calc(100% + var(--label-gap));
   translate: 0 -50%;
   writing-mode: vertical-rl;
   rotate: 180deg;
@@ -312,14 +322,14 @@
 /* Phones: a narrower arrow band and tighter cards leave the step text room to breathe. */
 @media (max-width: 600px) {
   .timeline {
-    --reserve: 3.9rem;
-    --small-inset: 2.5rem;
-    --large-inset: 1.05rem;
-    --arrow-width: 3px;
+    --reserve: 4.6rem;
+    --small-inset: 3rem;
+    --large-inset: 1.35rem;
+    --arrow-width: 4px;
+    --label-gap: 0.4rem;
   }
 
   .backLabel {
-    left: calc(100% + 0.15rem);
     font-size: 0.7rem;
   }
 

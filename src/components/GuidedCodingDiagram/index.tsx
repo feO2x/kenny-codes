@@ -32,7 +32,7 @@ const MID_Y = BOX_Y + BOX_H / 2;
 
 /** A downward arrowhead whose tip touches (x, y), sized for the heavy iteration arrows. */
 function HeadDown({x, y}: {x: number; y: number}): ReactNode {
-  return <path className={d.head} d={`M ${x} ${y} l -9 -14 h 18 z`} />;
+  return <path className={d.head} d={`M ${x} ${y} l -10 -16 h 20 z`} />;
 }
 
 /** A right-pointing arrowhead whose tip touches (x, y). */
@@ -52,7 +52,7 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
   // Iteration is the heart of Guided Coding, so its arrows are the heaviest strokes.
   const loop = (tile: Tile, ...touches: Phase[]): CSSProperties => ({
     ...(!highlight || touches.includes(highlight) ? markStyle(tile) : {}),
-    '--line-width': 4,
+    '--line-width': 5,
   }) as CSSProperties;
   /** Bold in forced colors, where the arrow's colour is gone. */
   const emphasis = (...touches: Phase[]) => (highlight && touches.includes(highlight) ? d.markActive : undefined);
@@ -73,25 +73,25 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
 
         {/* Guiding → Planning: a large issue, in the Planning Phase's colour */}
         <g style={loop('blue', 'guiding', 'planning')}>
-          <path className={d.line} d={`M 700 ${BOX_Y} V 52 Q 700 40 688 40 H 148 Q 136 40 136 52 V ${BOX_Y - 13}`} />
+          <path className={d.line} d={`M 700 ${BOX_Y} V 52 Q 700 40 688 40 H 148 Q 136 40 136 52 V ${BOX_Y - 15}`} />
           <HeadDown x={136} y={BOX_Y - 1} />
-          <text x={418} y={30} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'planning'))}>
+          <text x={418} y={25} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'planning'))}>
             large issue
           </text>
         </g>
 
         {/* Guiding → Implementing: a small issue, in the Implementing Phase's colour */}
         <g style={loop('amber', 'guiding', 'implementing')}>
-          <path className={d.line} d={`M 640 ${BOX_Y} V 96 Q 640 84 628 84 H 414 Q 402 84 402 96 V ${BOX_Y - 13}`} />
+          <path className={d.line} d={`M 640 ${BOX_Y} V 96 Q 640 84 628 84 H 414 Q 402 84 402 96 V ${BOX_Y - 15}`} />
           <HeadDown x={402} y={BOX_Y - 1} />
-          <text x={521} y={74} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'implementing'))}>
+          <text x={521} y={69} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'implementing'))}>
             small issue
           </text>
         </g>
 
         {/* The Planning Phase loops on itself until the plan stabilizes. */}
         <g style={loop('blue', 'planning')}>
-          <path className={d.line} d={`M 224 ${BOX_Y} V 110 Q 224 100 214 100 H 198 Q 188 100 188 110 V ${BOX_Y - 13}`} />
+          <path className={d.line} d={`M 224 ${BOX_Y} V 110 Q 224 100 214 100 H 198 Q 188 100 188 110 V ${BOX_Y - 15}`} />
           <HeadDown x={188} y={BOX_Y - 1} />
         </g>
 
