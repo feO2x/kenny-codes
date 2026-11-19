@@ -71,20 +71,21 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
           <TileGradients prefix={id} />
         </defs>
 
-        {/* Guiding → Planning: a large issue, in the Planning Phase's colour */}
+        {/* Guiding → Planning: a large issue, in the Planning Phase's colour. The two return
+            arrows keep well apart, each label close to its own line. */}
         <g style={loop('blue', 'guiding', 'planning')}>
-          <path className={d.line} d={`M 700 ${BOX_Y} V 52 Q 700 40 688 40 H 148 Q 136 40 136 52 V ${BOX_Y - 17}`} />
-          <HeadDown x={136} y={BOX_Y - 1} />
-          <text x={418} y={23} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'planning'))}>
+          <path className={d.line} d={`M 716 ${BOX_Y} V 48 Q 716 34 702 34 H 134 Q 120 34 120 48 V ${BOX_Y - 17}`} />
+          <HeadDown x={120} y={BOX_Y - 1} />
+          <text x={418} y={22} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'planning'))}>
             large issue
           </text>
         </g>
 
         {/* Guiding → Implementing: a small issue, in the Implementing Phase's colour */}
         <g style={loop('amber', 'guiding', 'implementing')}>
-          <path className={d.line} d={`M 640 ${BOX_Y} V 96 Q 640 84 628 84 H 414 Q 402 84 402 96 V ${BOX_Y - 17}`} />
+          <path className={d.line} d={`M 620 ${BOX_Y} V 108 Q 620 96 608 96 H 414 Q 402 96 402 108 V ${BOX_Y - 17}`} />
           <HeadDown x={402} y={BOX_Y - 1} />
-          <text x={521} y={67} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'implementing'))}>
+          <text x={511} y={84} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'implementing'))}>
             small issue
           </text>
         </g>
