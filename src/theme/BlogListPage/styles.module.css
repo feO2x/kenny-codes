@@ -104,3 +104,20 @@
     object-position: 50% 64%;
   }
 }
+
+/* Topic pages: the same chart beside the header, kept to a comfortable width when a topic spans
+   only a few years. */
+.topicRecord {
+  align-self: end;
+  min-width: 0;
+}
+
+@media (max-width: 860px) {
+  .topicRecord {
+    margin-top: 0.5rem;
+  }
+}
+
+.topicRecord ol {
+  max-width: calc(var(--columns) * 5.5rem);
+}

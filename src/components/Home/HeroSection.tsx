@@ -31,7 +31,7 @@ export default function HeroSection(): ReactNode {
     <header className={styles.hero}>
       <div className="container">
         <div className={styles.heroGrid}>
-          <div className={styles.heroText}>
+          <div>
             <Heading as="h1" className={styles.heroName}>
               Kenny Pflug
             </Heading>

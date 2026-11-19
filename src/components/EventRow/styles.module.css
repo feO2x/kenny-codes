@@ -216,7 +216,7 @@
     align-items: center;
     gap: 0.5rem 1rem;
     text-align: left;
-    padding-top: 0.35rem;
+    padding-top: 0.15rem;
   }
 }
 
@@ -236,13 +236,8 @@
     font-size: 1.5rem;
   }
 
+  /* Venue, place, and format read as one block. */
   .aside {
-    grid-column: 2;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 1rem;
-    text-align: left;
-    padding-top: 0.35rem;
+    padding-top: 0;
   }
 }

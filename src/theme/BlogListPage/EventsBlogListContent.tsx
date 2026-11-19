@@ -44,7 +44,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
     <Layout title="Events" description="Past and upcoming talks, workshops, and webinars by Kenny Pflug">
       <main className="container kc-page">
         <header className={styles.header}>
-          <div className={styles.headerText}>
+          <div>
             <Heading as="h1" className={styles.title}>
               Talks and workshops
             </Heading>

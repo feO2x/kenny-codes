@@ -1,0 +1,53 @@
+.section + .section {
+  margin-top: clamp(3rem, 2rem + 3vw, 4.5rem);
+}
+
+.sectionTitle {
+  font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem);
+  font-weight: 750;
+  font-stretch: 116%;
+  letter-spacing: -0.02em;
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--kc-line-strong);
+}
+
+.hint {
+  color: var(--kc-muted);
+  font-size: 0.95rem;
+  margin: 0 0 0.5rem;
+}
+
+/* Initial on the left, its topics on the right: the same rhythm as the archive's year groups. */
+.letter {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  gap: 0 1.5rem;
+  align-items: start;
+  padding: 1rem 0;
+}
+
+.letter + .letter {
+  border-top: 1px solid var(--kc-line);
+}
+
+.letterLabel {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 750;
+  font-stretch: 120%;
+  line-height: 2.5rem;
+  letter-spacing: -0.02em;
+  color: var(--kc-ink);
+}
+
+@media (max-width: 576px) {
+  .letter {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: 0 0.75rem;
+  }
+
+  .letterLabel {
+    font-size: 1.35rem;
+  }
+}

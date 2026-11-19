@@ -49,9 +49,7 @@ function BlogPostPageContent({
 
       <BlogPostItem>{children}</BlogPostItem>
 
-      {(nextItem || prevItem) && (
-        <BlogPostPaginator nextItem={nextItem} prevItem={prevItem} />
-      )}
+      <BlogPostPaginator nextItem={nextItem} prevItem={prevItem} />
     </BlogLayout>
   );
 }

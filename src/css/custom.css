@@ -19,7 +19,7 @@
   --kc-ink: #0c1a30;
   --kc-muted: #4f5e78;
   --kc-line: #dce3ee;
-  --kc-line-strong: #c3cede;
+  --kc-line-strong: #b8c5d8;
   --kc-accent-soft: rgba(0, 102, 214, 0.08);
   --kc-upcoming: #007a68;
   --kc-cancelled: #c62828;
@@ -291,6 +291,12 @@ hr {
   margin-right: 1.5rem;
 }
 
+/* Same ink in the navbar and the mobile drawer header. */
+.navbar__brand,
+.navbar__brand:hover {
+  color: var(--kc-ink);
+}
+
 .navbar__logo {
   height: 1.9rem;
 }
@@ -436,6 +442,8 @@ hr {
   --ifm-footer-link-color: #dfe7f3;
   --ifm-footer-link-hover-color: #33ffdc;
   --ifm-footer-title-color: #ffffff;
+  /* The inner .container brings the page gutters; extra footer padding would indent the columns. */
+  --ifm-footer-padding-horizontal: 0;
   border-top: 1px solid rgba(160, 185, 230, 0.12);
   padding-block: 4rem 3rem;
 }
@@ -613,9 +621,10 @@ pre code,
   border: 0;
 }
 
-.theme-code-block {
+/* div.theme-code-block outranks the code block's own module class without !important. */
+div.theme-code-block {
   border: 1px solid var(--kc-line);
-  border-radius: var(--kc-radius) !important;
+  border-radius: var(--kc-radius);
   box-shadow: none;
 }
 
@@ -654,8 +663,8 @@ pre code,
 
 /* ---------- Docs chrome ---------- */
 
-.theme-doc-sidebar-container {
-  border-right-color: var(--kc-line) !important;
+aside.theme-doc-sidebar-container {
+  border-right-color: var(--kc-line);
 }
 
 .menu {
@@ -778,60 +787,54 @@ pre code,
 }
 
 /* Event pages have no sidebar or TOC: start the column on the container edge like /events.
-   Narrow screens stack details, description, and invitation at the text width; wide screens put
-   the details and invitation in a column beside the description. */
+   The markup reads facts, description, invitation. Narrow screens stack them at the text width;
+   wide screens put the facts and the invitation in a column beside the description. */
 .kc-event-page main.col {
   --ifm-col-width: 100%;
   margin-left: 0;
   max-width: calc(44rem + 2 * var(--ifm-spacing-horizontal));
 }
 
-.kc-event-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "details" "body" "invite";
+.kc-event-layout__body {
+  min-width: 0;
 }
 
-/* On narrow screens the side column dissolves so details go first and the invite last. */
-.kc-event-layout__side { display: contents; }
-.kc-event-layout__details { grid-area: details; }
-.kc-event-layout__body { grid-area: body; min-width: 0; }
-.kc-event-layout__invite { grid-area: invite; }
-
-@media (min-width: 1200px) {
+@media (min-width: 997px) {
   .kc-event-page main.col {
-    max-width: none;
+    max-width: calc(44rem + 4rem + 21rem + 2 * var(--ifm-spacing-horizontal));
   }
 
-  .kc-event-page article > header {
+  .kc-event-page article > header,
+  .kc-event-page article > footer {
     max-width: 44rem;
   }
 
   .kc-event-layout {
-    grid-template-columns: minmax(0, 44rem) minmax(16rem, 21rem);
-    grid-template-areas: "body side";
-    column-gap: clamp(3rem, 1rem + 4vw, 6rem);
+    display: grid;
+    /* The side column takes the rest, so the grid, the paginator, and the column share a right edge. */
+    grid-template-columns: minmax(0, 44rem) minmax(15rem, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "body details"
+      "body invite";
+    gap: 1.5rem clamp(2.5rem, 4vw, 4rem);
     align-items: start;
     margin-top: 2rem;
   }
 
-  .kc-event-layout__side {
-    grid-area: side;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+  .kc-event-layout__details { grid-area: details; }
+  .kc-event-layout__body { grid-area: body; }
+
+  /* The invitation stays in view while the description scrolls past. */
+  .kc-event-layout__invite {
+    grid-area: invite;
     position: sticky;
     top: calc(var(--ifm-navbar-height) + 2rem);
   }
 
-  /* The cards bring their own margins for the stacked layout; the column gap replaces them. */
-  .kc-event-layout .kc-event-layout__side > div > * {
+  /* The cards bring their own margins for the stacked layout; the grid gap replaces them. */
+  .kc-event-layout > div > * {
     margin-block: 0;
-  }
-
-  .kc-event-page article > footer,
-  .kc-event-page .pagination-nav {
-    max-width: 44rem;
   }
 }
 
@@ -857,13 +860,12 @@ pre code,
 .blog-list-page main > article,
 .blog-tags-post-list-page main > article {
   padding-bottom: 2.5rem;
-  margin-bottom: 2.5rem !important;
+  margin-bottom: 2.5rem;
   border-bottom: 1px solid var(--kc-line);
 }
 
-.blog-list-page main > article footer,
-.blog-tags-post-list-page main > article footer {
-  margin-top: 1.5rem !important;
+.kc-list-footer {
+  margin-top: 1.5rem;
 }
 
 .blog-list-page main > article:last-of-type,
@@ -876,6 +878,7 @@ pre code,
   .blog-tags-post-list-page main > article footer .text--right {
     flex-basis: 100%;
     max-width: 100%;
+    /* Infima's .text--right utility is itself !important. */
     text-align: left !important;
     margin-top: 1rem;
   }
@@ -919,6 +922,7 @@ pre code,
   gap: 0.4rem;
   border-radius: 999px;
   box-shadow: inset 0 0 0 1px var(--kc-line-strong);
+  background: var(--kc-surface);
   color: var(--kc-ink);
   font-size: 0.85rem;
   font-weight: 500;
@@ -1035,8 +1039,13 @@ pre code,
   }
 }
 
-/* Long doc titles on phones: a narrower width axis keeps them to fewer lines. */
-@media (max-width: 576px) {
+/* Collapsed disclosure lists in the mobile drawer (see NavbarItem/DropdownNavbarItem/Mobile). */
+.menu__list[hidden] {
+  display: none;
+}
+
+/* Long doc titles on phones and tablets: a narrower width axis keeps them to fewer lines. */
+@media (max-width: 996px) {
   .markdown h1:first-child {
     font-stretch: 106%;
   }

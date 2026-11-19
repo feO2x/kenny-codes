@@ -63,7 +63,7 @@ export default function BlogPostItemFooter(): ReactNode {
   // BlogPost footer - list view
   else {
     return (
-      <footer className="row docusaurus-mt-lg">
+      <footer className="row kc-list-footer">
         {tagsExists && (
           <div className={clsx('col', {'col--9': truncatedPost})}>
             <TagsListInline tags={tags} />

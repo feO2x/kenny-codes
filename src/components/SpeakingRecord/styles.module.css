@@ -1,4 +1,5 @@
 .record {
+  container-type: inline-size;
   --square: 18px;
   --gap: 4px;
   --record-from: #0066d6;
@@ -146,17 +147,20 @@ a.columnBody:hover {
     --gap: 3px;
   }
 
+  .count,
+  .year {
+    font-size: 0.7rem;
+  }
+}
+
+/* Narrow charts (phones, or a sidebar column) abbreviate years so the labels never touch. */
+@container (max-width: 34rem) {
   .yearLong {
     display: none;
   }
 
   .yearShort {
     display: inline;
-  }
-
-  .count,
-  .year {
-    font-size: 0.7rem;
   }
 }
 
@@ -176,5 +180,26 @@ a.columnBody:hover {
 @media (prefers-reduced-motion: reduce) {
   .square {
     animation: none;
+  }
+}
+
+/* Windows high contrast and other forced palettes drop backgrounds; draw the squares in system colours. */
+@media (forced-colors: active) {
+  .square {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .squareUpcoming {
+    background: Canvas;
+    box-shadow: inset 0 0 0 2px CanvasText;
+  }
+
+  a.columnBody:hover .square:not(.squareUpcoming) {
+    background: LinkText;
+  }
+
+  .chart {
+    border-bottom-color: CanvasText;
   }
 }

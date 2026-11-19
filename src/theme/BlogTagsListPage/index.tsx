@@ -15,6 +15,7 @@ import homeData from '@site/src/data/home-data.json';
 import {useToday} from '@site/src/utils/dateFormatting';
 import type {Props} from '@theme/BlogTagsListPage';
 import {isEventPage} from '@site/src/utils/eventUtils';
+import styles from './styles.module.css';
 
 type TagItem = Props['tags'][number];
 
@@ -27,6 +28,55 @@ function TagCloud({tags}: {tags: ReadonlyArray<TagItem>}): ReactNode {
         </li>
       ))}
     </ul>
+  );
+}
+
+/** First letter or digit, so ".NET" files under N and "C#" under C. */
+function initialOf(label: string): string {
+  return (label.match(/[\p{L}\d]/u)?.[0] ?? '#').toUpperCase();
+}
+
+const byLabel = (a: TagItem, b: TagItem) => a.label.localeCompare(b.label, 'en', {sensitivity: 'base'});
+
+/**
+ * Long topic lists get the most frequent topics first and then an A–Z index grouped by initial,
+ * laid out like the year groups of the events archive. Short lists stay a single cloud.
+ */
+function TopicIndex({tags, unit}: {tags: ReadonlyArray<TagItem>; unit: string}): ReactNode {
+  if (tags.length <= 16) {
+    return <TagCloud tags={[...tags].sort(byCountThenLabel)} />;
+  }
+  const frequent = [...tags].sort(byCountThenLabel).slice(0, 10);
+  const groups = new Map<string, TagItem[]>();
+  for (const tag of [...tags].sort(byLabel)) {
+    const initial = initialOf(tag.label);
+    groups.set(initial, [...(groups.get(initial) ?? []), tag]);
+  }
+  return (
+    <>
+      <section className={styles.section} aria-labelledby="topics-frequent">
+        <Heading as="h2" id="topics-frequent" className={styles.sectionTitle}>
+          Most frequent
+        </Heading>
+        <TagCloud tags={frequent} />
+      </section>
+      <section className={styles.section} aria-labelledby="topics-all">
+        <Heading as="h2" id="topics-all" className={styles.sectionTitle}>
+          All {tags.length} topics, A–Z
+        </Heading>
+        <p className={styles.hint}>The number on each topic counts its {unit}.</p>
+        <div className={styles.letters}>
+          {[...groups].sort(([a], [b]) => a.localeCompare(b)).map(([initial, group]) => (
+            <div key={initial} className={styles.letter}>
+              <p className={styles.letterLabel} aria-hidden="true">
+                {initial}
+              </p>
+              <TagCloud tags={group} />
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
   );
 }
 
@@ -82,9 +132,11 @@ function EventTopics({tags}: {tags: ReadonlyArray<TagItem>}): ReactNode {
           <Heading as="h1" className="kc-page-title">
             Topics
           </Heading>
-          <p className="kc-page-lede">Talks and workshops by topic, most frequent first.</p>
+          <p className="kc-page-lede">
+            {topics.length} topics from {homeData.events.length} talks, workshops, and webinars.
+          </p>
         </header>
-        <TagCloud tags={topics} />
+        <TopicIndex tags={topics} unit="sessions" />
       </main>
     </Layout>
   );
@@ -117,7 +169,7 @@ export default function BlogTagsListPage({tags, sidebar}: Props): ReactNode {
             </Heading>
             <p className="kc-page-lede">Articles by topic, most frequent first.</p>
           </header>
-          <TagCloud tags={[...tags].sort(byCountThenLabel)} />
+          <TopicIndex tags={tags} unit="articles" />
         </BlogLayout>
       )}
     </HtmlClassNameProvider>

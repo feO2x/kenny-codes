@@ -1,9 +1,11 @@
 .eventDetails {
+  container-type: inline-size;
   margin: 1.75rem 0 2.25rem;
   padding: 1.5rem 1.75rem;
   border: 1px solid var(--kc-line);
   border-radius: var(--kc-radius);
   background: var(--kc-surface);
+  box-shadow: var(--kc-shadow);
 }
 
 .cancelledBanner {
@@ -43,8 +45,17 @@
   .eventDetails {
     padding: 1.25rem;
   }
+}
 
+/* Narrow cards (phones and the event page's side column) use two columns, with the event name
+   across both, so six short facts do not become a tall single column. */
+@container (max-width: 30rem) {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.25rem;
+  }
+
+  .item:first-child {
+    grid-column: 1 / -1;
   }
 }

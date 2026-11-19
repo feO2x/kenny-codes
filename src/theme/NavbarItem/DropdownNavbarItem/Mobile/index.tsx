@@ -1,6 +1,6 @@
-import React, {type ReactNode, useEffect, useId} from 'react';
+import React, {type ReactNode, useEffect, useId, useState} from 'react';
 import clsx from 'clsx';
-import {Collapsible, useCollapsible, isRegexpStringMatch} from '@docusaurus/theme-common';
+import {isRegexpStringMatch} from '@docusaurus/theme-common';
 import {useLocalPathname} from '@docusaurus/theme-common/internal';
 import NavbarItem from '@theme/NavbarItem';
 import type {Props} from '@theme/NavbarItem/DropdownNavbarItem/Mobile';
@@ -8,6 +8,9 @@ import type {Props} from '@theme/NavbarItem/DropdownNavbarItem/Mobile';
 /**
  * The drawer version of a dropdown as one native disclosure button (the stock component splits it
  * into a link and a separate caret button). It starts expanded on pages that belong to it.
+ *
+ * The list is always mounted and hidden with the `hidden` attribute, so what Tab can reach always
+ * matches `aria-expanded`; an animated collapse would leave links focusable while it runs.
  */
 export default function DropdownNavbarItemMobile({
   items,
@@ -20,41 +23,37 @@ export default function DropdownNavbarItemMobile({
   const containsActive = items.some((item) =>
     isRegexpStringMatch((item as {activeBaseRegex?: string}).activeBaseRegex, localPathname),
   );
-  const {collapsed, toggleCollapsed, setCollapsed} = useCollapsible({
-    initialState: () => !containsActive,
-  });
+  const [expanded, setExpanded] = useState(containsActive);
   const listId = useId();
 
   useEffect(() => {
-    if (containsActive) setCollapsed(false);
-  }, [containsActive, setCollapsed]);
+    if (containsActive) setExpanded(true);
+  }, [containsActive]);
 
   return (
-    <li className={clsx('menu__list-item', {'menu__list-item--collapsed': collapsed})}>
+    <li className={clsx('menu__list-item', {'menu__list-item--collapsed': !expanded})}>
       <button
         type="button"
         className={clsx('clean-btn', 'menu__link', 'menu__link--sublist', 'menu__link--sublist-caret', 'kc-menu-disclosure', className, {
           'menu__link--active': containsActive,
         })}
-        aria-expanded={!collapsed}
+        aria-expanded={expanded}
         aria-controls={listId}
-        onClick={toggleCollapsed}>
+        onClick={() => setExpanded((value) => !value)}>
         {children ?? label}
       </button>
-      <div id={listId}>
-        <Collapsible lazy as="ul" className="menu__list" collapsed={collapsed}>
-          {items.map((childItemProps, i) => (
-            <NavbarItem
-              mobile
-              isDropdownItem
-              onClick={onClick}
-              activeClassName="menu__link--active"
-              {...childItemProps}
-              key={i}
-            />
-          ))}
-        </Collapsible>
-      </div>
+      <ul id={listId} className="menu__list" hidden={!expanded}>
+        {items.map((childItemProps, i) => (
+          <NavbarItem
+            mobile
+            isDropdownItem
+            onClick={onClick}
+            activeClassName="menu__link--active"
+            {...childItemProps}
+            key={i}
+          />
+        ))}
+      </ul>
     </li>
   );
 }
