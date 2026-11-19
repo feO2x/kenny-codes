@@ -1,79 +1,152 @@
+import React, {type CSSProperties, type ReactNode} from 'react';
+import clsx from 'clsx';
+import {DiagramFrame, TileGradients, brandEdge, diagram as d, markStyle, tileUrl, useDiagramId, type Tile} from '../Diagram';
+
+type Phase = 'planning' | 'implementing' | 'guiding';
+
 interface GuidedCodingDiagramProps {
-  highlight?: 'planning' | 'implementing' | 'guiding';
+  highlight?: Phase;
 }
 
-const descriptions: Record<string, string> = {
-  planning: 'Guided Coding workflow diagram highlighting the Planning Phase. The three phases are Planning, Implementing, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementing for small issues.',
-  implementing: 'Guided Coding workflow diagram highlighting the Implementing Phase. The three phases are Planning, Implementing, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementing for small issues.',
-  guiding: 'Guided Coding workflow diagram highlighting the Guiding Phase. The three phases are Planning, Implementing, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementing for small issues.',
-  default: 'Guided Coding workflow diagram showing three phases: Planning, Implementing, and Guiding. Arrows indicate the flow between phases, with loops back to Planning for large issues and back to Implementing for small issues, ending with a PR.',
+const loops =
+  'Arrows lead back from the Guiding Phase: a large issue returns to the Planning Phase, a small issue to the Implementing Phase. The Planning Phase also loops on itself until the plan stabilizes.';
+
+const descriptions: Record<Phase | 'default', string> = {
+  planning: `Guided Coding workflow diagram highlighting the Planning Phase. The three phases are Planning, Implementing, and Guiding, followed by the pull request. ${loops}`,
+  implementing: `Guided Coding workflow diagram highlighting the Implementing Phase. The three phases are Planning, Implementing, and Guiding, followed by the pull request. ${loops}`,
+  guiding: `Guided Coding workflow diagram highlighting the Guiding Phase. The three phases are Planning, Implementing, and Guiding, followed by the pull request. ${loops}`,
+  default: `Guided Coding workflow diagram showing three phases, Planning, Implementing, and Guiding, ending with a pull request. ${loops}`,
 };
 
-export default function GuidedCodingDiagram({ highlight }: GuidedCodingDiagramProps) {
-  const dim = 0.3;
-  const o = (phase: 'planning' | 'implementing' | 'guiding') =>
-    highlight && highlight !== phase ? dim : 1;
-  const titleId = `guided-coding-diagram-title${highlight ? `-${highlight}` : ''}`;
+/** The same colours as the phases in the skill timelines. */
+const phases: {id: Phase; number: number; name: string; x: number; tile: Tile}[] = [
+  {id: 'planning', number: 1, name: 'Planning Phase', x: 20, tile: 'blue'},
+  {id: 'implementing', number: 2, name: 'Implementing Phase', x: 286, tile: 'amber'},
+  {id: 'guiding', number: 3, name: 'Guiding Phase', x: 552, tile: 'violet'},
+];
+
+const BOX_Y = 132;
+const BOX_W = 232;
+const BOX_H = 64;
+const MID_Y = BOX_Y + BOX_H / 2;
+
+/** A downward arrowhead whose tip touches (x, y), sized for the heavy iteration arrows. */
+function HeadDown({x, y}: {x: number; y: number}): ReactNode {
+  return <path className={d.head} d={`M ${x} ${y} l -11 -18 h 22 z`} />;
+}
+
+/** A right-pointing arrowhead whose tip touches (x, y). */
+function HeadRight({x, y}: {x: number; y: number}): ReactNode {
+  return <path className={d.head} d={`M ${x} ${y} l -10 -6 v 12 z`} />;
+}
+
+/**
+ * On a page about one phase, that phase and its arrows keep their colour; the other phases turn
+ * into neutral outlined boxes that stay fully readable.
+ */
+export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProps): ReactNode {
+  const id = useDiagramId();
+  const titleId = `${id}-title`;
+  const active = (phase: Phase) => !highlight || highlight === phase;
+  /** A back arrow keeps its colour unless the page is about a phase it does not touch. */
+  // Iteration is the heart of Guided Coding, so its arrows are the heaviest strokes.
+  const loop = (tile: Tile, ...touches: Phase[]): CSSProperties => ({
+    ...(!highlight || touches.includes(highlight) ? markStyle(tile) : {}),
+    '--line-width': 6.5,
+  }) as CSSProperties;
+  /** Bold in forced colors, where the arrow's colour is gone. */
+  const emphasis = (...touches: Phase[]) => (highlight && touches.includes(highlight) ? d.markActive : undefined);
 
   return (
-    <svg viewBox="0 0 870 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby={titleId} style={{maxWidth: '870px', width: '100%', margin: '1.5rem auto', display: 'block'}}>
-      <title id={titleId}>{descriptions[highlight ?? 'default']}</title>
-      {/* Background */}
-      <rect x="0" y="0" width="870" height="200" rx="8" fill="#D6D6D6" className="kc-diagram-plate" />
+    <DiagramFrame minWidth={540} label="Guided Coding workflow diagram">
+      <svg
+        viewBox="0 0 930 212"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby={titleId}
+        className={d.svg}
+        style={{maxWidth: 930}}>
+        <title id={titleId}>{descriptions[highlight ?? 'default']}</title>
+        <defs>
+          <TileGradients prefix={id} />
+        </defs>
 
-      {/* Arrow marker definitions */}
-      <defs>
-        <marker id="arrowGray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-          <polygon points="0 0, 10 3.5, 0 7" fill="#888" />
-        </marker>
-      </defs>
+        {/* Guiding → Planning: a large issue, in the Planning Phase's colour. The two return
+            arrows keep well apart, each label close to its own line. */}
+        <g style={loop('blue', 'guiding', 'planning')}>
+          <path className={d.line} d={`M 716 ${BOX_Y} V 48 Q 716 34 702 34 H 134 Q 120 34 120 48 V ${BOX_Y - 17}`} />
+          <HeadDown x={120} y={BOX_Y - 1} />
+          <text x={418} y={22} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'planning'))}>
+            large issue
+          </text>
+        </g>
 
-      {/* Blue arrow: Guiding → Planning (large issue) */}
-      <g opacity={Math.max(o('guiding'), o('planning'))}>
-        <path d="M 660 135 V 50 Q 660 25, 635 25 H 155 Q 130 25, 130 50 V 100" fill="none" stroke="#0078D4" strokeWidth="11" />
-        <polygon points="130,130 108,96 152,96" fill="#0078D4" />
-      </g>
+        {/* Guiding → Implementing: a small issue, in the Implementing Phase's colour */}
+        <g style={loop('amber', 'guiding', 'implementing')}>
+          <path className={d.line} d={`M 620 ${BOX_Y} V 108 Q 620 96 608 96 H 414 Q 402 96 402 108 V ${BOX_Y - 17}`} />
+          <HeadDown x={402} y={BOX_Y - 1} />
+          <text x={511} y={84} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'implementing'))}>
+            small issue
+          </text>
+        </g>
 
-      {/* Yellow arrow: Guiding → Implementation (small issue) */}
-      <g opacity={Math.max(o('guiding'), o('implementing'))}>
-        <path d="M 595 135 V 100 Q 595 80, 575 80 H 395 Q 375 80, 375 100 V 108" fill="none" stroke="#E88A00" strokeWidth="10" />
-        <polygon points="375,130 355,100 395,100" fill="#E88A00" />
-      </g>
+        {/* The Planning Phase loops on itself until the plan stabilizes. */}
+        <g style={loop('blue', 'planning')}>
+          <path className={d.line} d={`M 224 ${BOX_Y} V 110 Q 224 100 214 100 H 198 Q 188 100 188 110 V ${BOX_Y - 17}`} />
+          <HeadDown x={188} y={BOX_Y - 1} />
+        </g>
 
-      {/* Self-loop on Planning Phase (right side) */}
-      <g opacity={o('planning')}>
-        <path d="M 205 135 V 115 Q 205 105, 195 105 H 175 Q 165 105, 165 115 V 122" fill="none" stroke="#0078D4" strokeWidth="7" />
-        <polygon points="165,132 155,114 175,114" fill="#0078D4" />
-      </g>
+        {/* Forward arrows */}
+        {[phases[0].x + BOX_W, phases[1].x + BOX_W, phases[2].x + BOX_W].map((x) => (
+          <g key={x}>
+            <path className={d.line} d={`M ${x + 6} ${MID_Y} H ${x + 28}`} />
+            <HeadRight x={x + 36} y={MID_Y} />
+          </g>
+        ))}
 
-      {/* Phase boxes */}
-      <g opacity={o('planning')}>
-        <rect x="30" y="135" width="200" height="50" fill="#0078D4" rx="4" />
-        <text x="130" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">1. Planning Phase</text>
-      </g>
+        {phases.map(({id: phase, number, name, x, tile}) => {
+          const on = active(phase);
+          return (
+            <g key={phase}>
+              <rect
+                x={x}
+                y={BOX_Y}
+                width={BOX_W}
+                height={BOX_H}
+                rx="10"
+                {...(on ? {className: d.gradient, fill: tileUrl(id, tile), style: markStyle(tile)} : {className: d.box})}
+              />
+              <rect x={x + 14} y={BOX_Y + 16} width="32" height="32" rx="9" className={on ? d.badgeOnGradient : d.badge} />
+              <text x={x + 30} y={BOX_Y + 38.5} textAnchor="middle" fontSize="18" className={clsx(d.strong, on && d.onGradient)}>
+                {number}
+              </text>
+              {/* "Implementing Phase" on two lines, so the type can stay large. */}
+              <text x={x + 60} y={BOX_Y + 28} fontSize="20" className={clsx(d.strong, on && d.onGradient)}>
+                <tspan x={x + 60}>{name.split(' ')[0]}</tspan>
+                <tspan x={x + 60} dy="22">
+                  {name.split(' ')[1]}
+                </tspan>
+              </text>
+            </g>
+          );
+        })}
 
-      <g opacity={o('implementing')}>
-        <rect x="275" y="135" width="200" height="50" fill="#E88A00" rx="4" />
-        <text x="375" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">2. Implementing Phase</text>
-      </g>
-
-      <g opacity={o('guiding')}>
-        <rect x="520" y="135" width="200" height="50" fill="#6B2FA0" rx="4" />
-        <text x="620" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">3. Guiding Phase</text>
-      </g>
-
-      {/* Done / PR box */}
-      <g opacity={highlight ? dim : 1}>
-        <rect x="765" y="140" width="80" height="40" fill="#107C10" rx="20" />
-        <text x="805" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="14" fontWeight="600">✓ PR</text>
-      </g>
-
-      {/* Forward arrows between phases */}
-      <g opacity={highlight ? dim : 1}>
-        <line x1="230" y1="160" x2="270" y2="160" stroke="#888" strokeWidth="2.5" markerEnd="url(#arrowGray)" />
-        <line x1="475" y1="160" x2="515" y2="160" stroke="#888" strokeWidth="2.5" markerEnd="url(#arrowGray)" />
-        <line x1="720" y1="160" x2="760" y2="160" stroke="#888" strokeWidth="2.5" markerEnd="url(#arrowGray)" />
-      </g>
-    </svg>
+        {/* The pull request */}
+        <g>
+          <rect
+            x="818"
+            y={MID_Y - 21}
+            width="92"
+            height="42"
+            rx="21"
+            {...(highlight ? {className: d.box} : {className: d.gradient, fill: tileUrl(id, 'brand'), style: brandEdge(id)})}
+          />
+          <path className={highlight ? d.line : d.check} d={`M 840 ${MID_Y} l 5 5 l 9 -10`} />
+          <text x="862" y={MID_Y + 7} fontSize="20" className={clsx(d.strong, !highlight && d.onGradient)}>
+            PR
+          </text>
+        </g>
+      </svg>
+    </DiagramFrame>
   );
 }

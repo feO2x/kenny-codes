@@ -6,7 +6,7 @@ import {useToday} from '@site/src/utils/dateFormatting';
 import EventRow from '../EventRow';
 import styles from './styles.module.css';
 
-export interface ListingItem {
+interface ListingItem {
   content: {
     metadata: {
       title: string;
@@ -89,7 +89,7 @@ export default function EventsListing<T extends ListingItem>({
             <div key={year} id={`year-${year}`} className={styles.year}>
               <h3 className={styles.yearLabel}>
                 {year}
-                <span className={styles.srOnly}>, </span>
+                <span className="kc-sr-only">, </span>
                 <span className={styles.yearCount}>{sessionsLabel(pastEventsByYear[year].length)}</span>
               </h3>
               <div className={styles.rows}>{pastEventsByYear[year].map((item) => renderRow(item, false))}</div>

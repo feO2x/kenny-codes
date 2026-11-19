@@ -1,0 +1,201 @@
+.diagram {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8.5rem minmax(0, 1fr);
+  grid-template-areas:
+    "left-title tension right-title"
+    "left-list . right-list";
+  column-gap: 0;
+  margin: 0;
+}
+
+.leftTitle { grid-area: left-title; }
+.leftList { grid-area: left-list; }
+.rightTitle { grid-area: right-title; }
+.rightList { grid-area: right-list; }
+.tension { grid-area: tension; }
+
+/* The extremes as outlined boxes, like the CHACK categories. */
+.title {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  margin: 0 0 1.5rem;
+  padding: 0.7rem 1rem;
+  border: 1.5px solid var(--kc-control-line);
+  border-radius: var(--kc-radius);
+  background: var(--kc-bg);
+  font-weight: 700;
+  font-stretch: 110%;
+  text-align: center;
+}
+
+.bullets {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bullets li {
+  position: relative;
+  text-wrap: pretty;
+  margin: 0 0 0.6rem;
+  padding-left: 1.3rem;
+  font-size: 0.925rem;
+  line-height: 1.5;
+}
+
+/* The home page's gradient square as the bullet. */
+.bullets li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--kc-gradient);
+}
+
+/* A double-headed arrow between the two titles, pulled taut through a lightning-bolt tile. */
+.tension {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  height: 3.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  left: 0.4rem;
+  right: 0.4rem;
+  height: 2px;
+  translate: 0 -50%;
+  background: var(--kc-mark-amber);
+}
+
+.arrow::before,
+.arrow::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  translate: 0 -50%;
+  background: var(--kc-mark-amber);
+}
+
+.arrow::before {
+  left: -2px;
+  clip-path: polygon(0 50%, 100% 0, 100% 100%);
+}
+
+.arrow::after {
+  right: -2px;
+  clip-path: polygon(100% 50%, 0 0, 0 100%);
+}
+
+.symbol {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  background: var(--kc-tile-amber);
+  box-shadow: 0 0 0 4px var(--kc-surface);
+}
+
+:global([data-theme='light']) .symbol {
+  border: 1.5px solid var(--kc-mark-amber);
+}
+
+.symbol svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  fill: var(--kc-on-gradient);
+}
+
+.tensionLabel {
+  position: absolute;
+  top: calc(50% + 1.65rem);
+  left: 50%;
+  translate: -50% 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--kc-mark-amber);
+}
+
+/* Stacked when the card is narrow: the arrow turns vertical between the two extremes. */
+@container (max-width: 36rem) {
+  .diagram {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "left-title"
+      "left-list"
+      "tension"
+      "right-title"
+      "right-list";
+  }
+
+  .tension {
+    height: 5.5rem;
+    margin: 0.25rem 0 1.25rem;
+  }
+
+  .arrow {
+    top: 0.25rem;
+    bottom: 0.25rem;
+    left: 50%;
+    right: auto;
+    width: 2px;
+    height: auto;
+    translate: -50% 0;
+  }
+
+  .arrow::before,
+  .arrow::after {
+    top: auto;
+    left: 50%;
+    translate: -50% 0;
+  }
+
+  .arrow::before {
+    top: -2px;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+
+  .arrow::after {
+    bottom: -2px;
+    clip-path: polygon(50% 100%, 0 0, 100% 0);
+  }
+
+  .tensionLabel {
+    top: 50%;
+    left: calc(50% + 1.75rem);
+    translate: 0 -50%;
+  }
+}
+
+@media (forced-colors: active) {
+  .arrow,
+  .arrow::before,
+  .arrow::after,
+  .bullets li::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .symbol {
+    border: 2px solid CanvasText;
+    background: Canvas;
+  }
+
+  .symbol svg {
+    fill: CanvasText;
+  }
+}

@@ -24,7 +24,7 @@ function Level({name, level, text}: {name: string; level: number; text: string})
           <span key={square} className={square < level ? styles.meterOn : undefined} />
         ))}
       </span>
-      <span className={styles.levelText}>
+      <span>
         <strong>{name}:</strong> {text}
       </span>
     </li>
@@ -54,7 +54,7 @@ function ChackMap(): ReactNode {
       className={styles.chackMap}
       role="img"
       aria-label="CHACK in miniature: the Humble Objects sit on the process boundary and implement the Core's I/O abstractions. Unit tests and the Composition Root reference the Core, which performs no I/O itself.">
-      <span className={clsx(styles.chackBox, styles.chackHumble)}>Humble Objects</span>
+      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackHumble)}>Humble Objects</span>
       <span className={styles.chackDown}>
         <Arrow implementsAbstraction />
       </span>
@@ -68,8 +68,8 @@ function ChackMap(): ReactNode {
       <span className={styles.chackUp}>
         <Arrow up />
       </span>
-      <span className={styles.chackBox}>Automated Tests</span>
-      <span className={styles.chackBox}>Composition Root</span>
+      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackTests)}>Automated Tests</span>
+      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackRoot)}>Composition Root</span>
       <span className={styles.chackBoundary} aria-hidden="true">
         process boundary
       </span>

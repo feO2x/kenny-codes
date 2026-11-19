@@ -1,3 +1,7 @@
+import React, {type CSSProperties, type ReactNode} from 'react';
+import clsx from 'clsx';
+import {DiagramFrame, TileGradients, brandEdge, diagram as d, markStyle, tileUrl, useDiagramId, type Tile} from '../Diagram';
+
 type ChackPart = 'core' | 'humble-objects' | 'automated-tests' | 'composition-root';
 
 interface ChackDiagramProps {
@@ -29,284 +33,249 @@ const descriptions: Record<string, string> = {
   default: baseDescription,
 };
 
-const FONT = 'Segoe UI, sans-serif';
-const CORE_COLOR = '#0078D4';
-const ABSTRACTIONS_COLOR = '#3FA0E8';
-const HUMBLE_COLOR = '#107C10';
-const UNIT_TEST_COLOR = '#6B2FA0';
-const TEST_DOUBLE_COLOR = '#9B51C9';
-const BROAD_TEST_COLOR = '#4A2378';
-const COMPOSITION_ROOT_COLOR = '#00796B';
-const BOUNDARY_COLOR = '#C2185B';
-const ARROW_COLOR = '#2F2F2F';
-const BACKGROUND_COLOR = '#D6D6D6';
+/** Each category's colour; the Core shares the brand gradient with the logo. */
+const partTile: Record<ChackPart, Tile> = {
+  core: 'brand',
+  'humble-objects': 'violet',
+  'automated-tests': 'magenta',
+  'composition-root': 'amber',
+};
 
-const STROKE = 2.5;
-const DASH = '7 5';
+/** A label centred on (x, y), one tspan per line. */
+function Label({x, y, lines, size = 18, className}: {x: number; y: number; lines: string[]; size?: number; className?: string}): ReactNode {
+  const lineHeight = size * 1.2;
+  const top = y - ((lines.length - 1) * lineHeight) / 2 + size * 0.36;
+  return (
+    <text x={x} y={top} textAnchor="middle" fontSize={size} className={clsx(d.strong, className)}>
+      {lines.map((line, index) => (
+        <tspan key={line} x={x} dy={index === 0 ? 0 : lineHeight}>
+          {line}
+        </tspan>
+      ))}
+    </text>
+  );
+}
 
-export default function ChackDiagram({ highlight }: ChackDiagramProps) {
-  const dim = 0.25;
-  const o = (part: ChackPart) => (highlight && highlight !== part ? dim : 1);
-  const oContext = highlight ? dim : 1;
-  const titleId = `chack-diagram-title${highlight ? `-${highlight}` : ''}`;
+/** Arrowheads for one colour; markers do not inherit the colour of the line that uses them. */
+function Markers({prefix, tone}: {prefix: string; tone: Tile | 'muted'}): ReactNode {
+  const style = tone === 'muted' ? undefined : markStyle(tone);
+  const id = (name: string) => `${prefix}-${tone}-${name}`;
+  return (
+    <>
+      {/* Open arrowhead: "references" */}
+      <marker id={id('ref')} markerWidth="9" markerHeight="7" refX="8.5" refY="3.5" orient="auto" style={style}>
+        <path d="M 0.6 0.6 L 8.4 3.5 L 0.6 6.4" className={d.line} style={{strokeWidth: 0.9}} />
+      </marker>
+      {/* Hollow triangle: "implements / derives from" */}
+      <marker id={id('impl')} markerWidth="9" markerHeight="8" refX="8.6" refY="4" orient="auto" style={style}>
+        <polygon points="0.5 0.6, 8.5 4, 0.5 7.4" className={d.headHollow} style={{strokeWidth: 0.9}} />
+      </marker>
+      {/* Solid heads: runtime I/O */}
+      <marker id={id('io')} markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto" style={style}>
+        <polygon points="0 0, 8 3, 0 6" className={d.head} />
+      </marker>
+      <marker id={id('io-start')} markerWidth="8" markerHeight="6" refX="0.5" refY="3" orient="auto" style={style}>
+        <polygon points="8 0, 0 3, 8 6" className={d.head} />
+      </marker>
+    </>
+  );
+}
+
+/**
+ * On a page about one category, that category and its connectors keep their colour; the rest
+ * turns into neutral outlined boxes, still fully readable, instead of fading out.
+ */
+export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode {
+  // Ids must be unique per diagram, because a page may show several.
+  const prefix = useDiagramId();
+  const titleId = `${prefix}-title`;
+  const active = (part: ChackPart) => !highlight || highlight === part;
+  /** Tile fill for an active category, a neutral box otherwise. */
+  const box = (part: ChackPart) =>
+    active(part)
+      ? {
+          className: d.gradient,
+          fill: tileUrl(prefix, partTile[part]),
+          style: part === 'core' ? brandEdge(prefix) : markStyle(partTile[part]),
+        }
+      : {className: d.box};
+  const onBox = (part: ChackPart) => (active(part) ? d.onGradient : undefined);
+  /** Connectors between `parts` take the highlighted category's colour. */
+  const tone = (...parts: ChackPart[]): Tile | 'muted' =>
+    highlight && parts.includes(highlight) ? partTile[highlight] : 'muted';
+  const connector = (...parts: ChackPart[]) => {
+    const t = tone(...parts);
+    const marker = (name: string) => `url(#${prefix}-${t}-${name})`;
+    return {
+      style: t === 'muted' ? undefined : {...markStyle(t), '--line-width': 3},
+      ref: marker('ref'),
+      impl: marker('impl'),
+      io: marker('io'),
+      ioStart: marker('io-start'),
+    };
+  };
+  const tones: (Tile | 'muted')[] = ['muted', ...(highlight ? [partTile[highlight]] : [])];
+  const legend = connector();
+
+  const hoIo = connector('humble-objects');
+  const hoImpl = connector('humble-objects', 'core');
+  const tdImpl = connector('automated-tests', 'core');
+  const coreRef = connector('core');
+  const unitRef = connector('automated-tests', 'core');
+  const doubleRef = connector('automated-tests');
+  const broadToHumble = connector('automated-tests', 'humble-objects');
+  const broadToThirdParty = connector('automated-tests');
+  const broadToRoot = connector('automated-tests', 'composition-root');
+  const rootToCore = connector('composition-root', 'core');
+  const rootToHumble = connector('composition-root', 'humble-objects');
 
   return (
-    <svg
-      viewBox="0 0 1120 660"
-      xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-labelledby={titleId}
-      style={{ maxWidth: '1120px', width: '100%', margin: '1.5rem auto', display: 'block' }}
-    >
-      <title id={titleId}>{descriptions[highlight ?? 'default']}</title>
+    <DiagramFrame
+      minWidth={680}
+      label="CHACK diagram"
+      caption="All four categories may depend on the frameworks and libraries. Those arrows are left out to keep the number of arrows manageable.">
+      <svg
+        viewBox="0 0 1086 580"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby={titleId}
+        className={d.svg}
+        style={{maxWidth: 1086, '--line-width': 2.25} as CSSProperties}>
+        <title id={titleId}>{descriptions[highlight ?? 'default']}</title>
 
-      <rect x="0" y="0" width="1120" height="660" rx="8" fill={BACKGROUND_COLOR} />
+        <defs>
+          <TileGradients prefix={prefix} />
+          {tones.map((t) => (
+            <Markers key={t} prefix={prefix} tone={t} />
+          ))}
+        </defs>
 
-      <defs>
-        {/* Open arrowhead: "references" */}
-        <marker id="chackRef" markerWidth="9" markerHeight="7" refX="8.5" refY="3.5" orient="auto">
-          <path d="M 0.6 0.6 L 8.4 3.5 L 0.6 6.4" fill="none" stroke={ARROW_COLOR} strokeWidth="0.9" />
-        </marker>
-        {/* Hollow triangle: "implements / derives from" */}
-        <marker id="chackImpl" markerWidth="9" markerHeight="8" refX="8.6" refY="4" orient="auto">
-          <polygon points="0.5 0.6, 8.5 4, 0.5 7.4" fill={BACKGROUND_COLOR} stroke={ARROW_COLOR} strokeWidth="0.9" />
-        </marker>
-        {/* Solid heads: runtime I/O */}
-        <marker id="chackIo" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
-          <polygon points="0 0, 8 3, 0 6" fill={ARROW_COLOR} />
-        </marker>
-        <marker id="chackIoStart" markerWidth="8" markerHeight="6" refX="0.5" refY="3" orient="auto">
-          <polygon points="8 0, 0 3, 8 6" fill={ARROW_COLOR} />
-        </marker>
-      </defs>
-
-      {/* Process boundary - integration tests sit over its right edge; unit tests stay
-          inside, while E2E tests drive the system under test from another process. */}
-      <g opacity={oContext}>
-        <rect x="250" y="58" width="686" height="512" fill="none" stroke={BOUNDARY_COLOR} strokeWidth="3" />
-        <rect x="250" y="58" width="686" height="26" fill={BOUNDARY_COLOR} />
-        <text x="593" y="76" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="14" fontWeight="600">
-          Process Boundary
+        {/* Process boundary - integration tests sit over its right edge; unit tests stay
+            inside, while E2E tests drive the system under test from another process. */}
+        <rect x="250" y="58" width="686" height="512" rx="14" className={d.boundary} />
+        <rect x="503" y="44" width="180" height="28" rx="14" className={d.chip} />
+        <text x="593" y="64.5" textAnchor="middle" fontSize="18" className={clsx(d.muted, d.semibold)}>
+          Process boundary
         </text>
-      </g>
 
-      {/* Frameworks and libraries */}
-      <g opacity={oContext}>
-        <rect x="333" y="108" width="520" height="76" rx="4" fill="#6E6E6E" />
-        <text x="593" y="132" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="14.5" fontWeight="600">
+        {/* Frameworks and libraries */}
+        <rect x="268" y="94" width="650" height="94" rx="10" className={d.quiet} />
+        <text x="593" y="123" textAnchor="middle" fontSize="19" className={d.strong}>
           Frameworks &amp; Libraries
         </text>
-        <text x="593" y="151" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="11.5">
+        <text x="593" y="150" textAnchor="middle" fontSize="18" className={d.muted}>
           Base Class Library, HTTP Server Frameworks, Data Access,
         </text>
-        <text x="593" y="167" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="11.5">
+        <text x="593" y="173" textAnchor="middle" fontSize="18" className={d.muted}>
           Validation Frameworks, Test Frameworks, …
         </text>
-      </g>
 
-      {/* Third-party systems */}
-      <g opacity={oContext}>
-        <rect x="6" y="205" width="124" height="230" rx="4" fill="#FAFAFA" stroke="#3A3A3A" strokeWidth="1.5" />
-        <text x="68" y="233" textAnchor="middle" fill="#2A2A2A" fontFamily={FONT} fontSize="12" fontWeight="600">
-          Third-Party Systems
-        </text>
-        <rect x="16" y="253" width="104" height="46" rx="4" fill="#FFFFFF" stroke="#8A8A8A" strokeWidth="1.5" />
-        <text x="68" y="281" textAnchor="middle" fill="#2A2A2A" fontFamily={FONT} fontSize="11.5">
-          Databases
-        </text>
-        <rect x="16" y="309" width="104" height="46" rx="4" fill="#FFFFFF" stroke="#8A8A8A" strokeWidth="1.5" />
-        <text x="68" y="337" textAnchor="middle" fill="#2A2A2A" fontFamily={FONT} fontSize="11.5">
-          Web Services
-        </text>
-        <rect x="16" y="365" width="104" height="46" rx="4" fill="#FFFFFF" stroke="#8A8A8A" strokeWidth="1.5" />
-        <text x="68" y="393" textAnchor="middle" fill="#2A2A2A" fontFamily={FONT} fontSize="11.5">
-          Message Brokers
-        </text>
-      </g>
+        {/* Third-party systems */}
+        <rect x="4" y="198" width="128" height="244" rx="10" className={d.box} />
+        <Label x={68} y={228} lines={['Third-Party', 'Systems']} />
+        {['Databases', 'Web Services', 'Message Brokers'].map((name, index) => (
+          <g key={name}>
+            <rect x="12" y={260 + index * 58} width="112" height="50" rx="8" className={d.inner} />
+            <Label x={68} y={285 + index * 58} lines={name === 'Databases' ? [name] : name.split(' ')} className={d.regular} />
+          </g>
+        ))}
 
-      {/* Runtime I/O between third-party systems and humble objects */}
-      <g opacity={Math.max(o('humble-objects'), oContext)}>
-        <line
-          x1="134"
-          y1="328"
-          x2="181"
-          y2="328"
-          stroke={ARROW_COLOR}
-          strokeWidth={STROKE}
-          markerEnd="url(#chackIo)"
-          markerStart="url(#chackIoStart)"
+        {/* Runtime I/O between third-party systems and humble objects */}
+        <line x1="134" y1="328" x2="181" y2="328" className={d.line} style={hoIo.style} markerEnd={hoIo.io} markerStart={hoIo.ioStart} />
+
+        {/* Implements / derives from */}
+        <line x1="315" y1="328" x2="356" y2="328" className={clsx(d.line, d.dashed)} style={hoImpl.style} markerEnd={hoImpl.impl} />
+        <path d="M 808 420 H 429 V 358" className={clsx(d.line, d.dashed)} style={tdImpl.style} markerEnd={tdImpl.impl} />
+
+        {/* References */}
+        <line x1="540" y1="328" x2="502" y2="328" className={d.line} style={coreRef.style} markerEnd={coreRef.ref} />
+        <line x1="808" y1="311" x2="732" y2="311" className={d.line} style={unitRef.style} markerEnd={unitRef.ref} />
+        <line x1="852" y1="350" x2="852" y2="380" className={d.line} style={doubleRef.style} markerEnd={doubleRef.ref} />
+        {/* Integration and E2E tests share references to the same collaborators. */}
+        {/* Dots mark where two connectors join; a gap marks where one only crosses another. */}
+        <g style={broadToHumble.style}>
+          <path d="M 924 272 V 200" className={d.line} />
+          <path d="M 1000 272 V 200 H 280 V 288" className={d.line} markerEnd={broadToHumble.ref} />
+          <circle cx="924" cy="200" r="4.5" className={d.head} />
+        </g>
+        <g style={broadToThirdParty.style}>
+          <path d="M 948 272 V 209 M 948 191 V 30" className={d.line} />
+          <path d="M 1032 272 V 30 H 68 V 196" className={d.line} markerEnd={broadToThirdParty.ref} />
+          <circle cx="948" cy="30" r="4.5" className={d.head} />
+        </g>
+        <g style={broadToRoot.style}>
+          <path d="M 924 458 V 519" className={d.line} />
+          <path d="M 1016 458 V 519 H 732" className={d.line} markerEnd={broadToRoot.ref} />
+          <circle cx="924" cy="519" r="4.5" className={d.head} />
+        </g>
+        <line x1="645" y1="488" x2="645" y2="390" className={d.line} style={rootToCore.style} markerEnd={rootToCore.ref} />
+        <path d="M 540 519 H 280 V 368" className={d.line} style={rootToHumble.style} markerEnd={rootToHumble.ref} />
+
+        {/* Humble objects, on the process boundary */}
+        <rect x="185" y="290" width="130" height="76" rx="10" {...box('humble-objects')} />
+        <Label x={250} y={328} lines={['Humble', 'Objects']} className={onBox('humble-objects')} />
+
+        {/* I/O abstractions belong to the Core: a tint with the Core's gradient outline. */}
+        <rect
+          x="358"
+          y="300"
+          width="142"
+          height="56"
+          rx="10"
+          {...(active('core') ? {className: d.soft, stroke: tileUrl(prefix, 'brandLine')} : {className: d.box})}
         />
-      </g>
+        <Label x={429} y={328} lines={['I/O', 'Abstractions']} />
 
-      {/* Implements / derives from */}
-      <g opacity={Math.max(o('humble-objects'), o('core'))}>
-        <line
-          x1="315"
-          y1="328"
-          x2="363"
-          y2="328"
-          stroke={ARROW_COLOR}
-          strokeWidth={STROKE}
-          strokeDasharray={DASH}
-          markerEnd="url(#chackImpl)"
-        />
-      </g>
-      <g opacity={Math.max(o('automated-tests'), o('core'))}>
-        <path
-          d="M 808 420 H 428 V 358"
-          fill="none"
-          stroke={ARROW_COLOR}
-          strokeWidth={STROKE}
-          strokeDasharray={DASH}
-          markerEnd="url(#chackImpl)"
-        />
-      </g>
+        {/* Core */}
+        <rect x="540" y="268" width="190" height="120" rx="12" {...box('core')} />
+        <Label x={635} y={328} lines={['Core']} size={26} className={onBox('core')} />
 
-      {/* References */}
-      <g opacity={o('core')}>
-        <line x1="540" y1="328" x2="492" y2="328" stroke={ARROW_COLOR} strokeWidth={STROKE} markerEnd="url(#chackRef)" />
-      </g>
-      <g opacity={Math.max(o('automated-tests'), o('core'))}>
-        <line x1="808" y1="311" x2="732" y2="311" stroke={ARROW_COLOR} strokeWidth={STROKE} markerEnd="url(#chackRef)" />
-      </g>
-      <g opacity={o('automated-tests')}>
-        <line x1="852" y1="350" x2="852" y2="380" stroke={ARROW_COLOR} strokeWidth={STROKE} markerEnd="url(#chackRef)" />
-      </g>
-      {/* Integration and E2E tests share references to the same collaborators. */}
-      <g opacity={Math.max(o('automated-tests'), o('humble-objects'))}>
-        <path d="M 924 272 V 200" fill="none" stroke={ARROW_COLOR} strokeWidth={STROKE} />
-        <path d="M 1000 272 V 200 H 280 V 288" fill="none" stroke={ARROW_COLOR} strokeWidth={STROKE} markerEnd="url(#chackRef)" />
-      </g>
-      <g opacity={Math.max(o('automated-tests'), oContext)}>
-        <path d="M 948 272 V 38" fill="none" stroke={ARROW_COLOR} strokeWidth={STROKE} />
-        <path d="M 1032 272 V 38 H 68 V 203" fill="none" stroke={ARROW_COLOR} strokeWidth={STROKE} markerEnd="url(#chackRef)" />
-      </g>
-      <g opacity={Math.max(o('automated-tests'), o('composition-root'))}>
-        <path d="M 924 458 V 519" fill="none" stroke={ARROW_COLOR} strokeWidth={STROKE} />
-        <path d="M 1016 458 V 519 H 732" fill="none" stroke={ARROW_COLOR} strokeWidth={STROKE} markerEnd="url(#chackRef)" />
-      </g>
-      <g opacity={Math.max(o('composition-root'), o('core'))}>
-        <line x1="645" y1="488" x2="645" y2="390" stroke={ARROW_COLOR} strokeWidth={STROKE} markerEnd="url(#chackRef)" />
-      </g>
-      <g opacity={Math.max(o('composition-root'), o('humble-objects'))}>
-        <path d="M 540 519 H 280 V 368" fill="none" stroke={ARROW_COLOR} strokeWidth={STROKE} markerEnd="url(#chackRef)" />
-      </g>
+        {/* Automated tests - the group straddles the process boundary */}
+        <g style={active('automated-tests') ? markStyle('magenta') : undefined}>
+          <rect x="790" y="254" width="290" height="226" rx="14" className={d.group} />
+          {/* Above the group, left of the integration test connectors at x=924. */}
+          <text x="792" y="226" fontSize="18" className={clsx(active('automated-tests') && d.markText, highlight === 'automated-tests' && d.markActive, d.strong)}>
+            <tspan x="792">Automated</tspan>
+            <tspan x="792" dy="21">
+              Tests
+            </tspan>
+          </text>
+          <rect x="808" y="272" width="88" height="78" rx="10" {...box('automated-tests')} />
+          <Label x={852} y={311} lines={['Unit', 'Tests']} className={onBox('automated-tests')} />
+          {/* Test doubles implement the Core's abstractions: a lighter tint of the tests' colour. */}
+          <rect x="808" y="382" width="88" height="76" rx="10" className={active('automated-tests') ? d.tint : d.box} />
+          <Label x={852} y={420} lines={['Test', 'Doubles']} />
+          <rect x="912" y="272" width="48" height="186" rx="10" {...box('automated-tests')} />
+          <text transform="translate(936 365) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="18" className={clsx(d.strong, onBox('automated-tests'))}>
+            Integration Tests
+          </text>
+          <rect x="984" y="272" width="64" height="186" rx="10" {...box('automated-tests')} />
+          <text transform="translate(1016 365) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="18" className={clsx(d.strong, onBox('automated-tests'))}>
+            E2E Tests
+          </text>
+        </g>
 
-      {/* Humble objects */}
-      <g opacity={o('humble-objects')}>
-        <rect x="185" y="290" width="130" height="76" rx="6" fill={HUMBLE_COLOR} />
-        <text x="250" y="322" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="15" fontWeight="600">
-          Humble
-        </text>
-        <text x="250" y="343" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="15" fontWeight="600">
-          Objects
-        </text>
-      </g>
+        {/* Composition root */}
+        <rect x="540" y="488" width="190" height="62" rx="10" {...box('composition-root')} />
+        <Label x={635} y={519} lines={['Composition Root']} className={onBox('composition-root')} />
 
-      {/* I/O abstractions */}
-      <g opacity={o('core')}>
-        <rect x="365" y="300" width="125" height="56" rx="4" fill={ABSTRACTIONS_COLOR} />
-        <text x="427" y="323" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="13.5" fontWeight="600">
-          I/O
-        </text>
-        <text x="427" y="341" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="13.5" fontWeight="600">
-          Abstractions
-        </text>
-      </g>
-
-      {/* Core */}
-      <g opacity={o('core')}>
-        <rect x="540" y="268" width="190" height="120" rx="4" fill={CORE_COLOR} />
-        <text x="635" y="335" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="18" fontWeight="600">
-          Core
-        </text>
-      </g>
-
-      {/* Automated tests - the group straddles the process boundary */}
-      <g opacity={o('automated-tests')}>
-        <text x="790" y="242" fill={BROAD_TEST_COLOR} fontFamily={FONT} fontSize="13.5" fontWeight="600">
-          Automated Tests
-        </text>
-        <rect x="790" y="250" width="290" height="230" rx="4" fill="none" stroke={UNIT_TEST_COLOR} strokeWidth="2" />
-
-        <rect x="808" y="272" width="88" height="78" rx="4" fill={UNIT_TEST_COLOR} />
-        <text x="852" y="305" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="13.5" fontWeight="600">
-          Unit
-        </text>
-        <text x="852" y="323" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="13.5" fontWeight="600">
-          Tests
-        </text>
-
-        <rect x="808" y="382" width="88" height="76" rx="4" fill={TEST_DOUBLE_COLOR} />
-        <text x="852" y="414" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="13.5" fontWeight="600">
-          Test
-        </text>
-        <text x="852" y="432" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="13.5" fontWeight="600">
-          Doubles
-        </text>
-
-        <rect x="912" y="272" width="48" height="186" rx="4" fill={BROAD_TEST_COLOR} />
-        <text transform="translate(936 365) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fill="white" fontFamily={FONT} fontSize="13.5" fontWeight="600">
-          Integration Tests
-        </text>
-
-        <rect x="984" y="272" width="64" height="186" rx="4" fill={BROAD_TEST_COLOR} />
-        <text transform="translate(1016 365) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fill="white" fontFamily={FONT} fontSize="13.5" fontWeight="600">
-          E2E Tests
-        </text>
-      </g>
-
-      {/* Composition root */}
-      <g opacity={o('composition-root')}>
-        <rect x="540" y="488" width="190" height="62" rx="4" fill={COMPOSITION_ROOT_COLOR} />
-        <text x="635" y="525" textAnchor="middle" fill="white" fontFamily={FONT} fontSize="15" fontWeight="600">
-          Composition Root
-        </text>
-      </g>
-
-      {/* Legend */}
-      <g>
-        <line x1="20" y1="492" x2="64" y2="492" stroke={ARROW_COLOR} strokeWidth={STROKE} markerEnd="url(#chackRef)" />
-        <text x="76" y="496" fill="#2A2A2A" fontFamily={FONT} fontSize="11.5">
+        {/* Legend */}
+        <line x1="8" y1="476" x2="56" y2="476" className={d.line} markerEnd={legend.ref} />
+        <text x="66" y="482" fontSize="18" className={d.muted}>
           references
         </text>
-
-        <line
-          x1="20"
-          y1="521"
-          x2="64"
-          y2="521"
-          stroke={ARROW_COLOR}
-          strokeWidth={STROKE}
-          strokeDasharray={DASH}
-          markerEnd="url(#chackImpl)"
-        />
-        <text x="76" y="525" fill="#2A2A2A" fontFamily={FONT} fontSize="11.5">
-          implements / derives from
+        <line x1="8" y1="506" x2="56" y2="506" className={clsx(d.line, d.dashed)} markerEnd={legend.impl} />
+        <text x="66" y="512" fontSize="18" className={d.muted}>
+          <tspan x="66">implements /</tspan>
+          <tspan x="66" dy="21">
+            derives from
+          </tspan>
         </text>
-
-        <line
-          x1="20"
-          y1="550"
-          x2="64"
-          y2="550"
-          stroke={ARROW_COLOR}
-          strokeWidth={STROKE}
-          markerEnd="url(#chackIo)"
-          markerStart="url(#chackIoStart)"
-        />
-        <text x="76" y="554" fill="#2A2A2A" fontFamily={FONT} fontSize="11.5">
+        <line x1="8" y1="560" x2="56" y2="560" className={d.line} markerEnd={legend.io} markerStart={legend.ioStart} />
+        <text x="66" y="566" fontSize="18" className={d.muted}>
           I/O call at runtime
         </text>
-      </g>
-
-      {/* Caption */}
-      <text x="560" y="614" textAnchor="middle" fill="#4A4A4A" fontFamily={FONT} fontSize="12">
-        All four categories may depend on the frameworks and libraries. Those arrows are left out
-      </text>
-      <text x="560" y="632" textAnchor="middle" fill="#4A4A4A" fontFamily={FONT} fontSize="12">
-        to keep the number of arrows manageable.
-      </text>
-    </svg>
+      </svg>
+    </DiagramFrame>
   );
 }

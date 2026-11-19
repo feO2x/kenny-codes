@@ -1,0 +1,276 @@
+/*
+ * Phase cards like the method cards on the home page: numbered squircle tiles, filled squares
+ * for skills and hollow squares for the steps you take yourself, in each phase's colour
+ * (the same as in the Guided Coding phase diagram).
+ */
+
+.timeline {
+  --phase-gap: 0.75rem;
+  --step-gap: 0.7rem;
+  /* Centre of a step's title line. */
+  --marker-y: 0.75rem;
+  /* The step text stops at --text-max, so the arrows stay close to it on wide cards. Brackets
+     and arrows start and end just after it and run in three lanes, given here as distances from
+     the card edge on cards too narrow for the maximum (the band right of the text then holds
+     exactly the lanes); each lane's label stands to the right of its run. */
+  --text-max: 25rem;
+  --inner-lane: 10.4rem;
+  --small-lane: 6.8rem;
+  --large-lane: 2.5rem;
+  --arm: 4.6rem;
+  --arrow-width: 7px;
+  /* Space between the marks' ends and the text, between a run and its label, and between the
+     two tails leaving the Iterate step. */
+  --arrow-gap: 1rem;
+  --label-gap: 0.8rem;
+  --label-size: 0.8rem;
+  --tail-spread: 30px;
+  margin: 0;
+}
+
+.phases {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--phase-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.phase {
+  --phase: var(--kc-muted);
+  --tile: var(--kc-surface);
+  --pad: clamp(0.9rem, 0.6rem + 1.2vw, 1.4rem);
+  container-type: inline-size;
+  margin: 0;
+  padding: 1.05rem var(--pad) 1.15rem;
+  border: 1px solid var(--kc-line);
+  border-radius: var(--kc-radius);
+  background: var(--kc-bg);
+}
+
+/* The band right of the text: the inner lane, the arm, and a gap before the text. */
+.planning,
+.implementing,
+.guiding {
+  --band: calc(var(--inner-lane) + var(--arm) + var(--arrow-gap));
+  padding-right: var(--band);
+}
+
+/* Only the phase cards carry brackets and arrows, so only their text stops at the maximum. */
+.planning .steps,
+.implementing .steps,
+.guiding .steps {
+  max-width: var(--text-max);
+}
+
+/* Headings only cross the two outer lanes, so they may run into the band up to the small lane. */
+.planning .phaseHead,
+.implementing .phaseHead,
+.guiding .phaseHead {
+  margin-right: calc(-1 * (var(--band) - var(--small-lane) - 0.75rem));
+}
+
+.planning { --phase: var(--kc-mark-blue); --tile: var(--kc-tile-blue); }
+.implementing { --phase: var(--kc-mark-amber); --tile: var(--kc-tile-amber); }
+.guiding { --phase: var(--kc-mark-violet); --tile: var(--kc-tile-violet); }
+.done { --phase: var(--kc-mark-mint); --tile: var(--kc-gradient); }
+
+.phaseHead {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2rem;
+  margin: 0 0 0.85rem;
+}
+
+.badge {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9px;
+  background: var(--tile);
+  color: var(--kc-on-gradient);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.badgeDone svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: var(--kc-on-gradient);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.phaseTitle {
+  font-weight: 700;
+  font-stretch: 110%;
+  line-height: 1.3;
+}
+
+.phaseNote {
+  font-weight: 500;
+  font-stretch: 100%;
+  color: var(--kc-muted);
+}
+
+/* Steps: marker | text | optional bracket column. */
+.steps {
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+  column-gap: 0.65rem;
+  row-gap: var(--step-gap);
+  margin: 0;
+  padding: 0 0 0 0.375rem;
+  list-style: none;
+}
+
+
+.step {
+  grid-column: 1 / 3;
+  display: grid;
+  grid-template-columns: subgrid;
+  margin: 0;
+}
+
+.marker {
+  justify-self: center;
+  width: 10px;
+  height: 10px;
+  margin-top: calc(var(--marker-y) - 5px);
+  border-radius: 2.5px;
+}
+
+.skill .marker {
+  background: var(--phase);
+}
+
+.manual .marker {
+  border: 1.75px solid var(--phase);
+}
+
+.stepBody {
+  min-width: 0;
+}
+
+.stepTitle {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.5rem;
+}
+
+.skill .stepTitle {
+  font-family: var(--kc-font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.stepText {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--kc-muted);
+}
+
+/* Brackets and arrows, drawn by the component over the whole list in each phase's colour. */
+.marks {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  pointer-events: none;
+}
+
+.marks svg {
+  display: block;
+  overflow: visible;
+}
+
+.markLine {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: var(--arrow-width);
+  stroke-linejoin: round;
+}
+
+/* "Pick one" is a choice, not iteration: the same shape, lighter and without a head. */
+.bracket .markLine {
+  stroke-width: calc(var(--arrow-width) * 0.55);
+}
+
+.markHead {
+  fill: var(--tone);
+}
+
+.markLabel {
+  fill: var(--tone);
+  font-size: var(--label-size);
+  font-weight: 700;
+}
+
+.tone-planning { --tone: var(--kc-mark-blue); }
+.tone-implementing { --tone: var(--kc-mark-amber); }
+.tone-guiding { --tone: var(--kc-mark-violet); }
+
+@media (forced-colors: active) {
+  .skill .marker {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .markLine {
+    stroke: CanvasText;
+  }
+
+  .markHead,
+  .markLabel {
+    fill: CanvasText;
+  }
+
+  .manual .marker {
+    border-color: CanvasText;
+  }
+
+  .badge {
+    border: 1.5px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .badgeDone svg {
+    stroke: CanvasText;
+  }
+}
+
+/* Phones: a narrower arrow band and tighter cards leave the step text room to breathe. */
+@media (max-width: 600px) {
+  .timeline {
+    --inner-lane: 6.75rem;
+    --small-lane: 4.2rem;
+    --large-lane: 1.6rem;
+    --arm: 2.9rem;
+    --arrow-width: 5px;
+    --arrow-gap: 0.6rem;
+    --label-gap: 0.45rem;
+    --label-size: 0.7rem;
+    --tail-spread: 22px;
+  }
+
+  .phase {
+    --pad: 0.75rem;
+  }
+
+  .steps {
+    grid-template-columns: 1rem minmax(0, 1fr);
+    column-gap: 0.5rem;
+    padding-left: 0;
+  }
+
+}

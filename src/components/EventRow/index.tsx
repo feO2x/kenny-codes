@@ -6,7 +6,7 @@ import type {EventFrontMatter} from '@site/src/types/event';
 import {dateParts} from '@site/src/utils/dateFormatting';
 import styles from './styles.module.css';
 
-export interface EventRowProps extends EventFrontMatter {
+interface EventRowProps extends EventFrontMatter {
   title: string;
   permalink: string;
   /** ISO date, either `YYYY-MM-DD` or a full timestamp. */
@@ -24,7 +24,7 @@ export function formatPlace(location?: string, country?: string): string {
   return `${location}, ${country}`;
 }
 
-export function formatSessionFormat({type, duration, language}: EventFrontMatter): string {
+function formatSessionFormat({type, duration, language}: EventFrontMatter): string {
   return [type, duration, language].filter(Boolean).join(', ');
 }
 
@@ -57,7 +57,7 @@ export default function EventRow({
         {showYear ? (
           <span className={styles.year}>{year}</span>
         ) : (
-          <span className={styles.srOnly}>{year}</span>
+          <span className="kc-sr-only">{year}</span>
         )}
       </time>
 
@@ -78,7 +78,7 @@ export default function EventRow({
         </Heading>
         <p className={styles.venue}>
           {event && <span className={styles.event}>{event}</span>}
-          {place && <span className={styles.place}>{place}</span>}
+          {place && <span>{place}</span>}
         </p>
       </div>
 

@@ -42,7 +42,7 @@ Most arrows in the diagram are compile-time dependencies, like in UML:
 - an open arrowhead means one category **references** another
 - a dashed line with a hollow triangle means one type **implements or derives from** another
 
-The Composition Root knows the Core; the Core does not know the Composition Root. Humble Objects and Test Doubles implement the I/O abstractions. The abstractions themselves belong to the Core according to the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf), which is why both boxes are blue. The one double-headed arrow on the left represents I/O calls happening at runtime.
+The Composition Root knows the Core; the Core does not know the Composition Root. Humble Objects and Test Doubles implement the I/O abstractions. The abstractions themselves belong to the Core according to the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf), which is why both boxes carry the brand gradient. The one double-headed arrow on the left represents I/O calls happening at runtime.
 
 The placements along the process boundary are deliberate. The Humble Objects box sits **on** the boundary, because they make outgoing calls or receive incoming ones. Integration tests **straddle** the boundary: they may exercise the system under test inside or outside the test runner process. End-to-end tests sit **outside**, to the right of the boundary, because they usually start the system under test in another process (e.g., via Docker Compose). Unit tests and their test doubles stay inside the test runner process. Every category may also use the frameworks and libraries it references, so those arrows are left out to keep the picture readable.
 

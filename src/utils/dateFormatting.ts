@@ -24,7 +24,7 @@ export function formatDate(dateString: string): string {
  * Today's date as `YYYY-MM-DD` in the visitor's local timezone. Comparing this string with an
  * event's `YYYY-MM-DD` date avoids Date-object timezone pitfalls for day-level logic.
  */
-export function todayIsoDate(): string {
+function todayIsoDate(): string {
   const now = new Date();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');

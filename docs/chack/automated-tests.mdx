@@ -5,8 +5,8 @@ title: Automated Tests
 
 import ChackDiagram from '@site/src/components/ChackDiagram';
 import IoCostChart from '@site/src/components/IoCostChart';
+import TestShapesDiagram from '@site/src/components/TestShapesDiagram';
 import Image from '@theme/IdealImage';
-import useBaseUrl from '@docusaurus/useBaseUrl';
 import testPyramidFowler from '@site/static/img/test-pyramid-fowler.png';
 import unitTestsFowler from '@site/static/img/unit-tests-as-defined-by-fowler.png';
 import sociableVsSolitaryTestsFowler from '@site/static/img/sociable-vs-solitary-tests-fowler.png';
@@ -41,13 +41,7 @@ The argument was already clear back then: service and UI tests are more expensiv
 
 In the 2010s, Docker arrived, and with it David Heinemeier Hansson's 2014 article [TDD is dead. Long live testing.](https://dhh.dk/2014/04/23/tdd-is-dead-long-live-testing.html) A movement formed around the **Test Diamond**: write mostly integration tests, spin the third-party systems up in containers inside the test run, and test components in interaction rather than in isolation.
 
-<img
-  src={useBaseUrl('/img/testing-pyramid-vs-diamond.svg')}
-  alt="Test pyramid with a broad Unit base, compared with a Test Diamond whose widest layer is Integration; both have E2E tests at the top"
-  width="960"
-  height="540"
-  style={{ display: 'block', width: '100%', height: 'auto', margin: '1.5rem 0' }}
-/>
+<TestShapesDiagram />
 
 This also led to a redefinition of the layers: we now typically speak of **Unit Tests**, **Integration Tests**, and **End-to-End Tests**. David Heinemeier Hansson's main critique of the Test Pyramid was the enormous amount of Test Doubles that a unit-test-heavy suite requires ("writing mocks that return mocks"), and the resulting design damage on the production code, as can be seen in [this discussion between him, Martin Fowler, and Kent Beck](https://www.youtube.com/live/z9quxZsLcfo?si=vzNhKwGBALef5Xl9&t=1260).
 

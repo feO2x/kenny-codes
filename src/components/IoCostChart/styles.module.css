@@ -1,11 +1,8 @@
+/* Sits in the shared diagram card. The series reuse the CHACK colours: in-memory work is the
+   Core's mint, database reads the violet of the Humble Objects that perform the I/O. */
 .figure {
   container-type: inline-size;
-  margin: 1.5rem 0;
-  padding: 1rem;
-  border: 1px solid #D5D5D5;
-  border-radius: 8px;
-  background: #FFFFFF;
-  color: #2A2A2A;
+  margin: 0;
 }
 
 .toolbar {
@@ -17,24 +14,33 @@
   margin-bottom: 1rem;
 }
 
+.title {
+  font-weight: 700;
+  font-stretch: 110%;
+}
+
+/* Like the site's secondary buttons. */
 .scaleButton {
-  padding: 0.45rem 0.8rem;
-  border: 1px solid #0078D4;
-  border-radius: 4px;
-  background: #FFFFFF;
-  color: #005A9E;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.9rem;
+  border: 1.5px solid var(--kc-control-line);
+  border-radius: var(--kc-radius);
+  background: var(--kc-bg);
+  color: var(--kc-ink);
   font: inherit;
   font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .scaleButton:hover {
-  background: #EAF4FC;
+  border-color: var(--ifm-color-primary);
+  background: var(--kc-accent-soft);
 }
 
-.scaleButton:focus-visible,
-.values summary:focus-visible {
-  outline: 2px solid #0078D4;
+.scaleButton:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
   outline-offset: 3px;
 }
 
@@ -49,23 +55,34 @@
 .legend > span {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
 }
 
+/* The home page's square. */
 .swatch {
-  width: 0.8rem;
-  height: 0.8rem;
-  border-radius: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2.5px;
+}
+
+.inMemory {
+  background: var(--kc-mark-mint);
+}
+
+/* Hatched as well as coloured, so the two series differ without relying on hue. */
+.database {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--kc-mark-violet) 0 5px,
+    color-mix(in oklab, var(--kc-mark-violet) 55%, var(--kc-surface)) 5px 8px
+  );
 }
 
 .explanation,
 .caption {
   margin: 0 0 0.5rem;
   font-size: 0.875rem;
-}
-
-.caption {
-  color: #555555;
+  color: var(--kc-muted);
 }
 
 .chart {
@@ -83,12 +100,13 @@
 .axisRow {
   margin-bottom: 0.5rem;
   font-size: 0.75rem;
+  color: var(--kc-muted);
 }
 
 .axis {
   position: relative;
   height: 1.75rem;
-  border-bottom: 1px solid #777777;
+  border-bottom: 1px solid var(--kc-line-strong);
 }
 
 .tickLabel {
@@ -111,7 +129,7 @@
   min-height: 3.25rem;
   margin: 0;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #EEEEEE;
+  border-bottom: 1px solid var(--kc-line);
   font-size: 0.875rem;
 }
 
@@ -125,30 +143,21 @@
   grid-row: 1;
   font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
-}
-
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+  color: var(--kc-muted);
 }
 
 .track {
   position: relative;
   grid-column: 2;
   grid-row: 1;
-  height: 1.5rem;
+  height: 1.25rem;
 }
 
 .gridLine {
   position: absolute;
   top: 0;
   bottom: 0;
-  border-left: 1px solid #D5D5D5;
+  border-left: 1px solid var(--kc-line);
 }
 
 .gridLine:last-of-type {
@@ -158,6 +167,7 @@
 .bar {
   position: relative;
   height: 100%;
+  border-radius: 0 4px 4px 0;
 }
 
 @container (max-width: 600px) {
@@ -190,43 +200,15 @@
   }
 }
 
-.caption a {
-  color: #005A9E;
-  text-decoration: underline;
-}
+@media (forced-colors: active) {
+  .swatch,
+  .bar {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
 
-.values {
-  margin-top: 1rem;
-  font-size: 0.875rem;
-}
-
-.values summary {
-  cursor: pointer;
-}
-
-.values table {
-  display: table;
-  width: 100%;
-  margin-top: 0.75rem;
-  color: #2A2A2A;
-}
-
-.values tr {
-  background: #FFFFFF;
-}
-
-.values th,
-.values td {
-  border-color: #D5D5D5;
-  overflow-wrap: anywhere;
-}
-
-.values th[scope='row'] {
-  text-align: left;
-  font-weight: normal;
-}
-
-.values td {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+  .database {
+    background: repeating-linear-gradient(135deg, CanvasText 0 4px, Canvas 4px 7px);
+    outline: 1px solid CanvasText;
+  }
 }

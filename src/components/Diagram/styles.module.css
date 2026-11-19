@@ -1,0 +1,284 @@
+/*
+ * Shared look of the docs diagrams, taken from the home page: a card on the page background,
+ * outlined boxes on the page colour, the brand gradient only for the focal element, the
+ * blue-to-mint ramp for sequences, and quiet arrows with text labels instead of colour codes.
+ */
+
+.frame {
+  /* Diagrams adapt to the card's own width (the docs column), not the window. */
+  container-type: inline-size;
+  margin: 1.75rem 0;
+  padding: clamp(0.75rem, 0.4rem + 1.5vw, 1.75rem);
+  border: 1px solid var(--kc-line);
+  border-radius: var(--kc-radius-lg);
+  background: var(--kc-surface);
+}
+
+/* Wide SVG diagrams keep a legible minimum width and scroll sideways wherever the docs
+   column is narrower: on phones, and beside the sidebar and table of contents at 997–1300px. */
+.scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+/* While a diagram is cut off, show it: a thin visible scrollbar and a fade at the cut edge. */
+.overflowing {
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kc-control-line) transparent;
+}
+
+.scrollHint {
+  margin: 0.6rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--kc-muted);
+}
+
+/* Scroll position flags, set by DiagramFrame. */
+.atStart,
+.atEnd {
+}
+
+.overflowing:not(.atEnd) {
+  mask-image: linear-gradient(to left, transparent, #000 2.5rem);
+}
+
+.overflowing:not(.atStart).atEnd {
+  mask-image: linear-gradient(to right, transparent, #000 2.5rem);
+}
+
+.overflowing:not(.atStart):not(.atEnd) {
+  mask-image: linear-gradient(to right, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent);
+}
+
+.scroll > svg {
+  min-width: var(--diagram-min-width);
+}
+
+/* The focus ring sits on the card: the scroll area's edge fade would mask it away. */
+.scroll:focus-visible {
+  outline: none;
+}
+
+.frame:has(> .scroll:focus-visible) {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  font-family: var(--kc-font);
+}
+
+.svg text {
+  fill: var(--kc-ink);
+}
+
+/* Text and marks */
+
+.svg .muted {
+  fill: var(--kc-muted);
+}
+
+.svg .onGradient {
+  fill: var(--kc-on-gradient);
+}
+
+.strong {
+  font-weight: 650;
+  font-stretch: 108%;
+}
+
+.semibold {
+  font-weight: 600;
+}
+
+.svg .regular {
+  font-weight: 500;
+  font-stretch: 100%;
+}
+
+/* Real text under a diagram, so it stays legible when the diagram scales down. */
+.caption {
+  margin: 1rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--kc-muted);
+}
+
+/* Shapes */
+
+.box {
+  fill: var(--kc-bg);
+  stroke: var(--kc-control-line);
+  stroke-width: 1.5;
+}
+
+/* The focal element's companions, e.g. the Core's I/O abstractions. */
+.soft {
+  fill: var(--kc-accent-soft);
+  stroke-width: 2;
+}
+
+/* A tile; the element sets its fill to the gradient's url() and `--mark` to its colour. In light
+   mode an edge in that colour's dark shade keeps the pastel tile ends at 3:1 against the card. */
+.gradient {
+}
+
+:global([data-theme='light']) .gradient {
+  stroke: var(--mark, var(--kc-control-line));
+  stroke-width: 1.5;
+}
+
+/* Context that is not part of the model, e.g. frameworks and libraries. */
+.quiet {
+  fill: var(--kc-surface-raised);
+}
+
+.boundary {
+  fill: none;
+  stroke: var(--kc-control-line);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+
+.chip {
+  fill: var(--kc-surface);
+}
+
+/* Boxes inside a box, e.g. the kinds of third-party systems. */
+.inner {
+  fill: var(--kc-surface);
+  stroke: var(--kc-control-line);
+  stroke-width: 1.25;
+}
+
+/* A labelled group of boxes, e.g. the automated tests. */
+.group {
+  fill: none;
+  stroke: var(--kc-control-line);
+  stroke-width: 1.5;
+}
+
+/* Squircle number badge, as in the Guided Coding steps on the home page. */
+.badge {
+  fill: var(--kc-bg);
+  stroke: var(--kc-line-strong);
+  stroke-width: 1.5;
+}
+
+.badgeOnGradient {
+  fill: rgba(255, 255, 255, 0.55);
+}
+
+.separator {
+  fill: none;
+  stroke: var(--kc-surface);
+  stroke-width: 3;
+}
+
+/* Lines and arrows */
+
+.line {
+  fill: none;
+  stroke: var(--mark, var(--kc-muted));
+  stroke-width: var(--line-width, 1.75);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dashed {
+  stroke-dasharray: 7 5;
+  stroke-linecap: butt;
+}
+
+/* A check mark on the brand gradient. */
+.check {
+  fill: none;
+  stroke: var(--kc-on-gradient);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.head {
+  fill: var(--mark, var(--kc-muted));
+}
+
+/* Labels in a group's mark colour, e.g. "large issue" in the Planning Phase's blue. */
+.svg .markText {
+  fill: var(--mark, var(--kc-muted));
+}
+
+/* A mark label that belongs to the highlighted part; bold in forced colors. */
+.markActive {
+}
+
+/* A lighter tile: a tint of the mark colour with an outline, e.g. test doubles. */
+.tint {
+  fill: color-mix(in oklab, var(--mark) 14%, transparent);
+  stroke: var(--mark);
+  stroke-width: 2;
+}
+
+.headHollow {
+  fill: var(--kc-surface);
+  stroke: var(--mark, var(--kc-muted));
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+@media (forced-colors: active) {
+  .svg text,
+  .svg .muted,
+  .svg .onGradient,
+  .svg .markText,
+  .head {
+    fill: CanvasText;
+  }
+
+  .separator {
+    stroke: CanvasText;
+  }
+
+  .box,
+  .soft,
+  .quiet,
+  .badge,
+  .badgeOnGradient,
+  .chip,
+  .inner,
+  .tint,
+  .gradient {
+    fill: Canvas;
+    stroke: CanvasText;
+  }
+
+  .line,
+  .check,
+  .boundary,
+  .group,
+  .headHollow {
+    stroke: CanvasText;
+  }
+
+  .headHollow {
+    fill: Canvas;
+  }
+
+  /* Without colour, the highlighted category or phase stands out by a heavier outline. */
+  .gradient,
+  :global([data-theme='light']) .gradient,
+  .tint {
+    stroke: CanvasText;
+    stroke-width: 3.5;
+  }
+
+  .svg .markActive {
+    font-weight: 750;
+  }
+}

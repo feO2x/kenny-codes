@@ -409,15 +409,18 @@
   width: 2rem;
   height: 2rem;
   border-radius: 9px;
-  box-shadow: inset 0 0 0 1.5px var(--kc-line-strong);
   font-size: 0.9rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--kc-ink);
-  background: var(--kc-bg);
+  color: var(--kc-on-gradient);
   position: relative;
   z-index: 1;
 }
+
+/* The phase colours of the Guided Coding diagrams in the docs. */
+.phase:nth-child(1)::before { background: var(--kc-tile-blue); }
+.phase:nth-child(2)::before { background: var(--kc-tile-amber); }
+.phase:nth-child(3)::before { background: var(--kc-tile-violet); }
 
 .phase:not(:last-child)::after {
   content: "";
@@ -507,17 +510,10 @@
   border-radius: 2.5px;
 }
 
+/* Amber: the meter belongs to the Implement step, the Implementing Phase's colour. */
 .meter > .meterOn {
   border-color: transparent;
-  background: var(--kc-ramp-from);
-}
-
-.meter > .meterOn:nth-child(2) {
-  background: color-mix(in oklab, var(--kc-ramp-to) 50%, var(--kc-ramp-from));
-}
-
-.meter > .meterOn:nth-child(3) {
-  background: var(--kc-ramp-to);
+  background: var(--kc-mark-amber);
 }
 
 /* CHACK in miniature: the dashed box is the process boundary, Humble Objects straddle it. */
@@ -553,6 +549,16 @@
   min-width: 62%;
   margin-top: -1.35rem;
 }
+
+/* The same category colours as the CHACK diagram in the docs. */
+.chackTile {
+  border-color: transparent;
+  color: var(--kc-on-gradient);
+}
+
+.chackTile.chackHumble { background: var(--kc-tile-violet); }
+.chackTile.chackTests { background: var(--kc-tile-magenta); }
+.chackTile.chackRoot { background: var(--kc-tile-amber); }
 
 .chackCore {
   grid-column: 1 / -1;
@@ -841,7 +847,9 @@
     background: CanvasText;
   }
 
-  .phase::before {
+  .phase:nth-child(n)::before {
+    background: Canvas;
+    color: CanvasText;
     outline: 1.5px solid CanvasText;
   }
 
@@ -851,6 +859,7 @@
     -webkit-text-fill-color: CanvasText;
   }
 
+  .chackTile,
   .chackCore,
   .chackCore small {
     border-color: CanvasText;
