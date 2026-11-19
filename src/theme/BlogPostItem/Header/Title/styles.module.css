@@ -5,6 +5,8 @@
   letter-spacing: -0.028em;
   line-height: 1.08;
   margin-bottom: 0.75rem;
+  /* "pretty" instead of the global "balance" avoids breaking hyphenated words early. */
+  text-wrap: pretty;
 }
 
 /* Between tablet and wide desktop the post column is narrow; tighten the width axis. */

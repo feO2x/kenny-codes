@@ -44,8 +44,10 @@ export default function DropdownNavbarItemDesktop({
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        // Only pull focus back when it was in the menu; a hover-opened menu leaves focus alone.
+        const focusInside = containerRef.current?.contains(document.activeElement);
         setOpen(false);
-        buttonRef.current?.focus();
+        if (focusInside) buttonRef.current?.focus();
       }
     };
     document.addEventListener('mousedown', closeIfOutside);

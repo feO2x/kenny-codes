@@ -392,6 +392,11 @@ hr {
   color: var(--kc-muted);
 }
 
+/* The close icon draws with a stroke on its inner group, so colour alone does not reach it. */
+.navbar-sidebar__close svg g {
+  stroke: currentColor;
+}
+
 /* A 44px target for the menu button; Infima only shows it below 997px. */
 @media (max-width: 996px) {
   .navbar__toggle {
@@ -709,6 +714,12 @@ pre code,
     min-width: 0;
   }
 
+  .breadcrumbs__item:not(.breadcrumbs__item--active) {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+  }
+
   .breadcrumbs__item--active .breadcrumbs__link {
     display: block;
     white-space: nowrap;
@@ -753,11 +764,12 @@ pre code,
   }
 }
 
-/* Event pages have no sidebar or TOC: start the column on the container edge like /events. */
+/* Event pages have no sidebar or TOC: start the column on the container edge like /events,
+   at the width of the running text so cards and text share one right edge. */
 .kc-event-page main.col {
   --ifm-col-width: 100%;
   margin-left: 0;
-  max-width: 54rem;
+  max-width: calc(47rem + 2 * var(--ifm-spacing-horizontal));
 }
 
 .pagination-nav__link--prev .pagination-nav__label::before,
@@ -779,18 +791,21 @@ pre code,
   margin: 1.5rem 0 0.5rem;
 }
 
-.blog-list-page main > article {
+.blog-list-page main > article,
+.blog-tags-post-list-page main > article {
   padding-bottom: 2.5rem;
   margin-bottom: 2.5rem !important;
   border-bottom: 1px solid var(--kc-line);
 }
 
-.blog-list-page main > article:last-of-type {
+.blog-list-page main > article:last-of-type,
+.blog-tags-post-list-page main > article:last-of-type {
   border-bottom: 0;
 }
 
 @media (max-width: 600px) {
-  .blog-list-page main > article footer .text--right {
+  .blog-list-page main > article footer .text--right,
+  .blog-tags-post-list-page main > article footer .text--right {
     flex-basis: 100%;
     max-width: 100%;
     text-align: left !important;
@@ -799,15 +814,15 @@ pre code,
 }
 
 /* One author writes every post, so the list does not repeat the author card. */
-.blog-list-page main > article .avatar {
+.blog-list-page main > article .avatar,
+.blog-tags-post-list-page main > article .avatar {
   display: none;
 }
 
 /* Tags (see src/theme/Tag and src/theme/TagsListInline) */
 .kc-tags {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   gap: 0.5rem 0.75rem;
 }
 
@@ -908,6 +923,12 @@ pre code,
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Without transitions the Learn menu's links are focusable the instant it opens. */
+  .kc-disclosure,
+  .kc-disclosure * {
+    transition: none !important;
+  }
+
   *,
   *::before,
   *::after {
@@ -916,6 +937,12 @@ pre code,
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+.kc-back-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
 }
 
 .kc-back-link {

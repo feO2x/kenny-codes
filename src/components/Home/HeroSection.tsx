@@ -51,7 +51,7 @@ export default function HeroSection(): ReactNode {
               <a
                 className="button button--primary button--lg"
                 href={`${CONTACT_MAILTO}?subject=Speaking%20or%20consulting%20inquiry`}>
-                Get in touch
+                Email me
               </a>
               <Link className="button button--secondary button--lg" to="/events">
                 See talks and workshops
@@ -94,9 +94,7 @@ export default function HeroSection(): ReactNode {
           </div>
           <SpeakingRecord
             events={events}
-            yearLink={(year) => `/events#year-${year}`}
-            upcomingLink="/events#upcoming"
-            focusableColumns={false}
+            interactive={false}
             className={styles.recordChart}
           />
         </section>

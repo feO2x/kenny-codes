@@ -65,6 +65,9 @@ const config: Config = {
           sidebarPath: "./sidebars.ts",
         },
         blog: {
+          blogTitle: "Writing",
+          blogDescription:
+            "Articles by Kenny Pflug on AI-assisted development, software design, and .NET.",
           showReadingTime: true,
           feedOptions: {
             type: ["rss", "atom"],

@@ -35,18 +35,24 @@ function BlogTagsPostsPageContent(props: Props): ReactNode {
     return <EventsBlogTagsPostsContent {...props} />;
   }
 
-  const title = useBlogTagsPostsPageTitle(tag);
   return (
     <BlogLayout sidebar={sidebar}>
       {tag.unlisted && <Unlisted />}
       <header className="kc-page-header kc-page-header--divided">
+        <nav className="kc-back-links" aria-label="Writing">
+          <Link to="/blog" className="kc-back-link">
+            All articles
+          </Link>
+          <Link href={tag.allTagsPath} className="kc-back-link">
+            All topics
+          </Link>
+        </nav>
         <Heading as="h1" className="kc-page-title">
-          {title}
+          {tag.label}
         </Heading>
-        {tag.description && <p className="kc-page-lede">{tag.description}</p>}
-        <Link href={tag.allTagsPath} className="kc-text-link">
-          All topics
-        </Link>
+        <p className="kc-page-lede">
+          {tag.count === 1 ? 'One article' : `${tag.count} articles`} tagged “{tag.label}”.
+        </p>
       </header>
       <BlogPostItems items={items} />
       <BlogListPaginator metadata={listMetadata} />

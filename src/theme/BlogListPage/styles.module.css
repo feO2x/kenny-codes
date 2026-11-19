@@ -93,26 +93,6 @@
 
 
 
-.backLinks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 1.5rem;
-}
-
-.back {
-  display: inline-block;
-  /* Same as .kc-back-link in custom.css */
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--kc-muted);
-  margin-bottom: 1.25rem;
-}
-
-.back:hover {
-  color: var(--kc-ink);
-  text-decoration: none;
-}
-
 @media (max-width: 860px) {
   .header {
     grid-template-columns: minmax(0, 1fr);

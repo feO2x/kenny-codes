@@ -20,11 +20,11 @@ export default function EventsBlogTagsPostsContent({items, tag}: Props): ReactNo
       <main className="container kc-page">
         <header className={styles.header}>
           <div className={styles.headerText}>
-            <nav className={styles.backLinks} aria-label="Events">
-              <Link to="/events" className={styles.back}>
+            <nav className="kc-back-links" aria-label="Events">
+              <Link to="/events" className="kc-back-link">
                 All talks and workshops
               </Link>
-              <Link to="/events/tags" className={styles.back}>
+              <Link to="/events/tags" className="kc-back-link">
                 All topics
               </Link>
             </nav>
