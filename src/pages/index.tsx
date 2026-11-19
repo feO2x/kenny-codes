@@ -12,8 +12,8 @@ export default function Home(): ReactNode {
       description="Kenny Pflug builds cloud-native .NET systems, speaks at conferences, and helps teams stay in control when AI agents write the code.">
       <main>
         <HeroSection />
-        <EventsSection />
         <MethodsSection />
+        <EventsSection />
         <BlogSection />
       </main>
     </Layout>
