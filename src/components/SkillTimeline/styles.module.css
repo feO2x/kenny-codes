@@ -9,17 +9,19 @@
   --step-gap: 0.7rem;
   /* Centre of a step's title line. */
   --marker-y: 0.75rem;
-  /* The iteration arrows run over the right edge of the middle cards: a band of the card
-     (--reserve plus the card padding) stays free of text, with the two vertical runs at
-     --small-inset and --large-inset from the card edge and their labels inside the curves. */
-  --reserve: 6.75rem;
-  --small-inset: 5rem;
-  --large-inset: 2rem;
+  /* Brackets and arrows run in three lanes at the right edge of the middle cards, measured from
+     the card edge; each lane's label stands to the right of its run. The band (--reserve plus
+     the card padding) stays free of text. */
+  --inner-lane: 9.2rem;
+  --small-lane: 5.6rem;
+  --large-lane: 2.5rem;
+  /* Room for the inner lane, the shortest arrow arm and head, and the gap to the text. */
+  --reserve: 12.8rem;
   --arrow-width: 7px;
-  /* Space between the arrows' ends and the step text, between an arrow and its label, and
-     between the two tails leaving the Iterate step. */
+  /* Space between the marks' ends and the text, between a run and its label, and between the
+     two tails leaving the Iterate step. */
   --arrow-gap: 1rem;
-  --label-gap: 0.9rem;
+  --label-gap: 0.8rem;
   --label-size: 0.8rem;
   --tail-spread: 22px;
   margin: 0;
@@ -51,6 +53,13 @@
 .implementing,
 .guiding {
   padding-right: calc(var(--pad) + var(--reserve));
+}
+
+/* Headings only cross the two outer lanes, so they may run into the band up to the small lane. */
+.planning .phaseHead,
+.implementing .phaseHead,
+.guiding .phaseHead {
+  margin-right: calc(-1 * (var(--reserve) - var(--small-lane) - 0.75rem));
 }
 
 .planning { --phase: var(--kc-mark-blue); --tile: var(--kc-tile-blue); }
@@ -103,7 +112,6 @@
 
 /* Steps: marker | text | optional bracket column. */
 .steps {
-  --span-w: 9rem;
   display: grid;
   grid-template-columns: 1.25rem minmax(0, 1fr);
   column-gap: 0.65rem;
@@ -113,9 +121,6 @@
   list-style: none;
 }
 
-.withSpans {
-  grid-template-columns: 1.25rem minmax(0, 1fr) var(--span-w);
-}
 
 .step {
   grid-column: 1 / 3;
@@ -164,94 +169,8 @@
   color: var(--kc-muted);
 }
 
-/* A bracket from the first step's marker to the last step's marker. */
-.span {
-  grid-column: 3;
-  position: relative;
-  margin: 0;
-}
-
-.spanLine {
-  --bracket: 1rem;
-  position: absolute;
-  top: var(--marker-y);
-  bottom: calc(-1 * (var(--step-gap) + var(--marker-y)));
-  left: -0.4rem;
-  right: 0;
-  display: flex;
-  align-items: center;
-  padding-left: calc(var(--bracket) + var(--label-gap));
-}
-
-.spanLine::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--bracket);
-  border: 2px solid var(--phase);
-  border-left: 0;
-  border-radius: 0 8px 8px 0;
-}
-
-/* A loop is iteration: as heavy as the arrows back from the Guiding Phase, with long arms and a
-   generous curve, pointing back at its first step. */
-.loop .spanLine {
-  --bracket: 2rem;
-  bottom: 0.15rem;
-  left: -1rem;
-}
-
-.loop .spanLine::before {
-  inset-block: calc(var(--arrow-width) / -2);
-  border-width: var(--arrow-width);
-  border-left: 0;
-  border-radius: 0 22px 22px 0;
-}
-
-.loop .spanLine::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -8px;
-  width: 24px;
-  height: 24px;
-  translate: 0 -50%;
-  background: var(--phase);
-  clip-path: polygon(0 50%, 100% 0, 100% 100%);
-}
-
-.spanLabel {
-  font-size: 0.8rem;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--phase);
-}
-
-.spanLabel > span {
-  display: block;
-}
-
-/* Narrow cards: the bracket labels turn sideways so the step text keeps its width. */
-@container (max-width: 27rem) {
-  .steps {
-    --span-w: 3.4rem;
-  }
-
-  .loop .spanLine {
-    --bracket: 1.25rem;
-    left: -0.25rem;
-  }
-
-  .spanLabel {
-    writing-mode: vertical-rl;
-    rotate: 180deg;
-    font-size: 0.75rem;
-    white-space: nowrap;
-  }
-}
-
-/* Arrows back from the Guiding Phase, drawn by the component over the whole list. */
-.backLayer {
+/* Brackets and arrows, drawn by the component over the whole list in each phase's colour. */
+.marks {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -259,50 +178,49 @@
   pointer-events: none;
 }
 
-.backLayer svg {
+.marks svg {
   display: block;
   overflow: visible;
 }
 
-.backLine {
+.markLine {
   fill: none;
-  stroke: var(--arrow);
+  stroke: var(--tone);
   stroke-width: var(--arrow-width);
   stroke-linejoin: round;
 }
 
-.backHead {
-  fill: var(--arrow);
+/* "Pick one" is a choice, not iteration: the same shape, lighter and without a head. */
+.bracket .markLine {
+  stroke-width: calc(var(--arrow-width) * 0.55);
 }
 
-.backLabel {
-  fill: var(--arrow);
+.markHead {
+  fill: var(--tone);
+}
+
+.markLabel {
+  fill: var(--tone);
   font-size: var(--label-size);
   font-weight: 700;
 }
 
-/* Each arrow in the colour of the phase it returns to. */
-.backSmall {
-  --arrow: var(--kc-mark-amber);
-}
-
-.backLarge {
-  --arrow: var(--kc-mark-blue);
-}
+.tone-planning { --tone: var(--kc-mark-blue); }
+.tone-implementing { --tone: var(--kc-mark-amber); }
+.tone-guiding { --tone: var(--kc-mark-violet); }
 
 @media (forced-colors: active) {
-  .skill .marker,
-  .loop .spanLine::after {
+  .skill .marker {
     forced-color-adjust: none;
     background: CanvasText;
   }
 
-  .backLine {
+  .markLine {
     stroke: CanvasText;
   }
 
-  .backHead,
-  .backLabel {
+  .markHead,
+  .markLabel {
     fill: CanvasText;
   }
 
@@ -324,12 +242,13 @@
 /* Phones: a narrower arrow band and tighter cards leave the step text room to breathe. */
 @media (max-width: 600px) {
   .timeline {
-    --reserve: 4.4rem;
-    --small-inset: 3.2rem;
-    --large-inset: 1.2rem;
+    --inner-lane: 6.1rem;
+    --small-lane: 3.55rem;
+    --large-lane: 1.6rem;
+    --reserve: 8.1rem;
     --arrow-width: 5px;
     --arrow-gap: 0.6rem;
-    --label-gap: 0.5rem;
+    --label-gap: 0.45rem;
     --label-size: 0.7rem;
     --tail-spread: 16px;
   }
@@ -344,7 +263,4 @@
     padding-left: 0;
   }
 
-  .withSpans {
-    grid-template-columns: 1rem minmax(0, 1fr) var(--span-w);
-  }
 }

@@ -5,43 +5,69 @@ import {methodNames, phasesFor, type Method, type Phase, type Span, type Timelin
 import styles from './styles.module.css';
 
 /**
- * A bracket beside steps `from` to `to`, from marker to marker. A loop instead runs from the end
- * of its last step back up to the first, with an arrowhead pointing at it.
+ * Every bracket and arrow in the timeline follows one design: it starts and ends on one shared
+ * column just after the text, runs vertically in its own lane in the text-free band at the
+ * cards' right edge, and carries an upright label to the right of that run. The lanes, from the
+ * text outwards: brackets inside a card, then "small issue", then "large issue".
  */
-function SpanMark({span, loop}: {span: Span; loop?: boolean}): ReactNode {
-  return (
-    <li
-      className={clsx(styles.span, loop && styles.loop)}
-      style={{gridRow: `${span.from + 1} / ${span.to + (loop ? 2 : 1)}`}}
-      aria-hidden="true">
-      <span className={styles.spanLine}>
-        <span className={styles.spanLabel}>
-          <span>{span.label[0]}</span> <span>{span.label[1]}</span>
-        </span>
-      </span>
-    </li>
-  );
+type Lane = 'inner' | 'small' | 'large';
+
+interface Mark {
+  key: string;
+  lane: Lane;
+  /** Step anchors of the two ends: the arrowhead (or upper end) and the tail (or lower end). */
+  top: string;
+  bottom: string;
+  /** Moves the lower end up or down, so the two arrows leaving Iterate run apart. */
+  bottomOffset?: number;
+  arrow: boolean;
+  /** The phase whose colour the mark takes. */
+  tone: Phase['kind'];
+  label: string[];
 }
 
-/** Where the back arrows start (Iterate) and end (the first step of their target phase). */
-function anchorOf(phase: Phase, index: number): string | undefined {
-  if (index === 0 && (phase.kind === 'planning' || phase.kind === 'implementing')) return phase.kind;
-  if (phase.kind === 'guiding' && phase.steps[index].title === 'Iterate') return 'iterate';
-  return undefined;
-}
-
-interface BackArrow {
-  /** The arrow's path, from its tail at the Iterate step to just before its head. */
+interface DrawnMark extends Mark {
   path: string;
-  head: string;
-  label: {x: number; y: number};
+  head?: string;
+  /** Centre of each label line, before rotating the text upright. */
+  lines: {x: number; y: number}[];
 }
 
-interface BackArrows {
+interface Drawing {
   width: number;
   height: number;
-  small: BackArrow;
-  large: BackArrow;
+  marks: DrawnMark[];
+}
+
+const stepAnchor = (phase: Phase['kind'], index: number) => `${phase}-${index}`;
+
+/** The brackets inside cards, and the two arrows back from the Guiding Phase. */
+function marksFor(phases: Phase[]): Mark[] {
+  const marks: Mark[] = [];
+  for (const phase of phases) {
+    for (const [span, arrow] of [
+      [phase.choice, false],
+      [phase.loop, true],
+    ] as [Span | undefined, boolean][]) {
+      if (!span) continue;
+      marks.push({
+        key: `${phase.kind}-${span.from}`,
+        lane: 'inner',
+        top: stepAnchor(phase.kind, span.from),
+        bottom: stepAnchor(phase.kind, span.to),
+        arrow,
+        tone: phase.kind,
+        label: span.label,
+      });
+    }
+  }
+  const guiding = phases.find((phase) => phase.kind === 'guiding');
+  const iterate = stepAnchor('guiding', guiding?.steps.findIndex((step) => step.title === 'Iterate') ?? -1);
+  marks.push(
+    {key: 'small', lane: 'small', top: stepAnchor('implementing', 0), bottom: iterate, bottomOffset: -1, arrow: true, tone: 'implementing', label: ['small issue']},
+    {key: 'large', lane: 'large', top: stepAnchor('planning', 0), bottom: iterate, bottomOffset: 1, arrow: true, tone: 'planning', label: ['large issue']},
+  );
+  return marks;
 }
 
 /** A CSS length custom property of `element` in pixels (rem or px). */
@@ -52,14 +78,12 @@ function lengthOf(element: Element, property: string): number {
 }
 
 /**
- * Measures and draws the back arrows, because the step rows wrap differently at every width.
- * Each arrow leaves the Iterate step just after its text, runs up through the text-free band at
- * the cards' right edge, and points at the first step of the phase it returns to, just after
- * that step's text. The arrows appear only once measured; until then the Iterate step says in
- * words where small and large issues go.
+ * Measures and draws the marks, because the step rows wrap differently at every width. The marks
+ * appear only once measured; until then the sr-only descriptions and the Iterate step say in
+ * words what they show.
  */
-function useBackArrows(list: React.RefObject<HTMLOListElement | null>): BackArrows | undefined {
-  const [arrows, setArrows] = useState<BackArrows>();
+function useDrawing(list: React.RefObject<HTMLOListElement | null>, marks: Mark[]): Drawing | undefined {
+  const [drawing, setDrawing] = useState<Drawing>();
   useEffect(() => {
     const root = list.current;
     if (!root) return undefined;
@@ -67,14 +91,13 @@ function useBackArrows(list: React.RefObject<HTMLOListElement | null>): BackArro
       const origin = root.getBoundingClientRect();
       // An inactive tab panel has no size; wait until it is shown.
       if (origin.height === 0) return;
-      const step = (anchor: string) => root.querySelector(`[data-anchor="${anchor}"]`);
+      const step = (anchor: string) => root.querySelector(`[data-step="${anchor}"]`);
       const markerY = (anchor: string) => {
         const box = step(anchor)?.querySelector(`.${styles.marker}`)?.getBoundingClientRect();
         return box ? box.top + box.height / 2 - origin.top : NaN;
       };
-      /** Where the step's text ends; the arrow keeps a gap from it. */
+      /** Where the step's text lines end. */
       const textRight = (anchor: string) => {
-        // Measure the text lines themselves, not the block boxes that hold them.
         const lines = [...(step(anchor)?.querySelectorAll(`.${styles.stepTitle}, .${styles.stepText}`) ?? [])].flatMap(
           (element) => {
             const range = document.createRange();
@@ -87,44 +110,63 @@ function useBackArrows(list: React.RefObject<HTMLOListElement | null>): BackArro
       const card = root.querySelector(`:scope > .${styles.planning}`);
       if (!card) return;
       const cardRight = card.getBoundingClientRect().right - origin.left;
-      const stroke = lengthOf(root, '--arrow-width');
-      const gap = lengthOf(root, '--arrow-gap');
-      const labelGap = lengthOf(root, '--label-gap');
-      const labelSize = lengthOf(root, '--label-size');
-      const spread = lengthOf(root, '--tail-spread');
+      const length = (property: string) => lengthOf(root, property);
+      const stroke = length('--arrow-width');
       const headLength = stroke * 3.2;
-      const iterateY = markerY('iterate');
-      const tail = textRight('iterate') + gap;
+      const gap = length('--arrow-gap');
+      const labelGap = length('--label-gap');
+      const labelSize = length('--label-size');
+      const spread = length('--tail-spread');
+      const lane: Record<Lane, number> = {
+        inner: cardRight - length('--inner-lane'),
+        small: cardRight - length('--small-lane'),
+        large: cardRight - length('--large-lane'),
+      };
 
-      const draw = (target: string, inset: string, offset: number): BackArrow => {
-        const x = cardRight - lengthOf(root, inset);
-        const top = markerY(target);
-        const bottom = iterateY + offset;
-        const tip = textRight(target) + gap;
-        const r = Math.max(0, Math.min(stroke * 3.5, (bottom - top) / 2, x - tail, x - tip - headLength));
+      // One shared column for every end: just after the longest text line any mark touches,
+      // but never so close to the inner lane that an arrow loses its arm.
+      const touched = new Set<string>();
+      for (const mark of marks) {
+        touched.add(mark.top).add(mark.bottom);
+        if (mark.lane !== 'inner') continue;
+        const phase = mark.top.slice(0, mark.top.lastIndexOf('-')) as Phase['kind'];
+        const from = Number(mark.top.split('-').pop());
+        const to = Number(mark.bottom.split('-').pop());
+        for (let i = from; i <= to; i += 1) touched.add(stepAnchor(phase, i));
+      }
+      const column = Math.min(
+        Math.max(...[...touched].map(textRight)) + gap,
+        lane.inner - stroke * 3.5 - headLength - gap,
+      );
+
+      const drawn: DrawnMark[] = marks.map((mark) => {
+        const x = lane[mark.lane];
+        const top = markerY(mark.top);
+        const bottom = markerY(mark.bottom) + (mark.bottomOffset ?? 0) * (spread / 2);
+        const width = mark.arrow ? stroke : stroke * 0.55;
+        const r = Math.max(0, Math.min(stroke * 3.5, (bottom - top) / 2, x - column - (mark.arrow ? headLength : 0)));
+        const end = column + (mark.arrow ? headLength - 1 : 0);
+        const lineHeight = labelSize * 1.2;
+        const firstLine = x + width / 2 + labelGap + labelSize / 2;
         return {
-          path: `M ${tail} ${bottom} H ${x - r} Q ${x} ${bottom} ${x} ${bottom - r} V ${top + r} Q ${x} ${top} ${x - r} ${top} H ${tip + headLength - 1}`,
-          head: `${tip},${top} ${tip + headLength},${top - headLength * 0.62} ${tip + headLength},${top + headLength * 0.62}`,
-          // Inside the curve, a clear gap left of the vertical run.
-          label: {x: x - stroke / 2 - labelGap - labelSize / 2, y: (top + bottom) / 2},
+          ...mark,
+          path: `M ${column} ${bottom} H ${x - r} Q ${x} ${bottom} ${x} ${bottom - r} V ${top + r} Q ${x} ${top} ${x - r} ${top} H ${end}`,
+          head: mark.arrow
+            ? `${column},${top} ${column + headLength},${top - headLength * 0.62} ${column + headLength},${top + headLength * 0.62}`
+            : undefined,
+          lines: mark.label.map((_, index) => ({x: firstLine + index * lineHeight, y: (top + bottom) / 2})),
         };
-      };
-      const next: BackArrows = {
-        width: origin.width,
-        height: origin.height,
-        small: draw('implementing', '--small-inset', -spread / 2),
-        large: draw('planning', '--large-inset', spread / 2),
-      };
-      if ([next.small, next.large].every((arrow) => !/NaN|Infinity/.test(arrow.path + arrow.head))) {
-        setArrows(next);
+      });
+      if (drawn.every((mark) => !/NaN|Infinity/.test(mark.path + (mark.head ?? '')))) {
+        setDrawing({width: origin.width, height: origin.height, marks: drawn});
       }
     };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(root);
     return () => observer.disconnect();
-  }, [list]);
-  return arrows;
+  }, [list, marks]);
+  return drawing;
 }
 
 function PhaseCard({phase, row}: {phase: Phase; row: number}): ReactNode {
@@ -151,13 +193,9 @@ function PhaseCard({phase, row}: {phase: Phase; row: number}): ReactNode {
           </span>
         ))}
       </p>
-      <ol className={clsx(styles.steps, spans.length > 0 && styles.withSpans)}>
+      <ol className={styles.steps}>
         {phase.steps.map((step, index) => (
-          <li
-            key={index}
-            className={clsx(styles.step, styles[step.kind])}
-            style={{gridRow: index + 1}}
-            data-anchor={anchorOf(phase, index)}>
+          <li key={index} className={clsx(styles.step, styles[step.kind])} data-step={stepAnchor(phase.kind, index)}>
             <span className={styles.marker} aria-hidden="true" />
             <span className={styles.stepBody}>
               <span className="kc-sr-only">{step.kind === 'skill' ? 'Skill: ' : 'You: '}</span>
@@ -166,8 +204,6 @@ function PhaseCard({phase, row}: {phase: Phase; row: number}): ReactNode {
             </span>
           </li>
         ))}
-        {phase.choice && <SpanMark span={phase.choice} />}
-        {phase.loop && <SpanMark span={phase.loop} loop />}
       </ol>
     </li>
   );
@@ -175,7 +211,7 @@ function PhaseCard({phase, row}: {phase: Phase; row: number}): ReactNode {
 
 /**
  * The skills of Guided Coding or Guided Learning in the order you use them, as real text so it
- * reflows on phones. Two arrows lead back from the Guiding Phase, as in the phase diagram.
+ * reflows on phones, with the iteration drawn over the cards.
  */
 export default function SkillTimeline({
   method,
@@ -185,23 +221,9 @@ export default function SkillTimeline({
   variant?: TimelineVariant;
 }): ReactNode {
   const phases = phasesFor(method, variant);
+  const [marks] = useState(() => marksFor(phases));
   const listRef = useRef<HTMLOListElement>(null);
-  const arrows = useBackArrows(listRef);
-  const back = (arrow: BackArrow, label: string, className: string) => (
-    <g className={className}>
-      <path className={styles.backLine} d={arrow.path} />
-      <polygon className={styles.backHead} points={arrow.head} />
-      <text
-        className={styles.backLabel}
-        x={arrow.label.x}
-        y={arrow.label.y}
-        transform={`rotate(-90 ${arrow.label.x} ${arrow.label.y})`}
-        textAnchor="middle"
-        dominantBaseline="central">
-        {label}
-      </text>
-    </g>
-  );
+  const drawing = useDrawing(listRef, marks);
 
   return (
     <DiagramFrame>
@@ -215,11 +237,27 @@ export default function SkillTimeline({
           {phases.map((phase, index) => (
             <PhaseCard key={phase.kind} phase={phase} row={index + 1} />
           ))}
-          {arrows && (
-            <li className={styles.backLayer} aria-hidden="true">
-              <svg width={arrows.width} height={arrows.height} viewBox={`0 0 ${arrows.width} ${arrows.height}`}>
-                {back(arrows.small, 'small issue', styles.backSmall)}
-                {back(arrows.large, 'large issue', styles.backLarge)}
+          {drawing && (
+            <li className={styles.marks} aria-hidden="true">
+              <svg width={drawing.width} height={drawing.height} viewBox={`0 0 ${drawing.width} ${drawing.height}`}>
+                {drawing.marks.map((mark) => (
+                  <g key={mark.key} className={clsx(styles[`tone-${mark.tone}`], !mark.arrow && styles.bracket)}>
+                    <path className={styles.markLine} d={mark.path} />
+                    {mark.head && <polygon className={styles.markHead} points={mark.head} />}
+                    {mark.lines.map(({x, y}, index) => (
+                      <text
+                        key={index}
+                        className={styles.markLabel}
+                        x={x}
+                        y={y}
+                        transform={`rotate(-90 ${x} ${y})`}
+                        textAnchor="middle"
+                        dominantBaseline="central">
+                        {mark.label[index]}
+                      </text>
+                    ))}
+                  </g>
+                ))}
               </svg>
             </li>
           )}
