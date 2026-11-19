@@ -26,7 +26,7 @@
   min-width: 0;
 }
 
-.columnLink {
+.columnBody {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -39,11 +39,11 @@
 }
 
 /* Inset focus ring so the outermost columns are not clipped at the screen edge. */
-a.columnLink:focus-visible {
+a.columnBody:focus-visible {
   outline-offset: -2px;
 }
 
-a.columnLink:hover {
+a.columnBody:hover {
   color: var(--kc-ink);
   text-decoration: none;
   background: var(--kc-accent-soft);
@@ -84,7 +84,7 @@ a.columnLink:hover {
 }
 
 /* Dark mode can brighten on hover; light mode keeps its contrast and relies on the column tint. */
-:global([data-theme='dark']) a.columnLink:hover .square:not(.squareUpcoming) {
+:global([data-theme='dark']) a.columnBody:hover .square:not(.squareUpcoming) {
   filter: brightness(1.12) saturate(1.1);
 }
 
@@ -116,9 +116,9 @@ a.columnLink:hover {
 
 .legendItem .square {
   animation: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
+  /* Same shape as the chart's squares at every width. */
+  width: min(var(--square), 14px);
+  height: min(var(--square), 14px);
 }
 
 .srOnly {

@@ -38,3 +38,7 @@
     padding: 1.4rem 1.25rem;
   }
 }
+
+.text a[href^="mailto:"] {
+  white-space: nowrap;
+}

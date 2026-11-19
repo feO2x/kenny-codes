@@ -4,7 +4,6 @@ import {useBlogPost} from '@docusaurus/plugin-content-blog/client';
 import BlogPostItemHeaderTitle from '@theme/BlogPostItem/Header/Title';
 import BlogPostItemHeaderInfo from '@theme/BlogPostItem/Header/Info';
 import BlogPostItemHeaderAuthors from '@theme/BlogPostItem/Header/Authors';
-import EventDetails from '@site/src/components/EventDetails';
 import {isEventPage} from '@site/src/utils/eventUtils';
 
 export default function BlogPostItemHeader(): ReactNode {
@@ -21,7 +20,6 @@ export default function BlogPostItemHeader(): ReactNode {
       <BlogPostItemHeaderTitle />
       <BlogPostItemHeaderInfo />
       <BlogPostItemHeaderAuthors />
-      {isEvent && <EventDetails />}
     </header>
   );
 }

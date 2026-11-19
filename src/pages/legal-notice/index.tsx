@@ -5,8 +5,8 @@ import { CONTACT_EMAIL, CONTACT_MAILTO } from "@site/src/utils/contact";
 export default function LegalNotice() {
   return (
     <Layout
-      title="Legal Notice"
-      description="Legal Notice and Contact Information"
+      title="Legal notice"
+      description="Legal notice and contact information for Kenny Pflug - Kenny Codes"
     >
       <main className="container kc-page">
         <header className="kc-page-header">

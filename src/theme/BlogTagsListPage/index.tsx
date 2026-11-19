@@ -73,7 +73,7 @@ function EventTopics({tags}: {tags: ReadonlyArray<TagItem>}): ReactNode {
     .filter((tag) => tag.count > 0)
     .sort(byCountThenLabel);
   return (
-    <Layout title="Topics" description="Talks and workshops by Kenny Pflug, by topic">
+    <Layout title="Talk topics" description="Talks and workshops by Kenny Pflug, by topic">
       <main className="container kc-page">
         <header className="kc-page-header">
           <Link to="/events" className="kc-back-link">
@@ -93,11 +93,16 @@ function EventTopics({tags}: {tags: ReadonlyArray<TagItem>}): ReactNode {
 export default function BlogTagsListPage({tags, sidebar}: Props): ReactNode {
   const title = 'Topics';
   const isEvents = tags.length > 0 && isEventPage({permalink: tags[0].permalink});
+  // The visible h1 is "Topics" on both indexes; tab titles and descriptions tell them apart.
+  const metaTitle = isEvents ? 'Talk topics' : 'Article topics';
+  const metaDescription = isEvents
+    ? 'Talks and workshops by Kenny Pflug, by topic'
+    : 'Articles by Kenny Pflug, by topic';
 
   return (
     <HtmlClassNameProvider
       className={clsx(ThemeClassNames.wrapper.blogPages, ThemeClassNames.page.blogTagsListPage)}>
-      <PageMetadata title={title} />
+      <PageMetadata title={metaTitle} description={metaDescription} />
       <SearchMetadata tag="blog_tags_list" />
       {isEvents ? (
         <EventTopics tags={tags} />

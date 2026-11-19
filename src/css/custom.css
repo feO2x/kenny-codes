@@ -414,6 +414,19 @@ hr {
   padding-block: 0.65rem;
 }
 
+/* Drawer dropdown as one button (src/theme/NavbarItem/DropdownNavbarItem/Mobile). */
+.kc-menu-disclosure {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  color: var(--kc-muted);
+}
+
+/* Legal notice and other text pages: the header already spaces the first section. */
+.kc-page-header + .markdown > h2:first-child {
+  margin-top: 0;
+}
+
 /* ---------- Footer ---------- */
 
 .footer,
@@ -534,7 +547,7 @@ hr {
 .markdown > h3,
 .markdown > h4,
 .markdown .theme-admonition {
-  max-width: 70ch;
+  max-width: 62ch;
 }
 
 .markdown blockquote {
@@ -583,7 +596,7 @@ hr {
 }
 
 [data-theme='dark'] .markdown svg rect[fill="#D6D6D6"] {
-  fill: #cdd6e4;
+  fill: #b9c4d6;
 }
 
 /* Diagrams that put no text on the plate can use a dark plate in dark mode. */
@@ -764,12 +777,62 @@ pre code,
   }
 }
 
-/* Event pages have no sidebar or TOC: start the column on the container edge like /events,
-   at the width of the running text so cards and text share one right edge. */
+/* Event pages have no sidebar or TOC: start the column on the container edge like /events.
+   Narrow screens stack details, description, and invitation at the text width; wide screens put
+   the details and invitation in a column beside the description. */
 .kc-event-page main.col {
   --ifm-col-width: 100%;
   margin-left: 0;
-  max-width: calc(47rem + 2 * var(--ifm-spacing-horizontal));
+  max-width: calc(44rem + 2 * var(--ifm-spacing-horizontal));
+}
+
+.kc-event-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "details" "body" "invite";
+}
+
+/* On narrow screens the side column dissolves so details go first and the invite last. */
+.kc-event-layout__side { display: contents; }
+.kc-event-layout__details { grid-area: details; }
+.kc-event-layout__body { grid-area: body; min-width: 0; }
+.kc-event-layout__invite { grid-area: invite; }
+
+@media (min-width: 1200px) {
+  .kc-event-page main.col {
+    max-width: none;
+  }
+
+  .kc-event-page article > header {
+    max-width: 44rem;
+  }
+
+  .kc-event-layout {
+    grid-template-columns: minmax(0, 44rem) minmax(16rem, 21rem);
+    grid-template-areas: "body side";
+    column-gap: clamp(3rem, 1rem + 4vw, 6rem);
+    align-items: start;
+    margin-top: 2rem;
+  }
+
+  .kc-event-layout__side {
+    grid-area: side;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: sticky;
+    top: calc(var(--ifm-navbar-height) + 2rem);
+  }
+
+  /* The cards bring their own margins for the stacked layout; the column gap replaces them. */
+  .kc-event-layout .kc-event-layout__side > div > * {
+    margin-block: 0;
+  }
+
+  .kc-event-page article > footer,
+  .kc-event-page .pagination-nav {
+    max-width: 44rem;
+  }
 }
 
 .pagination-nav__link--prev .pagination-nav__label::before,
@@ -796,6 +859,11 @@ pre code,
   padding-bottom: 2.5rem;
   margin-bottom: 2.5rem !important;
   border-bottom: 1px solid var(--kc-line);
+}
+
+.blog-list-page main > article footer,
+.blog-tags-post-list-page main > article footer {
+  margin-top: 1.5rem !important;
 }
 
 .blog-list-page main > article:last-of-type,
@@ -956,6 +1024,15 @@ pre code,
 .kc-back-link:hover {
   color: var(--kc-ink);
   text-decoration: none;
+}
+
+/* Laptop widths: the docs column is narrow between sidebar and TOC. */
+@media (min-width: 997px) and (max-width: 1279px) {
+  .markdown h1:first-child {
+    font-stretch: 106%;
+    font-size: 2.35rem;
+    text-wrap: pretty;
+  }
 }
 
 /* Long doc titles on phones: a narrower width axis keeps them to fewer lines. */

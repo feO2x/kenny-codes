@@ -5,7 +5,6 @@ import {
   HtmlClassNameProvider,
   ThemeClassNames,
 } from '@docusaurus/theme-common';
-import {useBlogTagsPostsPageTitle} from '@docusaurus/theme-common/internal';
 import Link from '@docusaurus/Link';
 import BlogLayout from '@theme/BlogLayout';
 import BlogListPaginator from '@theme/BlogListPaginator';
@@ -19,10 +18,14 @@ import EventsBlogTagsPostsContent from './EventsBlogTagsPostsContent';
 import {isEventsBlogList} from '@site/src/utils/eventUtils';
 
 function BlogTagsPostsPageMetadata({tag}: Props): ReactNode {
-  const title = useBlogTagsPostsPageTitle(tag);
+  const isEvents = isEventsBlogList(tag);
+  const title = isEvents ? `Talks and workshops on ${tag.label}` : `Articles on ${tag.label}`;
+  const description = isEvents
+    ? `Talks and workshops by Kenny Pflug on ${tag.label}`
+    : `Articles by Kenny Pflug on ${tag.label}`;
   return (
     <>
-      <PageMetadata title={title} description={tag.description} />
+      <PageMetadata title={title} description={description} />
       <SearchMetadata tag="blog_tags_posts" />
     </>
   );

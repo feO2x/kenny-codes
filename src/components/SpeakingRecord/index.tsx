@@ -111,11 +111,11 @@ export default function SpeakingRecord({
               {total > 0 && interactive && yearLink && upcomingLink ? (
                 <Link
                   to={column.delivered > 0 ? yearLink(column.year) : upcomingLink}
-                  className={styles.columnLink}>
+                  className={styles.columnBody}>
                   {body}
                 </Link>
               ) : (
-                <span className={styles.columnLink}>{body}</span>
+                <span className={styles.columnBody}>{body}</span>
               )}
             </li>
           );
@@ -125,6 +125,7 @@ export default function SpeakingRecord({
         <span className={styles.legendItem}>
           <span className={styles.square} aria-hidden="true" /> One talk, workshop, or webinar
         </span>
+        {interactive && yearLink && <span>Select a year to jump to its sessions.</span>}
         {hasUpcoming && (
           <span className={styles.legendItem}>
             <span className={clsx(styles.square, styles.squareUpcoming)} aria-hidden="true" /> Upcoming

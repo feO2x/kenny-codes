@@ -203,6 +203,23 @@
   text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
 }
 
+/* Below desktop widths the format moves under the venue so titles keep their room. */
+@media (max-width: 996px) {
+  .row {
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+  }
+
+  .aside {
+    grid-column: 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    text-align: left;
+    padding-top: 0.35rem;
+  }
+}
+
 @media (max-width: 720px) {
   .row {
     grid-template-columns: 3.25rem minmax(0, 1fr);
