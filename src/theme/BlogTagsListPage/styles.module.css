@@ -17,21 +17,24 @@
 .ranking {
   --square: 12px;
   --gap: 3px;
+  /* One shared label column, as wide as the longest label, so every bar starts at the same x. */
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: clamp(1.5rem, 1rem + 2vw, 3rem);
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.ranking li {
+.ranking li,
+.rank {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
   margin: 0;
 }
 
-/* Name in the archive's year column, squares and count in its content column. */
 .rank {
-  display: grid;
-  grid-template-columns: minmax(9.5rem, 2fr) minmax(0, 10fr);
-  grid-template-areas: "label bar";
-  gap: 0.35rem clamp(1.5rem, 1rem + 2vw, 3rem);
   align-items: center;
   padding: 0.6rem 0.75rem;
   margin-inline: -0.75rem;
@@ -46,18 +49,14 @@
 }
 
 .rankLabel {
-  grid-area: label;
   font-weight: 650;
   font-stretch: 106%;
   line-height: 1.25;
-  /* Labels wrap between words only. */
-  overflow-wrap: normal;
-  hyphens: manual;
+  white-space: nowrap;
 }
 
 /* The count follows its squares directly, so each number sits at the end of its own bar. */
 .rankBar {
-  grid-area: bar;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -85,8 +84,6 @@
   color: var(--kc-muted);
 }
 
-/* Narrow lists (phones, or the blog column beside its sidebar): label and count on one line, the
-   squares below at full width. */
 .rankingWrap {
   container-type: inline-size;
 }
@@ -103,28 +100,22 @@
   }
 }
 
-@container (max-width: 40rem) {
+/* Phones and small tablets: the label above its bar; the count still follows the squares. */
+@container (max-width: 44rem) {
+  .ranking {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .rank {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "label count"
-      "squares squares";
+    row-gap: 0.4rem;
   }
 
-  .rankBar {
-    display: contents;
+  .rankLabel {
+    white-space: normal;
   }
 
-  .rankSquares {
-    grid-area: squares;
-  }
-
-  .rankCount {
-    grid-area: count;
-  }
 }
 
-/* Small enough that the longest row (36 sessions) stays on one line at 320px. */
 @container (max-width: 30rem) {
   .rankSquares {
     --square: 6px;
@@ -133,6 +124,12 @@
 
   .rankSquare {
     border-radius: 1.5px;
+  }
+}
+
+@container (max-width: 20rem) {
+  .rankSquares {
+    --square: 5px;
   }
 }
 

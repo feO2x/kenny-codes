@@ -469,8 +469,13 @@ hr {
   min-width: 24px;
 }
 
+/* The external-link icon stays for screen readers ("opens in new tab") but is not drawn. */
 .footer__link-item svg {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
 .footer__bottom {
@@ -478,6 +483,12 @@ hr {
   padding-top: 1.5rem;
   border-top: 1px solid rgba(160, 185, 230, 0.12);
   text-align: left;
+}
+
+/* Docusaurus dims the footer logo to 50%; the brand mark shows at full strength. */
+.footer__bottom a:has(> .footer__logo) {
+  display: inline-block;
+  opacity: 1;
 }
 
 .footer__copyright {
@@ -558,7 +569,13 @@ hr {
   transition: text-decoration-color 0.15s ease;
 }
 
-.markdown a:not(.button):not(.hash-link):hover {
+/* Light mode needs a firmer underline to reach 3:1 against the page and admonition cards. */
+[data-theme='light'] .markdown a:not(.button):not(.hash-link) {
+  text-decoration-color: var(--kc-control-line);
+}
+
+.markdown a:not(.button):not(.hash-link):hover,
+[data-theme='light'] .markdown a:not(.button):not(.hash-link):hover {
   text-decoration-color: currentColor;
 }
 
@@ -1081,7 +1098,7 @@ aside.theme-doc-sidebar-container {
   .markdown h1:first-child {
     font-stretch: 106%;
     font-size: 2.35rem;
-    text-wrap: pretty;
+    text-wrap: balance;
   }
 }
 

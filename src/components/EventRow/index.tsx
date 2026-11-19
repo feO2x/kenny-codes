@@ -85,7 +85,7 @@ export default function EventRow({
       <div className={styles.aside}>
         {format && <span className={styles.format}>{format}</span>}
         {videoUrl && (
-          <a className={styles.video} href={videoUrl} target="_blank" rel="noopener noreferrer">
+          <a className={styles.video} href={videoUrl}>
             <FaYoutube aria-hidden="true" /> Watch recording
           </a>
         )}

@@ -12,7 +12,7 @@ export default function EventInvite(): ReactNode {
       <p className={styles.text}>
         I give talks and workshops in German and English, on site or online. Write to{' '}
         <a href={`${CONTACT_MAILTO}?subject=Speaking%20inquiry`}>{CONTACT_EMAIL}</a> or message me on{' '}
-        <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+        <a href={LINKEDIN_URL}>
           LinkedIn
         </a>
         .

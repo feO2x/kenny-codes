@@ -90,7 +90,8 @@ const byLabel = (a: TagItem, b: TagItem) => a.label.localeCompare(b.label, 'en',
  * laid out on the same grid as the year groups of the events archive. Short lists stay one cloud.
  */
 function TopicIndex({tags, unit}: {tags: ReadonlyArray<TagItem>; unit: Unit}): ReactNode {
-  if (tags.length <= 16) {
+  // Short lists (the blog's) read best as one cloud; the index pays off for the talks' 70+ topics.
+  if (tags.length <= 30) {
     return <TagCloud tags={[...tags].sort(byCountThenLabel)} unit={unit} />;
   }
   const frequent = [...tags].sort(byCountThenLabel).slice(0, 10);
@@ -213,7 +214,7 @@ export default function BlogTagsListPage({tags, sidebar}: Props): ReactNode {
             <Heading as="h1" className="kc-page-title">
               {title}
             </Heading>
-            <p className="kc-page-lede">Articles by topic, most frequent first.</p>
+            <p className="kc-page-lede">Every topic I write about, most frequent first.</p>
           </header>
           <TopicIndex tags={tags} unit={ARTICLES} />
         </BlogLayout>

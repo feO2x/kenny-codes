@@ -7,6 +7,6 @@ export const X_URL = 'https://x.com/feO2x';
 
 /** A recorded session the home page offers so organizers can judge the delivery. */
 export const FEATURED_RECORDING = {
-  label: 'Watch the Guided Coding live stream',
+  label: 'Watch me present Guided Coding',
   url: 'https://www.youtube.com/live/vopBYXp9YV0',
 };

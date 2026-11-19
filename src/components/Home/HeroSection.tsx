@@ -3,7 +3,7 @@ import {deliveredSessions} from '@site/src/utils/eventUtils';
 import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import {FaGithub, FaLinkedinIn} from 'react-icons/fa';
+import {FaGithub, FaLinkedinIn, FaYoutube} from 'react-icons/fa';
 import {FaXTwitter} from 'react-icons/fa6';
 import homeData from '@site/src/data/home-data.json';
 import SpeakingRecord from '../SpeakingRecord';
@@ -42,9 +42,7 @@ export default function HeroSection(): ReactNode {
             </p>
             <p className={styles.heroRole}>
               Engineering Manager at{' '}
-              <a href="https://gwvs.de/" target="_blank" rel="noopener noreferrer">
-                TELIS/GWVS
-              </a>
+              <a href="https://gwvs.de/">TELIS/GWVS</a>
               , conference speaker, and consultant from Regensburg, Germany. Book me for talks,
               in-house workshops, or consulting on cloud-native .NET and AI-assisted development.
             </p>
@@ -58,10 +56,14 @@ export default function HeroSection(): ReactNode {
                 See talks and workshops
               </Link>
             </div>
+            {/* A recording lets organizers judge the delivery, not just the record. */}
+            <a href={FEATURED_RECORDING.url} className={styles.watch}>
+              <FaYoutube aria-hidden="true" /> {FEATURED_RECORDING.label}
+            </a>
             <ul className={styles.socials} aria-label="Kenny Pflug elsewhere">
               {socials.map(({label, href, Icon}) => (
                 <li key={label}>
-                  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}>
+                  <a href={href} aria-label={label} title={label}>
                     <Icon aria-hidden="true" />
                   </a>
                 </li>
@@ -89,19 +91,9 @@ export default function HeroSection(): ReactNode {
             <p className={styles.recordText}>
               Regular speaker at {joinList(venues.slice(0, 5))}.
             </p>
-            <div className={styles.recordLinks}>
-              <Link to="/events" className={styles.textLink}>
-                Browse all events
-              </Link>
-              {/* A recording lets organizers judge the delivery, not just the record. */}
-              <a
-                href={FEATURED_RECORDING.url}
-                className={styles.textLink}
-                target="_blank"
-                rel="noopener noreferrer">
-                {FEATURED_RECORDING.label}
-              </a>
-            </div>
+            <Link to="/events" className={styles.textLink}>
+              Browse all events
+            </Link>
           </div>
           <SpeakingRecord
             events={events}

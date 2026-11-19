@@ -6,6 +6,9 @@ import {useNavbarMobileSidebar} from '@docusaurus/theme-common/internal';
 
 type Props = WrapperProps<typeof NavbarMobileSidebarType>;
 
+// This wrapper relies on the drawer markup of @docusaurus/theme-classic 3.10 (`.navbar-sidebar`,
+// `nav.navbar`, `.navbar__inner`, `.navbar-sidebar__close`). Recheck it when upgrading Docusaurus.
+
 /** Visible, focusable elements inside the drawer's active panel and header. */
 function drawerFocusables(): HTMLElement[] {
   return Array.from(
@@ -39,7 +42,14 @@ export default function NavbarMobileSidebarWrapper(props: Props): ReactNode {
     if (!sidebar.shown) {
       if (wasShown.current) {
         wasShown.current = false;
-        document.querySelector<HTMLElement>('.navbar__toggle')?.focus();
+        // Return focus to the menu button; if the drawer closed because the window grew past the
+        // mobile breakpoint, that button is hidden, so the visible logo link takes focus instead.
+        const toggle = document.querySelector<HTMLElement>('.navbar__toggle');
+        const target =
+          toggle && toggle.offsetParent !== null
+            ? toggle
+            : document.querySelector<HTMLElement>('.navbar__inner .navbar__brand');
+        target?.focus();
       }
       return undefined;
     }

@@ -76,6 +76,7 @@ export default function SpeakingRecord({
     <figure
       className={clsx(styles.record, className)}
       style={{'--columns': columns.length} as CSSProperties}
+      data-bleed={columns.length > 10 || undefined}
       aria-label="Talks, workshops, and webinars per year">
       <ol className={styles.chart} style={{'--rows': tallest} as CSSProperties}>
         {columns.map((column, col) => {
@@ -126,12 +127,18 @@ export default function SpeakingRecord({
         <span className={styles.legendItem}>
           <span className={styles.square} aria-hidden="true" /> One talk, workshop, or webinar
         </span>
-        {interactive && yearLink && <span>Select a year to jump to its sessions.</span>}
-        {hasUpcoming && (
-          <span className={styles.legendItem}>
-            <span className={clsx(styles.square, styles.squareUpcoming)} aria-hidden="true" /> Upcoming
-          </span>
-        )}
+        {hasUpcoming &&
+          (interactive && upcomingLink ? (
+            <Link to={upcomingLink} className={clsx(styles.legendItem, styles.legendLink)}>
+              <span className={clsx(styles.square, styles.squareUpcoming)} aria-hidden="true" /> Upcoming
+              sessions
+            </Link>
+          ) : (
+            <span className={styles.legendItem}>
+              <span className={clsx(styles.square, styles.squareUpcoming)} aria-hidden="true" /> Upcoming
+            </span>
+          ))}
+        {interactive && yearLink && <span>Select a year to jump to its past sessions.</span>}
       </figcaption>
     </figure>
   );

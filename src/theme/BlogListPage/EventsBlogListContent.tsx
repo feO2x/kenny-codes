@@ -21,7 +21,7 @@ export function EventsContact(): ReactNode {
     <p className={styles.contact}>
       Want me at your conference, user group, or company? Write to{' '}
       <a href={CONTACT_MAILTO}>{CONTACT_EMAIL}</a> or message me on{' '}
-      <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+      <a href={LINKEDIN_URL}>
         LinkedIn
       </a>
       .
@@ -87,7 +87,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
               <p>
                 No public sessions are scheduled right now. New dates appear here first, and I
                 announce them on{' '}
-                <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+                <a href={LINKEDIN_URL}>
                   LinkedIn
                 </a>
                 .

@@ -115,6 +115,20 @@ a.columnBody:hover {
   gap: 0.5rem;
 }
 
+.legendLink {
+  color: var(--kc-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--kc-control-line);
+}
+
+.legendLink:hover {
+  color: var(--kc-ink);
+  text-decoration-color: var(--ifm-color-primary);
+}
+
 .legendItem .square {
   animation: none;
   /* Same shape as the chart's squares at every width. */
@@ -164,15 +178,19 @@ a.columnBody:hover {
   }
 }
 
-/* On the narrowest phones, use the full screen width so each year stays a 24px target. */
+/* On the narrowest phones, long charts use the full screen width so each year stays a 24px
+   target; short ones keep the page gutter. */
 @media (max-width: 400px) {
   .record {
     --square: 11px;
     --gap: 3px;
+  }
+
+  .record[data-bleed] {
     margin-inline: -1rem;
   }
 
-  .legend {
+  .record[data-bleed] .legend {
     padding-inline: 1rem;
   }
 }

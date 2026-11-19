@@ -290,7 +290,8 @@ const config: Config = {
           title: "Meet me",
           items: [
             { label: "Talks and workshops", to: "/events" },
-            { label: "Email", href: "mailto:info@kenny-codes.net" },
+            // An html item: Docusaurus would treat a mailto href as external and open a blank tab.
+            { html: '<a class="footer__link-item" href="mailto:info@kenny-codes.net">Email</a>' },
           ],
         },
         {
@@ -305,6 +306,14 @@ const config: Config = {
           ],
         },
       ],
+      // The logo's squircle closes every page; the footer is always navy, so it uses the dark logo.
+      logo: {
+        alt: "Kenny Codes home",
+        src: "img/logo-dark.svg",
+        href: "/",
+        width: 36,
+        height: 36,
+      },
       // Rendered as HTML, so the link goes through baseUrl to keep working in PR previews.
       copyright: `© ${new Date().getFullYear()} Kenny Pflug, Regensburg, Germany. <a class="footer__link-item" href="${baseUrl}legal-notice">Legal notice</a>`,
     },

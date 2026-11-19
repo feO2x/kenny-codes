@@ -209,6 +209,11 @@
     grid-template-columns: 4.25rem minmax(0, 1fr);
   }
 
+  /* The date block spans the title and the format line, so it does not push the format down. */
+  .date {
+    grid-row: 1 / span 2;
+  }
+
   .aside {
     grid-column: 2;
     flex-direction: row;
