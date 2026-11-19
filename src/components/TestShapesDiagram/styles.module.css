@@ -1,3 +1,16 @@
+/* Shades of the Automated Tests' magenta, as in the CHACK diagram; navy text in both themes. */
+.e2e {
+  fill: var(--kc-magenta);
+}
+
+.integration {
+  fill: color-mix(in oklab, var(--kc-magenta) 50%, var(--kc-magenta-from));
+}
+
+.unit {
+  fill: var(--kc-magenta-from);
+}
+
 /* Side by side, in proportion to their widths; stacked when the card gets narrow. */
 .shapes {
   display: grid;

@@ -137,7 +137,6 @@ async function readAllContent(dir: string, type: string): Promise<ContentItem[]>
       // Link
       const link = `/${type}/${slug}`;
 
-
       const tags = Array.isArray(data.tags) ? data.tags.map((tag) => String(tag)) : undefined;
       return {
         title,
@@ -161,7 +160,6 @@ async function readAllContent(dir: string, type: string): Promise<ContentItem[]>
   items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   return items;
 }
-
 
 async function main(): Promise<void> {
   const allPosts = await readAllContent(BLOG_DIR, "blog");

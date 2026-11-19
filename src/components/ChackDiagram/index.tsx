@@ -124,7 +124,7 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
   const rootToHumble = connector('composition-root', 'humble-objects');
 
   return (
-    <DiagramFrame minWidth={700} label="CHACK diagram">
+    <DiagramFrame minWidth={680} label="CHACK diagram">
       <svg
         viewBox="0 0 1086 580"
         xmlns="http://www.w3.org/2000/svg"
@@ -209,7 +209,7 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
           width="142"
           height="56"
           rx="10"
-          {...(active('core') ? {className: d.soft, stroke: tileUrl(prefix, 'brand')} : {className: d.box})}
+          {...(active('core') ? {className: d.soft, stroke: tileUrl(prefix, 'brandLine')} : {className: d.box})}
         />
         <Label x={429} y={328} lines={['I/O', 'Abstractions']} />
 
@@ -221,7 +221,7 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
         <g style={active('automated-tests') ? markStyle('magenta') : undefined}>
           <rect x="790" y="250" width="290" height="230" rx="14" className={d.group} />
           {/* Above the group, left of the integration test connectors at x=924. */}
-          <text x="792" y="222" fontSize="18" className={clsx(active('automated-tests') ? d.markText : undefined, d.strong)}>
+          <text x="792" y="226" fontSize="18" className={clsx(active('automated-tests') ? d.markText : undefined, d.strong)}>
             <tspan x="792">Automated</tspan>
             <tspan x="792" dy="21">
               Tests

@@ -1,4 +1,5 @@
-/* Sits in the shared diagram card; the two series in the diagram palette's blue and magenta. */
+/* Sits in the shared diagram card. The series reuse the CHACK colours: in-memory work is the
+   Core's mint, database reads the violet of the Humble Objects that perform the I/O. */
 .figure {
   container-type: inline-size;
   margin: 0;
@@ -65,15 +66,15 @@
 }
 
 .inMemory {
-  background: var(--kc-mark-blue);
+  background: var(--kc-mark-mint);
 }
 
 /* Hatched as well as coloured, so the two series differ without relying on hue. */
 .database {
   background: repeating-linear-gradient(
     135deg,
-    var(--kc-mark-magenta) 0 5px,
-    color-mix(in oklab, var(--kc-mark-magenta) 55%, var(--kc-surface)) 5px 8px
+    var(--kc-mark-violet) 0 5px,
+    color-mix(in oklab, var(--kc-mark-violet) 55%, var(--kc-surface)) 5px 8px
   );
 }
 

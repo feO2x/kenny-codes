@@ -420,9 +420,14 @@
 }
 
 /* The phase colours of the Guided Coding diagrams in the docs. */
-.phase:nth-child(1)::before { box-shadow: none; background: var(--kc-tile-blue); color: var(--kc-on-gradient); }
-.phase:nth-child(2)::before { box-shadow: none; background: var(--kc-tile-amber); color: var(--kc-on-gradient); }
-.phase:nth-child(3)::before { box-shadow: none; background: var(--kc-tile-violet); color: var(--kc-on-gradient); }
+.phase:nth-child(n)::before {
+  box-shadow: none;
+  color: var(--kc-on-gradient);
+}
+
+.phase:nth-child(1)::before { background: var(--kc-tile-blue); }
+.phase:nth-child(2)::before { background: var(--kc-tile-amber); }
+.phase:nth-child(3)::before { background: var(--kc-tile-violet); }
 
 .phase:not(:last-child)::after {
   content: "";
@@ -512,17 +517,10 @@
   border-radius: 2.5px;
 }
 
+/* Amber: the meter belongs to the Implement step, the Implementing Phase's colour. */
 .meter > .meterOn {
   border-color: transparent;
-  background: var(--kc-ramp-from);
-}
-
-.meter > .meterOn:nth-child(2) {
-  background: var(--kc-ramp-mid);
-}
-
-.meter > .meterOn:nth-child(3) {
-  background: var(--kc-ramp-to);
+  background: var(--kc-mark-amber);
 }
 
 /* CHACK in miniature: the dashed box is the process boundary, Humble Objects straddle it. */
@@ -565,9 +563,9 @@
   color: var(--kc-on-gradient);
 }
 
-.chackHumble.chackTile { background: var(--kc-tile-violet); }
-.chackTests { background: var(--kc-tile-magenta); }
-.chackRoot { background: var(--kc-tile-amber); }
+.chackTile.chackHumble { background: var(--kc-tile-violet); }
+.chackTile.chackTests { background: var(--kc-tile-magenta); }
+.chackTile.chackRoot { background: var(--kc-tile-amber); }
 
 .chackCore {
   grid-column: 1 / -1;

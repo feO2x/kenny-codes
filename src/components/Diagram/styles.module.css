@@ -21,6 +21,30 @@
   overscroll-behavior-x: contain;
 }
 
+/* While a diagram is cut off, show it: a thin visible scrollbar and a fade at the cut edge. */
+.overflowing {
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kc-control-line) transparent;
+}
+
+/* Scroll position flags, set by DiagramFrame. */
+.atStart,
+.atEnd {
+}
+
+.overflowing:not(.atEnd) {
+  mask-image: linear-gradient(to left, transparent, #000 2.5rem);
+}
+
+.overflowing:not(.atStart).atEnd {
+  mask-image: linear-gradient(to right, transparent, #000 2.5rem);
+}
+
+.overflowing:not(.atStart):not(.atEnd) {
+  mask-image: linear-gradient(to right, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent);
+}
+
 .scroll > svg {
   min-width: var(--diagram-min-width);
 }
@@ -50,15 +74,6 @@
 }
 
 .svg .onGradient {
-  fill: var(--kc-on-gradient);
-}
-
-/* Text on the ramp colours: white on the darker light-mode ramp, navy on the bright one. */
-.svg .onRamp {
-  fill: #ffffff;
-}
-
-:global([data-theme='dark']) .svg .onRamp {
   fill: var(--kc-on-gradient);
 }
 
@@ -98,8 +113,14 @@
   stroke-width: 2;
 }
 
-/* The brand gradient; the element sets fill or stroke to its url(). */
+/* A tile; the element sets its fill to the gradient's url(). In light mode a faint navy edge
+   keeps the pastel ends of the tiles apart from the white card. */
 .gradient {
+}
+
+:global([data-theme='light']) .gradient {
+  stroke: rgba(12, 26, 48, 0.22);
+  stroke-width: 1;
 }
 
 /* Context that is not part of the model, e.g. frameworks and libraries. */
@@ -141,19 +162,6 @@
 
 .badgeOnGradient {
   fill: rgba(255, 255, 255, 0.55);
-}
-
-.ramp1 {
-  fill: var(--kc-ramp-from);
-}
-
-.ramp2 {
-  fill: var(--kc-ramp-mid);
-}
-
-/* The ramp's teal, one step darker in light mode so white text on it reaches 4.5:1. */
-.ramp3 {
-  fill: var(--kc-upcoming);
 }
 
 .separator {
@@ -203,7 +211,7 @@
 
 .headHollow {
   fill: var(--kc-surface);
-  stroke: var(--kc-muted);
+  stroke: var(--mark, var(--kc-muted));
   stroke-width: 1.5;
   stroke-linejoin: round;
 }
@@ -212,19 +220,9 @@
   .svg text,
   .svg .muted,
   .svg .onGradient,
-  .svg .onRamp,
-  :global([data-theme='dark']) .svg .onRamp,
   .svg .markText,
   .head {
     fill: CanvasText;
-  }
-
-  .ramp1,
-  .ramp2,
-  .ramp3 {
-    fill: Canvas;
-    stroke: CanvasText;
-    stroke-width: 2;
   }
 
   .separator {
@@ -254,5 +252,16 @@
 
   .headHollow {
     fill: Canvas;
+  }
+
+  /* Without colour, the highlighted category or phase stands out by a heavier outline. */
+  .gradient,
+  :global([data-theme='light']) .gradient,
+  .tint {
+    stroke-width: 3.5;
+  }
+
+  .svg .markText {
+    font-weight: 750;
   }
 }

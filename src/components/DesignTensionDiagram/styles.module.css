@@ -37,6 +37,7 @@
 
 .bullets li {
   position: relative;
+  text-wrap: pretty;
   margin: 0 0 0.6rem;
   padding-left: 1.3rem;
   font-size: 0.925rem;

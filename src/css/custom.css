@@ -14,18 +14,13 @@
   /* Blue-to-mint ramp for small marks (record squares, stage meter), darkened for light mode. */
   --kc-ramp-from: #0066d6;
   --kc-ramp-to: #008f7a;
-  /* Declared on :root, so it follows the dark theme's ramp too. */
-  --kc-ramp-mid: color-mix(in oklab, var(--kc-ramp-to) 50%, var(--kc-ramp-from));
   /* Text on the brand gradient: navy in both themes. */
   --kc-on-gradient: #0c1a30;
 
   /* Diagram palette: neon tiles beside the brand gradient, the same in both themes with navy
      text on them. Each colour has a "mark" shade for thin lines, small squares and labels,
      darker in light mode so it keeps 4.5:1 against the page. */
-  --kc-tile-blue: linear-gradient(135deg, #7cbcff 0%, #3393ff 100%);
-  --kc-tile-violet: linear-gradient(135deg, #b9a4ff 0%, #8b6cff 100%);
-  --kc-tile-magenta: linear-gradient(135deg, #ff9fd0 0%, #ff5c9e 100%);
-  --kc-tile-amber: linear-gradient(135deg, #ffd780 0%, #ffa63d 100%);
+  /* Each tile runs from its light "-from" shade to the full colour (blue is --kc-blue). */
   --kc-blue-from: #7cbcff;
   --kc-violet-from: #b9a4ff;
   --kc-violet: #8b6cff;
@@ -33,11 +28,18 @@
   --kc-magenta: #ff5c9e;
   --kc-amber-from: #ffd780;
   --kc-amber: #ffa63d;
+  --kc-tile-blue: linear-gradient(135deg, var(--kc-blue-from), var(--kc-blue));
+  --kc-tile-violet: linear-gradient(135deg, var(--kc-violet-from), var(--kc-violet));
+  --kc-tile-magenta: linear-gradient(135deg, var(--kc-magenta-from), var(--kc-magenta));
+  --kc-tile-amber: linear-gradient(135deg, var(--kc-amber-from), var(--kc-amber));
   --kc-mark-blue: #0066d6;
   --kc-mark-violet: #6a4fe0;
   --kc-mark-magenta: #c2266f;
   --kc-mark-amber: #9a5800;
-  --kc-mark-mint: #007a68;
+  --kc-mark-mint: var(--kc-upcoming);
+  /* The brand gradient as an outline: darker ends in light mode so the edge stays visible. */
+  --kc-brand-line-from: #007a68;
+  --kc-brand-line-to: #0066d6;
 
   /* Surfaces and text (light theme) */
   --kc-bg: #f5f8fc;
@@ -125,7 +127,8 @@
   --kc-mark-violet: #b9a4ff;
   --kc-mark-magenta: #ff9fd0;
   --kc-mark-amber: #ffd780;
-  --kc-mark-mint: #33ffdc;
+  --kc-brand-line-from: var(--kc-mint);
+  --kc-brand-line-to: var(--kc-blue);
   --kc-bg: #0b1424;
   --kc-surface: #0f1b30;
   --kc-surface-raised: #15233d;

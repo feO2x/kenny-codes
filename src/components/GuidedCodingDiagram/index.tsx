@@ -27,7 +27,7 @@ const phases: {id: Phase; number: number; name: string; x: number; tile: Tile}[]
 
 const BOX_Y = 132;
 const BOX_W = 232;
-const BOX_H = 58;
+const BOX_H = 64;
 const MID_Y = BOX_Y + BOX_H / 2;
 
 /** A downward arrowhead whose tip touches (x, y). */
@@ -53,9 +53,9 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
     !highlight || touches.includes(highlight) ? markStyle(tile) : undefined;
 
   return (
-    <DiagramFrame minWidth={700} label="Guided Coding workflow diagram">
+    <DiagramFrame minWidth={540} label="Guided Coding workflow diagram">
       <svg
-        viewBox="0 0 930 210"
+        viewBox="0 0 930 212"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby={titleId}
@@ -70,7 +70,7 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
         <g style={loop('blue', 'guiding', 'planning')}>
           <path className={d.line} d={`M 700 ${BOX_Y} V 52 Q 700 40 688 40 H 148 Q 136 40 136 52 V ${BOX_Y - 9}`} />
           <HeadDown x={136} y={BOX_Y - 1} />
-          <text x={418} y={30} textAnchor="middle" fontSize="16" className={clsx(d.markText, d.semibold)}>
+          <text x={418} y={30} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold)}>
             large issue
           </text>
         </g>
@@ -79,7 +79,7 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
         <g style={loop('amber', 'guiding', 'implementing')}>
           <path className={d.line} d={`M 640 ${BOX_Y} V 96 Q 640 84 628 84 H 414 Q 402 84 402 96 V ${BOX_Y - 9}`} />
           <HeadDown x={402} y={BOX_Y - 1} />
-          <text x={521} y={74} textAnchor="middle" fontSize="16" className={clsx(d.markText, d.semibold)}>
+          <text x={521} y={74} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold)}>
             small issue
           </text>
         </g>
@@ -110,12 +110,16 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
                 rx="10"
                 {...(on ? {className: d.gradient, fill: tileUrl(id, tile)} : {className: d.box})}
               />
-              <rect x={x + 12} y={BOX_Y + 15} width="28" height="28" rx="8" className={on ? d.badgeOnGradient : d.badge} />
-              <text x={x + 26} y={BOX_Y + 34.5} textAnchor="middle" fontSize="15" className={clsx(d.strong, on && d.onGradient)}>
+              <rect x={x + 14} y={BOX_Y + 16} width="32" height="32" rx="9" className={on ? d.badgeOnGradient : d.badge} />
+              <text x={x + 30} y={BOX_Y + 38.5} textAnchor="middle" fontSize="18" className={clsx(d.strong, on && d.onGradient)}>
                 {number}
               </text>
-              <text x={x + 50} y={BOX_Y + 35} fontSize="17" className={clsx(d.strong, on && d.onGradient)}>
-                {name}
+              {/* "Implementing Phase" on two lines, so the type can stay large. */}
+              <text x={x + 60} y={BOX_Y + 28} fontSize="20" className={clsx(d.strong, on && d.onGradient)}>
+                <tspan x={x + 60}>{name.split(' ')[0]}</tspan>
+                <tspan x={x + 60} dy="22">
+                  {name.split(' ')[1]}
+                </tspan>
               </text>
             </g>
           );
@@ -132,7 +136,7 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
             {...(highlight ? {className: d.box} : {className: d.gradient, fill: tileUrl(id, 'brand')})}
           />
           <path className={highlight ? d.line : d.check} d={`M 840 ${MID_Y} l 5 5 l 9 -10`} />
-          <text x="863" y={MID_Y + 6} fontSize="17" className={clsx(d.strong, !highlight && d.onGradient)}>
+          <text x="862" y={MID_Y + 7} fontSize="20" className={clsx(d.strong, !highlight && d.onGradient)}>
             PR
           </text>
         </g>

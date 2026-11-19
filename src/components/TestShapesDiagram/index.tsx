@@ -6,21 +6,21 @@ import styles from './styles.module.css';
 const layers = [
   {
     name: 'E2E',
-    className: d.ramp1,
+    className: styles.e2e,
     pyramid: 'M 270 62 L 347.46 196 H 192.54 Z',
     diamond: 'M 750 62 L 839.04 176.49 H 660.96 Z',
     labels: [160, 147],
   },
   {
     name: 'Integration',
-    className: d.ramp2,
+    className: styles.integration,
     pyramid: 'M 192.54 196 H 347.46 L 406.42 298 H 133.58 Z',
     diamond: 'M 660.96 176.49 H 839.04 L 884.55 235 L 838.38 294.36 H 661.62 L 615.45 235 Z',
     labels: [260, 244],
   },
   {
     name: 'Unit',
-    className: d.ramp3,
+    className: styles.unit,
     pyramid: 'M 133.58 298 H 406.42 L 470 408 H 70 Z',
     diamond: 'M 661.62 294.36 H 838.38 L 750 408 Z',
     labels: [360, 342],
@@ -31,7 +31,7 @@ function Shape({kind, viewBox, title, x}: {kind: 'pyramid' | 'diamond'; viewBox:
   return (
     <svg viewBox={viewBox} xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" className={d.svg}>
       {layers.map((layer) => (
-        <path key={layer.name} d={layer[kind]} className={layer.className} />
+        <path key={layer.name} d={layer[kind]} className={clsx(d.gradient, layer.className)} />
       ))}
       {/* Gaps between the layers, in the card colour */}
       <path
@@ -39,7 +39,7 @@ function Shape({kind, viewBox, title, x}: {kind: 'pyramid' | 'diamond'; viewBox:
         d={kind === 'pyramid' ? 'M 192.54 196 H 347.46 M 133.58 298 H 406.42' : 'M 660.96 176.49 H 839.04 M 661.62 294.36 H 838.38'}
       />
       {layers.map(({name, labels: [pyramidY, diamondY]}) => (
-        <text key={name} x={x} y={kind === 'pyramid' ? pyramidY : diamondY} fontSize="30" textAnchor="middle" className={clsx(d.strong, d.onRamp)}>
+        <text key={name} x={x} y={kind === 'pyramid' ? pyramidY : diamondY} fontSize="30" textAnchor="middle" className={clsx(d.strong, d.onGradient)}>
           {name}
         </text>
       ))}
