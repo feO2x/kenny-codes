@@ -27,11 +27,6 @@ const topics = [
   '.NET framework internals: ASP.NET Core, DI containers, ORMs, and serializers',
 ];
 
-function joinList(items: string[]): string {
-  if (items.length <= 1) return items.join('');
-  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
-}
-
 export default function EventsSection(): ReactNode {
   const events = homeData.events as HomeEvent[];
   const today = useToday();
@@ -53,8 +48,7 @@ export default function EventsSection(): ReactNode {
               Talks and workshops
             </h2>
             <p className={styles.sectionLede}>
-              Conference sessions, in-house workshops, and user group talks, mostly in German.
-              I speak about:
+              Conference sessions, workshops, and user group talks. I speak about:
             </p>
             <ul className={styles.topics}>
               {topics.map((topic) => (
@@ -100,7 +94,7 @@ export default function EventsSection(): ReactNode {
               {delivered.length} talks, workshops, and webinars since {firstYear}
             </h3>
             <p className={styles.recordText}>
-              Regular speaker at {joinList(homeData.venues.slice(0, 5))}.
+              Regular speaker at conferences and user groups.
             </p>
             <Link to="/events" className={styles.textLink}>
               Browse all events
