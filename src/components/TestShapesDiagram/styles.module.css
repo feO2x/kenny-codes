@@ -1,0 +1,22 @@
+/* Side by side, in proportion to their widths; stacked when the card gets narrow. */
+.shapes {
+  display: grid;
+  grid-template-columns: minmax(0, 440fr) minmax(0, 320fr);
+  align-items: end;
+  gap: 1rem 2rem;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+@container (max-width: 34rem) {
+  .shapes {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    max-width: 22rem;
+  }
+
+  /* Same scale as the pyramid: the diamond's canvas is 320 of the pyramid's 440 units wide. */
+  .shapes > svg:last-child {
+    width: calc(100% * 320 / 440);
+  }
+}

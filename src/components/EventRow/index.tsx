@@ -78,7 +78,7 @@ export default function EventRow({
         </Heading>
         <p className={styles.venue}>
           {event && <span className={styles.event}>{event}</span>}
-          {place && <span className={styles.place}>{place}</span>}
+          {place && <span>{place}</span>}
         </p>
       </div>
 

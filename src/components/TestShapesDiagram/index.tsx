@@ -1,5 +1,7 @@
 import React, {type ReactNode} from 'react';
+import clsx from 'clsx';
 import {DiagramFrame, diagram as d, useDiagramId} from '../Diagram';
+import styles from './styles.module.css';
 
 const layers = [
   {
@@ -25,53 +27,43 @@ const layers = [
   },
 ];
 
-/** The test pyramid next to the test diamond, both the same height. */
+function Shape({kind, viewBox, title, x}: {kind: 'pyramid' | 'diamond'; viewBox: string; title: string; x: number}): ReactNode {
+  return (
+    <svg viewBox={viewBox} xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" className={d.svg}>
+      {layers.map((layer) => (
+        <path key={layer.name} d={layer[kind]} className={layer.className} />
+      ))}
+      {/* Gaps between the layers, in the card colour */}
+      <path
+        className={d.separator}
+        d={kind === 'pyramid' ? 'M 192.54 196 H 347.46 M 133.58 298 H 406.42' : 'M 660.96 176.49 H 839.04 M 661.62 294.36 H 838.38'}
+      />
+      {layers.map(({name, labels: [pyramidY, diamondY]}) => (
+        <text key={name} x={x} y={kind === 'pyramid' ? pyramidY : diamondY} fontSize="30" textAnchor="middle" className={clsx(d.strong, d.onRamp)}>
+          {name}
+        </text>
+      ))}
+      <text x={x} y="466" fontSize="30" textAnchor="middle" className={d.strong}>
+        {title}
+      </text>
+    </svg>
+  );
+}
+
+/** The test pyramid next to the test diamond, both the same height; they stack in narrow columns. */
 export default function TestShapesDiagram(): ReactNode {
-  const titleId = `${useDiagramId()}-title`;
+  const descriptionId = `${useDiagramId()}-description`;
   return (
     <DiagramFrame>
-      <svg
-        viewBox="0 36 960 448"
-        xmlns="http://www.w3.org/2000/svg"
-        role="img"
-        aria-labelledby={titleId}
-        className={d.svg}
-        style={{maxWidth: 760}}>
-        <title id={titleId}>
+      <div className={styles.shapes} role="img" aria-labelledby={descriptionId}>
+        <span id={descriptionId} className="kc-sr-only">
           Test pyramid with a broad Unit base, a narrower Integration layer, and an E2E tip,
           compared with a test diamond whose widest layer is Integration, narrowing toward E2E
           above and Unit below.
-        </title>
-        {layers.map(({name, className, pyramid, diamond}) => (
-          <g key={name} className={className}>
-            <path d={pyramid} />
-            <path d={diamond} />
-          </g>
-        ))}
-        {/* Gaps between the layers, in the card colour */}
-        <g className={d.separator}>
-          <path d="M 192.54 196 H 347.46 M 133.58 298 H 406.42" />
-          <path d="M 660.96 176.49 H 839.04 M 661.62 294.36 H 838.38" />
-        </g>
-        {layers.map(({name, labels: [pyramidY, diamondY]}) => (
-          <g key={name} fontSize="30" textAnchor="middle" className={d.strong}>
-            <text x="270" y={pyramidY} className={d.onRamp}>
-              {name}
-            </text>
-            <text x="750" y={diamondY} className={d.onRamp}>
-              {name}
-            </text>
-          </g>
-        ))}
-        <g fontSize="30" textAnchor="middle">
-          <text x="270" y="466" className={d.strong}>
-            Test Pyramid
-          </text>
-          <text x="750" y="466" className={d.strong}>
-            Test Diamond
-          </text>
-        </g>
-      </svg>
+        </span>
+        <Shape kind="pyramid" viewBox="50 36 440 448" title="Test Pyramid" x={270} />
+        <Shape kind="diamond" viewBox="590 36 320 448" title="Test Diamond" x={750} />
+      </div>
     </DiagramFrame>
   );
 }

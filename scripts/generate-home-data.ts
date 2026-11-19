@@ -16,7 +16,8 @@ interface ContentItem {
   title: string;
   date: string;
   link: string;
-  excerpt: string;
+  /** Only blog posts: the home page shows no event excerpts. */
+  excerpt?: string;
   /** Tag page slugs exactly as Docusaurus derives them, e.g. ".NET" -> "net". */
   tagSlugs?: string[];
   type?: string;
@@ -136,14 +137,13 @@ async function readAllContent(dir: string, type: string): Promise<ContentItem[]>
       // Link
       const link = `/${type}/${slug}`;
 
-      const excerpt = getExcerpt(content);
 
       const tags = Array.isArray(data.tags) ? data.tags.map((tag) => String(tag)) : undefined;
       return {
         title,
         date,
         link,
-        excerpt,
+        ...(type === "blog" ? { excerpt: getExcerpt(content) } : {}),
         // Only events: the blog has a tags.yml whose permalinks this helper does not read.
         tagSlugs: type === "events" ? tagSlugs(tags, link) : undefined,
         type: text(data.type),
@@ -169,7 +169,7 @@ async function main(): Promise<void> {
 
   const output: HomeData = {
     recentPosts: allPosts.slice(0, 4),
-    events: allEvents.map(({ excerpt: _excerpt, ...event }) => event),
+    events: allEvents,
   };
 
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2));

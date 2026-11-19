@@ -1,4 +1,4 @@
-import React, {type CSSProperties, type ReactNode} from 'react';
+import React, {type CSSProperties, type ReactNode, useEffect, useRef, useState} from 'react';
 import clsx from 'clsx';
 import {DiagramFrame} from '../Diagram';
 import {methodNames, phasesFor, type Method, type Phase, type Span, type TimelineVariant} from './data';
@@ -18,6 +18,53 @@ function SpanMark({span, loop}: {span: Span; loop?: boolean}): ReactNode {
       </span>
     </li>
   );
+}
+
+/** Where the back arrows start (Iterate) and end (the first step of their target phase). */
+function anchorOf(phase: Phase, index: number): string | undefined {
+  if (index === 0 && (phase.kind === 'planning' || phase.kind === 'implementing')) return phase.kind;
+  if (phase.kind === 'guiding' && phase.steps[index].title === 'Iterate') return 'iterate';
+  return undefined;
+}
+
+type Ends = Record<'small' | 'large', {top: number; bottom: number}>;
+
+/**
+ * Measures where the back arrows must start and end, because the step rows wrap differently at
+ * every width. Before hydration the arrows run between the phase headings instead.
+ */
+function useBackArrowEnds(list: React.RefObject<HTMLOListElement | null>): Ends | undefined {
+  const [ends, setEnds] = useState<Ends>();
+  useEffect(() => {
+    const root = list.current;
+    if (!root) return undefined;
+    const markerY = (anchor: string) => {
+      const marker = root.querySelector(`[data-anchor="${anchor}"] .${styles.marker}`);
+      const box = marker?.getBoundingClientRect();
+      return box ? box.top + box.height / 2 : NaN;
+    };
+    const measure = () => {
+      const iterate = markerY('iterate');
+      const next: Partial<Ends> = {};
+      for (const [arrow, target, offset] of [
+        ['small', 'implementing', -7],
+        ['large', 'planning', 7],
+      ] as const) {
+        const rail = root.querySelector(`.${arrow === 'small' ? styles.backSmall : styles.backLarge}`);
+        if (!rail) return;
+        const box = rail.getBoundingClientRect();
+        next[arrow] = {top: markerY(target) - box.top, bottom: box.bottom - (iterate + offset)};
+      }
+      if ([next.small, next.large].every((end) => end && Number.isFinite(end.top) && Number.isFinite(end.bottom))) {
+        setEnds(next as Ends);
+      }
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, [list]);
+  return ends;
 }
 
 function PhaseCard({phase, row}: {phase: Phase; row: number}): ReactNode {
@@ -46,7 +93,11 @@ function PhaseCard({phase, row}: {phase: Phase; row: number}): ReactNode {
       </p>
       <ol className={clsx(styles.steps, spans.length > 0 && styles.withSpans)}>
         {phase.steps.map((step, index) => (
-          <li key={index} className={clsx(styles.step, styles[step.kind])} style={{gridRow: index + 1}}>
+          <li
+            key={index}
+            className={clsx(styles.step, styles[step.kind])}
+            style={{gridRow: index + 1}}
+            data-anchor={anchorOf(phase, index)}>
             <span className={styles.marker} aria-hidden="true" />
             <span className={styles.stepBody}>
               <span className="kc-sr-only">{step.kind === 'skill' ? 'Skill: ' : 'You: '}</span>
@@ -74,13 +125,15 @@ export default function SkillTimeline({
   variant?: TimelineVariant;
 }): ReactNode {
   const phases = phasesFor(method, variant);
+  const listRef = useRef<HTMLOListElement>(null);
+  const ends = useBackArrowEnds(listRef);
   const rowOf = (kind: Phase['kind']) => phases.findIndex((phase) => phase.kind === kind) + 1;
-  const back = (target: Phase['kind'], label: string, className: string) => (
+  const back = (target: Phase['kind'], label: string, className: string, end?: Ends['small']) => (
     <li
       className={clsx(styles.back, className)}
       style={{gridRow: `${rowOf(target)} / ${rowOf('guiding')}`} as CSSProperties}
       aria-hidden="true">
-      <span className={styles.backLine}>
+      <span className={styles.backLine} style={end && {top: end.top, bottom: end.bottom}}>
         <span className={styles.backLabel}>{label}</span>
       </span>
     </li>
@@ -94,12 +147,12 @@ export default function SkillTimeline({
           are steps you take yourself. In the Guiding Phase, a small issue returns to the
           Implementing Phase and a large issue to the start of the Planning Phase.
         </figcaption>
-        <ol className={styles.phases}>
+        <ol className={styles.phases} ref={listRef}>
           {phases.map((phase, index) => (
             <PhaseCard key={phase.kind} phase={phase} row={index + 1} />
           ))}
-          {back('implementing', 'small issue', styles.backSmall)}
-          {back('planning', 'large issue', styles.backLarge)}
+          {back('implementing', 'small issue', styles.backSmall, ends?.small)}
+          {back('planning', 'large issue', styles.backLarge, ends?.large)}
         </ol>
       </figure>
     </DiagramFrame>

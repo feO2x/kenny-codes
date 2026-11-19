@@ -1,16 +1,24 @@
 .diagram {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 7.5rem minmax(0, 1fr);
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr) 7rem minmax(0, 1fr);
+  grid-template-areas:
+    "left-title tension right-title"
+    "left-list . right-list";
+  column-gap: 0;
   margin: 0;
 }
 
-.extreme {
-  min-width: 0;
-}
+.leftTitle { grid-area: left-title; }
+.leftList { grid-area: left-list; }
+.rightTitle { grid-area: right-title; }
+.rightList { grid-area: right-list; }
+.tension { grid-area: tension; }
 
 /* The extremes as outlined boxes, like the CHACK categories. */
 .title {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
   margin: 0 0 1rem;
   padding: 0.7rem 1rem;
   border: 1.5px solid var(--kc-control-line);
@@ -52,8 +60,9 @@
   position: relative;
   display: grid;
   place-items: center;
+  align-self: center;
   height: 3rem;
-  margin-top: 0;
+  margin-bottom: 1rem;
 }
 
 .arrow {
@@ -96,10 +105,16 @@
   line-height: 1.3;
 }
 
-/* Stacked: the arrow turns vertical between the two extremes. */
-@media (max-width: 720px) {
+/* Stacked when the card is narrow: the arrow turns vertical between the two extremes. */
+@container (max-width: 36rem) {
   .diagram {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "left-title"
+      "left-list"
+      "tension"
+      "right-title"
+      "right-list";
   }
 
   .tension {

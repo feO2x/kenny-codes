@@ -82,7 +82,7 @@ const guidedCodingPlanning: Record<TimelineVariant, Phase> = {
     loop: stabilizes(2, 3),
     steps: [
       {kind: 'manual', title: 'Discuss the approach', description: '"As an expert architect, how would you tackle this?"'},
-      {kind: 'skill', title: 'guided-coding-plan-and-review', description: 'Writes the draft; fresh reviewers refine it in rounds.'},
+      {kind: 'skill', title: 'guided-coding-plan-and-review', description: 'In the same conversation: writes the draft; fresh reviewers refine it in rounds.'},
       {kind: 'manual', title: 'Read the report and the plan', description: 'Confirm the decision and scope changes it lists.'},
       {kind: 'manual', title: 'Further discussion', description: '"Would you change anything about the plan?"'},
       {kind: 'skill', title: 'guided-coding-freeze-plan', description: 'Create any ticket first. Commit the frozen plan afterwards.'},
@@ -114,7 +114,7 @@ const guidedLearningPlanning: Record<TimelineVariant, Phase> = {
     loop: stabilizes(2, 3),
     steps: [
       {kind: 'manual', title: 'Discuss the approach', description: 'Your senior helps you judge the direction.'},
-      {kind: 'skill', title: 'guided-coding-plan-and-review', description: 'Writes the draft; fresh reviewers refine it in rounds.'},
+      {kind: 'skill', title: 'guided-coding-plan-and-review', description: 'In the same conversation: writes the draft; fresh reviewers refine it in rounds.'},
       {kind: 'manual', title: 'Read the report and the plan', description: 'Your senior checks the reviewed plan and its report.'},
       {kind: 'manual', title: 'Further discussion', description: '"Would you change anything about the plan?"'},
       {kind: 'skill', title: 'guided-coding-freeze-plan', description: 'Timestamps and freezes the plan. Commit it afterwards.'},
@@ -129,7 +129,7 @@ const later: Record<Method, Phase[]> = {
       number: 2,
       title: 'Implementing Phase',
       steps: [
-        {kind: 'skill', title: 'guided-coding-implement', description: 'In a fresh conversation. Plan and feedback loops steer it.'},
+        {kind: 'skill', title: 'guided-coding-implement', description: 'With the frozen plan, in a fresh conversation. Plan and feedback loops steer it.'},
       ],
     },
     {

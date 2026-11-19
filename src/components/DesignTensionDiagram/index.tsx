@@ -1,4 +1,5 @@
 import React, {type ReactNode} from 'react';
+import clsx from 'clsx';
 import {DiagramFrame} from '../Diagram';
 import styles from './styles.module.css';
 
@@ -25,17 +26,7 @@ const extremes: {title: string; bullets: string[]}[] = [
 /** The two design extremes, with the tension between them. */
 export default function DesignTensionDiagram(): ReactNode {
   const [left, right] = extremes;
-  const side = ({title, bullets}: (typeof extremes)[number]) => (
-    <div className={styles.extreme}>
-      <p className={styles.title}>{title}</p>
-      <ul className={styles.bullets}>
-        {bullets.map((bullet) => (
-          <li key={bullet}>{bullet}</li>
-        ))}
-      </ul>
-    </div>
-  );
-
+  // Reading order: each title with its list. The grid places titles and arrow in one row.
   return (
     <DiagramFrame>
       <figure className={styles.diagram}>
@@ -43,12 +34,22 @@ export default function DesignTensionDiagram(): ReactNode {
           The tension between two design extremes: too little abstraction and excessive
           abstraction.
         </figcaption>
-        {side(left)}
+        <p className={clsx(styles.title, styles.leftTitle)}>{left.title}</p>
+        <ul className={clsx(styles.bullets, styles.leftList)}>
+          {left.bullets.map((bullet) => (
+            <li key={bullet}>{bullet}</li>
+          ))}
+        </ul>
         <div className={styles.tension} aria-hidden="true">
           <span className={styles.arrow} />
           <span className={styles.tensionLabel}>Tension</span>
         </div>
-        {side(right)}
+        <p className={clsx(styles.title, styles.rightTitle)}>{right.title}</p>
+        <ul className={clsx(styles.bullets, styles.rightList)}>
+          {right.bullets.map((bullet) => (
+            <li key={bullet}>{bullet}</li>
+          ))}
+        </ul>
       </figure>
     </DiagramFrame>
   );

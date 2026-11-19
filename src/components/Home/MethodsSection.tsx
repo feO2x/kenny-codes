@@ -24,7 +24,7 @@ function Level({name, level, text}: {name: string; level: number; text: string})
           <span key={square} className={square < level ? styles.meterOn : undefined} />
         ))}
       </span>
-      <span className={styles.levelText}>
+      <span>
         <strong>{name}:</strong> {text}
       </span>
     </li>

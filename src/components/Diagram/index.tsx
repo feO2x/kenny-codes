@@ -1,5 +1,4 @@
 import React, {type CSSProperties, type ReactNode, useEffect, useId, useRef, useState} from 'react';
-import clsx from 'clsx';
 import styles from './styles.module.css';
 
 export {styles as diagram};
@@ -28,18 +27,16 @@ export function DiagramFrame({
   children,
   minWidth,
   label,
-  className,
 }: {
   children: ReactNode;
   minWidth?: number;
   /** Names the scrollable region for keyboard and screen reader users. */
   label?: string;
-  className?: string;
 }): ReactNode {
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollable = useOverflows(scrollRef);
   return (
-    <div className={clsx(styles.frame, className)}>
+    <div className={styles.frame}>
       {minWidth ? (
         <div
           ref={scrollRef}

@@ -85,7 +85,7 @@ export default function IoCostChart() {
       <p id={`${id}-description`} className={styles.explanation} aria-live="polite">{scaleDescription}</p>
       <div id={`${id}-chart`} className={styles.chart} role="group" aria-labelledby={`${id}-title`} aria-describedby={`${id}-description`}>
         <div className={styles.axisRow} aria-hidden="true">
-          <span className={styles.axisTitle}>Duration ({scale})</span>
+          <span>Duration ({scale})</span>
           <div className={styles.axis}>
             {ticks.map(({ value, label }, index) => label && (
               <span
@@ -108,7 +108,10 @@ export default function IoCostChart() {
           {measurements.map((measurement) => {
             return (
               <li key={measurement.label} className={styles.measurement}>
-                <span className={styles.operation}>{measurement.label}</span>
+                <span className={styles.operation}>
+                  <span className="kc-sr-only">{measurement.kind === 'database' ? 'Database read: ' : 'In-memory operation: '}</span>
+                  {measurement.label}
+                </span>
                 <span className={styles.value}>
                   {numberFormat.format(measurement.nanoseconds)}<span className="kc-sr-only"> nanoseconds</span>
                 </span>

@@ -5,6 +5,8 @@
  */
 
 .frame {
+  /* Diagrams adapt to the card's own width (the docs column), not the window. */
+  container-type: inline-size;
   margin: 1.75rem 0;
   padding: clamp(0.75rem, 0.4rem + 1.5vw, 1.75rem);
   border: 1px solid var(--kc-line);
