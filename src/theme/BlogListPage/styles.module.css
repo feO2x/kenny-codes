@@ -35,7 +35,7 @@
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
-  text-decoration-color: var(--kc-line-strong);
+  text-decoration-color: var(--kc-control-line);
 }
 
 .contact a:hover {
@@ -110,6 +110,18 @@
 .topicRecord {
   align-self: end;
   min-width: 0;
+}
+
+/* Beside the header, the chart closes on the page's right edge instead of floating mid-column. */
+@media (min-width: 861px) {
+  .topicRecord {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .topicRecord > figure {
+    width: min(100%, calc(var(--columns) * 5.5rem));
+  }
 }
 
 @media (max-width: 860px) {

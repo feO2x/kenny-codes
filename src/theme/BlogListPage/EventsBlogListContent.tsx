@@ -42,7 +42,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
   const germanShare = delivered.filter((s) => s.language === 'German').length / Math.max(1, delivered.length);
 
   return (
-    <Layout title="Events" description="Past and upcoming talks, workshops, and webinars by Kenny Pflug">
+    <Layout title="Talks and workshops" description="Past and upcoming talks, workshops, and webinars by Kenny Pflug">
       <main className="container kc-page">
         <header className={styles.header}>
           <div>

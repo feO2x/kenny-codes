@@ -96,16 +96,3 @@ export function isHiddenFromArchive(session: {date: string; cancelled?: boolean}
   return Boolean(session.cancelled) && session.date.slice(0, 10) < today;
 }
 
-// lodash's word boundaries for ASCII: lower-case runs (optionally capitalized), upper-case runs
-// that end before a capitalized word, and digit runs.
-const TAG_WORDS =
-  /[A-Z]?[a-z]+(?=[^A-Za-z0-9]|[A-Z]|$)|[A-Z]+(?=[^A-Za-z0-9]|[A-Z][a-z]|$)|[A-Z]?[a-z]+|[A-Z]+|\d+/g;
-
-/**
- * The permalink slug Docusaurus gives an inline tag (lodash `kebabCase`), so ".NET" becomes "net",
- * "ASP.NET Core" "asp-net-core", and "Utf8Json" "utf-8-json". Matches lodash for ASCII labels,
- * which is what the event front matter uses.
- */
-export function tagSlug(label: string): string {
-  return (label.match(TAG_WORDS) ?? []).map((word) => word.toLowerCase()).join('-');
-}

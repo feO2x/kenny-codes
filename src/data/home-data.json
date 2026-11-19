@@ -59,6 +59,11 @@
         "Coding-Agents",
         "Guided-Coding"
       ],
+      "tagSlugs": [
+        "ai",
+        "coding-agents",
+        "guided-coding"
+      ],
       "type": "Talk",
       "location": "Nürnberg, Germany",
       "duration": "2h",
@@ -75,6 +80,11 @@
         "Coding-Agents",
         "Guided-Coding"
       ],
+      "tagSlugs": [
+        "ai",
+        "coding-agents",
+        "guided-coding"
+      ],
       "type": "Talk",
       "location": "Online",
       "duration": "4h",
@@ -89,6 +99,11 @@
         "AI",
         "Coding-Agents",
         "Guided-Coding"
+      ],
+      "tagSlugs": [
+        "ai",
+        "coding-agents",
+        "guided-coding"
       ],
       "type": "Talk",
       "location": "University of Applied Sciences Hof",
@@ -105,6 +120,11 @@
         "AI",
         "Coding-Agents",
         "Guided-Coding"
+      ],
+      "tagSlugs": [
+        "ai",
+        "coding-agents",
+        "guided-coding"
       ],
       "type": "Talk",
       "location": "Regensburg",
@@ -125,6 +145,14 @@
         "LLM",
         "Cloud-Native"
       ],
+      "tagSlugs": [
+        "ai",
+        "net",
+        "aspire",
+        "microsoft-extensions-ai",
+        "llm",
+        "cloud-native"
+      ],
       "type": "Talk",
       "location": "Regensburg, Germany",
       "duration": "1h",
@@ -144,6 +172,14 @@
         "Microsoft.Extensions.AI",
         "LLM"
       ],
+      "tagSlugs": [
+        "ai",
+        "cloud-native",
+        "net",
+        "aspire",
+        "microsoft-extensions-ai",
+        "llm"
+      ],
       "type": "Workshop",
       "location": "Regensburg",
       "duration": "8h",
@@ -160,6 +196,11 @@
         "AI",
         "Coding-Agents",
         "Guided-Coding"
+      ],
+      "tagSlugs": [
+        "ai",
+        "coding-agents",
+        "guided-coding"
       ],
       "type": "Talk",
       "location": "Weiden in der Oberpfalz",
@@ -178,6 +219,12 @@
         "Java",
         "Guided-Coding"
       ],
+      "tagSlugs": [
+        "ai",
+        "coding-agents",
+        "java",
+        "guided-coding"
+      ],
       "type": "Talk",
       "location": "Online",
       "duration": "2h",
@@ -195,6 +242,14 @@
         "Microsoft.Extensions.AI",
         "LLM",
         "Cloud-Native"
+      ],
+      "tagSlugs": [
+        "ai",
+        "net",
+        "aspire",
+        "microsoft-extensions-ai",
+        "llm",
+        "cloud-native"
       ],
       "type": "Talk",
       "location": "Weiden in der Oberpfalz",
@@ -215,6 +270,14 @@
         "LLM",
         "Cloud-Native"
       ],
+      "tagSlugs": [
+        "ai",
+        "net",
+        "aspire",
+        "microsoft-extensions-ai",
+        "llm",
+        "cloud-native"
+      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "2h",
@@ -234,6 +297,14 @@
         "LLM",
         "Cloud-Native"
       ],
+      "tagSlugs": [
+        "ai",
+        "net",
+        "aspire",
+        "microsoft-extensions-ai",
+        "llm",
+        "cloud-native"
+      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "1h",
@@ -248,6 +319,12 @@
       "tags": [
         "async-await",
         ".NET",
+        "performance",
+        "scalability"
+      ],
+      "tagSlugs": [
+        "async-await",
+        "net",
         "performance",
         "scalability"
       ],
@@ -271,6 +348,15 @@
         "OpenAI",
         "Cloud-Native"
       ],
+      "tagSlugs": [
+        "ai",
+        "net",
+        "aspire",
+        "microsoft-extensions-ai",
+        "llm",
+        "open-ai",
+        "cloud-native"
+      ],
       "type": "Talk",
       "location": "Karlsruhe",
       "duration": "1h",
@@ -285,6 +371,12 @@
       "tags": [
         "async-await",
         ".NET",
+        "performance",
+        "scalability"
+      ],
+      "tagSlugs": [
+        "async-await",
+        "net",
         "performance",
         "scalability"
       ],
@@ -305,6 +397,12 @@
         "Web APIs",
         "performance"
       ],
+      "tagSlugs": [
+        "native-aot",
+        "net",
+        "web-ap-is",
+        "performance"
+      ],
       "type": "Talk",
       "location": "Mainz",
       "duration": "1h",
@@ -322,6 +420,12 @@
         "Terraform",
         "Security"
       ],
+      "tagSlugs": [
+        "azure",
+        "open-ai",
+        "terraform",
+        "security"
+      ],
       "type": "Talk",
       "location": "Nuremberg",
       "duration": "1h",
@@ -338,6 +442,11 @@
         "Native AOT",
         "Web APIs"
       ],
+      "tagSlugs": [
+        "asp-net-core",
+        "native-aot",
+        "web-ap-is"
+      ],
       "type": "Talk",
       "location": "Nuremberg",
       "duration": "1h",
@@ -352,6 +461,11 @@
       "tags": [
         "async-await",
         ".NET",
+        "scalability"
+      ],
+      "tagSlugs": [
+        "async-await",
+        "net",
         "scalability"
       ],
       "type": "Talk",
@@ -370,6 +484,11 @@
         "Native AOT",
         "Web APIs"
       ],
+      "tagSlugs": [
+        "asp-net-core",
+        "native-aot",
+        "web-ap-is"
+      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "1h",
@@ -387,6 +506,12 @@
         "Data Access",
         "Humble Objects"
       ],
+      "tagSlugs": [
+        "native-aot",
+        "net",
+        "data-access",
+        "humble-objects"
+      ],
       "type": "Webinar",
       "location": "Online",
       "duration": "1h",
@@ -401,6 +526,11 @@
         "Native AOT",
         ".NET",
         "Performance"
+      ],
+      "tagSlugs": [
+        "native-aot",
+        "net",
+        "performance"
       ],
       "type": "Webinar",
       "location": "Online",
@@ -418,6 +548,12 @@
         "Terraform",
         "Security"
       ],
+      "tagSlugs": [
+        "azure",
+        "open-ai",
+        "terraform",
+        "security"
+      ],
       "type": "Talk",
       "location": "Online",
       "duration": "1h",
@@ -431,6 +567,12 @@
       "tags": [
         "async-await",
         ".NET",
+        "scalability",
+        "best-practices"
+      ],
+      "tagSlugs": [
+        "async-await",
+        "net",
         "scalability",
         "best-practices"
       ],
@@ -453,6 +595,14 @@
         "Angular",
         "Streaming"
       ],
+      "tagSlugs": [
+        "azure",
+        "open-ai",
+        "terraform",
+        "security",
+        "angular",
+        "streaming"
+      ],
       "type": "Talk",
       "location": "Frankfurt",
       "duration": "1h",
@@ -468,6 +618,11 @@
         "Cloud-Native",
         "Architecture",
         "Kubernetes"
+      ],
+      "tagSlugs": [
+        "cloud-native",
+        "architecture",
+        "kubernetes"
       ],
       "type": "Workshop",
       "location": "Mainz",
@@ -485,6 +640,11 @@
         "Architecture",
         "Kubernetes"
       ],
+      "tagSlugs": [
+        "cloud-native",
+        "architecture",
+        "kubernetes"
+      ],
       "type": "Workshop",
       "location": "Nuremberg",
       "duration": "8h",
@@ -500,6 +660,11 @@
         "Cloud-Native",
         "Architecture",
         "Kubernetes"
+      ],
+      "tagSlugs": [
+        "cloud-native",
+        "architecture",
+        "kubernetes"
       ],
       "type": "Workshop",
       "location": "Nuremberg",
@@ -518,6 +683,12 @@
         "Performance",
         "Memory Management"
       ],
+      "tagSlugs": [
+        "net",
+        "async-await",
+        "performance",
+        "memory-management"
+      ],
       "type": "Talk",
       "location": "Online",
       "duration": "5h",
@@ -533,6 +704,12 @@
         "ASP.NET Core",
         "Minimal APIs",
         "Performance"
+      ],
+      "tagSlugs": [
+        "net",
+        "asp-net-core",
+        "minimal-ap-is",
+        "performance"
       ],
       "type": "Talk",
       "location": "Online",
@@ -554,6 +731,16 @@
         "Web API",
         "HTTP"
       ],
+      "tagSlugs": [
+        "net",
+        "asp-net-core",
+        "minimal-ap-is",
+        "c",
+        "backend",
+        "api",
+        "web-api",
+        "http"
+      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "1h",
@@ -573,6 +760,15 @@
         "async",
         "await",
         "C#"
+      ],
+      "tagSlugs": [
+        "net",
+        "csproj",
+        "compatibility",
+        "nrt",
+        "async",
+        "await",
+        "c"
       ],
       "type": "Talk",
       "location": "Regensburg",
@@ -594,6 +790,15 @@
         "C#",
         "Software Design"
       ],
+      "tagSlugs": [
+        "net",
+        "performance",
+        "asynchronous-programming",
+        "memory-management",
+        "benchmarks",
+        "c",
+        "software-design"
+      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "1h",
@@ -614,6 +819,15 @@
         "C#",
         "Software Design"
       ],
+      "tagSlugs": [
+        "net",
+        "performance",
+        "asynchronous-programming",
+        "memory-management",
+        "benchmarks",
+        "c",
+        "software-design"
+      ],
       "type": "Talk",
       "location": "Online",
       "duration": "2h",
@@ -633,6 +847,15 @@
         "Benchmarks",
         "C#",
         "Software Design"
+      ],
+      "tagSlugs": [
+        "net",
+        "performance",
+        "asynchronous-programming",
+        "memory-management",
+        "benchmarks",
+        "c",
+        "software-design"
       ],
       "type": "Talk",
       "location": "Online",
@@ -655,6 +878,16 @@
         "Utf8Json",
         "ASP.NET Core"
       ],
+      "tagSlugs": [
+        "net",
+        "performance",
+        "json",
+        "serialization",
+        "system-text-json",
+        "newtonsoft-json",
+        "utf-8-json",
+        "asp-net-core"
+      ],
       "type": "Talk",
       "location": "Munich",
       "duration": "1h",
@@ -670,6 +903,11 @@
         ".NET",
         "async await",
         "Memory Management"
+      ],
+      "tagSlugs": [
+        "net",
+        "async-await",
+        "memory-management"
       ],
       "type": "Talk",
       "location": "Munich",
@@ -689,6 +927,13 @@
         "Memory Management",
         "Garbage Collection"
       ],
+      "tagSlugs": [
+        "net",
+        "performance",
+        "benchmark-dot-net",
+        "memory-management",
+        "garbage-collection"
+      ],
       "type": "Talk",
       "location": "Graz",
       "duration": "3h",
@@ -705,6 +950,12 @@
         "Performance",
         "BenchmarkDotNet",
         "Memory Management"
+      ],
+      "tagSlugs": [
+        "net",
+        "performance",
+        "benchmark-dot-net",
+        "memory-management"
       ],
       "type": "Talk",
       "location": "Regensburg",
@@ -723,6 +974,12 @@
         "Garbage Collector",
         "GC"
       ],
+      "tagSlugs": [
+        "net",
+        "memory-management",
+        "garbage-collector",
+        "gc"
+      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "1h",
@@ -739,6 +996,12 @@
         "Memory Management",
         "Garbage Collector",
         "GC"
+      ],
+      "tagSlugs": [
+        "net",
+        "memory-management",
+        "garbage-collector",
+        "gc"
       ],
       "type": "Talk",
       "location": "Regensburg",
@@ -761,6 +1024,16 @@
         "MSBuild",
         "BenchmarkDotNet"
       ],
+      "tagSlugs": [
+        "open-source",
+        "net",
+        "guard-clauses",
+        "performance",
+        "roslyn",
+        "source-generators",
+        "ms-build",
+        "benchmark-dot-net"
+      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "2h",
@@ -779,6 +1052,13 @@
         "VCS",
         "GitHub"
       ],
+      "tagSlugs": [
+        "git",
+        "svn",
+        "version-control",
+        "vcs",
+        "git-hub"
+      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "3h",
@@ -795,6 +1075,12 @@
         "Dependency Injection",
         "DI Container",
         "ASP.NET Core"
+      ],
+      "tagSlugs": [
+        "net",
+        "dependency-injection",
+        "di-container",
+        "asp-net-core"
       ],
       "type": "Talk",
       "location": "Cologne",
@@ -814,6 +1100,13 @@
         "Threading",
         "ASP.NET Core"
       ],
+      "tagSlugs": [
+        "net",
+        "asynchronous-programming",
+        "async-await",
+        "threading",
+        "asp-net-core"
+      ],
       "type": "Talk",
       "location": "Cologne",
       "duration": "1h",
@@ -831,6 +1124,13 @@
         "Inversion of Control",
         "IoC",
         "Design Patterns"
+      ],
+      "tagSlugs": [
+        "net",
+        "dependency-injection",
+        "inversion-of-control",
+        "io-c",
+        "design-patterns"
       ],
       "type": "Talk",
       "location": "Regensburg",
@@ -850,6 +1150,13 @@
         "Performance",
         "async await"
       ],
+      "tagSlugs": [
+        "net",
+        "multithreading",
+        "asynchronous-programming",
+        "performance",
+        "async-await"
+      ],
       "type": "Talk",
       "location": "Ingolstadt",
       "duration": "2h",
@@ -867,6 +1174,13 @@
         "Asynchronous Programming",
         "Performance",
         "async await"
+      ],
+      "tagSlugs": [
+        "net",
+        "multithreading",
+        "asynchronous-programming",
+        "performance",
+        "async-await"
       ],
       "type": "Talk",
       "location": "Ulm",
@@ -886,6 +1200,13 @@
         "Performance",
         "async await"
       ],
+      "tagSlugs": [
+        "net",
+        "multithreading",
+        "asynchronous-programming",
+        "performance",
+        "async-await"
+      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "2h",
@@ -901,6 +1222,10 @@
         "Guard Clauses",
         ".NET"
       ],
+      "tagSlugs": [
+        "guard-clauses",
+        "net"
+      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "2h",
@@ -915,6 +1240,10 @@
       "tags": [
         "Design by Contract",
         ".NET"
+      ],
+      "tagSlugs": [
+        "design-by-contract",
+        "net"
       ],
       "type": "Talk",
       "location": "Regensburg",
@@ -932,6 +1261,11 @@
         "Automated Testing",
         ".NET"
       ],
+      "tagSlugs": [
+        "test-driven-development",
+        "automated-testing",
+        "net"
+      ],
       "type": "Talk",
       "location": "Regensburg",
       "duration": "2h",
@@ -947,6 +1281,11 @@
         "WPF",
         "UI",
         ".NET"
+      ],
+      "tagSlugs": [
+        "wpf",
+        "ui",
+        "net"
       ],
       "type": "Talk",
       "location": "Regensburg",

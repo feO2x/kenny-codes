@@ -28,7 +28,7 @@
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
-  text-decoration-color: var(--kc-line-strong);
+  text-decoration-color: var(--kc-control-line);
 }
 
 .empty p:last-child {

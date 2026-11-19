@@ -21,7 +21,7 @@ export default function BlogSection(): ReactNode {
         <div className={styles.split}>
           <div className={styles.splitIntro}>
             <h2 id="writing-title" className={styles.sectionTitle}>
-              Writing
+              From the blog
             </h2>
             <p className={styles.sectionLede}>
               Articles on AI-assisted development, software design, and .NET.

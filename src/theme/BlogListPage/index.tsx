@@ -48,7 +48,7 @@ function BlogListPageContent(props: Props): ReactNode {
     <BlogLayout sidebar={sidebar}>
       <header className="kc-page-header kc-page-header--divided">
         <Heading as="h1" className="kc-page-title">
-          Writing
+          Blog
         </Heading>
         {isFirstPage && (
           <>

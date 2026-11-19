@@ -75,10 +75,9 @@ export default function SpeakingRecord({
   return (
     <figure
       className={clsx(styles.record, className)}
+      style={{'--columns': columns.length} as CSSProperties}
       aria-label="Talks, workshops, and webinars per year">
-      <ol
-        className={styles.chart}
-        style={{'--rows': tallest, '--columns': columns.length} as CSSProperties}>
+      <ol className={styles.chart} style={{'--rows': tallest} as CSSProperties}>
         {columns.map((column, col) => {
           const total = column.delivered + column.upcoming;
           const label =

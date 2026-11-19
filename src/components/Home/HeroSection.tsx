@@ -8,7 +8,7 @@ import {FaXTwitter} from 'react-icons/fa6';
 import homeData from '@site/src/data/home-data.json';
 import SpeakingRecord from '../SpeakingRecord';
 import {useToday} from '@site/src/utils/dateFormatting';
-import {CONTACT_MAILTO, GITHUB_URL, LINKEDIN_URL, X_URL} from '@site/src/utils/contact';
+import {CONTACT_MAILTO, FEATURED_RECORDING, GITHUB_URL, LINKEDIN_URL, X_URL} from '@site/src/utils/contact';
 import styles from './Home.module.css';
 
 const socials = [
@@ -32,7 +32,7 @@ export default function HeroSection(): ReactNode {
     <header className={styles.hero}>
       <div className="container">
         <div className={styles.heroGrid}>
-          <div>
+          <div className={styles.heroText}>
             <Heading as="h1" className={styles.heroName}>
               Kenny Pflug
             </Heading>
@@ -94,9 +94,13 @@ export default function HeroSection(): ReactNode {
                 Browse all events
               </Link>
               {/* A recording lets organizers judge the delivery, not just the record. */}
-              <Link to="/blog/2026-02-28-guided-coding" className={styles.textLink}>
-                Watch a recorded session
-              </Link>
+              <a
+                href={FEATURED_RECORDING.url}
+                className={styles.textLink}
+                target="_blank"
+                rel="noopener noreferrer">
+                {FEATURED_RECORDING.label}
+              </a>
             </div>
           </div>
           <SpeakingRecord

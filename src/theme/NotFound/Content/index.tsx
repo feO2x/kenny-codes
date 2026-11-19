@@ -6,7 +6,7 @@ import type {Props} from '@theme/NotFound/Content';
 
 const destinations = [
   {to: '/', label: 'Home'},
-  {to: '/blog', label: 'Writing'},
+  {to: '/blog', label: 'Blog'},
   {to: '/events', label: 'Talks and workshops'},
   {to: '/docs/guided-coding', label: 'Guided Coding guide'},
   {to: '/docs/chack', label: 'CHACK guide'},

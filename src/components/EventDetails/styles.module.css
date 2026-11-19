@@ -58,7 +58,8 @@
     gap: 1rem 1.25rem;
   }
 
-  .item:first-child {
+  /* The event name and the date read best on one line each. */
+  .item[data-wide] {
     grid-column: 1 / -1;
   }
 }

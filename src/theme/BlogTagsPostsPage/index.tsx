@@ -42,7 +42,7 @@ function BlogTagsPostsPageContent(props: Props): ReactNode {
     <BlogLayout sidebar={sidebar}>
       {tag.unlisted && <Unlisted />}
       <header className="kc-page-header kc-page-header--divided">
-        <nav className="kc-back-links" aria-label="Writing">
+        <nav className="kc-back-links" aria-label="Blog">
           <Link to="/blog" className="kc-back-link">
             All articles
           </Link>

@@ -11,8 +11,14 @@
   align-items: center;
 }
 
+/* The name is sized against its own column (cqi), so it stays on one line at every width. */
+.heroText {
+  container-type: inline-size;
+  min-width: 0;
+}
+
 .heroName {
-  font-size: clamp(2.75rem, 1.6rem + 5.4vw, 6.25rem);
+  font-size: min(clamp(2.75rem, 1.6rem + 5.4vw, 6.25rem), 14.5cqi);
   font-stretch: 125%;
   font-weight: 800;
   letter-spacing: -0.035em;
@@ -43,7 +49,7 @@
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
-  text-decoration-color: var(--kc-line-strong);
+  text-decoration-color: var(--kc-control-line);
 }
 
 .heroRole a:hover {
@@ -389,7 +395,7 @@
   color: var(--kc-muted);
 }
 
-/* ---------- Writing ---------- */
+/* ---------- From the blog ---------- */
 
 .post {
   position: relative;

@@ -38,7 +38,7 @@ export default function EventDetails(): ReactNode {
         {details
           .filter(([, value]) => Boolean(value))
           .map(([label, value]) => (
-            <div key={label} className={styles.item}>
+            <div key={label} className={styles.item} data-wide={label === 'Event' || label === 'Date' || undefined}>
               <dt className={styles.label}>{label}</dt>
               <dd className={styles.value}>{value}</dd>
             </div>

@@ -1,4 +1,4 @@
-import React, {type CSSProperties, type ReactNode} from 'react';
+import React, {type ReactNode} from 'react';
 import clsx from 'clsx';
 import {
   PageMetadata,
@@ -13,7 +13,7 @@ import Heading from '@theme/Heading';
 import homeData from '@site/src/data/home-data.json';
 import {useToday} from '@site/src/utils/dateFormatting';
 import type {Props} from '@theme/BlogTagsListPage';
-import {deliveredSessions, isEventPage, isHiddenFromArchive, tagSlug} from '@site/src/utils/eventUtils';
+import {isEventPage, isHiddenFromArchive} from '@site/src/utils/eventUtils';
 import styles from './styles.module.css';
 
 type TagItem = Props['tags'][number];
@@ -48,30 +48,33 @@ interface Unit {
  * record uses, so the index shows at a glance what the sessions are mostly about.
  */
 function FrequentTopics({tags, unit}: {tags: ReadonlyArray<TagItem>; unit: Unit}): ReactNode {
-  const most = Math.max(1, ...tags.map((tag) => tag.count));
   return (
-    <ol className={styles.ranking}>
-      {tags.map((tag) => (
-        <li key={tag.permalink}>
-          <Link to={tag.permalink} className={styles.rank}>
-            <span className={styles.rankLabel}>{tag.label}</span>
-            <span className={styles.rankBar} aria-hidden="true">
-              {Array.from({length: tag.count}, (_, i) => (
-                <span
-                  key={i}
-                  className={styles.rankSquare}
-                  style={{'--t': i / Math.max(1, most - 1)} as CSSProperties}
-                />
-              ))}
-            </span>
-            <span className={styles.rankCount}>
-              {tag.count}
-              <span className="kc-sr-only"> {tag.count === 1 ? unit.one : unit.many}</span>
-            </span>
-          </Link>
-        </li>
-      ))}
-    </ol>
+    <div className={styles.rankingWrap}>
+      <ol className={styles.ranking}>
+        {tags.map((tag) => (
+          <li key={tag.permalink}>
+            <Link to={tag.permalink} className={styles.rank}>
+              <span className={styles.rankLabel}>{tag.label}</span>
+              <span className={styles.rankBar}>
+                <span className={styles.rankSquares} aria-hidden="true">
+                  {Array.from({length: tag.count}, (_, i) => (
+                    <span
+                      key={i}
+                      className={styles.rankSquare}
+                      />
+                  ))}
+                </span>
+                <span className={styles.rankCount}>
+                  <span className="kc-sr-only">, </span>
+                  {tag.count}
+                  <span className="kc-sr-only"> {tag.count === 1 ? unit.one : unit.many}</span>
+                </span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }
 
@@ -101,15 +104,15 @@ function TopicIndex({tags, unit}: {tags: ReadonlyArray<TagItem>; unit: Unit}): R
   return (
     <>
       <section className={styles.section} aria-labelledby="topics-frequent">
-        <Heading as="h2" id="topics-frequent" className={styles.sectionTitle}>
+        <h2 id="topics-frequent" className={styles.sectionTitle}>
           Most frequent
-        </Heading>
+        </h2>
         <FrequentTopics tags={frequent} unit={unit} />
       </section>
       <section className={styles.section} aria-labelledby="topics-all">
-        <Heading as="h2" id="topics-all" className={styles.sectionTitle}>
-          All {tags.length} topics, A–Z
-        </Heading>
+        <h2 id="topics-all" className={styles.sectionTitle}>
+          {`All ${tags.length} topics, A–Z`}
+        </h2>
         <nav className={styles.jump} aria-label="Topics by initial">
           {initials.map((initial) => (
             <a key={initial} href={`#${letterId(initial)}`}>
@@ -118,12 +121,12 @@ function TopicIndex({tags, unit}: {tags: ReadonlyArray<TagItem>; unit: Unit}): R
           ))}
         </nav>
         {initials.map((initial) => (
-          <section key={initial} className={styles.letter} aria-labelledby={letterId(initial)}>
-            <Heading as="h3" id={letterId(initial)} className={styles.letterLabel}>
+          <div key={initial} className={styles.letter}>
+            <h3 id={letterId(initial)} className={styles.letterLabel}>
               {initial}
-            </Heading>
+            </h3>
             <TagCloud tags={groups.get(initial) ?? []} unit={unit} />
-          </section>
+          </div>
         ))}
       </section>
     </>
@@ -142,7 +145,8 @@ function useHiddenSessionsBySlug(): Map<string, number> {
   const hidden = new Map<string, number>();
   for (const event of homeData.events) {
     if (!isHiddenFromArchive(event, today)) continue;
-    for (const slug of new Set((event.tags ?? []).map(tagSlug))) {
+    // Slugs come from Docusaurus's own tag normalization (see scripts/generate-home-data.ts).
+    for (const slug of new Set(event.tagSlugs ?? [])) {
       hidden.set(slug, (hidden.get(slug) ?? 0) + 1);
     }
   }
@@ -154,9 +158,6 @@ const ARTICLES: Unit = {one: 'article', many: 'articles'};
 
 function EventTopics({tags}: {tags: ReadonlyArray<TagItem>}): ReactNode {
   const hidden = useHiddenSessionsBySlug();
-  const today = useToday();
-  const delivered = deliveredSessions(homeData.events, today).length;
-  const firstYear = homeData.events[homeData.events.length - 1]?.date.slice(0, 4);
   const topics = tags
     .map((tag) => {
       const slug = tag.permalink.split('/').filter(Boolean).pop() ?? '';
@@ -175,8 +176,11 @@ function EventTopics({tags}: {tags: ReadonlyArray<TagItem>}): ReactNode {
             Topics
           </Heading>
           <p className="kc-page-lede">
-            {topics.length} topics across {delivered} talks, workshops, and webinars since {firstYear}.
+            {topics.length} topics across past and upcoming talks, workshops, and webinars.
           </p>
+          <a href="#topics-all" className="kc-text-link">
+            Jump to A–Z
+          </a>
         </header>
         <TopicIndex tags={topics} unit={SESSIONS} />
       </main>

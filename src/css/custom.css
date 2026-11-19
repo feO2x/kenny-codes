@@ -463,6 +463,12 @@ hr {
   padding-block: 0.2rem;
 }
 
+/* Short labels such as "X" still get a 24px-wide target. */
+.footer__link-item {
+  display: inline-block;
+  min-width: 24px;
+}
+
 .footer__link-item svg {
   display: none;
 }
@@ -887,6 +893,12 @@ aside.theme-doc-sidebar-container {
 
 .kc-list-footer {
   margin-top: 1.5rem;
+}
+
+/* "Read more" as a 24px-tall target. */
+.kc-list-footer a {
+  display: inline-block;
+  padding-block: 2px;
 }
 
 .blog-list-page main > article:last-of-type,

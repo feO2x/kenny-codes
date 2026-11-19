@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { normalizeTags } from "@docusaurus/utils";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,6 +20,8 @@ interface ContentItem {
   link: string;
   excerpt: string;
   tags?: string[];
+  /** Tag page slugs exactly as Docusaurus derives them, e.g. ".NET" -> "net". */
+  tagSlugs?: string[];
   type?: string;
   location?: string;
   duration?: string;
@@ -80,6 +83,18 @@ function parseFrontmatter(content: string): Frontmatter {
     }
   }
   return frontmatter;
+}
+
+/** The events plugin has no tags.yml, so every tag is inline and Docusaurus kebab-cases it. */
+function tagSlugs(tags: string[] | undefined, source: string): string[] | undefined {
+  if (!tags) return undefined;
+  return normalizeTags({
+    options: { tags: null, onInlineTags: "ignore" },
+    source,
+    frontMatterTags: tags,
+    tagsBaseRoutePath: "/",
+    tagsFile: null,
+  }).map((tag) => tag.permalink.replace(/^\//, ""));
 }
 
 function getExcerpt(content: string): string {
@@ -162,6 +177,8 @@ function readAllContent(dir: string, type: string): ContentItem[] {
         link,
         excerpt,
         tags: data.tags as string[] | undefined,
+        // Only events: the blog has a tags.yml whose permalinks this helper does not read.
+        tagSlugs: type === "events" ? tagSlugs(data.tags as string[] | undefined, link) : undefined,
         type: data.type as string | undefined,
         location: data.location as string | undefined,
         duration: data.duration as string | undefined,
