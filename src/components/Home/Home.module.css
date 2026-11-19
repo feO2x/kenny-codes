@@ -18,13 +18,62 @@
 }
 
 .heroName {
-  font-size: min(clamp(2.75rem, 1.6rem + 5.4vw, 6.25rem), 14.5cqi);
-  font-stretch: 125%;
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 0.92;
-  margin: 0 0 1.75rem;
+  /* A greeting, not a poster: medium weight and width, sized well below the column. */
+  font-size: min(clamp(2.6rem, 1.7rem + 3.6vw, 4.75rem), 12.5cqi);
+  font-stretch: 112%;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0 0 1.5rem;
 }
+
+/* The words rise in once; the name then drifts slowly through the brand ramp, like on the old site. */
+.greeting,
+.greetingName {
+  display: inline-block;
+  animation: greeting-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.greetingName {
+  /* Room below the baseline, so background-clip: text keeps the descender of the y. */
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+  background: linear-gradient(
+    100deg,
+    var(--kc-ramp-from) 0%,
+    var(--kc-ramp-to) 50%,
+    var(--kc-ramp-from) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation:
+    greeting-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both,
+    greeting-drift 10s ease-in-out 1s infinite alternate;
+}
+
+@keyframes greeting-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.25em);
+  }
+}
+
+@keyframes greeting-drift {
+  to {
+    background-position: 100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .greeting,
+  .greetingName {
+    animation: none;
+  }
+}
+
 
 .heroStatement {
   font-size: clamp(1.35rem, 1.1rem + 0.9vw, 1.8rem);
@@ -773,7 +822,7 @@
   }
 
   .heroName {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
   }
 }
 
@@ -794,6 +843,12 @@
 
   .phase::before {
     outline: 1.5px solid CanvasText;
+  }
+
+  .greetingName {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
   }
 
   .chackCore,

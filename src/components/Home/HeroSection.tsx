@@ -21,7 +21,8 @@ export default function HeroSection(): ReactNode {
         <div className={styles.heroGrid}>
           <div className={styles.heroText}>
             <Heading as="h1" className={styles.heroName}>
-              Hi, I’m Kenny.
+              <span className={styles.greeting}>Hi, I’m</span>{' '}
+              <span className={styles.greetingName}>Kenny.</span>
             </Heading>
             <p className={styles.heroStatement}>
               I build cloud-native .NET systems and help teams stay in control when AI agents
