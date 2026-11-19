@@ -13,7 +13,7 @@
      and arrows start and end just after it and run in three lanes, given here as distances from
      the card edge on cards too narrow for the maximum (the band right of the text then holds
      exactly the lanes); each lane's label stands to the right of its run. */
-  --text-max: 28rem;
+  --text-max: 25rem;
   --inner-lane: 9.2rem;
   --small-lane: 5.6rem;
   --large-lane: 2.5rem;
@@ -56,6 +56,13 @@
 .guiding {
   --band: calc(var(--inner-lane) + var(--arm) + var(--arrow-gap));
   padding-right: var(--band);
+}
+
+/* Only the phase cards carry brackets and arrows, so only their text stops at the maximum. */
+.planning .steps,
+.implementing .steps,
+.guiding .steps {
+  max-width: var(--text-max);
 }
 
 /* Headings only cross the two outer lanes, so they may run into the band up to the small lane. */
@@ -115,7 +122,6 @@
 
 /* Steps: marker | text | optional bracket column. */
 .steps {
-  max-width: var(--text-max);
   display: grid;
   grid-template-columns: 1.25rem minmax(0, 1fr);
   column-gap: 0.65rem;
