@@ -1,0 +1,203 @@
+.section + .section {
+  margin-top: clamp(3rem, 2rem + 3vw, 4.5rem);
+}
+
+.sectionTitle {
+  font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem);
+  font-weight: 750;
+  font-stretch: 116%;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--kc-line-strong);
+}
+
+/* ---------- Most frequent: one square per session ---------- */
+
+.ranking {
+  --square: 12px;
+  --gap: 3px;
+  /* One shared label column, as wide as the longest label, so every bar starts at the same x. */
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ranking li,
+.rank {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  margin: 0;
+}
+
+.rank {
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  margin-inline: -0.75rem;
+  border-radius: var(--kc-radius-sm);
+  color: var(--kc-ink);
+}
+
+.rank:hover {
+  color: var(--kc-ink);
+  text-decoration: none;
+  background: var(--kc-accent-soft);
+}
+
+.rankLabel {
+  font-weight: 650;
+  font-stretch: 106%;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+/* The count follows its squares directly, so each number sits at the end of its own bar. */
+.rankBar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.rankSquares {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+.rankSquare {
+  width: var(--square);
+  height: var(--square);
+  border-radius: 3.5px;
+  /* One brand fill: in the speaking record the blue-to-mint shift means time, here it would not. */
+  background: var(--ifm-color-primary);
+}
+
+.rankCount {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--kc-muted);
+}
+
+.rankingWrap {
+  container-type: inline-size;
+}
+
+/* Tablet widths: smaller squares so the longest row still fits on one line. */
+@container (max-width: 56rem) {
+  .rankSquares {
+    --square: 9px;
+    --gap: 2px;
+  }
+
+  .rankSquare {
+    border-radius: 2.5px;
+  }
+}
+
+/* Phones and small tablets: the label above its bar; the count still follows the squares. */
+@container (max-width: 44rem) {
+  .ranking {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rank {
+    row-gap: 0.4rem;
+  }
+
+  .rankLabel {
+    white-space: normal;
+  }
+
+}
+
+@container (max-width: 30rem) {
+  .rankSquares {
+    --square: 6px;
+    --gap: 2px;
+  }
+
+  .rankSquare {
+    border-radius: 1.5px;
+  }
+}
+
+@container (max-width: 20rem) {
+  .rankSquares {
+    --square: 5px;
+  }
+}
+
+@media (forced-colors: active) {
+  .rankSquare {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+}
+
+/* ---------- A–Z: the same grid as the archive's year groups ---------- */
+
+/* Jump row: one squircle per initial, the logo's shape at button size. */
+.jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1.25rem 0 1rem;
+}
+
+.jump a {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 31%;
+  box-shadow: inset 0 0 0 1px var(--kc-control-line);
+  background: var(--kc-surface);
+  color: var(--kc-ink);
+  font-weight: 700;
+  font-stretch: 112%;
+}
+
+.jump a:hover {
+  box-shadow: inset 0 0 0 1.5px var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.letter {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 10fr);
+  gap: 0 clamp(1.5rem, 1rem + 2vw, 3rem);
+  align-items: start;
+  padding: 1.1rem 0;
+}
+
+.letter + .letter {
+  border-top: 1px solid var(--kc-line);
+}
+
+.letterLabel {
+  margin: 0;
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 1rem);
+  font-size: 2rem;
+  font-weight: 750;
+  font-stretch: 120%;
+  line-height: 2.25rem;
+  letter-spacing: -0.03em;
+  color: var(--kc-ink);
+}
+
+@media (max-width: 720px) {
+  .letter {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: 0 0.75rem;
+  }
+
+  .letterLabel {
+    font-size: 1.5rem;
+  }
+}

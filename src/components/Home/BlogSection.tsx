@@ -1,38 +1,51 @@
-import React from 'react';
-import clsx from 'clsx';
+import React, {type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
-import styles from '@site/src/css/section.module.css';
 import homeData from '@site/src/data/home-data.json';
-import ContentCard from '../ContentCard';
 import {formatDate} from '@site/src/utils/dateFormatting';
+import styles from './Home.module.css';
 
-export default function BlogSection() {
+/** Excerpts are cut at 200 characters by the generator; trim to the last full word. */
+function tidyExcerpt(excerpt: string): string {
+  const text = excerpt.replace(/\s+/g, ' ').replace(/\.\.\.$/, '').trim();
+  if (text.length < 190) return text;
+  return `${text.slice(0, text.lastIndexOf(' '))}…`;
+}
+
+export default function BlogSection(): ReactNode {
   const {recentPosts} = homeData;
 
   return (
-    <section className={clsx(styles.section, styles.sectionDark)}>
+    <section className={styles.section} aria-labelledby="writing-title">
       <div className="container">
-        <Heading as="h2" className={styles.sectionTitle}>
-          Latest Blog Posts
-        </Heading>
-        <div className={styles.cardGrid}>
-          {recentPosts.map((post, idx) => (
-            <ContentCard
-              key={idx}
-              title={post.title}
-              link={post.link}
-              date={formatDate(post.date)}
-              tags={post.tags}
-              excerpt={post.excerpt}
-            />
-          ))}
-        </div>
+        <div className={styles.split}>
+          <div className={styles.splitIntro}>
+            <h2 id="writing-title" className={styles.sectionTitle}>
+              From the blog
+            </h2>
+            <p className={styles.sectionLede}>
+              Articles on AI-assisted development, software design, and .NET.
+            </p>
+            <Link to="/blog" className={styles.textLink}>
+              All articles
+            </Link>
+          </div>
 
-        <div className="text--center margin-top--lg">
-          <Link to="/blog" className="button button--info button--lg">
-            View All Posts
-          </Link>
+          <div className={styles.splitList}>
+            {recentPosts.map((post) => (
+              <article key={post.link} className={styles.post}>
+                <time className={styles.postDate} dateTime={post.date}>
+                  {formatDate(post.date)}
+                </time>
+                <Heading as="h3" className={styles.postTitle}>
+                  <Link to={post.link} className={styles.postLink}>
+                    {post.title}
+                  </Link>
+                </Heading>
+                <p className={styles.postExcerpt}>{tidyExcerpt(post.excerpt)}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -35,6 +35,12 @@ const config: Config = {
   organizationName: "feO2x", // Usually your GitHub org/user name.
   projectName: "kenny-codes", // Usually your repo name.
 
+  // The day the site was built. Date-dependent components render with it first so the
+  // browser's first render matches the static HTML, then switch to the visitor's date.
+  customFields: {
+    buildDate: new Date().toISOString().slice(0, 10),
+  },
+
   onBrokenLinks: "throw",
   markdown: {
     format: "detect",
@@ -59,6 +65,9 @@ const config: Config = {
           sidebarPath: "./sidebars.ts",
         },
         blog: {
+          blogTitle: "Blog",
+          blogDescription:
+            "Articles by Kenny Pflug on AI-assisted development, software design, and .NET.",
           showReadingTime: true,
           feedOptions: {
             type: ["rss", "atom"],
@@ -69,7 +78,11 @@ const config: Config = {
           onUntruncatedBlogPosts: "warn",
         },
         theme: {
-          customCss: "./src/css/custom.css",
+          customCss: [
+            "./node_modules/@fontsource-variable/mona-sans/wdth.css",
+            "./node_modules/@fontsource-variable/mona-sans/wdth-italic.css",
+            "./src/css/custom.css",
+          ],
         },
       } satisfies Preset.Options,
     ],
@@ -225,7 +238,7 @@ const config: Config = {
     navbar: {
       title: "Kenny Codes",
       logo: {
-        alt: "Kenny Codes Logo",
+        alt: "",
         src: "img/logo-light.svg",
         srcDark: "img/logo-dark.svg",
       },
@@ -245,11 +258,13 @@ const config: Config = {
               type: "docSidebar",
               sidebarId: "guidedCodingSidebar",
               label: "Guided Coding & Guided Learning",
+              activeBaseRegex: "^/docs/guided-coding(/|$)",
             },
             {
               type: "docSidebar",
               sidebarId: "chackSidebar",
               label: "CHACK",
+              activeBaseRegex: "^/docs/chack(/|$)",
             },
           ],
         },
@@ -264,25 +279,19 @@ const config: Config = {
       style: "dark",
       links: [
         {
-          title: "Kenny Pflug - Kenny Codes",
+          title: "Read and learn",
           items: [
-            {
-              label: "Legal Notice",
-              to: "/legal-notice",
-            },
+            { label: "Blog", to: "/blog" },
+            { label: "Guided Coding", to: "/docs/guided-coding" },
+            { label: "CHACK", to: "/docs/chack" },
           ],
         },
         {
-          title: "Read my stuff and meet me",
+          title: "Meet me",
           items: [
-            {
-              label: "Blog",
-              to: "/blog",
-            },
-            {
-              label: "Events",
-              to: "/events",
-            },
+            { label: "Talks and workshops", to: "/events" },
+            // An html item: Docusaurus would treat a mailto href as external and open a blank tab.
+            { html: '<a class="footer__link-item" href="mailto:info@kenny-codes.net">Email</a>' },
           ],
         },
         {
@@ -292,22 +301,25 @@ const config: Config = {
               label: "LinkedIn",
               href: "https://www.linkedin.com/in/kenny-pflug-7a1012123/",
             },
-            {
-              label: "GitHub",
-              href: "https://github.com/feO2x/",
-            },
-            {
-              label: "X",
-              href: "https://x.com/feO2x",
-            },
+            { label: "GitHub", href: "https://github.com/feO2x/" },
+            { label: "X", href: "https://x.com/feO2x" },
           ],
         },
       ],
-      copyright: `Copyright © 2025 Kenny Pflug. Built with Docusaurus.`,
+      // The logo's squircle closes every page; the footer is always navy, so it uses the dark logo.
+      logo: {
+        alt: "Kenny Codes home",
+        src: "img/logo-dark.svg",
+        href: "/",
+        width: 36,
+        height: 36,
+      },
+      // Rendered as HTML, so the link goes through baseUrl to keep working in PR previews.
+      copyright: `© ${new Date().getFullYear()} Kenny Pflug, Regensburg, Germany. <a class="footer__link-item" href="${baseUrl}legal-notice">Legal notice</a>`,
     },
     prism: {
-      theme: prismThemes.vsLight,
-      darkTheme: prismThemes.vsDark,
+      theme: prismThemes.github,
+      darkTheme: prismThemes.nightOwl,
       additionalLanguages: ["csharp"],
     },
   } satisfies Preset.ThemeConfig,

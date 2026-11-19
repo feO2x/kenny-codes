@@ -1,93 +1,1120 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * Kenny Codes design system.
+ *
+ * Brand: the logo's mint (#33FFDC) to blue (#3393FF) gradient on deep navy.
+ * Type: Mona Sans (variable weight and width, self-hosted), system monospace for code.
+ * Shape: the logo's squircle for signature elements, small radii everywhere else.
  */
 
-/* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: hsl(211, 100%, 46%);
-  --ifm-color-primary-dark: hsl(211, 100%, 41%);
-  --ifm-color-primary-darker: hsl(211, 100%, 39%);
-  --ifm-color-primary-darkest: hsl(211, 100%, 32%);
-  --ifm-color-primary-light: hsl(211, 100%, 50%);
-  --ifm-color-primary-lighter: hsl(211, 100%, 53%);
-  --ifm-color-primary-lightest: hsl(211, 100%, 60%);
-  --ifm-code-font-size: 95%;
-  --ifm-background-color: hsl(217, 66%, 95%);
-  --ifm-navbar-background-color: hsl(217, 65%, 100%);
-  --docusaurus-highlighted-code-line-bg: hsla(0, 0%, 0%, 0.1);
-  --kc-color-special-purple: hsl(286, 100%, 45%);
-  --kc-color-youtube: #ff0000;
-  --kc-color-youtube-hover: #cc0000;
-  --kc-color-upcoming: hsl(170, 100%, 40%);
-  --kc-color-upcoming-text: hsl(0, 0%, 100%);
-  --kc-color-cancelled: hsl(0, 75%, 50%);
-  --kc-color-cancelled-text: hsl(0, 0%, 100%);
+  /* Brand */
+  --kc-mint: #33ffdc;
+  --kc-blue: #3393ff;
+  --kc-gradient: linear-gradient(135deg, var(--kc-mint) 0%, var(--kc-blue) 100%);
+  /* Blue-to-mint ramp for small marks (record squares, stage meter), darkened for light mode. */
+  --kc-ramp-from: #0066d6;
+  --kc-ramp-to: #008f7a;
 
-  /* Custom spacing and sizing */
-  --kc-border-radius-card: 16px;
-  --kc-border-radius-tag: 20px;
-  --kc-border-radius-small: 4px;
+  /* Surfaces and text (light theme) */
+  --kc-bg: #f5f8fc;
+  --kc-surface: #ffffff;
+  --kc-surface-raised: #eef3fa;
+  --kc-ink: #0c1a30;
+  --kc-muted: #4f5e78;
+  --kc-line: #dce3ee;
+  --kc-line-strong: #b8c5d8;
+  /* Outlines of controls (secondary buttons, pills): at least 3:1 against the page. */
+  --kc-control-line: #7c8da8;
+  --kc-accent-soft: rgba(0, 102, 214, 0.08);
+  --kc-upcoming: #007a68;
+  --kc-cancelled: #c62828;
+  --kc-shadow: 0 1px 2px rgba(12, 26, 48, 0.04), 0 8px 24px -12px rgba(12, 26, 48, 0.12);
 
-  /* Custom transitions */
-  --kc-transition-card: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  --kc-transition-fast: 0.2s ease-in-out;
-  --kc-transition-smooth: 0.3s ease;
+  /* Type */
+  --kc-font: "Mona Sans Variable", "Mona Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --kc-font-mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --kc-display-stretch: 118%;
+  --kc-heading-stretch: 108%;
 
-  /* Custom shadows */
-  --kc-shadow-card-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
-  --kc-shadow-card-base: 0 4px 20px rgba(0, 0, 0, 0.05);
+  /* Space between the navbar and the first line of pages without a sidebar */
+  --kc-page-top: clamp(2.5rem, 1.5rem + 3vw, 4.5rem);
 
-  /* Custom gradients */
-  --kc-gradient-accent: linear-gradient(90deg, var(--ifm-color-primary), var(--kc-color-special-purple));
+  /* Radii */
+  --kc-radius-sm: 6px;
+  --kc-radius: 10px;
+  --kc-radius-lg: 20px;
 
-  /* Typography */
-  --kc-letter-spacing-wide: 0.5px;
-  --kc-letter-spacing-wider: 0.05em;
+  /* Infima: colors */
+  --ifm-color-primary: #0066d6;
+  --ifm-color-primary-dark: #005cc1;
+  --ifm-color-primary-darker: #0057b6;
+  --ifm-color-primary-darkest: #004896;
+  --ifm-color-primary-light: #0870e9;
+  --ifm-color-primary-lighter: #1a7af0;
+  --ifm-color-primary-lightest: #4d97f3;
+  --ifm-background-color: var(--kc-bg);
+  --ifm-background-surface-color: var(--kc-surface);
+  --ifm-card-background-color: var(--kc-surface);
+  --ifm-color-content: var(--kc-ink);
+  --ifm-color-content-secondary: var(--kc-muted);
+  --ifm-heading-color: var(--kc-ink);
+  --ifm-hr-border-color: var(--kc-line);
+  --ifm-toc-border-color: var(--kc-line);
+  --ifm-table-border-color: var(--kc-line);
+  --ifm-table-stripe-background: var(--kc-surface-raised);
+  --ifm-navbar-background-color: var(--kc-bg);
+  --ifm-navbar-shadow: none;
+  --ifm-navbar-height: 4rem;
+  --ifm-menu-color-background-active: var(--kc-accent-soft);
+  --ifm-menu-color-background-hover: var(--kc-surface-raised);
+  --ifm-dropdown-background-color: var(--kc-surface);
+
+  /* Infima: type */
+  --ifm-font-family-base: var(--kc-font);
+  --ifm-heading-font-family: var(--kc-font);
+  --ifm-font-family-monospace: var(--kc-font-mono);
+  --ifm-font-size-base: 100%;
+  --ifm-line-height-base: 1.65;
+  --ifm-heading-font-weight: 700;
+  --ifm-heading-line-height: 1.2;
+  --ifm-code-font-size: 88%;
+  --ifm-code-background: var(--kc-surface-raised);
+  --ifm-code-border-radius: 5px;
+  --ifm-code-padding-horizontal: 0.35rem;
+  --ifm-link-decoration: none;
+  --ifm-link-hover-decoration: none;
+
+  /* Infima: shape */
+  --ifm-global-radius: var(--kc-radius);
+  --ifm-button-border-radius: 8px;
+  --ifm-pagination-nav-border-radius: var(--kc-radius);
+  --ifm-container-width-xl: 1240px;
+  --ifm-global-shadow-lw: var(--kc-shadow);
+
+  --docusaurus-highlighted-code-line-bg: rgba(0, 102, 214, 0.1);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: hsl(170, 100%, 60%);
-  --ifm-color-primary-dark: hsl(170, 100%, 54%);
-  --ifm-color-primary-darker: hsl(170, 100%, 51%);
-  --ifm-color-primary-darkest: hsl(170, 100%, 42%);
-  --ifm-color-primary-light: hsl(170, 100%, 66%);
-  --ifm-color-primary-lighter: hsl(170, 100%, 69%);
-  --ifm-color-primary-lightest: hsl(170, 100%, 78%);
-  --ifm-background-color: hsl(217, 33%, 17%);
-  --ifm-navbar-background-color: hsl(246, 100%, 5%);
-  --kc-color-upcoming: hsl(170, 100%, 50%);
-  --kc-color-upcoming-text: hsl(217, 33%, 17%);
-  --kc-color-cancelled: hsl(0, 75%, 50%);
-  --kc-color-cancelled-text: hsl(0, 0%, 100%);
+  --kc-ramp-from: var(--kc-blue);
+  --kc-ramp-to: var(--kc-mint);
+  --kc-bg: #0b1424;
+  --kc-surface: #0f1b30;
+  --kc-surface-raised: #15233d;
+  --kc-ink: #e8eef8;
+  --kc-muted: #9eadc5;
+  --kc-line: rgba(160, 185, 230, 0.14);
+  --kc-line-strong: rgba(160, 185, 230, 0.26);
+  --kc-control-line: rgba(160, 185, 230, 0.5);
+  --kc-accent-soft: rgba(51, 255, 220, 0.09);
+  --kc-upcoming: #33ffdc;
+  --kc-cancelled: #ff7b7b;
+  --kc-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -16px rgba(0, 0, 0, 0.6);
+
+  --ifm-color-primary: #33ffdc;
+  --ifm-color-primary-dark: #14ffd6;
+  --ifm-color-primary-darker: #05fdd2;
+  --ifm-color-primary-darkest: #00d1ad;
+  --ifm-color-primary-light: #52ffe2;
+  --ifm-color-primary-lighter: #61ffe4;
+  --ifm-color-primary-lightest: #8fffeb;
+  --ifm-font-color-base-inverse: #0b1424;
+
+  --docusaurus-highlighted-code-line-bg: rgba(51, 255, 220, 0.08);
 }
 
-/* Utility class for card gradient top border effect */
-.kc-card-gradient-border {
-  position: relative;
-  overflow: hidden;
+/* ---------- Base ---------- */
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Keeps anchor targets and focused elements clear of the sticky navbar. */
+  scroll-padding-top: calc(var(--ifm-navbar-height) + 1rem);
 }
 
-.kc-card-gradient-border::before {
+body {
+  background-color: var(--kc-bg);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--ifm-color-primary) 28%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+h1, h2, h3, h4 {
+  font-stretch: var(--kc-heading-stretch);
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+h1 {
+  letter-spacing: -0.022em;
+}
+
+/* Balanced rag on wider screens; on phones it leaves visibly short lines. */
+@media (min-width: 768px) {
+  p, li {
+    text-wrap: pretty;
+  }
+}
+
+hr {
+  border-color: var(--kc-line);
+}
+
+/* Wider side margins on laptop widths, where Infima drops to 1rem. */
+@media (min-width: 997px) {
+  .container {
+    padding-inline: clamp(1.5rem, 3.5vw, 3rem);
+  }
+}
+
+/* ---------- Page shell and headers ---------- */
+
+/* Pages without a sidebar (events, topics, legal notice, 404) share one top edge. */
+.kc-page {
+  padding-top: var(--kc-page-top);
+  padding-bottom: clamp(4rem, 3rem + 3vw, 6rem);
+}
+
+/* Event detail pages render through BlogLayout; align their first line with the other pages. */
+.kc-event-page .main-wrapper > .container {
+  padding-top: calc(var(--kc-page-top) - 2rem);
+}
+
+/* Readable measure for text-only pages such as the legal notice. */
+.kc-text-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 600;
+  color: var(--kc-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+.kc-text-link:hover {
+  color: var(--kc-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+.kc-measure {
+  max-width: 48rem;
+}
+
+.kc-page-header {
+  margin-bottom: 2.5rem;
+}
+
+/* The blog list intro is set apart from the first post like posts are from each other. */
+.kc-page-header--divided {
+  padding-bottom: 2.5rem;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid var(--kc-line);
+}
+
+.kc-page-title {
+  font-size: clamp(2.6rem, 1.6rem + 4vw, 4.5rem);
+  font-weight: 800;
+  font-stretch: 125%;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  margin: 0 0 1rem;
+}
+
+.kc-page-lede {
+  font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.4rem);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--kc-muted);
+  max-width: 40ch;
+  margin: 0;
+}
+
+.kc-tag-cloud {
+  gap: 0.6rem;
+  max-width: 64rem;
+}
+
+.kc-tag-cloud .kc-tag {
+  font-size: 0.95rem;
+  padding: 0.45rem 0.9rem;
+}
+
+/* ---------- Buttons ---------- */
+
+.button {
+  font-weight: 600;
+  letter-spacing: 0;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.button--primary {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .button--primary {
+  color: #0b1424;
+}
+
+.button--secondary {
+  --ifm-button-background-color: transparent;
+  --ifm-button-border-color: var(--kc-control-line);
+  --ifm-button-color: var(--kc-ink);
+  color: var(--kc-ink);
+}
+
+.button--secondary:hover {
+  --ifm-button-background-color: var(--kc-surface-raised);
+  border-color: var(--ifm-color-primary);
+  color: var(--kc-ink);
+}
+
+/* ---------- Navbar ---------- */
+
+.navbar {
+  background-color: color-mix(in srgb, var(--kc-bg) 84%, transparent);
+  border-bottom: 1px solid var(--kc-line);
+  padding-inline: 1.25rem;
+}
+
+/* Blur lives on a pseudo-element: backdrop-filter on .navbar itself would trap the fixed mobile menu. */
+.navbar::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--kc-gradient-accent);
-  opacity: 0;
-  transition: opacity var(--kc-transition-smooth);
+  inset: 0;
+  z-index: -1;
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  backdrop-filter: saturate(160%) blur(14px);
 }
 
-.kc-card-gradient-border:hover::before {
+.navbar__brand {
+  margin-right: 1.5rem;
+}
+
+/* Same ink in the navbar and the mobile drawer header. */
+.navbar__brand,
+.navbar__brand:hover {
+  color: var(--kc-ink);
+}
+
+.navbar__logo {
+  height: 1.9rem;
+}
+
+.navbar__title {
+  font-stretch: 112%;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-size: 1.05rem;
+}
+
+.navbar__link {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--kc-muted);
+}
+
+.navbar__link:hover,
+.navbar__link--active {
+  color: var(--kc-ink);
+}
+
+/* Active section: solid primary in light mode (contrast), a strip of the logo gradient in dark. */
+.navbar__items:not(.navbar__items--right) .navbar__link--active {
+  background-image: linear-gradient(var(--ifm-color-primary), var(--ifm-color-primary));
+  background-size: 100% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+}
+
+[data-theme='dark'] .navbar__items:not(.navbar__items--right) .navbar__link--active {
+  background-image: var(--kc-gradient);
+}
+
+.navbar-sidebar .navbar__link--active,
+.navbar-sidebar .menu__link--active {
+  background-image: none;
+}
+
+.navbar__items .navbar__item.navbar__link,
+.navbar__item.dropdown > .navbar__link {
+  padding-block: calc((var(--ifm-navbar-height) - 2rem - 1.5rem) / 2);
+}
+
+/* Give the Learn dropdown the same box as Blog and Events so their active markers line up,
+   and make its whole area the button's hit target. */
+.navbar__items .navbar__item.dropdown {
+  padding: 0;
+}
+
+.navbar__item.dropdown > .navbar__link {
+  display: block;
+  padding-inline: var(--ifm-navbar-item-padding-horizontal);
+  /* Infima disables pointer events on href-less dropdown links; ours is a real button. */
+  pointer-events: auto;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: var(--ifm-line-height-base);
+}
+
+/* Visibility switches instantly so the links are focusable as soon as the menu is expanded. */
+.kc-disclosure .dropdown__menu {
+  transition-property: opacity, transform;
+}
+
+.dropdown__menu {
+  border: 1px solid var(--kc-line);
+  border-radius: var(--kc-radius);
+  box-shadow: var(--kc-shadow);
+  padding: 0.4rem;
+}
+
+.dropdown__link {
+  border-radius: var(--kc-radius-sm);
+  font-size: 0.95rem;
+  padding: 0.45rem 0.75rem;
+}
+
+.navbar-sidebar {
+  background-color: var(--kc-bg);
+}
+
+.navbar-sidebar__close {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-right: -0.6rem;
+  border-radius: 8px;
+}
+
+.navbar-sidebar__close:hover {
+  background: var(--kc-surface-raised);
+}
+
+.navbar-sidebar__close svg,
+.navbar__toggle svg {
+  color: var(--kc-muted);
+}
+
+/* The close icon draws with a stroke on its inner group, so colour alone does not reach it. */
+.navbar-sidebar__close svg g {
+  stroke: currentColor;
+}
+
+/* A 44px target for the menu button; Infima only shows it below 997px. */
+@media (max-width: 996px) {
+  .navbar__toggle {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-left: -0.5rem;
+    margin-right: 0.25rem;
+    border-radius: 8px;
+  }
+}
+
+.navbar-sidebar .menu__link {
+  padding-block: 0.65rem;
+}
+
+/* Drawer dropdown as one button (src/theme/NavbarItem/DropdownNavbarItem/Mobile). */
+.kc-menu-disclosure {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  color: var(--kc-muted);
+}
+
+/* Legal notice and other text pages: the header already spaces the first section. */
+.kc-page-header + .markdown > h2:first-child {
+  margin-top: 0;
+}
+
+/* ---------- Footer ---------- */
+
+.footer,
+.footer--dark {
+  --ifm-footer-background-color: #08101d;
+  --ifm-footer-color: #b9c5d8;
+  --ifm-footer-link-color: #dfe7f3;
+  --ifm-footer-link-hover-color: #33ffdc;
+  --ifm-footer-title-color: #ffffff;
+  /* The inner .container brings the page gutters; extra footer padding would indent the columns. */
+  --ifm-footer-padding-horizontal: 0;
+  border-top: 1px solid rgba(160, 185, 230, 0.12);
+  padding-block: 4rem 3rem;
+}
+
+.footer__title {
+  font-size: 0.95rem;
+  font-weight: 650;
+  font-stretch: 108%;
+  margin-bottom: 0.75rem;
+}
+
+.footer__item {
+  font-size: 0.95rem;
+  padding-block: 0.2rem;
+}
+
+/* Short labels such as "X" still get a 24px-wide target. */
+.footer__link-item {
+  display: inline-block;
+  min-width: 24px;
+}
+
+/* The external-link icon stays for screen readers ("opens in new tab") but is not drawn. */
+.footer__link-item svg {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.footer__bottom {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(160, 185, 230, 0.12);
+  text-align: left;
+}
+
+/* Docusaurus dims the footer logo to 50%; the brand mark shows at full strength. */
+.footer__bottom a:has(> .footer__logo) {
+  display: inline-block;
   opacity: 1;
+}
+
+.footer__copyright {
+  font-size: 0.875rem;
+  color: #8796ae;
+}
+
+@media (max-width: 996px) {
+  .footer__links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 1rem;
+  }
+
+  .footer__links .footer__col {
+    margin: 0;
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+/* Tablets fit all three columns in one row. */
+@media (min-width: 577px) and (max-width: 996px) {
+  .footer__links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 360px) {
+  .footer__links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Long-form content (docs and blog) ---------- */
+
+.markdown {
+  --ifm-h1-font-size: clamp(2.1rem, 1.7rem + 1.4vw, 2.75rem);
+  --ifm-h2-font-size: 1.75rem;
+  --ifm-h3-font-size: 1.3rem;
+  --ifm-h4-font-size: 1.1rem;
+  --ifm-heading-vertical-rhythm-top: 2.25;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+
+/* Give the page title room before the first section (docs wrap it in a <header>). */
+.markdown > header:first-child + h2,
+.markdown > h1:first-child + h2 {
+  margin-top: 2.25rem;
+}
+
+.markdown > header:first-child h1 {
+  margin-bottom: 1.25rem;
+}
+
+.markdown h1:first-child {
+  --ifm-h1-vertical-rhythm-bottom: 1.25;
+  font-stretch: var(--kc-display-stretch);
+  font-weight: 750;
+  line-height: 1.1;
+}
+
+.markdown h2 {
+  font-weight: 700;
+}
+
+.markdown h3,
+.markdown h4 {
+  font-weight: 650;
+}
+
+.markdown a:not(.button):not(.hash-link) {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  transition: text-decoration-color 0.15s ease;
+}
+
+/* Light mode needs a firmer underline to reach 3:1 against the page and admonition cards. */
+[data-theme='light'] .markdown a:not(.button):not(.hash-link) {
+  text-decoration-color: var(--kc-control-line);
+}
+
+.markdown a:not(.button):not(.hash-link):hover,
+[data-theme='light'] .markdown a:not(.button):not(.hash-link):hover {
+  text-decoration-color: currentColor;
+}
+
+/* Keep running text at a comfortable measure; figures, code, and tables use the full column. */
+.markdown > p,
+.markdown > ul,
+.markdown > ol,
+.markdown > blockquote,
+.markdown > h2,
+.markdown > h3,
+.markdown > h4,
+.markdown .theme-admonition {
+  max-width: 62ch;
+}
+
+.markdown blockquote {
+  border-left: 3px solid var(--ifm-color-primary);
+  background: var(--kc-surface-raised);
+  border-radius: 0 var(--kc-radius-sm) var(--kc-radius-sm) 0;
+  color: var(--kc-ink);
+  padding: 0.9rem 1.25rem;
+}
+
+.markdown table {
+  /* Infima keeps tables display: block so wide ones scroll on their own instead of the page. */
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.markdown table thead tr {
+  border-bottom: 2px solid var(--kc-line-strong);
+}
+
+.markdown th {
+  text-align: left;
+  font-weight: 650;
+  background: transparent;
+}
+
+.markdown table tr {
+  border-top: 1px solid var(--kc-line);
+  background: transparent;
+}
+
+.markdown td,
+.markdown th {
+  border: 0;
+  padding: 0.65rem 0.9rem;
+}
+
+.markdown img {
+  border-radius: var(--kc-radius);
+}
+
+/* Article diagrams are drawn on a neutral grey plate (#D6D6D6). Retint it to the palette;
+   it stays light in dark mode because the diagrams put dark text on it. */
+.markdown svg rect[fill="#D6D6D6"] {
+  fill: #e3e9f2;
+}
+
+[data-theme='dark'] .markdown svg rect[fill="#D6D6D6"] {
+  fill: #b9c4d6;
+}
+
+/* Diagrams that put no text on the plate can use a dark plate in dark mode. */
+[data-theme='dark'] .markdown svg rect.kc-diagram-plate {
+  fill: var(--kc-surface-raised);
+}
+
+code {
+  border: 1px solid var(--kc-line);
+}
+
+pre code,
+.theme-code-block code {
+  border: 0;
+}
+
+/* div.theme-code-block outranks the code block's own module class without !important. */
+div.theme-code-block {
+  border: 1px solid var(--kc-line);
+  border-radius: var(--kc-radius);
+  box-shadow: none;
+}
+
+[data-theme='dark'] .theme-code-block {
+  border-color: rgba(160, 185, 230, 0.12);
+}
+
+.theme-code-block [class*="codeBlockTitle"] {
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--kc-line);
+}
+
+/* Admonitions: quieter tones, aligned with the palette */
+.theme-admonition {
+  border: 1px solid var(--kc-line);
+  border-left-width: 3px;
+  border-radius: var(--kc-radius-sm);
+  box-shadow: none;
+  background: var(--kc-surface);
+  color: var(--kc-ink);
+}
+
+.theme-admonition-note { border-left-color: var(--kc-muted); }
+.theme-admonition-tip { border-left-color: #12a86b; }
+.theme-admonition-info { border-left-color: var(--ifm-color-primary); }
+.theme-admonition-warning,
+.theme-admonition-caution { border-left-color: #d98e04; }
+.theme-admonition-danger { border-left-color: var(--kc-cancelled); }
+
+.theme-admonition [class*="admonitionHeading"] {
+  font-stretch: 108%;
+  text-transform: none;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+}
+
+/* ---------- Docs chrome ---------- */
+
+aside.theme-doc-sidebar-container {
+  border-right-color: var(--kc-line);
+}
+
+.menu {
+  font-size: 0.94rem;
+  padding: 1rem 0.75rem;
+}
+
+.menu__link {
+  border-radius: var(--kc-radius-sm);
+  color: var(--kc-muted);
+  line-height: 1.35;
+  padding-block: 0.45rem;
+}
+
+.menu__link:hover {
+  color: var(--kc-ink);
+}
+
+.menu__link--active:not(.menu__link--sublist) {
+  color: var(--kc-ink);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--ifm-color-primary);
+  border-radius: 0 var(--kc-radius-sm) var(--kc-radius-sm) 0;
+}
+
+.menu__list-item-collapsible .menu__link--active {
+  color: var(--kc-ink);
+  font-weight: 600;
+}
+
+.table-of-contents {
+  font-size: 0.85rem;
+}
+
+.table-of-contents__link {
+  color: var(--kc-muted);
+  /* At least 24px tall targets (WCAG 2.5.8) without changing the list's rhythm much. */
+  display: inline-block;
+  min-height: 24px;
+  padding-block: 2px;
+}
+
+.table-of-contents__link:hover,
+.table-of-contents__link--active {
+  color: var(--ifm-color-primary);
+}
+
+.table-of-contents__link--active {
+  font-weight: 600;
+}
+
+.breadcrumbs__link {
+  border-radius: var(--kc-radius-sm);
+  font-size: 0.85rem;
+  background: transparent;
+  color: var(--kc-muted);
+}
+
+.breadcrumbs__item--active .breadcrumbs__link {
+  background: var(--kc-surface-raised);
+  color: var(--kc-ink);
+}
+
+/* On small screens the current page repeats the h1 right below it; keep it to one line. */
+@media (max-width: 996px) {
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .breadcrumbs__item--active {
+    min-width: 0;
+  }
+
+  .breadcrumbs__item:not(.breadcrumbs__item--active) {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .breadcrumbs__item--active .breadcrumbs__link {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .theme-doc-markdown {
+    margin-top: 1.25rem;
+  }
+}
+
+.pagination-nav__link {
+  border: 1px solid var(--kc-line);
+  background: var(--kc-surface);
+  transition: border-color 0.15s ease;
+}
+
+.pagination-nav__link:hover {
+  border-color: var(--ifm-color-primary);
+}
+
+.pagination-nav__sublabel {
+  font-size: 0.85rem;
+  color: var(--kc-muted);
+  font-weight: 500;
+}
+
+.pagination-nav__label {
+  font-weight: 650;
+  font-stretch: 106%;
+}
+
+@media (max-width: 576px) {
+  .pagination-nav {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pagination-nav__link--next {
+    grid-column: 1;
+    text-align: left;
+  }
+}
+
+/* Event pages have no sidebar or TOC: start the column on the container edge like /events.
+   The markup reads facts, description, invitation. Narrow screens stack them at the text width;
+   wide screens put the facts and the invitation in a column beside the description. */
+.kc-event-page main.col {
+  --ifm-col-width: 100%;
+  margin-left: 0;
+  max-width: calc(44rem + 2 * var(--ifm-spacing-horizontal));
+}
+
+.kc-event-layout__body {
+  min-width: 0;
+}
+
+@media (min-width: 997px) {
+  /* Full container width, so event pages share the right edge of the archive and the footer. */
+  .kc-event-page main.col {
+    max-width: none;
+  }
+
+  .kc-event-page article > header {
+    max-width: 44rem;
+  }
+
+  .kc-event-layout {
+    display: grid;
+    /* The description takes what the side column leaves; its paragraphs keep their own measure. */
+    grid-template-columns: minmax(0, 1fr) clamp(17.5rem, 26vw, 23rem);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "body details"
+      "body invite";
+    gap: 1.5rem clamp(2.5rem, 4vw, 4rem);
+    align-items: start;
+    margin-top: 2rem;
+  }
+
+  .kc-event-layout__details { grid-area: details; }
+  .kc-event-layout__body { grid-area: body; }
+
+  /* The invitation stays in view while the description scrolls past. */
+  .kc-event-layout__invite {
+    grid-area: invite;
+    position: sticky;
+    top: calc(var(--ifm-navbar-height) + 2rem);
+  }
+
+  /* The cards bring their own margins for the stacked layout; the grid gap replaces them. */
+  .kc-event-layout > .kc-event-layout__details > *,
+  .kc-event-layout > .kc-event-layout__invite > * {
+    margin-block: 0;
+  }
+
+  /* Tighter cards in the side column, so facts and the invitation keep whole words per line. */
+  .kc-event-layout .kc-event-layout__details > *,
+  .kc-event-layout .kc-event-layout__invite > * {
+    padding: 1.4rem 1.5rem;
+  }
+}
+
+.pagination-nav__link--prev .pagination-nav__label::before,
+.pagination-nav__link--next .pagination-nav__label::after {
+  content: none;
+}
+
+/* ---------- Blog chrome ---------- */
+
+.blog-wrapper aside nav {
+  font-size: 0.92rem;
+}
+
+/* Year labels in the blog sidebar (paragraphs, see src/theme/BlogSidebar/Content). */
+.blog-wrapper aside [role="group"] > p {
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--kc-muted);
+  margin: 1.5rem 0 0.5rem;
+}
+
+.blog-list-page main > article,
+.blog-tags-post-list-page main > article {
+  padding-bottom: 2.5rem;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid var(--kc-line);
+}
+
+.kc-list-footer {
+  margin-top: 1.5rem;
+}
+
+/* "Read more" as a 24px-tall target. */
+.kc-list-footer a {
+  display: inline-block;
+  padding-block: 2px;
+}
+
+.blog-list-page main > article:last-of-type,
+.blog-tags-post-list-page main > article:last-of-type {
+  border-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .blog-list-page main > article footer .text--right,
+  .blog-tags-post-list-page main > article footer .text--right {
+    flex-basis: 100%;
+    max-width: 100%;
+    /* Infima's .text--right utility is itself !important. */
+    text-align: left !important;
+    margin-top: 1rem;
+  }
+}
+
+/* One author writes every post, so the list does not repeat the author card. */
+.blog-list-page main > article .avatar,
+.blog-tags-post-list-page main > article .avatar {
+  display: none;
+}
+
+/* Tags (see src/theme/Tag and src/theme/TagsListInline) */
+.kc-tags {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+}
+
+.kc-tags__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--kc-muted);
+}
+
+.kc-tags__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.kc-tags__list li {
+  margin: 0;
+}
+
+.kc-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--kc-control-line);
+  background: var(--kc-surface);
+  color: var(--kc-ink);
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: 0.3rem 0.75rem;
+}
+
+.kc-tag:hover {
+  box-shadow: inset 0 0 0 1px var(--ifm-color-primary);
+  color: var(--kc-ink);
+  text-decoration: none;
+}
+
+.kc-tag__count {
+  font-size: 0.75rem;
+  color: var(--kc-muted);
+}
+
+/* Text for screen readers only, such as the unit after a topic's count. */
+.kc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Author card: let the title wrap and give the social icons 32px targets in one colour. */
+.avatar__intro small {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  line-height: 1.35;
+  margin-top: 0.15rem;
+}
+
+.avatar__intro div:has(> a > svg) {
+  height: auto;
+  overflow: visible;
+  display: flex;
+  gap: 0.15rem;
+  margin: 0.2rem 0 0 -0.45rem;
+}
+
+.avatar__intro a:has(> svg) {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+  border-radius: 6px;
+  color: var(--kc-muted);
+}
+
+.avatar__intro a:has(> svg) svg {
+  fill: currentColor;
+  color: currentColor;
+}
+
+.avatar__intro a:has(> svg):hover {
+  background: var(--kc-surface-raised);
+  color: var(--kc-ink);
+}
+
+.avatar__name {
+  font-stretch: 106%;
+  font-weight: 650;
+}
+
+.avatar__subtitle {
+  color: var(--kc-muted);
 }
 
 /* Required for Firefox. https://github.com/facebook/docusaurus/pull/11356 introduces clipping issue. */
 .theme-doc-sidebar-item-link .menu__link > span,
 .theme-doc-sidebar-item-category .menu__link > span {
   padding-bottom: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Without transitions the Learn menu's links are focusable the instant it opens. */
+  .kc-disclosure,
+  .kc-disclosure * {
+    transition: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.kc-back-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
+}
+
+.kc-back-link {
+  display: inline-block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--kc-muted);
+  margin-bottom: 1rem;
+}
+
+.kc-back-link:hover {
+  color: var(--kc-ink);
+  text-decoration: none;
+}
+
+/* Laptop widths: the docs column is narrow between sidebar and TOC. */
+@media (min-width: 997px) and (max-width: 1279px) {
+  .markdown h1:first-child {
+    font-stretch: 106%;
+    font-size: 2.35rem;
+    text-wrap: balance;
+  }
+}
+
+/* Collapsed disclosure lists in the mobile drawer (see NavbarItem/DropdownNavbarItem/Mobile). */
+.menu__list[hidden] {
+  display: none;
+}
+
+/* Long doc titles on phones and tablets: a narrower width axis keeps them to fewer lines. */
+@media (max-width: 996px) {
+  .markdown h1:first-child {
+    font-stretch: 106%;
+  }
 }

@@ -1,0 +1,53 @@
+.invite {
+  container-type: inline-size;
+  position: relative;
+  margin-top: 3rem;
+  padding: 1.75rem 2rem;
+  border-radius: var(--kc-radius-lg);
+  background: var(--kc-surface);
+  border: 1px solid var(--kc-line);
+  box-shadow: var(--kc-shadow);
+}
+
+.title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-stretch: 110%;
+  margin: 0 0 0.5rem;
+}
+
+.text {
+  color: var(--kc-muted);
+  margin: 0;
+  max-width: 60ch;
+}
+
+.text a {
+  color: var(--kc-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--kc-control-line);
+}
+
+.text a:hover {
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+@media (max-width: 576px) {
+  .invite {
+    padding: 1.4rem 1.25rem;
+  }
+}
+
+.text a[href^="mailto:"] {
+  white-space: nowrap;
+}
+
+/* In the event page's side column the heading steps down so it keeps to two or three lines. */
+@container (max-width: 20rem) {
+  .title {
+    font-size: 1.15rem;
+  }
+}

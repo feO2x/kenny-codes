@@ -1,66 +1,72 @@
 .eventDetails {
-  background: var(--ifm-color-emphasis-100);
-  border-left: 4px solid var(--ifm-color-primary);
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-  border-radius: var(--kc-border-radius-small);
+  container-type: inline-size;
+  margin: 1.75rem 0 2.25rem;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--kc-line);
+  border-radius: var(--kc-radius);
+  background: var(--kc-surface);
+  box-shadow: var(--kc-shadow);
 }
 
 .cancelledBanner {
-  background: var(--kc-color-cancelled);
-  color: var(--kc-color-cancelled-text);
-  padding: 0.75rem 1rem;
-  border-radius: var(--kc-border-radius-small);
-  font-weight: 700;
-  font-size: 1rem;
-  text-align: center;
-  margin-bottom: 1rem;
-  letter-spacing: 0.03em;
+  margin: 0 0 1.25rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--kc-radius-sm);
+  font-weight: 650;
+  color: var(--kc-cancelled);
+  box-shadow: inset 0 0 0 1px currentColor;
 }
 
-.eventDetailsGrid {
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1.25rem 2rem;
+  margin: 0;
 }
 
-.eventDetailItem {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.item {
+  min-width: 0;
 }
 
-.eventDetailLabel {
+.label {
   font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: var(--kc-letter-spacing-wide);
-  color: var(--ifm-color-emphasis-700);
-}
-
-.eventDetailValue {
-  font-size: 1rem;
-  color: var(--ifm-color-content);
   font-weight: 500;
+  color: var(--kc-muted);
+  margin-bottom: 0.2rem;
 }
 
-/* Dark mode adjustments */
-[data-theme='dark'] .eventDetails {
-  background: var(--ifm-color-emphasis-200);
+.value {
+  margin: 0;
+  /* Wrap between words only; a narrow card must never split "September" or "Regensburg". */
+  overflow-wrap: normal;
+  hyphens: manual;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
-[data-theme='dark'] .eventDetailLabel {
-  color: var(--ifm-color-emphasis-600);
+@media (max-width: 576px) {
+  .eventDetails {
+    padding: 1.25rem;
+  }
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .eventDetailsGrid {
-    grid-template-columns: 1fr;
+/* Narrow cards (phones and the event page's side column) use two columns, with the event name
+   across both, so six short facts do not become a tall single column. */
+@container (max-width: 30rem) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.25rem;
   }
 
-  .eventDetails {
-    padding: 1rem;
-    margin: 1rem 0;
+  /* The event name and the date read best on one line each. */
+  .item[data-wide] {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Very narrow cards: one fact per row. */
+@container (max-width: 13.5rem) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -1,101 +1,61 @@
-import React from 'react';
+import React, {type ReactNode} from 'react';
+import clsx from 'clsx';
 import Layout from '@theme/Layout';
-import HeaderWithImage from '@site/src/components/HeaderWithImage';
-import EventCard from '@site/src/components/EventCard';
+import Heading from '@theme/Heading';
+import Link from '@docusaurus/Link';
 import type {Props} from '@theme/BlogTagsPostsPage';
+import EventsListing from '@site/src/components/EventsListing';
+import SpeakingRecord from '@site/src/components/SpeakingRecord';
 import type {EventFrontMatter} from '@site/src/types/event';
-import {formatDate} from '@site/src/utils/dateFormatting';
-import styles from '@site/src/css/events.module.css';
-import localStyles from './styles.module.css';
-
 import {groupEvents} from '@site/src/utils/eventUtils';
-import EventStats from '@site/src/components/EventStats';
+import {useToday} from '@site/src/utils/dateFormatting';
+import {EventsContact} from '@site/src/theme/BlogListPage/EventsBlogListContent';
+import styles from '@site/src/theme/BlogListPage/styles.module.css';
 
-type EventsBlogTagsPostsContentProps = Props;
-
-type BlogListItem = EventsBlogTagsPostsContentProps['items'][number];
-
-export default function EventsBlogTagsPostsContent({items, tag}: EventsBlogTagsPostsContentProps) {
-  const {upcomingEvents, pastEvents, pastEventsByYear, years} = groupEvents<BlogListItem>(items);
-
-  const cancelledUpcomingCount = upcomingEvents.filter(
-    item => (item.content.frontMatter as EventFrontMatter).cancelled
-  ).length;
-
-  const title = `Events tagged with "${tag.label}"`;
+export default function EventsBlogTagsPostsContent({items, tag}: Props): ReactNode {
+  const title = `Talks and workshops on ${tag.label}`;
+  // Count what the listing shows: cancelled sessions disappear once their date has passed.
+  const {upcomingEvents, pastEvents} = groupEvents(items, useToday());
+  const sessionCount = upcomingEvents.length + pastEvents.length;
+  const sessions = items.map((item) => ({
+    date: item.content.metadata.date,
+    cancelled: (item.content.frontMatter as EventFrontMatter).cancelled,
+  }));
 
   return (
-    <Layout title={title} description={`Events tagged with ${tag.label}`}>
-      <HeaderWithImage title="Events" imageUrl="/img/events.jpg" />
-
-      <div className={styles.eventsContainer}>
-        <h1 className={localStyles.pageTitle}>{title}</h1>
-        <EventStats
-          totalEvents={upcomingEvents.length - cancelledUpcomingCount + pastEvents.length}
-          upcomingEvents={upcomingEvents.length - cancelledUpcomingCount}
-          pastEvents={pastEvents.length}
-        />
-
-        {upcomingEvents.length > 0 && (
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Upcoming Events</h2>
-            {upcomingEvents.map((item, index) => {
-              const frontMatter = item.content.frontMatter as EventFrontMatter;
-              return (
-                <EventCard
-                  key={index}
-                  title={item.content.metadata.title}
-                  permalink={item.content.metadata.permalink}
-                  date={item.content.metadata.date}
-                  formattedDate={formatDate(item.content.metadata.date)}
-                  type={frontMatter.type}
-                  duration={frontMatter.duration}
-                  language={frontMatter.language}
-                  location={frontMatter.location}
-                  country={frontMatter.country}
-                  event={frontMatter.event}
-                  description={item.content.metadata.description}
-                  tags={item.content.metadata.tags}
-                  videoUrl={frontMatter.videoUrl}
-                  isUpcoming={true}
-                  cancelled={frontMatter.cancelled}
-                />
-              );
-            })}
+    <Layout title={title} description={`Talks and workshops by Kenny Pflug tagged ${tag.label}`}>
+      <main className="container kc-page">
+        <header className={clsx(styles.header, styles.headerTopic)}>
+          <div>
+            <nav className="kc-back-links" aria-label="Events">
+              <Link to="/events" className="kc-back-link">
+                All talks and workshops
+              </Link>
+              <Link to="/events/tags" className="kc-back-link">
+                All topics
+              </Link>
+            </nav>
+            <Heading as="h1" className="kc-page-title">
+              {tag.label}
+            </Heading>
+            <p className={styles.lede}>
+              {sessionCount === 1 ? 'One session' : `${sessionCount} sessions`} tagged “{tag.label}”.
+            </p>
+            <EventsContact />
           </div>
-        )}
+          {sessionCount > 1 && (
+            <section className={styles.topicRecord} aria-label={`Sessions on ${tag.label} per year`}>
+              <SpeakingRecord
+                events={sessions}
+                yearLink={(year) => `#year-${year}`}
+                upcomingLink="#upcoming"
+              />
+            </section>
+          )}
+        </header>
 
-        <div className={styles.section}>
-          {pastEvents.length > 0 && <h2 className={styles.sectionTitle}>Past Events</h2>}
-          {years.map(year => (
-            <div key={year}>
-              <h3 className={styles.yearHeader}>{year}</h3>
-              {pastEventsByYear[year].map((item, index) => {
-                const frontMatter = item.content.frontMatter as EventFrontMatter;
-                return (
-                  <EventCard
-                    key={index}
-                    title={item.content.metadata.title}
-                    permalink={item.content.metadata.permalink}
-                    date={item.content.metadata.date}
-                    formattedDate={formatDate(item.content.metadata.date)}
-                    type={frontMatter.type}
-                    duration={frontMatter.duration}
-                    language={frontMatter.language}
-                    location={frontMatter.location}
-                    country={frontMatter.country}
-                    event={frontMatter.event}
-                    description={item.content.metadata.description}
-                    tags={item.content.metadata.tags}
-                    videoUrl={frontMatter.videoUrl}
-                    isUpcoming={false}
-                  />
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      </div>
+        <EventsListing items={items} />
+      </main>
     </Layout>
   );
 }

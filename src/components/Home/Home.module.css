@@ -1,0 +1,860 @@
+/* ---------- Hero ---------- */
+
+.hero {
+  padding: clamp(2.5rem, 1.5rem + 3vw, 4.5rem) 0 clamp(3rem, 2rem + 3vw, 5rem);
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: clamp(2rem, 1rem + 4vw, 5rem);
+  align-items: center;
+}
+
+/* The greeting is sized against its own column (cqi), so it stays on one line at every width. */
+.heroText {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.heroName {
+  /* A greeting, not a poster: medium weight and width, sized well below the column. */
+  font-size: min(clamp(2.6rem, 1.7rem + 3.6vw, 4.75rem), 12.5cqi);
+  font-stretch: 112%;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0 0 1.5rem;
+}
+
+/* The words rise in once; the name then drifts slowly through the brand ramp, like on the old site. */
+.greeting,
+.greetingName {
+  display: inline-block;
+  animation: greeting-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.greetingName {
+  /* Room below the baseline, so background-clip: text keeps the descender of the y. */
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+  background: linear-gradient(
+    100deg,
+    var(--kc-ramp-from) 0%,
+    var(--kc-ramp-to) 50%,
+    var(--kc-ramp-from) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation:
+    greeting-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both,
+    greeting-drift 10s ease-in-out 1s infinite alternate;
+}
+
+@keyframes greeting-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.25em);
+  }
+}
+
+@keyframes greeting-drift {
+  to {
+    background-position: 100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .greeting,
+  .greetingName {
+    animation: none;
+  }
+}
+
+
+.heroStatement {
+  font-size: clamp(1.35rem, 1.1rem + 0.9vw, 1.8rem);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--kc-ink);
+  max-width: 30ch;
+  margin: 0 0 1.25rem;
+}
+
+.heroRole {
+  font-size: 1.0625rem;
+  color: var(--kc-muted);
+  max-width: 48ch;
+  margin: 0 0 2.25rem;
+}
+
+.heroFullName {
+  font-weight: 600;
+  color: var(--kc-ink);
+}
+
+.heroRole a {
+  color: var(--kc-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--kc-control-line);
+}
+
+.heroRole a:hover {
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.heroActions :global(.button--lg) {
+  font-size: 1rem;
+  padding: 0.75rem 1.3rem;
+}
+
+.ctaIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.ctaIcon svg {
+  flex: none;
+  font-size: 1.1rem;
+}
+
+/* The recording sits right under the main actions, where organizers decide. */
+.watch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.75rem;
+  margin-top: 1.1rem;
+  font-weight: 600;
+  color: var(--kc-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  text-decoration-color: var(--kc-control-line);
+}
+
+.watch svg {
+  flex: none;
+  font-size: 1.35rem;
+  color: #ff0033;
+}
+
+.watch:hover {
+  color: var(--kc-ink);
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+.socials {
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;
+  /* Pull the 44px hit areas left so the glyphs line up with the text edge. */
+  margin: 0.25rem 0 0 -0.7rem;
+  padding: 0;
+}
+
+.socials a {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 8px;
+  color: var(--kc-muted);
+  font-size: 1.2rem;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.socials a:hover {
+  color: var(--kc-ink);
+  background: var(--kc-surface-raised);
+}
+
+/* The portrait sits in the logo's squircle, framed by the logo's gradient. */
+.portraitFrame {
+  justify-self: end;
+  width: min(100%, 25rem);
+  padding: 5px;
+  border-radius: 31%;
+  background: var(--kc-gradient);
+  box-shadow: var(--kc-shadow);
+}
+
+.portrait {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: 60% 45%;
+  border-radius: calc(31% - 1px);
+  background: var(--kc-surface-raised);
+}
+
+/* ---------- Speaking record ---------- */
+
+.record {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 2.5rem clamp(2rem, 1rem + 4vw, 5rem);
+  align-items: end;
+  margin-top: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+  padding-top: 2rem;
+  border-top: 1px solid var(--kc-line);
+}
+
+.recordIntro {
+  align-self: start;
+}
+
+.recordTitle {
+  font-size: clamp(1.4rem, 1.2rem + 0.8vw, 1.85rem);
+  font-weight: 700;
+  font-stretch: 112%;
+  line-height: 1.15;
+  margin: 0 0 0.9rem;
+}
+
+.recordText {
+  color: var(--kc-muted);
+  margin: 0 0 1.25rem;
+  max-width: 40ch;
+}
+
+.recordChart {
+  min-width: 0;
+}
+
+/* ---------- Sections ---------- */
+
+.section {
+  padding: clamp(4rem, 2.5rem + 4vw, 7rem) 0;
+  border-top: 1px solid var(--kc-line);
+}
+
+.sectionHead {
+  max-width: 44rem;
+  margin-bottom: 3rem;
+}
+
+.sectionTitle {
+  font-size: clamp(1.9rem, 1.4rem + 1.6vw, 2.75rem);
+  font-weight: 750;
+  font-stretch: 116%;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  margin: 0 0 1rem;
+}
+
+.sectionLede {
+  font-size: 1.0625rem;
+  color: var(--kc-muted);
+  max-width: 44ch;
+  margin: 0 0 1.25rem;
+}
+
+.textLink {
+  display: inline-block;
+  font-weight: 600;
+  color: var(--kc-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+.textLink:hover {
+  color: var(--ifm-color-primary-darkest);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+:global([data-theme='dark']) .textLink:hover {
+  color: var(--ifm-color-primary);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 2rem clamp(2rem, 1rem + 4vw, 5rem);
+  align-items: start;
+}
+
+.splitIntro {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 2rem);
+}
+
+.splitList {
+  min-width: 0;
+}
+
+.topics {
+  list-style: none;
+  margin: 0 0 1.75rem;
+  padding: 0;
+}
+
+.topics li {
+  position: relative;
+  padding-left: 1.4rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.975rem;
+  line-height: 1.45;
+}
+
+/* Same square as in the speaking record. */
+.topics li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.38em;
+  width: 9px;
+  height: 9px;
+  border-radius: 2.5px;
+  background: var(--kc-gradient);
+}
+
+.listCaption {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--kc-muted);
+  margin: 0.5rem 0 0.75rem;
+}
+
+/* ---------- Methods ---------- */
+
+.methodsBand {
+  background: var(--kc-surface);
+}
+
+.methods {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 1.5rem;
+}
+
+.method {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  border: 1px solid var(--kc-line);
+  border-radius: var(--kc-radius-lg);
+  background: var(--kc-bg);
+}
+
+.methodName {
+  font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem);
+  font-weight: 750;
+  font-stretch: 120%;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+}
+
+.methodText {
+  color: var(--kc-muted);
+  max-width: 42ch;
+  margin: 0 0 2rem;
+}
+
+.methodLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.75rem;
+  margin-top: auto;
+}
+
+.phases {
+  list-style: none;
+  counter-reset: phase;
+  margin: 0 0 2.25rem;
+  padding: 0;
+}
+
+/* Number, name, and one sentence per phase; the line between numbers shows the sequence. */
+.phase {
+  counter-increment: phase;
+  position: relative;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  column-gap: 0.9rem;
+  margin: 0;
+  padding-bottom: 1.1rem;
+}
+
+.phase:last-child {
+  padding-bottom: 0;
+}
+
+.phase::before {
+  content: counter(phase);
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9px;
+  box-shadow: inset 0 0 0 1.5px var(--kc-line-strong);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--kc-ink);
+  background: var(--kc-bg);
+  position: relative;
+  z-index: 1;
+}
+
+.phase:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(1rem - 0.75px);
+  top: 2rem;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--kc-line-strong);
+}
+
+.phaseName {
+  font-weight: 700;
+  font-stretch: 110%;
+  line-height: 2rem;
+}
+
+.phaseText {
+  font-size: 0.975rem;
+  line-height: 1.5;
+  color: var(--kc-muted);
+}
+
+/* Implement branches by who writes the code; the Guided Learning rows sit in their own box. */
+.implementers {
+  grid-column: 2;
+  margin-top: 0.75rem;
+}
+
+.levels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.level {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  column-gap: 0.75rem;
+  margin: 0;
+  padding: 0.2rem 0;
+  font-size: 0.975rem;
+  line-height: 1.5;
+  color: var(--kc-muted);
+}
+
+.level strong {
+  font-weight: 650;
+  color: var(--kc-ink);
+}
+
+.learning {
+  position: relative;
+  margin-top: 0.9rem;
+  padding: 0.85rem 0.9rem 0.6rem;
+  /* Solid, so it doesn't read like CHACK's dashed process boundary. */
+  border: 1px solid var(--kc-line-strong);
+  border-radius: var(--kc-radius);
+}
+
+.learningLabel {
+  position: absolute;
+  top: 0;
+  left: 0.65rem;
+  translate: 0 -50%;
+  padding: 0 0.35rem;
+  background: var(--kc-bg);
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--kc-ink);
+}
+
+.meter {
+  display: flex;
+  gap: 2.5px;
+  /* Centred on the first line, also when the text wraps. */
+  align-self: start;
+  margin-top: calc((1.5em - 9px) / 2);
+}
+
+.meter > span {
+  box-sizing: border-box;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--kc-control-line);
+  border-radius: 2.5px;
+}
+
+.meter > .meterOn {
+  border-color: transparent;
+  background: var(--kc-ramp-from);
+}
+
+.meter > .meterOn:nth-child(2) {
+  background: color-mix(in oklab, var(--kc-ramp-to) 50%, var(--kc-ramp-from));
+}
+
+.meter > .meterOn:nth-child(3) {
+  background: var(--kc-ramp-to);
+}
+
+/* CHACK in miniature: the dashed box is the process boundary, Humble Objects straddle it. */
+.chackMap {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 0.75rem;
+  margin: 1.35rem 0 2.25rem;
+  padding: 0 1rem 1.5rem;
+  border: 1.5px dashed var(--kc-control-line);
+  border-radius: var(--kc-radius);
+}
+
+.chackBox {
+  display: grid;
+  place-items: center;
+  min-height: 2.6rem;
+  padding: 0.45rem 0.6rem;
+  border: 1.5px solid var(--kc-control-line);
+  border-radius: var(--kc-radius);
+  background: var(--kc-bg);
+  font-size: 0.875rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--kc-ink);
+}
+
+.chackHumble {
+  grid-column: 1 / -1;
+  justify-self: center;
+  min-width: 62%;
+  margin-top: -1.35rem;
+}
+
+.chackCore {
+  grid-column: 1 / -1;
+  min-height: 4.25rem;
+  border-color: transparent;
+  background: var(--kc-gradient);
+  color: #0c1a30;
+  font-size: 1.05rem;
+  font-weight: 750;
+  font-stretch: 112%;
+}
+
+.chackCore small {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 550;
+  font-stretch: 100%;
+  color: #12305a;
+}
+
+.chackDown,
+.chackUp {
+  display: grid;
+  place-items: center;
+  height: 1.75rem;
+  color: var(--kc-muted);
+}
+
+.chackDown {
+  grid-column: 1 / -1;
+}
+
+.chackArrow {
+  width: 12px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chackBoundary {
+  position: absolute;
+  right: 0.9rem;
+  bottom: 0;
+  translate: 0 50%;
+  padding: 0 0.4rem;
+  background: var(--kc-bg);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--kc-muted);
+}
+
+/* ---------- From the blog ---------- */
+
+.post {
+  position: relative;
+  padding: 1.5rem 1rem;
+  margin-inline: -1rem;
+  border-radius: var(--kc-radius);
+  transition: background-color 0.15s ease;
+}
+
+.post:hover,
+.post:focus-within {
+  background: var(--kc-surface);
+}
+
+/* Dividers align with the content edge, not with the hover background. */
+.post + .post::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline: 1rem;
+  height: 1px;
+  background: var(--kc-line);
+  transition: opacity 0.15s ease;
+}
+
+.post:hover::before,
+.post:focus-within::before,
+.post:hover + .post::before,
+.post:focus-within + .post::before {
+  opacity: 0;
+}
+
+.postDate {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--kc-muted);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.4rem;
+}
+
+.postTitle {
+  font-size: 1.3rem;
+  font-weight: 650;
+  font-stretch: 106%;
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+}
+
+.postLink {
+  color: var(--kc-ink);
+}
+
+.postLink:hover {
+  color: var(--kc-ink);
+  text-decoration: none;
+}
+
+.post:hover .postLink {
+  color: var(--ifm-color-primary-darkest);
+}
+
+:global([data-theme='dark']) .post:hover .postLink {
+  color: var(--ifm-color-primary);
+}
+
+.postLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.postLink:focus-visible {
+  outline: none;
+}
+
+.postLink:focus-visible::after {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.postExcerpt {
+  color: var(--kc-muted);
+  margin: 0;
+  max-width: 68ch;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 996px) {
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 15rem);
+    align-items: start;
+  }
+
+  .record,
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .splitIntro {
+    position: static;
+  }
+
+  /* Stacked, two sessions are enough, so the record follows sooner. Child 1 is the caption. */
+  .splitList > :nth-child(n + 4) {
+    display: none;
+  }
+
+  .record {
+    row-gap: 1.25rem;
+    margin-top: 2rem;
+  }
+}
+
+/* Two columns: title, text, visual, and links share rows across the cards. */
+@media (min-width: 997px) {
+  .methods {
+    grid-template-rows: auto auto auto 1fr;
+  }
+
+  .method {
+    display: grid;
+    grid-row: span 4;
+    grid-template-rows: subgrid;
+    row-gap: 0;
+  }
+
+  .methodLinks {
+    align-self: end;
+  }
+
+  /* The Guided Coding steps set the row height; the diagram sits in its middle. */
+  .chackVisual {
+    align-self: center;
+  }
+}
+
+/* Below that, the cards stack and each lays its visual beside the text. */
+@media (max-width: 996px) {
+  .methods {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 996px) {
+  .method {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "name visual"
+      "text visual"
+      "links visual";
+    column-gap: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .methodName { grid-area: name; }
+  .methodText { grid-area: text; }
+
+  .methodLinks {
+    grid-area: links;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: start;
+    margin-top: 0;
+  }
+
+  .methodVisual {
+    grid-area: visual;
+    align-self: center;
+    margin-bottom: 0;
+  }
+
+  .methodVisual > .chackMap {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Below 720px the portrait column would squeeze the name onto two lines; stack instead. */
+@media (max-width: 720px) {
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .portraitFrame {
+    grid-row: 1;
+    justify-self: start;
+    width: 6.5rem;
+    padding: 3px;
+  }
+
+  .hero {
+    padding-top: 1.75rem;
+  }
+
+  .heroGrid {
+    gap: 1.5rem;
+  }
+
+  .heroRole {
+    margin-bottom: 1.5rem;
+  }
+
+  .record {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+  }
+
+  .heroName {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Once the two buttons no longer fit on one row, both go full width instead of stacking raggedly. */
+@media (max-width: 840px) {
+  .heroActions :global(.button) {
+    flex: 1 1 auto;
+  }
+}
+
+@media (forced-colors: active) {
+  .meter > .meterOn:nth-child(n),
+  .phase:not(:last-child)::after,
+  .topics li::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .phase::before {
+    outline: 1.5px solid CanvasText;
+  }
+
+  .greetingName {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+
+  .chackCore,
+  .chackCore small {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+}

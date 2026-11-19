@@ -1,12 +1,39 @@
 .title {
-  font-size: 3rem;
+  font-size: clamp(2.1rem, 1.3rem + 2.2vw, 3.1rem);
+  font-weight: 750;
+  font-stretch: 118%;
+  letter-spacing: -0.028em;
+  line-height: 1.08;
+  margin-bottom: 0.75rem;
+  /* On wide screens "pretty" avoids breaking hyphenated words early; phones keep "balance"
+     so titles do not end on a single word. */
+  text-wrap: balance;
 }
 
-/**
-  Blog post title should be smaller on smaller devices
-**/
-@media (max-width: 576px) {
+@media (min-width: 577px) {
   .title {
-    font-size: 2rem;
+    text-wrap: pretty;
   }
+}
+
+/* Between tablet and wide desktop the post column is narrow; tighten the width axis. */
+@media (min-width: 997px) and (max-width: 1279px) {
+  .title {
+    font-stretch: 106%;
+    font-size: 2.35rem;
+  }
+}
+
+/* Titles in the blog list are links and slightly smaller than on the post page. */
+h2.title {
+  font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.2rem);
+}
+
+h2.title a {
+  color: var(--kc-ink);
+}
+
+h2.title a:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
 }

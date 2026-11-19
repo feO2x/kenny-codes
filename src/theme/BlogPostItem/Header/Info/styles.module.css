@@ -1,3 +1,14 @@
 .container {
-  font-size: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.25rem;
+  font-size: 0.925rem;
+  color: var(--kc-muted);
+}
+
+.readingTime {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }

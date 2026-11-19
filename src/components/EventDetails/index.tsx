@@ -1,76 +1,49 @@
-import React from 'react';
-import { useBlogPost } from '@docusaurus/plugin-content-blog/client';
-import type { EventFrontMatter } from '@site/src/types/event';
-import { formatDate } from '@site/src/utils/dateFormatting';
+import React, {type ReactNode} from 'react';
+import {useBlogPost} from '@docusaurus/plugin-content-blog/client';
+import type {EventFrontMatter} from '@site/src/types/event';
+import {formatDate} from '@site/src/utils/dateFormatting';
+import {formatPlace} from '@site/src/components/EventRow';
 import styles from './styles.module.css';
 
-export default function EventDetails() {
-  const { metadata } = useBlogPost();
-  const { frontMatter, date } = metadata;
+export default function EventDetails(): ReactNode {
+  const {metadata} = useBlogPost();
+  const {frontMatter, date} = metadata;
 
-  // Type the frontMatter with event-specific fields
-  const eventFrontMatter = frontMatter as EventFrontMatter;
-
-  const { type, duration, language, location, country, event, cancelled } = eventFrontMatter;
+  const {type, duration, language, location, country, event, cancelled} =
+    frontMatter as EventFrontMatter;
 
   // Validate that event has required metadata
   if (!type && !duration && !language && !location && !country && !event) {
     throw new Error(
       `Event page is missing required frontmatter. ` +
-      `At least one of the following fields must be provided: type, duration, language, location, country, event. ` +
-      `Page: ${metadata.permalink}`
+        `At least one of the following fields must be provided: type, duration, language, location, country, event. ` +
+        `Page: ${metadata.permalink}`,
     );
   }
 
+  const place = formatPlace(location, country);
+  const details: Array<[string, string | undefined]> = [
+    ['Event', event],
+    ['Date', date ? formatDate(date) : undefined],
+    ['Format', type],
+    ['Duration', duration],
+    ['Location', place || undefined],
+    ['Language', language],
+  ];
+
   return (
     <div className={styles.eventDetails}>
-      {cancelled && (
-        <div className={styles.cancelledBanner}>
-          This event has been cancelled.
-        </div>
-      )}
-      <div className={styles.eventDetailsGrid}>
-        {event && (
-          <div className={styles.eventDetailItem}>
-            <span className={styles.eventDetailLabel}>Event:</span>
-            <span className={styles.eventDetailValue}>{event}</span>
-          </div>
-        )}
-        {type && (
-          <div className={styles.eventDetailItem}>
-            <span className={styles.eventDetailLabel}>Type:</span>
-            <span className={styles.eventDetailValue}>{type}</span>
-          </div>
-        )}
-        {date && (
-          <div className={styles.eventDetailItem}>
-            <span className={styles.eventDetailLabel}>Date:</span>
-            <span className={styles.eventDetailValue}>{formatDate(date)}</span>
-          </div>
-        )}
-        {duration && (
-          <div className={styles.eventDetailItem}>
-            <span className={styles.eventDetailLabel}>Duration:</span>
-            <span className={styles.eventDetailValue}>{duration}</span>
-          </div>
-        )}
-        {(location || country) && (
-          <div className={styles.eventDetailItem}>
-            <span className={styles.eventDetailLabel}>Location:</span>
-            <span className={styles.eventDetailValue}>
-              {location}
-              {location && country && ', '}
-              {country}
-            </span>
-          </div>
-        )}
-        {language && (
-          <div className={styles.eventDetailItem}>
-            <span className={styles.eventDetailLabel}>Language:</span>
-            <span className={styles.eventDetailValue}>{language}</span>
-          </div>
-        )}
-      </div>
+      {cancelled && <p className={styles.cancelledBanner}>This event has been cancelled.</p>}
+      <dl className={styles.grid}>
+        {details
+          .filter(([, value]) => Boolean(value))
+          .map(([label, value]) => (
+            <div key={label} className={styles.item} data-wide={label === 'Event' || label === 'Date' || undefined}>
+              <dt className={styles.label}>{label}</dt>
+              <dd className={styles.value}>{value}</dd>
+            </div>
+          ))}
+      </dl>
     </div>
   );
 }
