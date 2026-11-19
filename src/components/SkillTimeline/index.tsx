@@ -1,4 +1,4 @@
-import React, {type CSSProperties, type ReactNode, useEffect, useRef, useState} from 'react';
+import React, {type ReactNode, useEffect, useRef, useState} from 'react';
 import clsx from 'clsx';
 import {DiagramFrame} from '../Diagram';
 import {methodNames, phasesFor, type Method, type Phase, type Span, type TimelineVariant} from './data';
@@ -27,41 +27,49 @@ function anchorOf(phase: Phase, index: number): string | undefined {
   return undefined;
 }
 
-type Ends = Record<'small' | 'large', {top: number; bottom: number}>;
+interface ArrowBox {
+  top: number;
+  height: number;
+  left: number;
+}
+
+type Ends = Record<'small' | 'large', ArrowBox>;
+
+/** Half the arrows' stroke width: the stroke's centre lines run through the measured points. */
+const HALF_STROKE = 2;
 
 /**
- * Measures where the back arrows must start and end, because the step rows wrap differently at
- * every width. The arrows appear only once measured; until then the Iterate step says in words
- * where small and large issues go.
+ * Measures the back arrows, because the step rows wrap differently at every width. Each arrow
+ * leaves the Iterate step, runs up over the cards' right edge, and points at the first step of
+ * the phase it returns to. The arrows appear only once measured; until then the Iterate step
+ * says in words where small and large issues go.
  */
 function useBackArrowEnds(list: React.RefObject<HTMLOListElement | null>): Ends | undefined {
   const [ends, setEnds] = useState<Ends>();
   useEffect(() => {
     const root = list.current;
     if (!root) return undefined;
-    const markerY = (anchor: string) => {
-      const marker = root.querySelector(`[data-anchor="${anchor}"] .${styles.marker}`);
-      const box = marker?.getBoundingClientRect();
-      return box ? box.top + box.height / 2 : NaN;
-    };
     const measure = () => {
+      const origin = root.getBoundingClientRect();
       // An inactive tab panel has no size; wait until it is shown.
-      if (root.getBoundingClientRect().height === 0) return;
+      if (origin.height === 0) return;
+      const markerY = (anchor: string) => {
+        const box = root.querySelector(`[data-anchor="${anchor}"] .${styles.marker}`)?.getBoundingClientRect();
+        return box ? box.top + box.height / 2 - origin.top : NaN;
+      };
+      // The arrows start where the step text area of the middle cards ends.
+      const card = root.querySelector(`:scope > .${styles.planning}`);
+      if (!card) return;
+      const cardBox = card.getBoundingClientRect();
+      const left = cardBox.right - parseFloat(getComputedStyle(card).paddingRight) - origin.left;
       const iterate = markerY('iterate');
-      const next: Partial<Ends> = {};
-      // Each rail spans the grid rows from its target phase down to the Implementing Phase, so
-      // it starts at the target card's top and ends at the Implementing card's bottom.
-      const card = (kind: string) => root.querySelector(`:scope > .${styles[kind]}`)?.getBoundingClientRect();
-      const railBottom = card('implementing')?.bottom ?? NaN;
-      for (const [arrow, target, offset] of [
-        ['small', 'implementing', -7],
-        ['large', 'planning', 7],
-      ] as const) {
-        const railTop = card(target)?.top ?? NaN;
-        next[arrow] = {top: markerY(target) - railTop, bottom: railBottom - (iterate + offset)};
-      }
-      if ([next.small, next.large].every((end) => end && Number.isFinite(end.top) && Number.isFinite(end.bottom))) {
-        setEnds(next as Ends);
+      const box = (target: string, offset: number): ArrowBox => {
+        const top = markerY(target) - HALF_STROKE;
+        return {top, height: iterate + offset + HALF_STROKE - top, left};
+      };
+      const next: Ends = {small: box('implementing', -7), large: box('planning', 7)};
+      if (Object.values(next).every(({top, height}) => Number.isFinite(top) && Number.isFinite(height) && height > 0)) {
+        setEnds(next);
       }
     };
     measure();
@@ -132,15 +140,9 @@ export default function SkillTimeline({
   const phases = phasesFor(method, variant);
   const listRef = useRef<HTMLOListElement>(null);
   const ends = useBackArrowEnds(listRef);
-  const rowOf = (kind: Phase['kind']) => phases.findIndex((phase) => phase.kind === kind) + 1;
-  const back = (target: Phase['kind'], label: string, className: string, end: Ends['small']) => (
-    <li
-      className={clsx(styles.back, className)}
-      style={{gridRow: `${rowOf(target)} / ${rowOf('guiding')}`} as CSSProperties}
-      aria-hidden="true">
-      <span className={styles.backLine} style={{top: end.top, bottom: end.bottom}}>
-        <span className={styles.backLabel}>{label}</span>
-      </span>
+  const back = (label: string, className: string, {top, height, left}: ArrowBox) => (
+    <li className={clsx(styles.back, className)} style={{top, height, left}} aria-hidden="true">
+      <span className={styles.backLabel}>{label}</span>
     </li>
   );
 
@@ -156,8 +158,8 @@ export default function SkillTimeline({
           {phases.map((phase, index) => (
             <PhaseCard key={phase.kind} phase={phase} row={index + 1} />
           ))}
-          {ends && back('implementing', 'small issue', styles.backSmall, ends.small)}
-          {ends && back('planning', 'large issue', styles.backLarge, ends.large)}
+          {ends && back('small issue', styles.backSmall, ends.small)}
+          {ends && back('large issue', styles.backLarge, ends.large)}
         </ol>
       </figure>
     </DiagramFrame>

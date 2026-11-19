@@ -42,6 +42,12 @@ export default function DesignTensionDiagram(): ReactNode {
         </ul>
         <div className={styles.tension} aria-hidden="true">
           <span className={styles.arrow} />
+          {/* A lightning bolt on an amber tile: the old diagram's warning sign, restyled. */}
+          <span className={styles.symbol}>
+            <svg viewBox="0 0 24 24">
+              <path d="M13.5 2 4.5 13.5h6.5L10 22l9.5-12H13z" />
+            </svg>
+          </span>
           <span className={styles.tensionLabel}>Tension</span>
         </div>
         <p className={clsx(styles.title, styles.rightTitle)}>{right.title}</p>

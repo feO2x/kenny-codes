@@ -1,6 +1,6 @@
 .diagram {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 7rem minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 8.5rem minmax(0, 1fr);
   grid-template-areas:
     "left-title tension right-title"
     "left-list . right-list";
@@ -19,7 +19,7 @@
   align-self: stretch;
   display: grid;
   place-items: center;
-  margin: 0 0 1rem;
+  margin: 0 0 1.5rem;
   padding: 0.7rem 1rem;
   border: 1.5px solid var(--kc-control-line);
   border-radius: var(--kc-radius);
@@ -56,23 +56,24 @@
   background: var(--kc-gradient);
 }
 
-/* A double-headed arrow between the two titles. */
+/* A double-headed arrow between the two titles, pulled taut through a lightning-bolt tile. */
 .tension {
   position: relative;
   display: grid;
   place-items: center;
   align-self: center;
-  height: 3rem;
-  margin-bottom: 1rem;
+  height: 3.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .arrow {
   position: absolute;
   top: 50%;
-  left: 0.5rem;
-  right: 0.5rem;
-  height: 1.75px;
-  background: var(--kc-muted);
+  left: 0.4rem;
+  right: 0.4rem;
+  height: 2px;
+  translate: 0 -50%;
+  background: var(--kc-mark-amber);
 }
 
 .arrow::before,
@@ -80,10 +81,10 @@
   content: "";
   position: absolute;
   top: 50%;
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   translate: 0 -50%;
-  background: var(--kc-muted);
+  background: var(--kc-mark-amber);
 }
 
 .arrow::before {
@@ -96,14 +97,37 @@
   clip-path: polygon(100% 50%, 0 0, 0 100%);
 }
 
-.tensionLabel {
+.symbol {
   position: relative;
-  padding: 0 0.4rem;
-  background: var(--kc-surface);
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--kc-muted);
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  background: var(--kc-tile-amber);
+  box-shadow: 0 0 0 4px var(--kc-surface);
+}
+
+:global([data-theme='light']) .symbol {
+  border: 1.5px solid var(--kc-mark-amber);
+}
+
+.symbol svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  fill: var(--kc-on-gradient);
+}
+
+.tensionLabel {
+  position: absolute;
+  top: calc(50% + 1.65rem);
+  left: 50%;
+  translate: -50% 0;
+  font-size: 0.85rem;
+  font-weight: 700;
   line-height: 1.3;
+  white-space: nowrap;
+  color: var(--kc-mark-amber);
 }
 
 /* Stacked when the card is narrow: the arrow turns vertical between the two extremes. */
@@ -119,8 +143,8 @@
   }
 
   .tension {
-    height: 4rem;
-    margin: 0.25rem 0 1rem;
+    height: 5.5rem;
+    margin: 0.25rem 0 1.25rem;
   }
 
   .arrow {
@@ -128,8 +152,9 @@
     bottom: 0.25rem;
     left: 50%;
     right: auto;
-    width: 1.75px;
+    width: 2px;
     height: auto;
+    translate: -50% 0;
   }
 
   .arrow::before,
@@ -148,6 +173,12 @@
     bottom: -2px;
     clip-path: polygon(50% 100%, 0 0, 100% 0);
   }
+
+  .tensionLabel {
+    top: 50%;
+    left: calc(50% + 1.75rem);
+    translate: 0 -50%;
+  }
 }
 
 @media (forced-colors: active) {
@@ -159,7 +190,12 @@
     background: CanvasText;
   }
 
-  .tensionLabel {
+  .symbol {
+    border: 2px solid CanvasText;
     background: Canvas;
+  }
+
+  .symbol svg {
+    fill: CanvasText;
   }
 }
