@@ -8,6 +8,7 @@ import type {EventFrontMatter} from '@site/src/types/event';
 import SpeakingRecord from '@site/src/components/SpeakingRecord';
 import EventsListing from '@site/src/components/EventsListing';
 import {useToday} from '@site/src/utils/dateFormatting';
+import {deliveredSessions} from '@site/src/utils/eventUtils';
 import {CONTACT_EMAIL, CONTACT_MAILTO, LINKEDIN_URL} from '@site/src/utils/contact';
 import styles from './styles.module.css';
 
@@ -35,7 +36,7 @@ export default function EventsBlogListContent({items}: EventsBlogListContentProp
     cancelled: (item.content.frontMatter as EventFrontMatter).cancelled,
     language: (item.content.frontMatter as EventFrontMatter).language,
   }));
-  const delivered = sessions.filter((s) => !s.cancelled && s.date.slice(0, 10) < today);
+  const delivered = deliveredSessions(sessions, today);
   const firstYear = Math.min(...sessions.map((s) => Number(s.date.slice(0, 4))));
   const hasUpcoming = sessions.some((s) => s.date.slice(0, 10) >= today);
   const germanShare = delivered.filter((s) => s.language === 'German').length / Math.max(1, delivered.length);

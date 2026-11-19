@@ -24,12 +24,13 @@ export default function BlogPostItem({children, className}: Props): ReactNode {
           </div>
           <div className="kc-event-layout__body">
             <BlogPostItemContent>{children}</BlogPostItemContent>
+            {/* Tags follow the description directly, however tall the side column is. */}
+            <BlogPostItemFooter />
           </div>
           <div className="kc-event-layout__invite">
             <EventInvite />
           </div>
         </div>
-        <BlogPostItemFooter />
       </BlogPostItemContainer>
     );
   }

@@ -20,6 +20,8 @@
   --kc-muted: #4f5e78;
   --kc-line: #dce3ee;
   --kc-line-strong: #b8c5d8;
+  /* Outlines of controls (secondary buttons, pills): at least 3:1 against the page. */
+  --kc-control-line: #7c8da8;
   --kc-accent-soft: rgba(0, 102, 214, 0.08);
   --kc-upcoming: #007a68;
   --kc-cancelled: #c62828;
@@ -97,6 +99,7 @@
   --kc-muted: #9eadc5;
   --kc-line: rgba(160, 185, 230, 0.14);
   --kc-line-strong: rgba(160, 185, 230, 0.26);
+  --kc-control-line: rgba(160, 185, 230, 0.5);
   --kc-accent-soft: rgba(51, 255, 220, 0.09);
   --kc-upcoming: #33ffdc;
   --kc-cancelled: #ff7b7b;
@@ -258,7 +261,7 @@ hr {
 
 .button--secondary {
   --ifm-button-background-color: transparent;
-  --ifm-button-border-color: var(--kc-line-strong);
+  --ifm-button-border-color: var(--kc-control-line);
   --ifm-button-color: var(--kc-ink);
   color: var(--kc-ink);
 }
@@ -490,6 +493,13 @@ hr {
   }
 }
 
+/* Tablets fit all three columns in one row. */
+@media (min-width: 577px) and (max-width: 996px) {
+  .footer__links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 360px) {
   .footer__links {
     grid-template-columns: minmax(0, 1fr);
@@ -701,6 +711,10 @@ aside.theme-doc-sidebar-container {
 
 .table-of-contents__link {
   color: var(--kc-muted);
+  /* At least 24px tall targets (WCAG 2.5.8) without changing the list's rhythm much. */
+  display: inline-block;
+  min-height: 24px;
+  padding-block: 2px;
 }
 
 .table-of-contents__link:hover,
@@ -800,19 +814,19 @@ aside.theme-doc-sidebar-container {
 }
 
 @media (min-width: 997px) {
+  /* Full container width, so event pages share the right edge of the archive and the footer. */
   .kc-event-page main.col {
-    max-width: calc(44rem + 4rem + 21rem + 2 * var(--ifm-spacing-horizontal));
+    max-width: none;
   }
 
-  .kc-event-page article > header,
-  .kc-event-page article > footer {
+  .kc-event-page article > header {
     max-width: 44rem;
   }
 
   .kc-event-layout {
     display: grid;
-    /* The side column takes the rest, so the grid, the paginator, and the column share a right edge. */
-    grid-template-columns: minmax(0, 44rem) minmax(15rem, 1fr);
+    /* The description takes what the side column leaves; its paragraphs keep their own measure. */
+    grid-template-columns: minmax(0, 1fr) clamp(17.5rem, 26vw, 23rem);
     grid-template-rows: auto 1fr;
     grid-template-areas:
       "body details"
@@ -833,8 +847,15 @@ aside.theme-doc-sidebar-container {
   }
 
   /* The cards bring their own margins for the stacked layout; the grid gap replaces them. */
-  .kc-event-layout > div > * {
+  .kc-event-layout > .kc-event-layout__details > *,
+  .kc-event-layout > .kc-event-layout__invite > * {
     margin-block: 0;
+  }
+
+  /* Tighter cards in the side column, so facts and the invitation keep whole words per line. */
+  .kc-event-layout .kc-event-layout__details > *,
+  .kc-event-layout .kc-event-layout__invite > * {
+    padding: 1.4rem 1.5rem;
   }
 }
 
@@ -921,7 +942,7 @@ aside.theme-doc-sidebar-container {
   align-items: center;
   gap: 0.4rem;
   border-radius: 999px;
-  box-shadow: inset 0 0 0 1px var(--kc-line-strong);
+  box-shadow: inset 0 0 0 1px var(--kc-control-line);
   background: var(--kc-surface);
   color: var(--kc-ink);
   font-size: 0.85rem;
@@ -939,6 +960,19 @@ aside.theme-doc-sidebar-container {
 .kc-tag__count {
   font-size: 0.75rem;
   color: var(--kc-muted);
+}
+
+/* Text for screen readers only, such as the unit after a topic's count. */
+.kc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Author card: let the title wrap and give the social icons 32px targets in one colour. */

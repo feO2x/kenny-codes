@@ -7,24 +7,151 @@
   font-weight: 750;
   font-stretch: 116%;
   letter-spacing: -0.02em;
-  margin: 0 0 1.25rem;
+  margin: 0 0 0.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--kc-line-strong);
 }
 
-.hint {
-  color: var(--kc-muted);
-  font-size: 0.95rem;
-  margin: 0 0 0.5rem;
+/* ---------- Most frequent: one square per session ---------- */
+
+.ranking {
+  --square: 12px;
+  --gap: 3px;
+  --record-from: #0066d6;
+  --record-to: #008f7a;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-/* Initial on the left, its topics on the right: the same rhythm as the archive's year groups. */
+:global([data-theme='dark']) .ranking {
+  --record-from: #3393ff;
+  --record-to: #33ffdc;
+}
+
+.ranking li {
+  margin: 0;
+}
+
+/* Name in the archive's year column, squares and count in its content column. */
+.rank {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 10fr);
+  grid-template-areas: "label bar";
+  gap: 0.25rem clamp(1.5rem, 1rem + 2vw, 3rem);
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  margin-inline: -0.75rem;
+  border-radius: var(--kc-radius-sm);
+  color: var(--kc-ink);
+}
+
+.rank:hover {
+  color: var(--kc-ink);
+  text-decoration: none;
+  background: var(--kc-accent-soft);
+}
+
+.rankLabel {
+  grid-area: label;
+  font-weight: 650;
+  font-stretch: 106%;
+  line-height: 1.25;
+}
+
+.rankBar {
+  grid-area: bar;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap);
+  margin-right: 2.5rem;
+}
+
+.rankSquare {
+  width: var(--square);
+  height: var(--square);
+  border-radius: 3.5px;
+  background: color-mix(in oklab, var(--record-to) calc(var(--t, 0) * 100%), var(--record-from));
+}
+
+.rankCount {
+  grid-area: bar;
+  justify-self: end;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--kc-muted);
+}
+
+@media (max-width: 720px) {
+  .rank {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "label count"
+      "bar bar";
+  }
+
+  .rankCount {
+    grid-area: count;
+  }
+
+  .rankBar {
+    margin-right: 0;
+  }
+
+  /* Small enough that the longest row (36 sessions) stays on one line at 320px. */
+  .ranking {
+    --square: 6px;
+    --gap: 2px;
+  }
+
+  .rankSquare {
+    border-radius: 1.5px;
+  }
+}
+
+@media (forced-colors: active) {
+  .rankSquare {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+}
+
+/* ---------- A–Z: the same grid as the archive's year groups ---------- */
+
+/* Jump row: one squircle per initial, the logo's shape at button size. */
+.jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1.25rem 0 1rem;
+}
+
+.jump a {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 31%;
+  box-shadow: inset 0 0 0 1px var(--kc-control-line);
+  background: var(--kc-surface);
+  color: var(--kc-ink);
+  font-weight: 700;
+  font-stretch: 112%;
+}
+
+.jump a:hover {
+  box-shadow: inset 0 0 0 1.5px var(--ifm-color-primary);
+  text-decoration: none;
+}
+
 .letter {
   display: grid;
-  grid-template-columns: 4rem minmax(0, 1fr);
-  gap: 0 1.5rem;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 10fr);
+  gap: 0 clamp(1.5rem, 1rem + 2vw, 3rem);
   align-items: start;
-  padding: 1rem 0;
+  padding: 1.1rem 0;
 }
 
 .letter + .letter {
@@ -33,21 +160,22 @@
 
 .letterLabel {
   margin: 0;
-  font-size: 1.75rem;
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 1rem);
+  font-size: 2rem;
   font-weight: 750;
   font-stretch: 120%;
-  line-height: 2.5rem;
-  letter-spacing: -0.02em;
+  line-height: 2.25rem;
+  letter-spacing: -0.03em;
   color: var(--kc-ink);
 }
 
-@media (max-width: 576px) {
+@media (max-width: 720px) {
   .letter {
     grid-template-columns: 2.25rem minmax(0, 1fr);
     gap: 0 0.75rem;
   }
 
   .letterLabel {
-    font-size: 1.35rem;
+    font-size: 1.5rem;
   }
 }

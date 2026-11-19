@@ -37,6 +37,9 @@
 
 .value {
   margin: 0;
+  /* Wrap between words only; a narrow card must never split "September" or "Regensburg". */
+  overflow-wrap: normal;
+  hyphens: manual;
   font-weight: 600;
   line-height: 1.35;
 }
@@ -57,5 +60,12 @@
 
   .item:first-child {
     grid-column: 1 / -1;
+  }
+}
+
+/* Very narrow cards: one fact per row. */
+@container (max-width: 13.5rem) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

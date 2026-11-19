@@ -57,7 +57,11 @@ export function groupEvents<T extends EventItem>(items: ReadonlyArray<T>, today:
     .filter((item) => day(item) >= today)
     .sort((a, b) => day(a).localeCompare(day(b)));
   const pastEvents = items
-    .filter((item) => day(item) < today && !isCancelled(item.content.frontMatter))
+    .filter(
+      (item) =>
+        day(item) < today &&
+        !isHiddenFromArchive({date: day(item), cancelled: isCancelled(item.content.frontMatter)}, today),
+    )
     .sort((a, b) => day(b).localeCompare(day(a)));
 
   const pastEventsByYear: Record<number, T[]> = {};
@@ -71,4 +75,37 @@ export function groupEvents<T extends EventItem>(items: ReadonlyArray<T>, today:
     .sort((a, b) => b - a);
 
   return {upcomingEvents, pastEvents, pastEventsByYear, years};
+}
+
+/**
+ * Sessions that took place: not cancelled and dated before today. The home page, the events
+ * archive, and the topic index all quote this number, so they share one definition.
+ */
+export function deliveredSessions<T extends {date: string; cancelled?: boolean}>(
+  sessions: ReadonlyArray<T>,
+  today: string,
+): T[] {
+  return sessions.filter((session) => !session.cancelled && session.date.slice(0, 10) < today);
+}
+
+/**
+ * Whether the archive hides a session: cancelled ones stay listed until their date has passed so
+ * visitors learn about the change, then disappear. Topic counts and Newer/Older links follow suit.
+ */
+export function isHiddenFromArchive(session: {date: string; cancelled?: boolean}, today: string): boolean {
+  return Boolean(session.cancelled) && session.date.slice(0, 10) < today;
+}
+
+// lodash's word boundaries for ASCII: lower-case runs (optionally capitalized), upper-case runs
+// that end before a capitalized word, and digit runs.
+const TAG_WORDS =
+  /[A-Z]?[a-z]+(?=[^A-Za-z0-9]|[A-Z]|$)|[A-Z]+(?=[^A-Za-z0-9]|[A-Z][a-z]|$)|[A-Z]?[a-z]+|[A-Z]+|\d+/g;
+
+/**
+ * The permalink slug Docusaurus gives an inline tag (lodash `kebabCase`), so ".NET" becomes "net",
+ * "ASP.NET Core" "asp-net-core", and "Utf8Json" "utf-8-json". Matches lodash for ASCII labels,
+ * which is what the event front matter uses.
+ */
+export function tagSlug(label: string): string {
+  return (label.match(TAG_WORDS) ?? []).map((word) => word.toLowerCase()).join('-');
 }

@@ -138,6 +138,12 @@
   max-width: 40ch;
 }
 
+.recordLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
 .recordChart {
   min-width: 0;
 }
@@ -497,7 +503,8 @@
   }
 }
 
-@media (max-width: 680px) {
+/* Below 720px the portrait column would squeeze the name onto two lines; stack instead. */
+@media (max-width: 720px) {
   .heroGrid {
     grid-template-columns: minmax(0, 1fr);
   }

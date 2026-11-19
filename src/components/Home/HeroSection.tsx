@@ -1,4 +1,5 @@
 import React, {type ReactNode} from 'react';
+import {deliveredSessions} from '@site/src/utils/eventUtils';
 import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import useBaseUrl from '@docusaurus/useBaseUrl';
@@ -24,7 +25,7 @@ function joinList(items: string[]): string {
 export default function HeroSection(): ReactNode {
   const {events, venues} = homeData;
   const today = useToday();
-  const delivered = events.filter((e) => !e.cancelled && e.date < today);
+  const delivered = deliveredSessions(events, today);
   const firstYear = events[events.length - 1]?.date.slice(0, 4);
 
   return (
@@ -88,9 +89,15 @@ export default function HeroSection(): ReactNode {
             <p className={styles.recordText}>
               Regular speaker at {joinList(venues.slice(0, 5))}.
             </p>
-            <Link to="/events" className={styles.textLink}>
-              Browse all events
-            </Link>
+            <div className={styles.recordLinks}>
+              <Link to="/events" className={styles.textLink}>
+                Browse all events
+              </Link>
+              {/* A recording lets organizers judge the delivery, not just the record. */}
+              <Link to="/blog/2026-02-28-guided-coding" className={styles.textLink}>
+                Watch a recorded session
+              </Link>
+            </div>
           </div>
           <SpeakingRecord
             events={events}

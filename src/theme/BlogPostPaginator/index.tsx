@@ -4,7 +4,7 @@ import {useBlogPost} from '@docusaurus/plugin-content-blog/client';
 import type {Props} from '@theme/BlogPostPaginator';
 import homeData from '@site/src/data/home-data.json';
 import {useToday} from '@site/src/utils/dateFormatting';
-import {isEventPage} from '@site/src/utils/eventUtils';
+import {isEventPage, isHiddenFromArchive} from '@site/src/utils/eventUtils';
 
 type NavItem = NonNullable<Props['nextItem']>;
 
@@ -18,7 +18,7 @@ function useEventNeighbours(permalink: string, fallback: Props): Props {
   const index = events.findIndex((event) => permalink.replace(/\/$/, '').endsWith(event.link));
   if (index === -1) return fallback;
 
-  const isListed = (event: (typeof events)[number]) => !(event.cancelled && event.date < today);
+  const isListed = (event: (typeof events)[number]) => !isHiddenFromArchive(event, today);
   const toItem = (event: (typeof events)[number] | undefined): NavItem | undefined =>
     event && {title: event.title, permalink: event.link};
 

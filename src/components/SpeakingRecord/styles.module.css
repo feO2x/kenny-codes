@@ -1,5 +1,4 @@
 .record {
-  container-type: inline-size;
   --square: 18px;
   --gap: 4px;
   --record-from: #0066d6;
@@ -25,6 +24,7 @@
 .column {
   margin: 0;
   min-width: 0;
+  container-type: inline-size;
 }
 
 .columnBody {
@@ -153,8 +153,8 @@ a.columnBody:hover {
   }
 }
 
-/* Narrow charts (phones, or a sidebar column) abbreviate years so the labels never touch. */
-@container (max-width: 34rem) {
+/* Narrow year columns abbreviate their year so the labels never touch; wide ones keep "2024". */
+@container (max-width: 2.6rem) {
   .yearLong {
     display: none;
   }

@@ -1,4 +1,5 @@
 import React, {type ReactNode} from 'react';
+import clsx from 'clsx';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
 import Link from '@docusaurus/Link';
@@ -24,7 +25,7 @@ export default function EventsBlogTagsPostsContent({items, tag}: Props): ReactNo
   return (
     <Layout title={title} description={`Talks and workshops by Kenny Pflug tagged ${tag.label}`}>
       <main className="container kc-page">
-        <header className={styles.header}>
+        <header className={clsx(styles.header, styles.headerTopic)}>
           <div>
             <nav className="kc-back-links" aria-label="Events">
               <Link to="/events" className="kc-back-link">
