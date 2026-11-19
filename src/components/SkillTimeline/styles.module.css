@@ -11,13 +11,17 @@
   --marker-y: 0.75rem;
   /* The iteration arrows run over the right edge of the middle cards: a band of the card
      (--reserve plus the card padding) stays free of text, with the two vertical runs at
-     --small-inset and --large-inset from the card edge. */
+     --small-inset and --large-inset from the card edge and their labels inside the curves. */
   --reserve: 6.75rem;
-  --small-inset: 4.3rem;
-  --large-inset: 2.1rem;
-  --arrow-width: 5px;
-  /* Space between an arrow and its label. */
-  --label-gap: 0.6rem;
+  --small-inset: 5rem;
+  --large-inset: 2rem;
+  --arrow-width: 7px;
+  /* Space between the arrows' ends and the step text, between an arrow and its label, and
+     between the two tails leaving the Iterate step. */
+  --arrow-gap: 1rem;
+  --label-gap: 0.9rem;
+  --label-size: 0.8rem;
+  --tail-spread: 22px;
   margin: 0;
 }
 
@@ -201,16 +205,16 @@
   inset-block: calc(var(--arrow-width) / -2);
   border-width: var(--arrow-width);
   border-left: 0;
-  border-radius: 0 18px 18px 0;
+  border-radius: 0 22px 22px 0;
 }
 
 .loop .spanLine::after {
   content: "";
   position: absolute;
   top: 0;
-  left: -6px;
-  width: 19px;
-  height: 19px;
+  left: -8px;
+  width: 24px;
+  height: 24px;
   translate: 0 -50%;
   background: var(--phase);
   clip-path: polygon(0 50%, 100% 0, 100% 100%);
@@ -246,62 +250,60 @@
   }
 }
 
-/* Arrows back from the Guiding Phase. They leave the Iterate step, run up over the right edge
-   of the cards, and point at the first step of the phase they return to. The component measures
-   top, height and left; the right edge sets where the vertical run goes. */
-.back {
+/* Arrows back from the Guiding Phase, drawn by the component over the whole list. */
+.backLayer {
   position: absolute;
+  inset: 0;
   z-index: 1;
   margin: 0;
-  border: var(--arrow-width) solid var(--arrow);
-  border-left: 0;
-  border-radius: 0 20px 20px 0;
   pointer-events: none;
 }
 
-.back::after {
-  content: "";
-  position: absolute;
-  top: calc(var(--arrow-width) / -2);
-  left: -6px;
-  width: 19px;
-  height: 19px;
-  translate: 0 -50%;
-  background: var(--arrow);
-  clip-path: polygon(0 50%, 100% 0, 100% 100%);
+.backLayer svg {
+  display: block;
+  overflow: visible;
+}
+
+.backLine {
+  fill: none;
+  stroke: var(--arrow);
+  stroke-width: var(--arrow-width);
+  stroke-linejoin: round;
+}
+
+.backHead {
+  fill: var(--arrow);
+}
+
+.backLabel {
+  fill: var(--arrow);
+  font-size: var(--label-size);
+  font-weight: 700;
 }
 
 /* Each arrow in the colour of the phase it returns to. */
 .backSmall {
-  right: var(--small-inset);
   --arrow: var(--kc-mark-amber);
 }
 
 .backLarge {
-  right: var(--large-inset);
   --arrow: var(--kc-mark-blue);
-}
-
-.backLabel {
-  position: absolute;
-  top: 50%;
-  left: calc(100% + var(--label-gap));
-  translate: 0 -50%;
-  writing-mode: vertical-rl;
-  rotate: 180deg;
-  font-size: 0.8rem;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-  color: var(--arrow);
 }
 
 @media (forced-colors: active) {
   .skill .marker,
-  .loop .spanLine::after,
-  .back::after {
+  .loop .spanLine::after {
     forced-color-adjust: none;
     background: CanvasText;
+  }
+
+  .backLine {
+    stroke: CanvasText;
+  }
+
+  .backHead,
+  .backLabel {
+    fill: CanvasText;
   }
 
   .manual .marker {
@@ -322,15 +324,14 @@
 /* Phones: a narrower arrow band and tighter cards leave the step text room to breathe. */
 @media (max-width: 600px) {
   .timeline {
-    --reserve: 4.6rem;
-    --small-inset: 3rem;
-    --large-inset: 1.35rem;
-    --arrow-width: 4px;
-    --label-gap: 0.4rem;
-  }
-
-  .backLabel {
-    font-size: 0.7rem;
+    --reserve: 4.4rem;
+    --small-inset: 3.2rem;
+    --large-inset: 1.2rem;
+    --arrow-width: 5px;
+    --arrow-gap: 0.6rem;
+    --label-gap: 0.5rem;
+    --label-size: 0.7rem;
+    --tail-spread: 16px;
   }
 
   .phase {

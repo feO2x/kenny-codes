@@ -30,22 +30,36 @@ function anchorOf(phase: Phase, index: number): string | undefined {
   return undefined;
 }
 
-interface ArrowBox {
-  top: number;
-  height: number;
-  left: number;
+interface BackArrow {
+  /** The arrow's path, from its tail at the Iterate step to just before its head. */
+  path: string;
+  head: string;
+  label: {x: number; y: number};
 }
 
-type Ends = Record<'small' | 'large', ArrowBox>;
+interface BackArrows {
+  width: number;
+  height: number;
+  small: BackArrow;
+  large: BackArrow;
+}
+
+/** A CSS length custom property of `element` in pixels (rem or px). */
+function lengthOf(element: Element, property: string): number {
+  const value = getComputedStyle(element).getPropertyValue(property).trim();
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  return value.endsWith('rem') ? parseFloat(value) * rem : parseFloat(value);
+}
 
 /**
- * Measures the back arrows, because the step rows wrap differently at every width. Each arrow
- * leaves the Iterate step, runs up over the cards' right edge, and points at the first step of
- * the phase it returns to. The arrows appear only once measured; until then the Iterate step
- * says in words where small and large issues go.
+ * Measures and draws the back arrows, because the step rows wrap differently at every width.
+ * Each arrow leaves the Iterate step just after its text, runs up through the text-free band at
+ * the cards' right edge, and points at the first step of the phase it returns to, just after
+ * that step's text. The arrows appear only once measured; until then the Iterate step says in
+ * words where small and large issues go.
  */
-function useBackArrowEnds(list: React.RefObject<HTMLOListElement | null>): Ends | undefined {
-  const [ends, setEnds] = useState<Ends>();
+function useBackArrows(list: React.RefObject<HTMLOListElement | null>): BackArrows | undefined {
+  const [arrows, setArrows] = useState<BackArrows>();
   useEffect(() => {
     const root = list.current;
     if (!root) return undefined;
@@ -53,25 +67,56 @@ function useBackArrowEnds(list: React.RefObject<HTMLOListElement | null>): Ends 
       const origin = root.getBoundingClientRect();
       // An inactive tab panel has no size; wait until it is shown.
       if (origin.height === 0) return;
+      const step = (anchor: string) => root.querySelector(`[data-anchor="${anchor}"]`);
       const markerY = (anchor: string) => {
-        const box = root.querySelector(`[data-anchor="${anchor}"] .${styles.marker}`)?.getBoundingClientRect();
+        const box = step(anchor)?.querySelector(`.${styles.marker}`)?.getBoundingClientRect();
         return box ? box.top + box.height / 2 - origin.top : NaN;
       };
-      // The arrows start where the step text area of the middle cards ends.
+      /** Where the step's text ends; the arrow keeps a gap from it. */
+      const textRight = (anchor: string) => {
+        // Measure the text lines themselves, not the block boxes that hold them.
+        const lines = [...(step(anchor)?.querySelectorAll(`.${styles.stepTitle}, .${styles.stepText}`) ?? [])].flatMap(
+          (element) => {
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            return [...range.getClientRects()];
+          },
+        );
+        return lines.length ? Math.max(...lines.map((r) => r.right)) - origin.left : NaN;
+      };
       const card = root.querySelector(`:scope > .${styles.planning}`);
       if (!card) return;
-      const cardBox = card.getBoundingClientRect();
-      const left = cardBox.right - parseFloat(getComputedStyle(card).paddingRight) - origin.left;
-      const iterate = markerY('iterate');
-      // The strokes' centre lines run through the measured points.
-      const halfStroke = parseFloat(getComputedStyle(root).getPropertyValue('--arrow-width')) / 2 || 0;
-      const box = (target: string, offset: number): ArrowBox => {
-        const top = markerY(target) - halfStroke;
-        return {top, height: iterate + offset + halfStroke - top, left};
+      const cardRight = card.getBoundingClientRect().right - origin.left;
+      const stroke = lengthOf(root, '--arrow-width');
+      const gap = lengthOf(root, '--arrow-gap');
+      const labelGap = lengthOf(root, '--label-gap');
+      const labelSize = lengthOf(root, '--label-size');
+      const spread = lengthOf(root, '--tail-spread');
+      const headLength = stroke * 3.2;
+      const iterateY = markerY('iterate');
+      const tail = textRight('iterate') + gap;
+
+      const draw = (target: string, inset: string, offset: number): BackArrow => {
+        const x = cardRight - lengthOf(root, inset);
+        const top = markerY(target);
+        const bottom = iterateY + offset;
+        const tip = textRight(target) + gap;
+        const r = Math.max(0, Math.min(stroke * 3.5, (bottom - top) / 2, x - tail, x - tip - headLength));
+        return {
+          path: `M ${tail} ${bottom} H ${x - r} Q ${x} ${bottom} ${x} ${bottom - r} V ${top + r} Q ${x} ${top} ${x - r} ${top} H ${tip + headLength - 1}`,
+          head: `${tip},${top} ${tip + headLength},${top - headLength * 0.62} ${tip + headLength},${top + headLength * 0.62}`,
+          // Inside the curve, a clear gap left of the vertical run.
+          label: {x: x - stroke / 2 - labelGap - labelSize / 2, y: (top + bottom) / 2},
+        };
       };
-      const next: Ends = {small: box('implementing', -8), large: box('planning', 8)};
-      if (Object.values(next).every(({top, height}) => Number.isFinite(top) && Number.isFinite(height) && height > 0)) {
-        setEnds(next);
+      const next: BackArrows = {
+        width: origin.width,
+        height: origin.height,
+        small: draw('implementing', '--small-inset', -spread / 2),
+        large: draw('planning', '--large-inset', spread / 2),
+      };
+      if ([next.small, next.large].every((arrow) => !/NaN|Infinity/.test(arrow.path + arrow.head))) {
+        setArrows(next);
       }
     };
     measure();
@@ -79,7 +124,7 @@ function useBackArrowEnds(list: React.RefObject<HTMLOListElement | null>): Ends 
     observer.observe(root);
     return () => observer.disconnect();
   }, [list]);
-  return ends;
+  return arrows;
 }
 
 function PhaseCard({phase, row}: {phase: Phase; row: number}): ReactNode {
@@ -141,11 +186,21 @@ export default function SkillTimeline({
 }): ReactNode {
   const phases = phasesFor(method, variant);
   const listRef = useRef<HTMLOListElement>(null);
-  const ends = useBackArrowEnds(listRef);
-  const back = (label: string, className: string, {top, height, left}: ArrowBox) => (
-    <li className={clsx(styles.back, className)} style={{top, height, left}} aria-hidden="true">
-      <span className={styles.backLabel}>{label}</span>
-    </li>
+  const arrows = useBackArrows(listRef);
+  const back = (arrow: BackArrow, label: string, className: string) => (
+    <g className={className}>
+      <path className={styles.backLine} d={arrow.path} />
+      <polygon className={styles.backHead} points={arrow.head} />
+      <text
+        className={styles.backLabel}
+        x={arrow.label.x}
+        y={arrow.label.y}
+        transform={`rotate(-90 ${arrow.label.x} ${arrow.label.y})`}
+        textAnchor="middle"
+        dominantBaseline="central">
+        {label}
+      </text>
+    </g>
   );
 
   return (
@@ -160,8 +215,14 @@ export default function SkillTimeline({
           {phases.map((phase, index) => (
             <PhaseCard key={phase.kind} phase={phase} row={index + 1} />
           ))}
-          {ends && back('small issue', styles.backSmall, ends.small)}
-          {ends && back('large issue', styles.backLarge, ends.large)}
+          {arrows && (
+            <li className={styles.backLayer} aria-hidden="true">
+              <svg width={arrows.width} height={arrows.height} viewBox={`0 0 ${arrows.width} ${arrows.height}`}>
+                {back(arrows.small, 'small issue', styles.backSmall)}
+                {back(arrows.large, 'large issue', styles.backLarge)}
+              </svg>
+            </li>
+          )}
         </ol>
       </figure>
     </DiagramFrame>
