@@ -133,12 +133,12 @@ export default function SkillTimeline({
   const listRef = useRef<HTMLOListElement>(null);
   const ends = useBackArrowEnds(listRef);
   const rowOf = (kind: Phase['kind']) => phases.findIndex((phase) => phase.kind === kind) + 1;
-  const back = (target: Phase['kind'], label: string, className: string, end?: Ends['small']) => (
+  const back = (target: Phase['kind'], label: string, className: string, end: Ends['small']) => (
     <li
       className={clsx(styles.back, className)}
       style={{gridRow: `${rowOf(target)} / ${rowOf('guiding')}`} as CSSProperties}
       aria-hidden="true">
-      <span className={styles.backLine} style={end && {top: end.top, bottom: end.bottom}}>
+      <span className={styles.backLine} style={{top: end.top, bottom: end.bottom}}>
         <span className={styles.backLabel}>{label}</span>
       </span>
     </li>

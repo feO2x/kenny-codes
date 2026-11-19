@@ -7,8 +7,7 @@
 .timeline {
   --phase-gap: 0.75rem;
   --step-gap: 0.7rem;
-  /* Centre of a phase head (card padding + half the badge) and of a step's title line. */
-  --head-y: 2.05rem;
+  /* Centre of a step's title line. */
   --marker-y: 0.75rem;
   --rail: 4.25rem;
   margin: 0;
@@ -225,8 +224,7 @@
 
 .backLine {
   position: absolute;
-  top: var(--head-y);
-  bottom: calc(-1 * (var(--phase-gap) + var(--head-y) + var(--offset)));
+  /* top and bottom are measured by the component. */
   left: 0;
   width: var(--width);
   border: 1.75px solid var(--arrow);
@@ -249,13 +247,11 @@
 /* Each arrow in the colour of the phase it returns to. */
 .backSmall {
   --width: 1.2rem;
-  --offset: -7px;
   --arrow: var(--kc-mark-amber);
 }
 
 .backLarge {
   --width: 2.7rem;
-  --offset: 7px;
   --arrow: var(--kc-mark-blue);
 }
 

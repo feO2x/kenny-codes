@@ -35,7 +35,7 @@ function Shape({kind, viewBox, title, x}: {kind: 'pyramid' | 'diamond'; viewBox:
       ))}
       {/* Gaps between the layers, in the card colour */}
       <path
-        className={d.separator}
+        className={clsx(d.separator, styles.layerLines)}
         d={kind === 'pyramid' ? 'M 192.54 196 H 347.46 M 133.58 298 H 406.42' : 'M 660.96 176.49 H 839.04 M 661.62 294.36 H 838.38'}
       />
       {layers.map(({name, labels: [pyramidY, diamondY]}) => (

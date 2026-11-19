@@ -82,8 +82,8 @@ const guidedCodingPlanning: Record<TimelineVariant, Phase> = {
     loop: stabilizes(2, 3),
     steps: [
       {kind: 'manual', title: 'Discuss the approach', description: '"As an expert architect, how would you tackle this?"'},
-      {kind: 'skill', title: 'guided-coding-plan-and-review', description: 'In the same conversation: writes the draft; fresh reviewers refine it in rounds.'},
-      {kind: 'manual', title: 'Read the report and the plan', description: 'Confirm the decision and scope changes it lists.'},
+      {kind: 'skill', title: 'guided-coding-plan-and-review', description: 'In the same conversation: writes the draft; independent reviewers in fresh contexts refine it in rounds.'},
+      {kind: 'manual', title: 'Read the report and the plan', description: 'It lists every finding; confirm the decision and scope changes.'},
       {kind: 'manual', title: 'Further discussion', description: '"Would you change anything about the plan?"'},
       {kind: 'skill', title: 'guided-coding-freeze-plan', description: 'Create any ticket first. Timestamps and freezes the plan; commit it afterwards.'},
     ],
@@ -114,7 +114,7 @@ const guidedLearningPlanning: Record<TimelineVariant, Phase> = {
     loop: stabilizes(2, 3),
     steps: [
       {kind: 'manual', title: 'Discuss the approach', description: 'Your senior helps you judge the direction.'},
-      {kind: 'skill', title: 'guided-coding-plan-and-review', description: 'In the same conversation: writes the draft; fresh reviewers refine it in rounds.'},
+      {kind: 'skill', title: 'guided-coding-plan-and-review', description: 'In the same conversation: writes the draft; independent reviewers in fresh contexts refine it in rounds.'},
       {kind: 'manual', title: 'Read the report and the plan', description: 'Your senior checks the reviewed plan and its report.'},
       {kind: 'manual', title: 'Further discussion', description: '"Would you change anything about the plan?"'},
       {kind: 'skill', title: 'guided-coding-freeze-plan', description: 'Timestamps and freezes the plan. Commit it afterwards.'},

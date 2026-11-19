@@ -11,11 +11,21 @@
   fill: var(--kc-magenta-from);
 }
 
+/* In light mode the lines between the layers are dark magenta: white lines on pastel pink would
+   fall below 3:1. */
+:global([data-theme='light']) .layerLines {
+  stroke: #851448;
+}
+
 @media (forced-colors: active) {
   .e2e,
   .integration,
   .unit {
     fill: Canvas;
+  }
+
+  :global([data-theme='light']) .layerLines {
+    stroke: CanvasText;
   }
 }
 

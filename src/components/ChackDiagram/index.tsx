@@ -260,19 +260,19 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
         <Label x={635} y={519} lines={['Composition Root']} className={onBox('composition-root')} />
 
         {/* Legend */}
-        <line x1="8" y1="476" x2="42" y2="476" className={d.line} markerEnd={legend.ref} />
-        <text x="52" y="482" fontSize="18" className={d.muted}>
+        <line x1="8" y1="476" x2="56" y2="476" className={d.line} markerEnd={legend.ref} />
+        <text x="66" y="482" fontSize="18" className={d.muted}>
           references
         </text>
-        <line x1="8" y1="506" x2="42" y2="506" className={clsx(d.line, d.dashed)} markerEnd={legend.impl} />
-        <text x="52" y="512" fontSize="18" className={d.muted}>
-          <tspan x="52">implements /</tspan>
-          <tspan x="52" dy="21">
+        <line x1="8" y1="506" x2="56" y2="506" className={clsx(d.line, d.dashed)} markerEnd={legend.impl} />
+        <text x="66" y="512" fontSize="18" className={d.muted}>
+          <tspan x="66">implements /</tspan>
+          <tspan x="66" dy="21">
             derives from
           </tspan>
         </text>
-        <line x1="8" y1="560" x2="42" y2="560" className={d.line} markerEnd={legend.io} markerStart={legend.ioStart} />
-        <text x="52" y="566" fontSize="18" className={d.muted}>
+        <line x1="8" y1="560" x2="56" y2="560" className={d.line} markerEnd={legend.io} markerStart={legend.ioStart} />
+        <text x="66" y="566" fontSize="18" className={d.muted}>
           I/O call at runtime
         </text>
       </svg>
