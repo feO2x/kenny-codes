@@ -38,8 +38,8 @@
   --kc-mark-amber: #9a5800;
   --kc-mark-mint: var(--kc-upcoming);
   /* The brand gradient as an outline: darker ends in light mode so the edge stays visible. */
-  --kc-brand-line-from: #007a68;
-  --kc-brand-line-to: #0066d6;
+  --kc-brand-line-from: var(--kc-upcoming);
+  --kc-brand-line-to: var(--kc-mark-blue);
 
   /* Surfaces and text (light theme) */
   --kc-bg: #f5f8fc;

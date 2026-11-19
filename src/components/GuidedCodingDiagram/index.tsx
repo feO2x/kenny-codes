@@ -1,6 +1,6 @@
 import React, {type ReactNode} from 'react';
 import clsx from 'clsx';
-import {DiagramFrame, TileGradients, diagram as d, markStyle, tileUrl, useDiagramId, type Tile} from '../Diagram';
+import {DiagramFrame, TileGradients, brandEdge, diagram as d, markStyle, tileUrl, useDiagramId, type Tile} from '../Diagram';
 
 type Phase = 'planning' | 'implementing' | 'guiding';
 
@@ -51,6 +51,8 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
   /** A back arrow keeps its colour unless the page is about a phase it does not touch. */
   const loop = (tile: Tile, ...touches: Phase[]) =>
     !highlight || touches.includes(highlight) ? markStyle(tile) : undefined;
+  /** Bold in forced colors, where the arrow's colour is gone. */
+  const emphasis = (...touches: Phase[]) => (highlight && touches.includes(highlight) ? d.markActive : undefined);
 
   return (
     <DiagramFrame minWidth={540} label="Guided Coding workflow diagram">
@@ -70,7 +72,7 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
         <g style={loop('blue', 'guiding', 'planning')}>
           <path className={d.line} d={`M 700 ${BOX_Y} V 52 Q 700 40 688 40 H 148 Q 136 40 136 52 V ${BOX_Y - 9}`} />
           <HeadDown x={136} y={BOX_Y - 1} />
-          <text x={418} y={30} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold)}>
+          <text x={418} y={30} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'planning'))}>
             large issue
           </text>
         </g>
@@ -79,7 +81,7 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
         <g style={loop('amber', 'guiding', 'implementing')}>
           <path className={d.line} d={`M 640 ${BOX_Y} V 96 Q 640 84 628 84 H 414 Q 402 84 402 96 V ${BOX_Y - 9}`} />
           <HeadDown x={402} y={BOX_Y - 1} />
-          <text x={521} y={74} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold)}>
+          <text x={521} y={74} textAnchor="middle" fontSize="19" className={clsx(d.markText, d.semibold, emphasis('guiding', 'implementing'))}>
             small issue
           </text>
         </g>
@@ -133,7 +135,7 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
             width="92"
             height="42"
             rx="21"
-            {...(highlight ? {className: d.box} : {className: d.gradient, fill: tileUrl(id, 'brand'), style: markStyle('brand')})}
+            {...(highlight ? {className: d.box} : {className: d.gradient, fill: tileUrl(id, 'brand'), style: brandEdge(id)})}
           />
           <path className={highlight ? d.line : d.check} d={`M 840 ${MID_Y} l 5 5 l 9 -10`} />
           <text x="862" y={MID_Y + 7} fontSize="20" className={clsx(d.strong, !highlight && d.onGradient)}>

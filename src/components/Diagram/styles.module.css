@@ -56,10 +56,14 @@
   min-width: var(--diagram-min-width);
 }
 
+/* The focus ring sits on the card: the scroll area's edge fade would mask it away. */
 .scroll:focus-visible {
+  outline: none;
+}
+
+.frame:has(> .scroll:focus-visible) {
   outline: 2px solid var(--ifm-color-primary);
-  outline-offset: 4px;
-  border-radius: var(--kc-radius-sm);
+  outline-offset: 2px;
 }
 
 .svg {
@@ -210,6 +214,10 @@
   fill: var(--mark, var(--kc-muted));
 }
 
+/* A mark label that belongs to the highlighted part; bold in forced colors. */
+.markActive {
+}
+
 /* A lighter tile: a tint of the mark colour with an outline, e.g. test doubles. */
 .tint {
   fill: color-mix(in oklab, var(--mark) 14%, transparent);
@@ -266,10 +274,11 @@
   .gradient,
   :global([data-theme='light']) .gradient,
   .tint {
+    stroke: CanvasText;
     stroke-width: 3.5;
   }
 
-  .svg .markText {
+  .svg .markActive {
     font-weight: 750;
   }
 }

@@ -11,6 +11,14 @@
   fill: var(--kc-magenta-from);
 }
 
+@media (forced-colors: active) {
+  .e2e,
+  .integration,
+  .unit {
+    fill: Canvas;
+  }
+}
+
 /* Side by side, in proportion to their widths; stacked when the card gets narrow. */
 .shapes {
   display: grid;

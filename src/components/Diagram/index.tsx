@@ -44,18 +44,20 @@ export function DiagramFrame({
   children,
   minWidth,
   label,
+  caption,
 }: {
   children: ReactNode;
   minWidth?: number;
   /** Names the scrollable region for keyboard and screen reader users. */
   label?: string;
+  /** Text under the diagram, outside the scroll area so it never scrolls away. */
+  caption?: ReactNode;
 }): ReactNode {
   const scrollRef = useRef<HTMLDivElement>(null);
   const {overflows, atStart, atEnd} = useScrollState(scrollRef);
   return (
     <div className={styles.frame}>
       {minWidth ? (
-        <>
         <div
           ref={scrollRef}
           className={clsx(
@@ -68,15 +70,15 @@ export function DiagramFrame({
           {...(overflows ? {role: 'region', 'aria-label': `${label}, scrolls sideways`, tabIndex: 0} : {})}>
           {children}
         </div>
-        {/* Screen readers get the same hint from the region's name. */}
-        {overflows && (
-          <p className={styles.scrollHint} aria-hidden="true">
-            Scroll sideways to see the whole diagram <span>→</span>
-          </p>
-        )}
-        </>
       ) : (
         children
+      )}
+      {caption && <p className={styles.caption}>{caption}</p>}
+      {/* Screen readers get the same hint from the region's name. */}
+      {overflows && (
+        <p className={styles.scrollHint} aria-hidden="true">
+          Scroll sideways to see the whole diagram <span>{atEnd && !atStart ? '←' : '→'}</span>
+        </p>
       )}
     </div>
   );
@@ -125,6 +127,10 @@ export function TileGradients({prefix}: {prefix: string}): ReactNode {
     </>
   );
 }
+
+/** The light-mode edge of a brand tile: the brand gradient in its darker, light-mode shades. */
+export const brandEdge = (prefix: string): CSSProperties =>
+  ({'--mark': `url(#${prefix}-brandLine)`}) as CSSProperties;
 
 /** `fill` or `stroke` value for a tile gradient of one diagram. */
 export const tileUrl = (prefix: string, tile: Tile): string => `url(#${prefix}-${tile})`;

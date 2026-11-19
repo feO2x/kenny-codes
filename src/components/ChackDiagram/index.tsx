@@ -1,6 +1,6 @@
 import React, {type CSSProperties, type ReactNode} from 'react';
 import clsx from 'clsx';
-import {DiagramFrame, TileGradients, diagram as d, markStyle, tileUrl, useDiagramId, type Tile} from '../Diagram';
+import {DiagramFrame, TileGradients, brandEdge, diagram as d, markStyle, tileUrl, useDiagramId, type Tile} from '../Diagram';
 
 type ChackPart = 'core' | 'humble-objects' | 'automated-tests' | 'composition-root';
 
@@ -93,7 +93,11 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
   /** Tile fill for an active category, a neutral box otherwise. */
   const box = (part: ChackPart) =>
     active(part)
-      ? {className: d.gradient, fill: tileUrl(prefix, partTile[part]), style: markStyle(partTile[part])}
+      ? {
+          className: d.gradient,
+          fill: tileUrl(prefix, partTile[part]),
+          style: part === 'core' ? brandEdge(prefix) : markStyle(partTile[part]),
+        }
       : {className: d.box};
   const onBox = (part: ChackPart) => (active(part) ? d.onGradient : undefined);
   /** Connectors between `parts` take the highlighted category's colour. */
@@ -126,7 +130,10 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
   const rootToHumble = connector('composition-root', 'humble-objects');
 
   return (
-    <DiagramFrame minWidth={680} label="CHACK diagram">
+    <DiagramFrame
+      minWidth={680}
+      label="CHACK diagram"
+      caption="All four categories may depend on the frameworks and libraries. Those arrows are left out to keep the number of arrows manageable.">
       <svg
         viewBox="0 0 1086 580"
         xmlns="http://www.w3.org/2000/svg"
@@ -225,9 +232,9 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
 
         {/* Automated tests - the group straddles the process boundary */}
         <g style={active('automated-tests') ? markStyle('magenta') : undefined}>
-          <rect x="790" y="250" width="290" height="230" rx="14" className={d.group} />
+          <rect x="790" y="254" width="290" height="226" rx="14" className={d.group} />
           {/* Above the group, left of the integration test connectors at x=924. */}
-          <text x="792" y="226" fontSize="18" className={clsx(active('automated-tests') ? d.markText : undefined, d.strong)}>
+          <text x="792" y="226" fontSize="18" className={clsx(active('automated-tests') && d.markText, highlight === 'automated-tests' && d.markActive, d.strong)}>
             <tspan x="792">Automated</tspan>
             <tspan x="792" dy="21">
               Tests
@@ -269,10 +276,6 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
           I/O call at runtime
         </text>
       </svg>
-      <p className={d.caption}>
-        All four categories may depend on the frameworks and libraries. Those arrows are left out to
-        keep the number of arrows manageable.
-      </p>
     </DiagramFrame>
   );
 }
