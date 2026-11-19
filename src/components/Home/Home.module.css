@@ -419,6 +419,11 @@
   z-index: 1;
 }
 
+/* The phase colours of the Guided Coding diagrams in the docs. */
+.phase:nth-child(1)::before { box-shadow: none; background: var(--kc-tile-blue); color: var(--kc-on-gradient); }
+.phase:nth-child(2)::before { box-shadow: none; background: var(--kc-tile-amber); color: var(--kc-on-gradient); }
+.phase:nth-child(3)::before { box-shadow: none; background: var(--kc-tile-violet); color: var(--kc-on-gradient); }
+
 .phase:not(:last-child)::after {
   content: "";
   position: absolute;
@@ -553,6 +558,16 @@
   min-width: 62%;
   margin-top: -1.35rem;
 }
+
+/* The same category colours as the CHACK diagram in the docs. */
+.chackTile {
+  border-color: transparent;
+  color: var(--kc-on-gradient);
+}
+
+.chackHumble.chackTile { background: var(--kc-tile-violet); }
+.chackTests { background: var(--kc-tile-magenta); }
+.chackRoot { background: var(--kc-tile-amber); }
 
 .chackCore {
   grid-column: 1 / -1;
@@ -841,7 +856,9 @@
     background: CanvasText;
   }
 
-  .phase::before {
+  .phase:nth-child(n)::before {
+    background: Canvas;
+    color: CanvasText;
     outline: 1.5px solid CanvasText;
   }
 
@@ -851,6 +868,7 @@
     -webkit-text-fill-color: CanvasText;
   }
 
+  .chackTile,
   .chackCore,
   .chackCore small {
     border-color: CanvasText;

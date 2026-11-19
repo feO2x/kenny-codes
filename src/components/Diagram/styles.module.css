@@ -12,16 +12,15 @@
   background: var(--kc-surface);
 }
 
-/* Wide SVG diagrams keep a legible minimum width and scroll sideways on phones. */
+/* Wide SVG diagrams keep a legible minimum width and scroll sideways wherever the docs
+   column is narrower: on phones, and beside the sidebar and table of contents at 997–1300px. */
 .scroll {
   overflow-x: auto;
   overscroll-behavior-x: contain;
 }
 
-@media (max-width: 760px) {
-  .scroll > svg {
-    min-width: var(--diagram-min-width);
-  }
+.scroll > svg {
+  min-width: var(--diagram-min-width);
 }
 
 .scroll:focus-visible {
@@ -94,8 +93,11 @@
 /* The focal element's companions, e.g. the Core's I/O abstractions. */
 .soft {
   fill: var(--kc-accent-soft);
-  stroke: var(--kc-ramp-from);
-  stroke-width: 1.5;
+  stroke-width: 2;
+}
+
+/* The brand gradient; the element sets fill or stroke to its url(). */
+.gradient {
 }
 
 /* Context that is not part of the model, e.g. frameworks and libraries. */
@@ -117,14 +119,14 @@
 /* Boxes inside a box, e.g. the kinds of third-party systems. */
 .inner {
   fill: var(--kc-surface);
-  stroke: var(--kc-line-strong);
+  stroke: var(--kc-control-line);
   stroke-width: 1.25;
 }
 
 /* A labelled group of boxes, e.g. the automated tests. */
 .group {
   fill: none;
-  stroke: var(--kc-line-strong);
+  stroke: var(--kc-control-line);
   stroke-width: 1.5;
 }
 
@@ -147,8 +149,9 @@
   fill: var(--kc-ramp-mid);
 }
 
+/* The ramp's teal, one step darker in light mode so white text on it reaches 4.5:1. */
 .ramp3 {
-  fill: var(--kc-ramp-to);
+  fill: var(--kc-upcoming);
 }
 
 .separator {
@@ -161,7 +164,7 @@
 
 .line {
   fill: none;
-  stroke: var(--kc-muted);
+  stroke: var(--mark, var(--kc-muted));
   stroke-width: var(--line-width, 1.75);
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -171,8 +174,29 @@
   stroke-dasharray: 5 4;
 }
 
+/* A check mark on the brand gradient. */
+.check {
+  fill: none;
+  stroke: var(--kc-on-gradient);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .head {
-  fill: var(--kc-muted);
+  fill: var(--mark, var(--kc-muted));
+}
+
+/* Labels in a group's mark colour, e.g. "large issue" in the Planning Phase's blue. */
+.svg .markText {
+  fill: var(--mark, var(--kc-muted));
+}
+
+/* A lighter tile: a tint of the mark colour with an outline, e.g. test doubles. */
+.tint {
+  fill: color-mix(in oklab, var(--mark) 14%, transparent);
+  stroke: var(--mark);
+  stroke-width: 2;
 }
 
 .headHollow {
@@ -188,6 +212,7 @@
   .svg .onGradient,
   .svg .onRamp,
   :global([data-theme='dark']) .svg .onRamp,
+  .svg .markText,
   .head {
     fill: CanvasText;
   }
@@ -211,12 +236,14 @@
   .badgeOnGradient,
   .chip,
   .inner,
+  .tint,
   .gradient {
     fill: Canvas;
     stroke: CanvasText;
   }
 
   .line,
+  .check,
   .boundary,
   .group,
   .headHollow {

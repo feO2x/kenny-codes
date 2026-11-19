@@ -1,6 +1,6 @@
 import React, {type ReactNode} from 'react';
 import clsx from 'clsx';
-import {BrandGradient, DiagramFrame, diagram as d, useGradientId} from '../Diagram';
+import {DiagramFrame, TileGradients, diagram as d, markStyle, tileUrl, useDiagramId, type Tile} from '../Diagram';
 
 type Phase = 'planning' | 'implementing' | 'guiding';
 
@@ -18,10 +18,11 @@ const descriptions: Record<Phase | 'default', string> = {
   default: `Guided Coding workflow diagram showing three phases, Planning, Implementing, and Guiding, ending with a pull request. ${loops}`,
 };
 
-const phases: {id: Phase; number: number; name: string; x: number}[] = [
-  {id: 'planning', number: 1, name: 'Planning Phase', x: 20},
-  {id: 'implementing', number: 2, name: 'Implementing Phase', x: 286},
-  {id: 'guiding', number: 3, name: 'Guiding Phase', x: 552},
+/** The same colours as the phases in the skill timelines. */
+const phases: {id: Phase; number: number; name: string; x: number; tile: Tile}[] = [
+  {id: 'planning', number: 1, name: 'Planning Phase', x: 20, tile: 'blue'},
+  {id: 'implementing', number: 2, name: 'Implementing Phase', x: 286, tile: 'amber'},
+  {id: 'guiding', number: 3, name: 'Guiding Phase', x: 552, tile: 'violet'},
 ];
 
 const BOX_Y = 132;
@@ -40,9 +41,9 @@ function HeadRight({x, y}: {x: number; y: number}): ReactNode {
 }
 
 export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProps): ReactNode {
-  const gradient = useGradientId();
-  const titleId = `guided-coding-diagram-title${highlight ? `-${highlight}` : ''}`;
-  const dim = 0.3;
+  const id = useDiagramId();
+  const titleId = `${id}-title`;
+  const dim = 0.35;
   const o = (phase: Phase) => (highlight && highlight !== phase ? dim : 1);
   const either = (a: Phase, b: Phase) => Math.max(o(a), o(b));
 
@@ -57,29 +58,29 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
         style={{maxWidth: 930}}>
         <title id={titleId}>{descriptions[highlight ?? 'default']}</title>
         <defs>
-          <BrandGradient id={gradient} />
+          <TileGradients prefix={id} />
         </defs>
 
-        {/* Guiding → Planning: a large issue */}
-        <g opacity={either('guiding', 'planning')}>
+        {/* Guiding → Planning: a large issue, in the Planning Phase's colour */}
+        <g opacity={either('guiding', 'planning')} style={markStyle('blue')}>
           <path className={d.line} d={`M 700 ${BOX_Y} V 52 Q 700 40 688 40 H 148 Q 136 40 136 52 V ${BOX_Y - 9}`} />
           <HeadDown x={136} y={BOX_Y - 1} />
-          <text x={418} y={30} textAnchor="middle" fontSize="14" className={clsx(d.muted, d.semibold)}>
+          <text x={418} y={30} textAnchor="middle" fontSize="15" className={clsx(d.markText, d.semibold)}>
             large issue
           </text>
         </g>
 
-        {/* Guiding → Implementing: a small issue */}
-        <g opacity={either('guiding', 'implementing')}>
+        {/* Guiding → Implementing: a small issue, in the Implementing Phase's colour */}
+        <g opacity={either('guiding', 'implementing')} style={markStyle('amber')}>
           <path className={d.line} d={`M 640 ${BOX_Y} V 96 Q 640 84 628 84 H 414 Q 402 84 402 96 V ${BOX_Y - 9}`} />
           <HeadDown x={402} y={BOX_Y - 1} />
-          <text x={521} y={74} textAnchor="middle" fontSize="14" className={clsx(d.muted, d.semibold)}>
+          <text x={521} y={74} textAnchor="middle" fontSize="15" className={clsx(d.markText, d.semibold)}>
             small issue
           </text>
         </g>
 
         {/* The Planning Phase loops on itself until the plan stabilizes. */}
-        <g opacity={o('planning')}>
+        <g opacity={o('planning')} style={markStyle('blue')}>
           <path className={d.line} d={`M 224 ${BOX_Y} V 110 Q 224 100 214 100 H 198 Q 188 100 188 110 V ${BOX_Y - 9}`} />
           <HeadDown x={188} y={BOX_Y - 1} />
         </g>
@@ -94,50 +95,23 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
           ))}
         </g>
 
-        {phases.map(({id, number, name, x}) => {
-          const focal = highlight === id;
-          return (
-            <g key={id} opacity={o(id)}>
-              <rect
-                x={x}
-                y={BOX_Y}
-                width={BOX_W}
-                height={BOX_H}
-                rx="10"
-                className={focal ? d.gradient : d.box}
-                fill={focal ? `url(#${gradient})` : undefined}
-              />
-              <rect
-                x={x + 14}
-                y={BOX_Y + 15}
-                width="28"
-                height="28"
-                rx="8"
-                className={focal ? d.badgeOnGradient : d.badge}
-              />
-              <text
-                x={x + 28}
-                y={BOX_Y + 34}
-                textAnchor="middle"
-                fontSize="14"
-                className={clsx(d.strong, focal && d.onGradient)}>
-                {number}
-              </text>
-              <text x={x + 54} y={BOX_Y + 35} fontSize="16" className={clsx(d.strong, focal && d.onGradient)}>
-                {name}
-              </text>
-            </g>
-          );
-        })}
+        {phases.map(({id: phase, number, name, x, tile}) => (
+          <g key={phase} opacity={o(phase)}>
+            <rect x={x} y={BOX_Y} width={BOX_W} height={BOX_H} rx="10" className={d.gradient} fill={tileUrl(id, tile)} />
+            <rect x={x + 14} y={BOX_Y + 15} width="28" height="28" rx="8" className={d.badgeOnGradient} />
+            <text x={x + 28} y={BOX_Y + 34} textAnchor="middle" fontSize="14" className={clsx(d.strong, d.onGradient)}>
+              {number}
+            </text>
+            <text x={x + 54} y={BOX_Y + 35} fontSize="16" className={clsx(d.strong, d.onGradient)}>
+              {name}
+            </text>
+          </g>
+        ))}
 
         {/* The pull request */}
         <g opacity={highlight ? dim : 1}>
-          <rect x="818" y={MID_Y - 21} width="92" height="42" rx="21" className={d.gradient} fill={`url(#${gradient})`} />
-          <path
-            className={d.line}
-            style={{stroke: 'var(--kc-on-gradient)', strokeWidth: 2.25}}
-            d={`M 840 ${MID_Y} l 5 5 l 9 -10`}
-          />
+          <rect x="818" y={MID_Y - 21} width="92" height="42" rx="21" className={d.gradient} fill={tileUrl(id, 'brand')} />
+          <path className={d.check} d={`M 840 ${MID_Y} l 5 5 l 9 -10`} />
           <text x="863" y={MID_Y + 5.5} fontSize="16" className={clsx(d.strong, d.onGradient)}>
             PR
           </text>

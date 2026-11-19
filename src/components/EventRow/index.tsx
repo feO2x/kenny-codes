@@ -6,7 +6,7 @@ import type {EventFrontMatter} from '@site/src/types/event';
 import {dateParts} from '@site/src/utils/dateFormatting';
 import styles from './styles.module.css';
 
-export interface EventRowProps extends EventFrontMatter {
+interface EventRowProps extends EventFrontMatter {
   title: string;
   permalink: string;
   /** ISO date, either `YYYY-MM-DD` or a full timestamp. */
@@ -57,7 +57,7 @@ export default function EventRow({
         {showYear ? (
           <span className={styles.year}>{year}</span>
         ) : (
-          <span className={styles.srOnly}>{year}</span>
+          <span className="kc-sr-only">{year}</span>
         )}
       </time>
 

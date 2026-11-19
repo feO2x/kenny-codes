@@ -1,11 +1,7 @@
-/* A card like the other docs diagrams; in-memory and database series along the brand ramp. */
+/* Sits in the shared diagram card; the two series in the diagram palette's blue and magenta. */
 .figure {
   container-type: inline-size;
-  margin: 1.75rem 0;
-  padding: clamp(0.75rem, 0.4rem + 1.5vw, 1.75rem);
-  border: 1px solid var(--kc-line);
-  border-radius: var(--kc-radius-lg);
-  background: var(--kc-surface);
+  margin: 0;
 }
 
 .toolbar {
@@ -69,11 +65,16 @@
 }
 
 .inMemory {
-  background: var(--kc-ramp-from);
+  background: var(--kc-mark-blue);
 }
 
+/* Hatched as well as coloured, so the two series differ without relying on hue. */
 .database {
-  background: var(--kc-ramp-to);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--kc-mark-magenta) 0 5px,
+    color-mix(in oklab, var(--kc-mark-magenta) 55%, var(--kc-surface)) 5px 8px
+  );
 }
 
 .explanation,

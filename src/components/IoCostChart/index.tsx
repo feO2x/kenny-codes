@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import clsx from 'clsx';
+import { DiagramFrame } from '../Diagram';
 import styles from './styles.module.css';
 
 interface Measurement {
@@ -64,6 +65,7 @@ export default function IoCostChart() {
     : 'Linear scale: the axis starts at zero; each grid step is 5 ms. The fastest bars are too short to see at this scale; their exact values remain beside the operation names.';
 
   return (
+    <DiagramFrame>
     <figure className={styles.figure}>
       <div className={styles.toolbar}>
         <strong id={`${id}-title`} className={styles.title}>Performance of everyday things</strong>
@@ -128,5 +130,6 @@ export default function IoCostChart() {
         Values measured on an AMD Ryzen 9 5950X with .NET Core 5.0.3. Timings depend on the operation, hardware, and environment.
       </figcaption>
     </figure>
+    </DiagramFrame>
   );
 }

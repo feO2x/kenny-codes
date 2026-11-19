@@ -1,6 +1,6 @@
-import React, {type CSSProperties, type ReactNode, useId} from 'react';
+import React, {type CSSProperties, type ReactNode} from 'react';
 import clsx from 'clsx';
-import {BrandGradient, DiagramFrame, diagram as d, useGradientId} from '../Diagram';
+import {DiagramFrame, TileGradients, diagram as d, markStyle, tileUrl, useDiagramId} from '../Diagram';
 
 type ChackPart = 'core' | 'humble-objects' | 'automated-tests' | 'composition-root';
 
@@ -34,7 +34,7 @@ const descriptions: Record<string, string> = {
 };
 
 /** Two-line label centred in a box. */
-function Label({x, y, lines, size = 15, className}: {x: number; y: number; lines: string[]; size?: number; className?: string}): ReactNode {
+function Label({x, y, lines, size = 18, className}: {x: number; y: number; lines: string[]; size?: number; className?: string}): ReactNode {
   const lineHeight = size * 1.25;
   const top = y - ((lines.length - 1) * lineHeight) / 2 + size * 0.36;
   return (
@@ -49,31 +49,31 @@ function Label({x, y, lines, size = 15, className}: {x: number; y: number; lines
 }
 
 export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode {
-  const dim = 0.25;
+  const dim = 0.35;
   const o = (part: ChackPart) => (highlight && highlight !== part ? dim : 1);
   const oContext = highlight ? dim : 1;
-  const titleId = `chack-diagram-title${highlight ? `-${highlight}` : ''}`;
-  const gradient = useGradientId();
-  // Marker ids must be unique per diagram, because a page may show several.
-  const prefix = useId().replace(/:/g, '');
+  // Ids must be unique per diagram, because a page may show several.
+  const prefix = useDiagramId();
+  const titleId = `${prefix}-title`;
+  const tile = (name: Parameters<typeof tileUrl>[1]) => tileUrl(prefix, name);
   const ref = `url(#${prefix}-ref)`;
   const impl = `url(#${prefix}-impl)`;
   const io = `url(#${prefix}-io)`;
   const ioStart = `url(#${prefix}-io-start)`;
 
   return (
-    <DiagramFrame minWidth={760} label="CHACK diagram">
+    <DiagramFrame minWidth={640} label="CHACK diagram">
       <svg
-        viewBox="0 0 1120 580"
+        viewBox="0 0 1086 580"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby={titleId}
         className={d.svg}
-        style={{maxWidth: 1120, '--line-width': 2.25} as CSSProperties}>
+        style={{maxWidth: 1086, '--line-width': 2.25} as CSSProperties}>
         <title id={titleId}>{descriptions[highlight ?? 'default']}</title>
 
         <defs>
-          <BrandGradient id={gradient} />
+          <TileGradients prefix={prefix} />
           {/* Open arrowhead: "references" */}
           <marker id={`${prefix}-ref`} markerWidth="9" markerHeight="7" refX="8.5" refY="3.5" orient="auto">
             <path d="M 0.6 0.6 L 8.4 3.5 L 0.6 6.4" className={d.line} style={{strokeWidth: 0.9}} />
@@ -95,8 +95,8 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
             inside, while E2E tests drive the system under test from another process. */}
         <g opacity={oContext}>
           <rect x="250" y="58" width="686" height="512" rx="14" className={d.boundary} />
-          <rect x="523" y="46" width="140" height="24" rx="12" className={d.chip} />
-          <text x="593" y="63" textAnchor="middle" fontSize="14" className={clsx(d.muted, d.semibold)}>
+          <rect x="513" y="45" width="160" height="26" rx="13" className={d.chip} />
+          <text x="593" y="63.5" textAnchor="middle" fontSize="16" className={clsx(d.muted, d.semibold)}>
             Process boundary
           </text>
         </g>
@@ -104,25 +104,25 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
         {/* Frameworks and libraries */}
         <g opacity={oContext}>
           <rect x="333" y="100" width="520" height="84" rx="10" className={d.quiet} />
-          <text x="593" y="128" textAnchor="middle" fontSize="15" className={d.strong}>
+          <text x="593" y="129" textAnchor="middle" fontSize="17" className={d.strong}>
             Frameworks &amp; Libraries
           </text>
-          <text x="593" y="150" textAnchor="middle" fontSize="13" className={d.muted}>
+          <text x="593" y="153" textAnchor="middle" fontSize="16" className={d.muted}>
             Base Class Library, HTTP Server Frameworks, Data Access,
           </text>
-          <text x="593" y="168" textAnchor="middle" fontSize="13" className={d.muted}>
+          <text x="593" y="173" textAnchor="middle" fontSize="16" className={d.muted}>
             Validation Frameworks, Test Frameworks, …
           </text>
         </g>
 
         {/* Third-party systems */}
         <g opacity={oContext}>
-          <rect x="6" y="205" width="124" height="230" rx="10" className={d.box} />
-          <Label x={68} y={232} lines={['Third-Party', 'Systems']} size={13} />
+          <rect x="4" y="198" width="128" height="244" rx="10" className={d.box} />
+          <Label x={68} y={228} lines={['Third-Party', 'Systems']} size={16} />
           {['Databases', 'Web Services', 'Message Brokers'].map((name, index) => (
             <g key={name}>
-              <rect x="16" y={262 + index * 56} width="104" height="46" rx="8" className={d.inner} />
-              <Label x={68} y={285 + index * 56} lines={name === 'Message Brokers' ? ['Message', 'Brokers'] : [name]} size={12.5} className={d.regular} />
+              <rect x="12" y={260 + index * 58} width="112" height="50" rx="8" className={d.inner} />
+              <Label x={68} y={285 + index * 58} lines={name === 'Databases' ? [name] : name.split(' ')} size={16} className={d.regular} />
             </g>
           ))}
         </g>
@@ -157,7 +157,7 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
         </g>
         <g opacity={Math.max(o('automated-tests'), oContext)}>
           <path d="M 948 272 V 30" className={d.line} />
-          <path d="M 1032 272 V 30 H 68 V 203" className={d.line} markerEnd={ref} />
+          <path d="M 1032 272 V 30 H 68 V 196" className={d.line} markerEnd={ref} />
         </g>
         <g opacity={Math.max(o('automated-tests'), o('composition-root'))}>
           <path d="M 924 458 V 519" className={d.line} />
@@ -172,61 +172,66 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
 
         {/* Humble objects, on the process boundary */}
         <g opacity={o('humble-objects')}>
-          <rect x="185" y="290" width="130" height="76" rx="10" className={d.box} />
-          <Label x={250} y={328} lines={['Humble', 'Objects']} />
+          <rect x="185" y="290" width="130" height="76" rx="10" className={d.gradient} fill={tile('violet')} />
+          <Label x={250} y={328} lines={['Humble', 'Objects']} className={d.onGradient} />
         </g>
 
         {/* I/O abstractions belong to the Core. */}
         <g opacity={o('core')}>
-          <rect x="365" y="300" width="125" height="56" rx="10" className={d.soft} />
-          <Label x={427} y={328} lines={['I/O', 'Abstractions']} size={14} />
+          {/* Its gradient outline shows that it belongs to the Core. */}
+          <rect x="365" y="300" width="125" height="56" rx="10" className={d.soft} stroke={tile('brand')} />
+          <Label x={427} y={328} lines={['I/O', 'Abstractions']} size={16} />
         </g>
 
         {/* Core */}
         <g opacity={o('core')}>
-          <rect x="540" y="268" width="190" height="120" rx="12" className={d.gradient} fill={`url(#${gradient})`} />
-          <Label x={635} y={328} lines={['Core']} size={20} className={d.onGradient} />
+          <rect x="540" y="268" width="190" height="120" rx="12" className={d.gradient} fill={tile('brand')} />
+          <Label x={635} y={328} lines={['Core']} size={24} className={d.onGradient} />
         </g>
 
         {/* Automated tests - the group straddles the process boundary */}
-        <g opacity={o('automated-tests')}>
+        <g opacity={o('automated-tests')} style={markStyle('magenta')}>
           <rect x="790" y="250" width="290" height="230" rx="14" className={d.group} />
-          <rect x="800" y="238" width="120" height="24" rx="12" className={d.chip} />
-          <text x="860" y="255" textAnchor="middle" fontSize="14" className={d.strong}>
+          {/* Above the group's top edge, clear of the integration test connectors at x=924. */}
+          <text x="792" y="241" fontSize="15" className={clsx(d.markText, d.semibold)}>
             Automated Tests
           </text>
-          <rect x="808" y="272" width="88" height="78" rx="10" className={d.box} />
-          <Label x={852} y={311} lines={['Unit', 'Tests']} size={14} />
-          <rect x="808" y="382" width="88" height="76" rx="10" className={d.box} />
-          <Label x={852} y={420} lines={['Test', 'Doubles']} size={14} />
-          <rect x="912" y="272" width="48" height="186" rx="10" className={d.box} />
-          <text transform="translate(936 365) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="14" className={d.strong}>
+          <rect x="808" y="272" width="88" height="78" rx="10" className={d.gradient} fill={tile('magenta')} />
+          <Label x={852} y={311} lines={['Unit', 'Tests']} size={17} className={d.onGradient} />
+          {/* Test doubles implement the Core's abstractions: a lighter tint of the tests' colour. */}
+          <rect x="808" y="382" width="88" height="76" rx="10" className={d.tint} />
+          <Label x={852} y={420} lines={['Test', 'Doubles']} size={17} />
+          <rect x="912" y="272" width="48" height="186" rx="10" className={d.gradient} fill={tile('magenta')} />
+          <text transform="translate(936 365) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="17" className={clsx(d.strong, d.onGradient)}>
             Integration Tests
           </text>
-          <rect x="984" y="272" width="64" height="186" rx="10" className={d.box} />
-          <text transform="translate(1016 365) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="14" className={d.strong}>
+          <rect x="984" y="272" width="64" height="186" rx="10" className={d.gradient} fill={tile('magenta')} />
+          <text transform="translate(1016 365) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="17" className={clsx(d.strong, d.onGradient)}>
             E2E Tests
           </text>
         </g>
 
         {/* Composition root */}
         <g opacity={o('composition-root')}>
-          <rect x="540" y="488" width="190" height="62" rx="10" className={d.box} />
-          <Label x={635} y={519} lines={['Composition Root']} />
+          <rect x="540" y="488" width="190" height="62" rx="10" className={d.gradient} fill={tile('amber')} />
+          <Label x={635} y={519} lines={['Composition Root']} className={d.onGradient} />
         </g>
 
         {/* Legend */}
         <g>
-          <line x1="16" y1="486" x2="60" y2="486" className={d.line} markerEnd={ref} />
-          <text x="72" y="491" fontSize="13" className={d.muted}>
+          <line x1="8" y1="482" x2="42" y2="482" className={d.line} markerEnd={ref} />
+          <text x="52" y="487" fontSize="16" className={d.muted}>
             references
           </text>
-          <line x1="16" y1="514" x2="60" y2="514" className={clsx(d.line, d.dashed)} markerEnd={impl} />
-          <text x="72" y="519" fontSize="13" className={d.muted}>
-            implements / derives from
+          <line x1="8" y1="512" x2="42" y2="512" className={clsx(d.line, d.dashed)} markerEnd={impl} />
+          <text x="52" y="517" fontSize="16" className={d.muted}>
+            implements /
           </text>
-          <line x1="16" y1="542" x2="60" y2="542" className={d.line} markerEnd={io} markerStart={ioStart} />
-          <text x="72" y="547" fontSize="13" className={d.muted}>
+          <text x="52" y="535" fontSize="16" className={d.muted}>
+            derives from
+          </text>
+          <line x1="8" y1="560" x2="42" y2="560" className={d.line} markerEnd={io} markerStart={ioStart} />
+          <text x="52" y="565" fontSize="16" className={d.muted}>
             I/O call at runtime
           </text>
         </g>

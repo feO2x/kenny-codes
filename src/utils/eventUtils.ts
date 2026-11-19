@@ -28,7 +28,7 @@ export function isEventsBlogList(metadata: {permalink: string}): boolean {
   return metadata.permalink.includes(eventsRoutePath);
 }
 
-export interface EventItem {
+interface EventItem {
   content: {
     metadata: {
       date: string;

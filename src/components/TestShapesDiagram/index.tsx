@@ -1,6 +1,5 @@
 import React, {type ReactNode} from 'react';
-import clsx from 'clsx';
-import {DiagramFrame, diagram as d} from '../Diagram';
+import {DiagramFrame, diagram as d, useDiagramId} from '../Diagram';
 
 const layers = [
   {
@@ -28,16 +27,17 @@ const layers = [
 
 /** The test pyramid next to the test diamond, both the same height. */
 export default function TestShapesDiagram(): ReactNode {
+  const titleId = `${useDiagramId()}-title`;
   return (
     <DiagramFrame>
       <svg
-        viewBox="0 40 960 500"
+        viewBox="0 36 960 448"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
-        aria-labelledby="test-shapes-title"
+        aria-labelledby={titleId}
         className={d.svg}
         style={{maxWidth: 760}}>
-        <title id="test-shapes-title">
+        <title id={titleId}>
           Test pyramid with a broad Unit base, a narrower Integration layer, and an E2E tip,
           compared with a test diamond whose widest layer is Integration, narrowing toward E2E
           above and Unit below.
@@ -54,7 +54,7 @@ export default function TestShapesDiagram(): ReactNode {
           <path d="M 660.96 176.49 H 839.04 M 661.62 294.36 H 838.38" />
         </g>
         {layers.map(({name, labels: [pyramidY, diamondY]}) => (
-          <g key={name} fontSize="27" textAnchor="middle" className={d.strong}>
+          <g key={name} fontSize="30" textAnchor="middle" className={d.strong}>
             <text x="270" y={pyramidY} className={d.onRamp}>
               {name}
             </text>
@@ -63,11 +63,11 @@ export default function TestShapesDiagram(): ReactNode {
             </text>
           </g>
         ))}
-        <g fontSize="27" textAnchor="middle">
-          <text x="270" y="500" className={clsx(d.strong)}>
+        <g fontSize="30" textAnchor="middle">
+          <text x="270" y="466" className={d.strong}>
             Test Pyramid
           </text>
-          <text x="750" y="500" className={clsx(d.strong)}>
+          <text x="750" y="466" className={d.strong}>
             Test Diamond
           </text>
         </g>

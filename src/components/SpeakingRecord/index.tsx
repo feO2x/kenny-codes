@@ -4,7 +4,7 @@ import Link from '@docusaurus/Link';
 import {useToday} from '@site/src/utils/dateFormatting';
 import styles from './styles.module.css';
 
-export interface RecordEvent {
+interface RecordEvent {
   /** ISO date, either `YYYY-MM-DD` or a full timestamp. */
   date: string;
   cancelled?: boolean;
@@ -94,7 +94,7 @@ export default function SpeakingRecord({
           ));
           const body = (
             <>
-              <span className={styles.srOnly}>{label}</span>
+              <span className="kc-sr-only">{label}</span>
               <span className={styles.stack} aria-hidden="true">
                 {squares}
                 {total > 0 && <span className={styles.count}>{total}</span>}
