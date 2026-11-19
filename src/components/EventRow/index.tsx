@@ -24,7 +24,7 @@ export function formatPlace(location?: string, country?: string): string {
   return `${location}, ${country}`;
 }
 
-export function formatSessionFormat({type, duration, language}: EventFrontMatter): string {
+function formatSessionFormat({type, duration, language}: EventFrontMatter): string {
   return [type, duration, language].filter(Boolean).join(', ');
 }
 

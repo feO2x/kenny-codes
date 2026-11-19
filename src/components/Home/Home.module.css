@@ -513,7 +513,7 @@
 }
 
 .meter > .meterOn:nth-child(2) {
-  background: color-mix(in oklab, var(--kc-ramp-to) 50%, var(--kc-ramp-from));
+  background: var(--kc-ramp-mid);
 }
 
 .meter > .meterOn:nth-child(3) {

@@ -1,0 +1,229 @@
+/*
+ * Shared look of the docs diagrams, taken from the home page: a card on the page background,
+ * outlined boxes on the page colour, the brand gradient only for the focal element, the
+ * blue-to-mint ramp for sequences, and quiet arrows with text labels instead of colour codes.
+ */
+
+.frame {
+  margin: 1.75rem 0;
+  padding: clamp(0.75rem, 0.4rem + 1.5vw, 1.75rem);
+  border: 1px solid var(--kc-line);
+  border-radius: var(--kc-radius-lg);
+  background: var(--kc-surface);
+}
+
+/* Wide SVG diagrams keep a legible minimum width and scroll sideways on phones. */
+.scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+@media (max-width: 760px) {
+  .scroll > svg {
+    min-width: var(--diagram-min-width);
+  }
+}
+
+.scroll:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 4px;
+  border-radius: var(--kc-radius-sm);
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  font-family: var(--kc-font);
+}
+
+.svg text {
+  fill: var(--kc-ink);
+}
+
+/* Text and marks */
+
+.svg .muted {
+  fill: var(--kc-muted);
+}
+
+.svg .onGradient {
+  fill: var(--kc-on-gradient);
+}
+
+/* Text on the ramp colours: white on the darker light-mode ramp, navy on the bright one. */
+.svg .onRamp {
+  fill: #ffffff;
+}
+
+:global([data-theme='dark']) .svg .onRamp {
+  fill: var(--kc-on-gradient);
+}
+
+.strong {
+  font-weight: 650;
+  font-stretch: 108%;
+}
+
+.semibold {
+  font-weight: 600;
+}
+
+.svg .regular {
+  font-weight: 500;
+  font-stretch: 100%;
+}
+
+/* Real text under a diagram, so it stays legible when the diagram scales down. */
+.caption {
+  margin: 1rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--kc-muted);
+}
+
+/* Shapes */
+
+.box {
+  fill: var(--kc-bg);
+  stroke: var(--kc-control-line);
+  stroke-width: 1.5;
+}
+
+/* The focal element's companions, e.g. the Core's I/O abstractions. */
+.soft {
+  fill: var(--kc-accent-soft);
+  stroke: var(--kc-ramp-from);
+  stroke-width: 1.5;
+}
+
+/* Context that is not part of the model, e.g. frameworks and libraries. */
+.quiet {
+  fill: var(--kc-surface-raised);
+}
+
+.boundary {
+  fill: none;
+  stroke: var(--kc-control-line);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+
+.chip {
+  fill: var(--kc-surface);
+}
+
+/* Boxes inside a box, e.g. the kinds of third-party systems. */
+.inner {
+  fill: var(--kc-surface);
+  stroke: var(--kc-line-strong);
+  stroke-width: 1.25;
+}
+
+/* A labelled group of boxes, e.g. the automated tests. */
+.group {
+  fill: none;
+  stroke: var(--kc-line-strong);
+  stroke-width: 1.5;
+}
+
+/* Squircle number badge, as in the Guided Coding steps on the home page. */
+.badge {
+  fill: var(--kc-bg);
+  stroke: var(--kc-line-strong);
+  stroke-width: 1.5;
+}
+
+.badgeOnGradient {
+  fill: rgba(255, 255, 255, 0.55);
+}
+
+.ramp1 {
+  fill: var(--kc-ramp-from);
+}
+
+.ramp2 {
+  fill: var(--kc-ramp-mid);
+}
+
+.ramp3 {
+  fill: var(--kc-ramp-to);
+}
+
+.separator {
+  fill: none;
+  stroke: var(--kc-surface);
+  stroke-width: 3;
+}
+
+/* Lines and arrows */
+
+.line {
+  fill: none;
+  stroke: var(--kc-muted);
+  stroke-width: var(--line-width, 1.75);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dashed {
+  stroke-dasharray: 5 4;
+}
+
+.head {
+  fill: var(--kc-muted);
+}
+
+.headHollow {
+  fill: var(--kc-surface);
+  stroke: var(--kc-muted);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+@media (forced-colors: active) {
+  .svg text,
+  .svg .muted,
+  .svg .onGradient,
+  .svg .onRamp,
+  :global([data-theme='dark']) .svg .onRamp,
+  .head {
+    fill: CanvasText;
+  }
+
+  .ramp1,
+  .ramp2,
+  .ramp3 {
+    fill: Canvas;
+    stroke: CanvasText;
+    stroke-width: 2;
+  }
+
+  .separator {
+    stroke: CanvasText;
+  }
+
+  .box,
+  .soft,
+  .quiet,
+  .badge,
+  .badgeOnGradient,
+  .chip,
+  .inner,
+  .gradient {
+    fill: Canvas;
+    stroke: CanvasText;
+  }
+
+  .line,
+  .boundary,
+  .group,
+  .headHollow {
+    stroke: CanvasText;
+  }
+
+  .headHollow {
+    fill: Canvas;
+  }
+}

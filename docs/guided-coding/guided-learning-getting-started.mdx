@@ -5,7 +5,7 @@ title: "Guided Learning: Getting Started"
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import GuidedLearningSkillTimeline from '@site/src/components/GuidedLearningSkillTimeline';
+import SkillTimeline from '@site/src/components/SkillTimeline';
 
 # Guided Learning: Getting Started
 
@@ -51,17 +51,17 @@ If you are the senior developer, join before the plan freezes, not after the pul
 <Tabs groupId="guided-coding-planning-variant">
 <TabItem value="manual" label="Manual path" default>
 
-<GuidedLearningSkillTimeline variant="manual" />
+<SkillTimeline method="guided-learning" variant="manual" />
 
 </TabItem>
 <TabItem value="plan-and-review" label="Plan-and-review path">
 
-<GuidedLearningSkillTimeline variant="plan-and-review" />
+<SkillTimeline method="guided-learning" variant="plan-and-review" />
 
 </TabItem>
 </Tabs>
 
-As in [Guided Coding: Getting Started](./guided-coding-getting-started.mdx), filled dots are skills and hollow dots are the parts you do yourself. The Planning and Guiding Phases are the same as in Guided Coding - only the people around the table change. The Implementing Phase is where Guided Learning differs: you start a fresh conversation, run the skill that matches your learning progress, and work through the milestones with the agent.
+As in [Guided Coding: Getting Started](./guided-coding-getting-started.mdx), filled squares are skills and hollow squares are the parts you do yourself. The Planning and Guiding Phases are the same as in Guided Coding - only the people around the table change. The Implementing Phase is where Guided Learning differs: you start a fresh conversation, run the skill that matches your learning progress, and work through the milestones with the agent.
 
 The two tabs show the two ways through the Planning Phase. Writing the plan together with your senior developer, on the manual path, is the better option: you learn from the discussion, and the plan's decisions are ones you understood as they were made. When your senior can't be there for the whole discussion, the plan-and-review path saves time. `guided-coding-plan-and-review` writes the plan and lets independent reviewers improve it in rounds, and your senior checks the reviewed plan and its report before the plan freezes. [Automated Plan Review](./automated-plan-review.mdx) explains how it works.
 

@@ -14,6 +14,9 @@
   /* Blue-to-mint ramp for small marks (record squares, stage meter), darkened for light mode. */
   --kc-ramp-from: #0066d6;
   --kc-ramp-to: #008f7a;
+  --kc-ramp-mid: color-mix(in oklab, var(--kc-ramp-to) 50%, var(--kc-ramp-from));
+  /* Text on the brand gradient: navy in both themes. */
+  --kc-on-gradient: #0c1a30;
 
   /* Surfaces and text (light theme) */
   --kc-bg: #f5f8fc;
@@ -97,6 +100,7 @@
 [data-theme='dark'] {
   --kc-ramp-from: var(--kc-blue);
   --kc-ramp-to: var(--kc-mint);
+  --kc-ramp-mid: color-mix(in oklab, var(--kc-ramp-to) 50%, var(--kc-ramp-from));
   --kc-bg: #0b1424;
   --kc-surface: #0f1b30;
   --kc-surface-raised: #15233d;
@@ -633,21 +637,6 @@ hr {
 
 .markdown img {
   border-radius: var(--kc-radius);
-}
-
-/* Article diagrams are drawn on a neutral grey plate (#D6D6D6). Retint it to the palette;
-   it stays light in dark mode because the diagrams put dark text on it. */
-.markdown svg rect[fill="#D6D6D6"] {
-  fill: #e3e9f2;
-}
-
-[data-theme='dark'] .markdown svg rect[fill="#D6D6D6"] {
-  fill: #b9c4d6;
-}
-
-/* Diagrams that put no text on the plate can use a dark plate in dark mode. */
-[data-theme='dark'] .markdown svg rect.kc-diagram-plate {
-  fill: var(--kc-surface-raised);
 }
 
 code {

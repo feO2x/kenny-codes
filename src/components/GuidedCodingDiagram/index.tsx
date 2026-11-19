@@ -1,79 +1,148 @@
+import React, {type ReactNode} from 'react';
+import clsx from 'clsx';
+import {BrandGradient, DiagramFrame, diagram as d, useGradientId} from '../Diagram';
+
+type Phase = 'planning' | 'implementing' | 'guiding';
+
 interface GuidedCodingDiagramProps {
-  highlight?: 'planning' | 'implementing' | 'guiding';
+  highlight?: Phase;
 }
 
-const descriptions: Record<string, string> = {
-  planning: 'Guided Coding workflow diagram highlighting the Planning Phase. The three phases are Planning, Implementing, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementing for small issues.',
-  implementing: 'Guided Coding workflow diagram highlighting the Implementing Phase. The three phases are Planning, Implementing, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementing for small issues.',
-  guiding: 'Guided Coding workflow diagram highlighting the Guiding Phase. The three phases are Planning, Implementing, and Guiding, with arrows showing iteration back to Planning for large issues or back to Implementing for small issues.',
-  default: 'Guided Coding workflow diagram showing three phases: Planning, Implementing, and Guiding. Arrows indicate the flow between phases, with loops back to Planning for large issues and back to Implementing for small issues, ending with a PR.',
+const loops =
+  'Arrows lead back from the Guiding Phase: a large issue returns to the Planning Phase, a small issue to the Implementing Phase. The Planning Phase also loops on itself until the plan stabilizes.';
+
+const descriptions: Record<Phase | 'default', string> = {
+  planning: `Guided Coding workflow diagram highlighting the Planning Phase. The three phases are Planning, Implementing, and Guiding, followed by the pull request. ${loops}`,
+  implementing: `Guided Coding workflow diagram highlighting the Implementing Phase. The three phases are Planning, Implementing, and Guiding, followed by the pull request. ${loops}`,
+  guiding: `Guided Coding workflow diagram highlighting the Guiding Phase. The three phases are Planning, Implementing, and Guiding, followed by the pull request. ${loops}`,
+  default: `Guided Coding workflow diagram showing three phases, Planning, Implementing, and Guiding, ending with a pull request. ${loops}`,
 };
 
-export default function GuidedCodingDiagram({ highlight }: GuidedCodingDiagramProps) {
-  const dim = 0.3;
-  const o = (phase: 'planning' | 'implementing' | 'guiding') =>
-    highlight && highlight !== phase ? dim : 1;
+const phases: {id: Phase; number: number; name: string; x: number}[] = [
+  {id: 'planning', number: 1, name: 'Planning Phase', x: 20},
+  {id: 'implementing', number: 2, name: 'Implementing Phase', x: 286},
+  {id: 'guiding', number: 3, name: 'Guiding Phase', x: 552},
+];
+
+const BOX_Y = 132;
+const BOX_W = 232;
+const BOX_H = 58;
+const MID_Y = BOX_Y + BOX_H / 2;
+
+/** A downward arrowhead whose tip touches (x, y). */
+function HeadDown({x, y}: {x: number; y: number}): ReactNode {
+  return <path className={d.head} d={`M ${x} ${y} l -6 -10 h 12 z`} />;
+}
+
+/** A right-pointing arrowhead whose tip touches (x, y). */
+function HeadRight({x, y}: {x: number; y: number}): ReactNode {
+  return <path className={d.head} d={`M ${x} ${y} l -10 -6 v 12 z`} />;
+}
+
+export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProps): ReactNode {
+  const gradient = useGradientId();
   const titleId = `guided-coding-diagram-title${highlight ? `-${highlight}` : ''}`;
+  const dim = 0.3;
+  const o = (phase: Phase) => (highlight && highlight !== phase ? dim : 1);
+  const either = (a: Phase, b: Phase) => Math.max(o(a), o(b));
 
   return (
-    <svg viewBox="0 0 870 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby={titleId} style={{maxWidth: '870px', width: '100%', margin: '1.5rem auto', display: 'block'}}>
-      <title id={titleId}>{descriptions[highlight ?? 'default']}</title>
-      {/* Background */}
-      <rect x="0" y="0" width="870" height="200" rx="8" fill="#D6D6D6" className="kc-diagram-plate" />
+    <DiagramFrame minWidth={640} label="Guided Coding workflow diagram">
+      <svg
+        viewBox="0 0 930 210"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-labelledby={titleId}
+        className={d.svg}
+        style={{maxWidth: 930}}>
+        <title id={titleId}>{descriptions[highlight ?? 'default']}</title>
+        <defs>
+          <BrandGradient id={gradient} />
+        </defs>
 
-      {/* Arrow marker definitions */}
-      <defs>
-        <marker id="arrowGray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-          <polygon points="0 0, 10 3.5, 0 7" fill="#888" />
-        </marker>
-      </defs>
+        {/* Guiding → Planning: a large issue */}
+        <g opacity={either('guiding', 'planning')}>
+          <path className={d.line} d={`M 700 ${BOX_Y} V 52 Q 700 40 688 40 H 148 Q 136 40 136 52 V ${BOX_Y - 9}`} />
+          <HeadDown x={136} y={BOX_Y - 1} />
+          <text x={418} y={30} textAnchor="middle" fontSize="14" className={clsx(d.muted, d.semibold)}>
+            large issue
+          </text>
+        </g>
 
-      {/* Blue arrow: Guiding → Planning (large issue) */}
-      <g opacity={Math.max(o('guiding'), o('planning'))}>
-        <path d="M 660 135 V 50 Q 660 25, 635 25 H 155 Q 130 25, 130 50 V 100" fill="none" stroke="#0078D4" strokeWidth="11" />
-        <polygon points="130,130 108,96 152,96" fill="#0078D4" />
-      </g>
+        {/* Guiding → Implementing: a small issue */}
+        <g opacity={either('guiding', 'implementing')}>
+          <path className={d.line} d={`M 640 ${BOX_Y} V 96 Q 640 84 628 84 H 414 Q 402 84 402 96 V ${BOX_Y - 9}`} />
+          <HeadDown x={402} y={BOX_Y - 1} />
+          <text x={521} y={74} textAnchor="middle" fontSize="14" className={clsx(d.muted, d.semibold)}>
+            small issue
+          </text>
+        </g>
 
-      {/* Yellow arrow: Guiding → Implementation (small issue) */}
-      <g opacity={Math.max(o('guiding'), o('implementing'))}>
-        <path d="M 595 135 V 100 Q 595 80, 575 80 H 395 Q 375 80, 375 100 V 108" fill="none" stroke="#E88A00" strokeWidth="10" />
-        <polygon points="375,130 355,100 395,100" fill="#E88A00" />
-      </g>
+        {/* The Planning Phase loops on itself until the plan stabilizes. */}
+        <g opacity={o('planning')}>
+          <path className={d.line} d={`M 224 ${BOX_Y} V 110 Q 224 100 214 100 H 198 Q 188 100 188 110 V ${BOX_Y - 9}`} />
+          <HeadDown x={188} y={BOX_Y - 1} />
+        </g>
 
-      {/* Self-loop on Planning Phase (right side) */}
-      <g opacity={o('planning')}>
-        <path d="M 205 135 V 115 Q 205 105, 195 105 H 175 Q 165 105, 165 115 V 122" fill="none" stroke="#0078D4" strokeWidth="7" />
-        <polygon points="165,132 155,114 175,114" fill="#0078D4" />
-      </g>
+        {/* Forward arrows */}
+        <g opacity={highlight ? dim : 1}>
+          {[phases[0].x + BOX_W, phases[1].x + BOX_W, phases[2].x + BOX_W].map((x) => (
+            <g key={x}>
+              <path className={d.line} d={`M ${x + 6} ${MID_Y} H ${x + 28}`} />
+              <HeadRight x={x + 36} y={MID_Y} />
+            </g>
+          ))}
+        </g>
 
-      {/* Phase boxes */}
-      <g opacity={o('planning')}>
-        <rect x="30" y="135" width="200" height="50" fill="#0078D4" rx="4" />
-        <text x="130" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">1. Planning Phase</text>
-      </g>
+        {phases.map(({id, number, name, x}) => {
+          const focal = highlight === id;
+          return (
+            <g key={id} opacity={o(id)}>
+              <rect
+                x={x}
+                y={BOX_Y}
+                width={BOX_W}
+                height={BOX_H}
+                rx="10"
+                className={focal ? d.gradient : d.box}
+                fill={focal ? `url(#${gradient})` : undefined}
+              />
+              <rect
+                x={x + 14}
+                y={BOX_Y + 15}
+                width="28"
+                height="28"
+                rx="8"
+                className={focal ? d.badgeOnGradient : d.badge}
+              />
+              <text
+                x={x + 28}
+                y={BOX_Y + 34}
+                textAnchor="middle"
+                fontSize="14"
+                className={clsx(d.strong, focal && d.onGradient)}>
+                {number}
+              </text>
+              <text x={x + 54} y={BOX_Y + 35} fontSize="16" className={clsx(d.strong, focal && d.onGradient)}>
+                {name}
+              </text>
+            </g>
+          );
+        })}
 
-      <g opacity={o('implementing')}>
-        <rect x="275" y="135" width="200" height="50" fill="#E88A00" rx="4" />
-        <text x="375" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">2. Implementing Phase</text>
-      </g>
-
-      <g opacity={o('guiding')}>
-        <rect x="520" y="135" width="200" height="50" fill="#6B2FA0" rx="4" />
-        <text x="620" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="15" fontWeight="600">3. Guiding Phase</text>
-      </g>
-
-      {/* Done / PR box */}
-      <g opacity={highlight ? dim : 1}>
-        <rect x="765" y="140" width="80" height="40" fill="#107C10" rx="20" />
-        <text x="805" y="166" textAnchor="middle" fill="white" fontFamily="Segoe UI, sans-serif" fontSize="14" fontWeight="600">✓ PR</text>
-      </g>
-
-      {/* Forward arrows between phases */}
-      <g opacity={highlight ? dim : 1}>
-        <line x1="230" y1="160" x2="270" y2="160" stroke="#888" strokeWidth="2.5" markerEnd="url(#arrowGray)" />
-        <line x1="475" y1="160" x2="515" y2="160" stroke="#888" strokeWidth="2.5" markerEnd="url(#arrowGray)" />
-        <line x1="720" y1="160" x2="760" y2="160" stroke="#888" strokeWidth="2.5" markerEnd="url(#arrowGray)" />
-      </g>
-    </svg>
+        {/* The pull request */}
+        <g opacity={highlight ? dim : 1}>
+          <rect x="818" y={MID_Y - 21} width="92" height="42" rx="21" className={d.gradient} fill={`url(#${gradient})`} />
+          <path
+            className={d.line}
+            style={{stroke: 'var(--kc-on-gradient)', strokeWidth: 2.25}}
+            d={`M 840 ${MID_Y} l 5 5 l 9 -10`}
+          />
+          <text x="863" y={MID_Y + 5.5} fontSize="16" className={clsx(d.strong, d.onGradient)}>
+            PR
+          </text>
+        </g>
+      </svg>
+    </DiagramFrame>
   );
 }

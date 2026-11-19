@@ -1,9 +1,10 @@
 import { useId, useState } from 'react';
+import clsx from 'clsx';
 import styles from './styles.module.css';
 
 interface Measurement {
   label: string;
-  /** Duration in nanoseconds, transcribed from performance-of-everyday-things.png. */
+  /** Duration in nanoseconds, from the benchmark chart this component replaced. */
   nanoseconds: number;
   kind: 'in-memory' | 'database';
 }
@@ -29,8 +30,6 @@ const measurements: Measurement[] = [
   { label: 'Load entity from Oracle (VPN)', nanoseconds: 20_300_000, kind: 'database' },
 ];
 
-const IN_MEMORY_COLOR = '#0078D4';
-const DATABASE_COLOR = '#C2185B';
 const MIN_EXPONENT = -3;
 const MAX_EXPONENT = 8;
 const LINEAR_MAX = 25_000_000;
@@ -67,7 +66,7 @@ export default function IoCostChart() {
   return (
     <figure className={styles.figure}>
       <div className={styles.toolbar}>
-        <strong id={`${id}-title`}>Performance of everyday things</strong>
+        <strong id={`${id}-title`} className={styles.title}>Performance of everyday things</strong>
         <button
           type="button"
           className={styles.scaleButton}
@@ -78,8 +77,8 @@ export default function IoCostChart() {
         </button>
       </div>
       <div className={styles.legend}>
-        <span><span className={styles.swatch} style={{ backgroundColor: IN_MEMORY_COLOR }} />In-memory operations</span>
-        <span><span className={styles.swatch} style={{ backgroundColor: DATABASE_COLOR }} />Database reads</span>
+        <span><span className={clsx(styles.swatch, styles.inMemory)} />In-memory operations</span>
+        <span><span className={clsx(styles.swatch, styles.database)} />Database reads</span>
       </div>
       <p id={`${id}-description`} className={styles.explanation} aria-live="polite">{scaleDescription}</p>
       <div id={`${id}-chart`} className={styles.chart} role="group" aria-labelledby={`${id}-title`} aria-describedby={`${id}-description`}>
@@ -105,18 +104,20 @@ export default function IoCostChart() {
         </div>
         <ul className={styles.measurements}>
           {measurements.map((measurement) => {
-            const color = measurement.kind === 'database' ? DATABASE_COLOR : IN_MEMORY_COLOR;
             return (
               <li key={measurement.label} className={styles.measurement}>
                 <span className={styles.operation}>{measurement.label}</span>
                 <span className={styles.value}>
-                  {numberFormat.format(measurement.nanoseconds)}<span className={styles.srOnly}> nanoseconds</span>
+                  {numberFormat.format(measurement.nanoseconds)}<span className="kc-sr-only"> nanoseconds</span>
                 </span>
                 <div className={styles.track} aria-hidden="true">
                   {ticks.map(({ value }) => (
                     <span key={value} className={styles.gridLine} style={{ left: `${positionOf(value)}%` }} />
                   ))}
-                  <div className={styles.bar} style={{ width: `${positionOf(measurement.nanoseconds)}%`, backgroundColor: color }} />
+                  <div
+                    className={clsx(styles.bar, measurement.kind === 'database' ? styles.database : styles.inMemory)}
+                    style={{ width: `${positionOf(measurement.nanoseconds)}%` }}
+                  />
                 </div>
               </li>
             );

@@ -17,7 +17,6 @@ interface ContentItem {
   date: string;
   link: string;
   excerpt: string;
-  tags?: string[];
   /** Tag page slugs exactly as Docusaurus derives them, e.g. ".NET" -> "net". */
   tagSlugs?: string[];
   type?: string;
@@ -38,7 +37,6 @@ interface HomeData {
    * home page classifies them in the browser instead of relying on a build-time shortlist.
    */
   events: HomeEvent[];
-  venues: string[];
 }
 
 /** Front matter parsed exactly as Docusaurus parses it (YAML via gray-matter). */
@@ -146,7 +144,6 @@ async function readAllContent(dir: string, type: string): Promise<ContentItem[]>
         date,
         link,
         excerpt,
-        tags,
         // Only events: the blog has a tags.yml whose permalinks this helper does not read.
         tagSlugs: type === "events" ? tagSlugs(tags, link) : undefined,
         type: text(data.type),
@@ -166,30 +163,6 @@ async function readAllContent(dir: string, type: string): Promise<ContentItem[]>
 }
 
 
-// Strips years and seasons so "BASTA! Spring 2024" and "BASTA! Autumn 2024" count as one venue.
-function normalizeVenue(event: string): string {
-  return event
-    .replace(/\b(19|20)\d{2}\b/g, "")
-    .replace(/\b(Spring|Autumn|Fall|Summer|Winter)\b/gi, "")
-    .replace(/\s{2,}/g, " ")
-    .trim();
-}
-
-// Venues ordered by how often Kenny spoke there; one-off formats such as
-// webinars or lectures are left out because they are not recognizable venues.
-function rankVenues(events: ContentItem[]): string[] {
-  const counts = new Map<string, number>();
-  for (const item of events) {
-    if (!item.event || item.cancelled) continue;
-    const venue = normalizeVenue(item.event);
-    if (/webinar|lecture|linkedin/i.test(venue)) continue;
-    counts.set(venue, (counts.get(venue) ?? 0) + 1);
-  }
-  return [...counts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([venue]) => venue);
-}
-
 async function main(): Promise<void> {
   const allPosts = await readAllContent(BLOG_DIR, "blog");
   const allEvents = await readAllContent(EVENTS_DIR, "events");
@@ -197,7 +170,6 @@ async function main(): Promise<void> {
   const output: HomeData = {
     recentPosts: allPosts.slice(0, 4),
     events: allEvents.map(({ excerpt: _excerpt, ...event }) => event),
-    venues: rankVenues(allEvents),
   };
 
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(output, null, 2));

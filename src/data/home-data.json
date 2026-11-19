@@ -4,49 +4,25 @@
       "title": "Markdown is not Spec-Driven Development",
       "date": "2026-03-31",
       "link": "/blog/2026-03-31-is-github-spec-kit-sdd",
-      "excerpt": "In 2025, a wave of tools like GitHub Spec Kit and Amazon Kiro reinvigorated the term Spec-Driven Development (SDD) as a counterpart to Vibe Coding. They use markdown specifications and plans to steer ...",
-      "tags": [
-        "ai",
-        "coding-agents",
-        "guided-coding"
-      ]
+      "excerpt": "In 2025, a wave of tools like GitHub Spec Kit and Amazon Kiro reinvigorated the term Spec-Driven Development (SDD) as a counterpart to Vibe Coding. They use markdown specifications and plans to steer ..."
     },
     {
       "title": "Guided Coding: Staying in Control While Coding with AI Agents",
       "date": "2026-02-28",
       "link": "/blog/2026-02-28-guided-coding",
-      "excerpt": "I recently joined Johannes Rabauer on his live stream to present Guided Coding - an approach I developed for writing enterprise-grade software with coding agents while maintaining full control over th...",
-      "tags": [
-        "ai",
-        "coding-agents",
-        "guided-coding",
-        "software-design"
-      ]
+      "excerpt": "I recently joined Johannes Rabauer on his live stream to present Guided Coding - an approach I developed for writing enterprise-grade software with coding agents while maintaining full control over th..."
     },
     {
       "title": "More on Design by Contract - Assertions and Inheritance",
       "date": "2016-05-07",
       "link": "/blog/2016-05-07-assertions-and-inheritance",
-      "excerpt": "My previous two posts about Bertrand Meyer's Design by Contract (DbC) were mainly introductions to pre- and post-conditions and class invariants and how they can be implemented in C# – in this one we'...",
-      "tags": [
-        "csharp",
-        "dotnet",
-        "design-by-contract",
-        "object-oriented-programming"
-      ]
+      "excerpt": "My previous two posts about Bertrand Meyer's Design by Contract (DbC) were mainly introductions to pre- and post-conditions and class invariants and how they can be implemented in C# – in this one we'..."
     },
     {
       "title": "Stronger-Typed Resource Dictionaries in XAML",
       "date": "2015-12-29",
       "link": "/blog/2015-12-29-stronger-typed-resource-dictionaries-in-xaml",
-      "excerpt": "If you’ve ever programmed in XAML-based technologies, you know Resource Dictionaries: these XAML files usually contain the styles and templates you want to share across different views, or provide the...",
-      "tags": [
-        "xaml",
-        "csharp",
-        "wpf",
-        "uwp",
-        "dotnet"
-      ]
+      "excerpt": "If you’ve ever programmed in XAML-based technologies, you know Resource Dictionaries: these XAML files usually contain the styles and templates you want to share across different views, or provide the..."
     }
   ],
   "events": [
@@ -54,11 +30,6 @@
       "title": "Forget Vibe Coding, Switch to Guided Coding",
       "date": "2026-09-17",
       "link": "/events/2026-09-17-dodnedder-guided-coding",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Guided-Coding"
-      ],
       "tagSlugs": [
         "ai",
         "coding-agents",
@@ -75,11 +46,6 @@
       "title": "Guided Coding: Agentic Coding Without Loss of Control",
       "date": "2026-08-14",
       "link": "/events/2026-08-14-guided-coding-agentic-coding-without-loss-of-control",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Guided-Coding"
-      ],
       "tagSlugs": [
         "ai",
         "coding-agents",
@@ -95,11 +61,6 @@
       "title": "Guided Coding - Staying in Control While Coding with AI Agents",
       "date": "2026-06-17",
       "link": "/events/2026-06-17-oth-hof-guided-coding",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Guided-Coding"
-      ],
       "tagSlugs": [
         "ai",
         "coding-agents",
@@ -116,11 +77,6 @@
       "title": "Forget Vibe Coding, Switch to Guided Coding",
       "date": "2026-05-06",
       "link": "/events/2026-05-06-adc-forget-vibe-coding-use-guided-coding",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Guided-Coding"
-      ],
       "tagSlugs": [
         "ai",
         "coding-agents",
@@ -137,14 +93,6 @@
       "title": "Cloud-Native Meets AI: Modern Backends with Aspire and Microsoft.Extensions.AI",
       "date": "2026-05-05",
       "link": "/events/2026-05-05-adc-cloud-native-meets-ai",
-      "tags": [
-        "AI",
-        ".NET",
-        "Aspire",
-        "Microsoft.Extensions.AI",
-        "LLM",
-        "Cloud-Native"
-      ],
       "tagSlugs": [
         "ai",
         "net",
@@ -164,14 +112,6 @@
       "title": "AI-powered Cloud-Native Backends with Aspire and Microsoft.Extensions.AI",
       "date": "2026-05-04",
       "link": "/events/2026-05-04-adc-workshop-ai-powered-cloud-native-backends-with-aspire-and-mea",
-      "tags": [
-        "AI",
-        "Cloud-Native",
-        ".NET",
-        "Aspire",
-        "Microsoft.Extensions.AI",
-        "LLM"
-      ],
       "tagSlugs": [
         "ai",
         "cloud-native",
@@ -192,11 +132,6 @@
       "title": "Forget Vibe Coding, Switch to Guided Coding",
       "date": "2026-04-14",
       "link": "/events/2026-04-14-dcn-forget-vibe-coding-use-guided-coding",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Guided-Coding"
-      ],
       "tagSlugs": [
         "ai",
         "coding-agents",
@@ -213,12 +148,6 @@
       "title": "Guided Coding instead of Vibe Coding in Java",
       "date": "2026-02-26",
       "link": "/events/2026-02-26-guided-coding-in-java",
-      "tags": [
-        "AI",
-        "Coding-Agents",
-        "Java",
-        "Guided-Coding"
-      ],
       "tagSlugs": [
         "ai",
         "coding-agents",
@@ -235,14 +164,6 @@
       "title": "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI",
       "date": "2025-09-30",
       "link": "/events/2025-09-30-dcn-cloud-native-meets-ai",
-      "tags": [
-        "AI",
-        ".NET",
-        "Aspire",
-        "Microsoft.Extensions.AI",
-        "LLM",
-        "Cloud-Native"
-      ],
       "tagSlugs": [
         "ai",
         "net",
@@ -262,14 +183,6 @@
       "title": "Cloud Native Meets AI: Building Modern Backends With .NET Aspire and Microsoft.Extensions.AI",
       "date": "2025-09-24",
       "link": "/events/2025-09-24-dotnet-regensburg-cloud-native-meets-ai",
-      "tags": [
-        "AI",
-        ".NET",
-        "Aspire",
-        "Microsoft.Extensions.AI",
-        "LLM",
-        "Cloud-Native"
-      ],
       "tagSlugs": [
         "ai",
         "net",
@@ -289,14 +202,6 @@
       "title": "Access Multimodal LLMs from .NET Backends with Microsoft.Extensions.AI and .NET Aspire",
       "date": "2025-05-07",
       "link": "/events/2025-05-07-adc-access-multimodal-llms-from-dotnet-backends-with-mea-and-aspire",
-      "tags": [
-        "AI",
-        ".NET",
-        "Aspire",
-        "Microsoft.Extensions.AI",
-        "LLM",
-        "Cloud-Native"
-      ],
       "tagSlugs": [
         "ai",
         "net",
@@ -316,12 +221,6 @@
       "title": "How to async – async await Internals and Expert Knowledge for Scalable .NET Apps",
       "date": "2025-05-05",
       "link": "/events/2025-05-05-adc-async-await-workshop",
-      "tags": [
-        "async-await",
-        ".NET",
-        "performance",
-        "scalability"
-      ],
       "tagSlugs": [
         "async-await",
         "net",
@@ -339,15 +238,6 @@
       "title": "Integrate Multimodal Language Models into .NET Backends with OpenAI .NET API and .NET Aspire",
       "date": "2024-10-17",
       "link": "/events/2024-10-17-gen-ai-openai-with-aspire",
-      "tags": [
-        "AI",
-        ".NET",
-        "Aspire",
-        "Microsoft.Extensions.AI",
-        "LLM",
-        "OpenAI",
-        "Cloud-Native"
-      ],
       "tagSlugs": [
         "ai",
         "net",
@@ -368,12 +258,6 @@
       "title": "Async Workshop: Clarity in Asynchrony – async await Internals and Expert Knowledge for Scalable .NET Apps",
       "date": "2024-09-16",
       "link": "/events/2024-09-16-basta-autumn-async-workshop",
-      "tags": [
-        "async-await",
-        ".NET",
-        "performance",
-        "scalability"
-      ],
       "tagSlugs": [
         "async-await",
         "net",
@@ -391,12 +275,6 @@
       "title": ".NET Native AOT – Ready for My Web APIs?",
       "date": "2024-09-16",
       "link": "/events/2024-09-16-basta-autumn-native-aot",
-      "tags": [
-        "Native AOT",
-        ".NET",
-        "Web APIs",
-        "performance"
-      ],
       "tagSlugs": [
         "native-aot",
         "net",
@@ -414,12 +292,6 @@
       "title": "Private GPT LLMs: Securely Deploying Azure OpenAI Service with Terraform",
       "date": "2024-07-01",
       "link": "/events/2024-07-01-dwx-azure-openai-terraform",
-      "tags": [
-        "Azure",
-        "OpenAI",
-        "Terraform",
-        "Security"
-      ],
       "tagSlugs": [
         "azure",
         "open-ai",
@@ -437,11 +309,6 @@
       "title": "Web APIs with ASP.NET Core Native AOT",
       "date": "2024-07-01",
       "link": "/events/2024-07-01-dwx-native-aot-web-apis",
-      "tags": [
-        "ASP.NET Core",
-        "Native AOT",
-        "Web APIs"
-      ],
       "tagSlugs": [
         "asp-net-core",
         "native-aot",
@@ -458,11 +325,6 @@
       "title": "Scalable .NET Apps with async await",
       "date": "2024-05-06",
       "link": "/events/2024-05-06-adc-async-await",
-      "tags": [
-        "async-await",
-        ".NET",
-        "scalability"
-      ],
       "tagSlugs": [
         "async-await",
         "net",
@@ -479,11 +341,6 @@
       "title": "Web APIs with ASP.NET Core Native AOT",
       "date": "2024-05-06",
       "link": "/events/2024-05-06-adc-native-aot-web-apis",
-      "tags": [
-        "ASP.NET Core",
-        "Native AOT",
-        "Web APIs"
-      ],
       "tagSlugs": [
         "asp-net-core",
         "native-aot",
@@ -500,12 +357,6 @@
       "title": ".NET Native AOT – Data Access without EF Core, Using Humble Objects Instead",
       "date": "2024-03-20",
       "link": "/events/2024-03-20-webinar-native-aot-data-access",
-      "tags": [
-        "Native AOT",
-        ".NET",
-        "Data Access",
-        "Humble Objects"
-      ],
       "tagSlugs": [
         "native-aot",
         "net",
@@ -522,11 +373,6 @@
       "title": ".NET Native AOT – Overview and Performance",
       "date": "2024-03-06",
       "link": "/events/2024-03-06-webinar-native-aot-overview",
-      "tags": [
-        "Native AOT",
-        ".NET",
-        "Performance"
-      ],
       "tagSlugs": [
         "native-aot",
         "net",
@@ -542,12 +388,6 @@
       "title": "Securely Deploying Private OpenAI LLMs in Azure with Terraform",
       "date": "2024-02-27",
       "link": "/events/2024-02-27-dcn-azure-openai-terraform",
-      "tags": [
-        "Azure",
-        "OpenAI",
-        "Terraform",
-        "Security"
-      ],
       "tagSlugs": [
         "azure",
         "open-ai",
@@ -564,12 +404,6 @@
       "title": "Scalable .NET Apps with async await – Fundamentals & Practical Tips",
       "date": "2024-02-12",
       "link": "/events/2024-02-12-basta-spring-async-await",
-      "tags": [
-        "async-await",
-        ".NET",
-        "scalability",
-        "best-practices"
-      ],
       "tagSlugs": [
         "async-await",
         "net",
@@ -587,14 +421,6 @@
       "title": "Private GPT LLMs: Securely Deploying Azure OpenAI Service with Terraform",
       "date": "2024-02-12",
       "link": "/events/2024-02-12-basta-spring-azure-openai-terraform",
-      "tags": [
-        "Azure",
-        "OpenAI",
-        "Terraform",
-        "Security",
-        "Angular",
-        "Streaming"
-      ],
       "tagSlugs": [
         "azure",
         "open-ai",
@@ -614,11 +440,6 @@
       "title": "Cloud-Native in Practice: Modern End-to-End Architectures",
       "date": "2023-09-25",
       "link": "/events/2023-09-25-basta-autumn-cloud-native-workshop",
-      "tags": [
-        "Cloud-Native",
-        "Architecture",
-        "Kubernetes"
-      ],
       "tagSlugs": [
         "cloud-native",
         "architecture",
@@ -635,11 +456,6 @@
       "title": "Cloud-Native for .NET developers: Modern End-to-End Architectures",
       "date": "2023-06-26",
       "link": "/events/2023-06-26-dwx-cloud-native-workshop",
-      "tags": [
-        "Cloud-Native",
-        "Architecture",
-        "Kubernetes"
-      ],
       "tagSlugs": [
         "cloud-native",
         "architecture",
@@ -656,11 +472,6 @@
       "title": "Cloud-Native for .NET developers: Modern End-to-End Architectures",
       "date": "2023-04-28",
       "link": "/events/2023-04-28-dotnet-day-franken-cloud-native-workshop",
-      "tags": [
-        "Cloud-Native",
-        "Architecture",
-        "Kubernetes"
-      ],
       "tagSlugs": [
         "cloud-native",
         "architecture",
@@ -677,12 +488,6 @@
       "title": ".NET Async Await - In Depth",
       "date": "2023-04-07",
       "link": "/events/2023-04-07-coding-zone-async-await-in-depth",
-      "tags": [
-        ".NET",
-        "async await",
-        "Performance",
-        "Memory Management"
-      ],
       "tagSlugs": [
         "net",
         "async-await",
@@ -699,12 +504,6 @@
       "title": "ASP.NET Core Minimal APIs in Practice",
       "date": "2022-12-13",
       "link": "/events/2022-12-13-dcn-minimal-apis-in-practice",
-      "tags": [
-        ".NET",
-        "ASP.NET Core",
-        "Minimal APIs",
-        "Performance"
-      ],
       "tagSlugs": [
         "net",
         "asp-net-core",
@@ -721,16 +520,6 @@
       "title": "ASP.NET Core Minimal APIs in Practice",
       "date": "2022-05-25",
       "link": "/events/2022-05-25-adc-minimal-apis-in-practice",
-      "tags": [
-        ".NET",
-        "ASP.NET Core",
-        "Minimal APIs",
-        "C#",
-        "Backend",
-        "API",
-        "Web API",
-        "HTTP"
-      ],
       "tagSlugs": [
         "net",
         "asp-net-core",
@@ -752,15 +541,6 @@
       "title": "Old Apps with New .NET Features",
       "date": "2022-05-24",
       "link": "/events/2022-05-24-adc-old-apps-with-new-dotnet-features",
-      "tags": [
-        ".NET",
-        "csproj",
-        "compatibility",
-        "NRT",
-        "async",
-        "await",
-        "C#"
-      ],
       "tagSlugs": [
         "net",
         "csproj",
@@ -781,15 +561,6 @@
       "title": "Design Principles vs. Performance",
       "date": "2021-11-30",
       "link": "/events/2021-11-30-adc-design-principles-vs-performance",
-      "tags": [
-        ".NET",
-        "Performance",
-        "Asynchronous Programming",
-        "Memory Management",
-        "Benchmarks",
-        "C#",
-        "Software Design"
-      ],
       "tagSlugs": [
         "net",
         "performance",
@@ -810,15 +581,6 @@
       "title": "Design Principles vs. Performance",
       "date": "2021-03-02",
       "link": "/events/2021-03-02-mdug-graz-design-principles-vs-performance",
-      "tags": [
-        ".NET",
-        "Performance",
-        "Asynchronous Programming",
-        "Memory Management",
-        "Benchmarks",
-        "C#",
-        "Software Design"
-      ],
       "tagSlugs": [
         "net",
         "performance",
@@ -839,15 +601,6 @@
       "title": "Design Principles vs. Performance",
       "date": "2021-02-16",
       "link": "/events/2021-02-16-dcn-design-principles-vs-performance",
-      "tags": [
-        ".NET",
-        "Performance",
-        "Asynchronous Programming",
-        "Memory Management",
-        "Benchmarks",
-        "C#",
-        "Software Design"
-      ],
       "tagSlugs": [
         "net",
         "performance",
@@ -868,16 +621,6 @@
       "title": "JSON Serialization in ASP.NET Core",
       "date": "2020-10-13",
       "link": "/events/2020-10-13-adc-json-serialization-in-aspnetcore",
-      "tags": [
-        ".NET",
-        "Performance",
-        "JSON",
-        "Serialization",
-        "System.Text.Json",
-        "Newtonsoft.Json",
-        "Utf8Json",
-        "ASP.NET Core"
-      ],
       "tagSlugs": [
         "net",
         "performance",
@@ -899,11 +642,6 @@
       "title": "Async Await Internals: Understand the Async State Machine from a Memory Perspective",
       "date": "2020-10-12",
       "link": "/events/2020-10-12-adc-async-await-memory-perspective",
-      "tags": [
-        ".NET",
-        "async await",
-        "Memory Management"
-      ],
       "tagSlugs": [
         "net",
         "async-await",
@@ -920,13 +658,6 @@
       "title": "High Perf - .NET Performance Benchmarking and Garbage Collector in Detail",
       "date": "2019-12-11",
       "link": "/events/2019-12-11-mdug-graz-high-perf",
-      "tags": [
-        ".NET",
-        "Performance",
-        "BenchmarkDotNet",
-        "Memory Management",
-        "Garbage Collection"
-      ],
       "tagSlugs": [
         "net",
         "performance",
@@ -945,12 +676,6 @@
       "title": "Introduction to Performance Optimization in .NET",
       "date": "2019-05-23",
       "link": "/events/2019-05-23-adc-introduction-to-performance-optimization",
-      "tags": [
-        ".NET",
-        "Performance",
-        "BenchmarkDotNet",
-        "Memory Management"
-      ],
       "tagSlugs": [
         "net",
         "performance",
@@ -968,12 +693,6 @@
       "title": ".NET GC Internals: How the Garbage Collector Works Under the Covers",
       "date": "2019-05-22",
       "link": "/events/2019-05-22-adc-dotnet-gc-internals",
-      "tags": [
-        ".NET",
-        "Memory Management",
-        "Garbage Collector",
-        "GC"
-      ],
       "tagSlugs": [
         "net",
         "memory-management",
@@ -991,12 +710,6 @@
       "title": ".NET Garbage Collector Internals",
       "date": "2019-05-08",
       "link": "/events/2019-05-08-dotnet-regensburg-dotnet-gc-internals",
-      "tags": [
-        ".NET",
-        "Memory Management",
-        "Garbage Collector",
-        "GC"
-      ],
       "tagSlugs": [
         "net",
         "memory-management",
@@ -1014,16 +727,6 @@
       "title": "Writing Open Source Software in .NET - With BenchmarkDotNet, Roslyn Source Generators and MSBuild Multitargeting",
       "date": "2018-12-10",
       "link": "/events/2018-12-10-dotnet-regensburg-open-source",
-      "tags": [
-        "Open Source",
-        ".NET",
-        "Guard Clauses",
-        "Performance",
-        "Roslyn",
-        "Source Generators",
-        "MSBuild",
-        "BenchmarkDotNet"
-      ],
       "tagSlugs": [
         "open-source",
         "net",
@@ -1045,13 +748,6 @@
       "title": "Introduction to git - and Everything Else about Version Control",
       "date": "2018-01-16",
       "link": "/events/2018-01-16-dotnet-regensburg-introduction-to-git",
-      "tags": [
-        "git",
-        "SVN",
-        "Version Control",
-        "VCS",
-        "GitHub"
-      ],
       "tagSlugs": [
         "git",
         "svn",
@@ -1070,12 +766,6 @@
       "title": "Designing ASP.NET Core Applications with Dependency Injection in Mind",
       "date": "2017-09-19",
       "link": "/events/2017-09-19-adc-dependency-injection-aspnetcore",
-      "tags": [
-        ".NET",
-        "Dependency Injection",
-        "DI Container",
-        "ASP.NET Core"
-      ],
       "tagSlugs": [
         "net",
         "dependency-injection",
@@ -1093,13 +783,6 @@
       "title": "Multithreading and async await in ASP.NET Core",
       "date": "2017-09-18",
       "link": "/events/2017-09-18-adc-multithreading-async-await",
-      "tags": [
-        ".NET",
-        "Asynchronous Programming",
-        "async/await",
-        "Threading",
-        "ASP.NET Core"
-      ],
       "tagSlugs": [
         "net",
         "asynchronous-programming",
@@ -1118,13 +801,6 @@
       "title": "Dependency Injection in .NET",
       "date": "2017-06-28",
       "link": "/events/2017-06-28-dotnet-regensburg-dependency-injection",
-      "tags": [
-        ".NET",
-        "Dependency Injection",
-        "Inversion of Control",
-        "IoC",
-        "Design Patterns"
-      ],
       "tagSlugs": [
         "net",
         "dependency-injection",
@@ -1143,13 +819,6 @@
       "title": ".NET Threading in Detail",
       "date": "2017-06-12",
       "link": "/events/2017-06-12-dotnet-ingolstadt-dotnet-threading-in-detail",
-      "tags": [
-        ".NET",
-        "Multithreading",
-        "Asynchronous Programming",
-        "Performance",
-        "async await"
-      ],
       "tagSlugs": [
         "net",
         "multithreading",
@@ -1168,13 +837,6 @@
       "title": ".NET Threading in Detail",
       "date": "2017-03-15",
       "link": "/events/2017-03-15-dotnet-ulm-dotnet-threading-in-detail",
-      "tags": [
-        ".NET",
-        "Multithreading",
-        "Asynchronous Programming",
-        "Performance",
-        "async await"
-      ],
       "tagSlugs": [
         "net",
         "multithreading",
@@ -1193,13 +855,6 @@
       "title": ".NET Threading in Detail",
       "date": "2017-01-30",
       "link": "/events/2017-01-30-dotnet-regensburg-dotnet-threading-in-detail",
-      "tags": [
-        ".NET",
-        "Multithreading",
-        "Asynchronous Programming",
-        "Performance",
-        "async await"
-      ],
       "tagSlugs": [
         "net",
         "multithreading",
@@ -1218,10 +873,6 @@
       "title": "Check Parameters Easily with Light.GuardClauses",
       "date": "2016-05-30",
       "link": "/events/2016-05-30-dotnet-regensburg-light-guardclauses",
-      "tags": [
-        "Guard Clauses",
-        ".NET"
-      ],
       "tagSlugs": [
         "guard-clauses",
         "net"
@@ -1237,10 +888,6 @@
       "title": "Design by Contract",
       "date": "2016-01-25",
       "link": "/events/2016-01-25-dotnet-regensburg-design-by-contract",
-      "tags": [
-        "Design by Contract",
-        ".NET"
-      ],
       "tagSlugs": [
         "design-by-contract",
         "net"
@@ -1256,11 +903,6 @@
       "title": "Automated Testing in TDD with Visual Studio",
       "date": "2015-01-26",
       "link": "/events/2015-01-26-dotnet-regensburg-automated-testing",
-      "tags": [
-        "Test-Driven Development",
-        "Automated Testing",
-        ".NET"
-      ],
       "tagSlugs": [
         "test-driven-development",
         "automated-testing",
@@ -1277,11 +919,6 @@
       "title": "Fast and Fluent UI in WPF",
       "date": "2014-02-24",
       "link": "/events/2014-02-24-dotnet-regensburg-fast-and-fluent-ui-in-wpf",
-      "tags": [
-        "WPF",
-        "UI",
-        ".NET"
-      ],
       "tagSlugs": [
         "wpf",
         "ui",
@@ -1294,19 +931,5 @@
       "country": "Germany",
       "event": ".NET User Group Regensburg"
     }
-  ],
-  "venues": [
-    "Advanced Developers Conference",
-    ".NET User Group Regensburg",
-    "BASTA!",
-    "Digital Craftsmanship Nordoberpfalz",
-    "DWX",
-    "Microsoft Developer User Group Graz",
-    "My Coding Zone",
-    ".NET Day Franken",
-    ".NET Developer Group Ingolstadt",
-    ".NET Developer Group Ulm",
-    "Dotnedder",
-    "Generation AI - Rhein Neckar Kreis und Karlsruhe"
   ]
 }
