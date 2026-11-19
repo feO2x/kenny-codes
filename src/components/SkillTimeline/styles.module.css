@@ -14,8 +14,8 @@
      the card edge on cards too narrow for the maximum (the band right of the text then holds
      exactly the lanes); each lane's label stands to the right of its run. */
   --text-max: 25rem;
-  --inner-lane: 9.2rem;
-  --small-lane: 5.6rem;
+  --inner-lane: 10.4rem;
+  --small-lane: 6.8rem;
   --large-lane: 2.5rem;
   --arm: 4.6rem;
   --arrow-width: 7px;
@@ -24,7 +24,7 @@
   --arrow-gap: 1rem;
   --label-gap: 0.8rem;
   --label-size: 0.8rem;
-  --tail-spread: 22px;
+  --tail-spread: 30px;
   margin: 0;
 }
 
@@ -252,15 +252,15 @@
 /* Phones: a narrower arrow band and tighter cards leave the step text room to breathe. */
 @media (max-width: 600px) {
   .timeline {
-    --inner-lane: 6.1rem;
-    --small-lane: 3.55rem;
+    --inner-lane: 6.75rem;
+    --small-lane: 4.2rem;
     --large-lane: 1.6rem;
     --arm: 2.9rem;
     --arrow-width: 5px;
     --arrow-gap: 0.6rem;
     --label-gap: 0.45rem;
     --label-size: 0.7rem;
-    --tail-spread: 16px;
+    --tail-spread: 22px;
   }
 
   .phase {
