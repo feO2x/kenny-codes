@@ -55,6 +55,7 @@ export function DiagramFrame({
   return (
     <div className={styles.frame}>
       {minWidth ? (
+        <>
         <div
           ref={scrollRef}
           className={clsx(
@@ -67,6 +68,13 @@ export function DiagramFrame({
           {...(overflows ? {role: 'region', 'aria-label': `${label}, scrolls sideways`, tabIndex: 0} : {})}>
           {children}
         </div>
+        {/* Screen readers get the same hint from the region's name. */}
+        {overflows && (
+          <p className={styles.scrollHint} aria-hidden="true">
+            Scroll sideways to see the whole diagram <span>→</span>
+          </p>
+        )}
+        </>
       ) : (
         children
       )}

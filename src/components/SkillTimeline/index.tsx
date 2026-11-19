@@ -31,7 +31,8 @@ type Ends = Record<'small' | 'large', {top: number; bottom: number}>;
 
 /**
  * Measures where the back arrows must start and end, because the step rows wrap differently at
- * every width. Before hydration the arrows run between the phase headings instead.
+ * every width. The arrows appear only once measured; until then the Iterate step says in words
+ * where small and large issues go.
  */
 function useBackArrowEnds(list: React.RefObject<HTMLOListElement | null>): Ends | undefined {
   const [ends, setEnds] = useState<Ends>();
@@ -44,16 +45,20 @@ function useBackArrowEnds(list: React.RefObject<HTMLOListElement | null>): Ends 
       return box ? box.top + box.height / 2 : NaN;
     };
     const measure = () => {
+      // An inactive tab panel has no size; wait until it is shown.
+      if (root.getBoundingClientRect().height === 0) return;
       const iterate = markerY('iterate');
       const next: Partial<Ends> = {};
+      // Each rail spans the grid rows from its target phase down to the Implementing Phase, so
+      // it starts at the target card's top and ends at the Implementing card's bottom.
+      const card = (kind: string) => root.querySelector(`:scope > .${styles[kind]}`)?.getBoundingClientRect();
+      const railBottom = card('implementing')?.bottom ?? NaN;
       for (const [arrow, target, offset] of [
         ['small', 'implementing', -7],
         ['large', 'planning', 7],
       ] as const) {
-        const rail = root.querySelector(`.${arrow === 'small' ? styles.backSmall : styles.backLarge}`);
-        if (!rail) return;
-        const box = rail.getBoundingClientRect();
-        next[arrow] = {top: markerY(target) - box.top, bottom: box.bottom - (iterate + offset)};
+        const railTop = card(target)?.top ?? NaN;
+        next[arrow] = {top: markerY(target) - railTop, bottom: railBottom - (iterate + offset)};
       }
       if ([next.small, next.large].every((end) => end && Number.isFinite(end.top) && Number.isFinite(end.bottom))) {
         setEnds(next as Ends);
@@ -151,8 +156,8 @@ export default function SkillTimeline({
           {phases.map((phase, index) => (
             <PhaseCard key={phase.kind} phase={phase} row={index + 1} />
           ))}
-          {back('implementing', 'small issue', styles.backSmall, ends?.small)}
-          {back('planning', 'large issue', styles.backLarge, ends?.large)}
+          {ends && back('implementing', 'small issue', styles.backSmall, ends.small)}
+          {ends && back('planning', 'large issue', styles.backLarge, ends.large)}
         </ol>
       </figure>
     </DiagramFrame>

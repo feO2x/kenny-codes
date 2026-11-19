@@ -1,6 +1,6 @@
 import React, {type ReactNode} from 'react';
 import clsx from 'clsx';
-import {DiagramFrame, diagram as d, useDiagramId} from '../Diagram';
+import {DiagramFrame, diagram as d, markStyle, useDiagramId} from '../Diagram';
 import styles from './styles.module.css';
 
 const layers = [
@@ -29,7 +29,7 @@ const layers = [
 
 function Shape({kind, viewBox, title, x}: {kind: 'pyramid' | 'diamond'; viewBox: string; title: string; x: number}): ReactNode {
   return (
-    <svg viewBox={viewBox} xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" className={d.svg}>
+    <svg viewBox={viewBox} xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" className={d.svg} style={markStyle('magenta')}>
       {layers.map((layer) => (
         <path key={layer.name} d={layer[kind]} className={clsx(d.gradient, layer.className)} />
       ))}

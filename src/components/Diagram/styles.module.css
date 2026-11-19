@@ -28,6 +28,13 @@
   scrollbar-color: var(--kc-control-line) transparent;
 }
 
+.scrollHint {
+  margin: 0.6rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--kc-muted);
+}
+
 /* Scroll position flags, set by DiagramFrame. */
 .atStart,
 .atEnd {
@@ -113,14 +120,14 @@
   stroke-width: 2;
 }
 
-/* A tile; the element sets its fill to the gradient's url(). In light mode a faint navy edge
-   keeps the pastel ends of the tiles apart from the white card. */
+/* A tile; the element sets its fill to the gradient's url() and `--mark` to its colour. In light
+   mode an edge in that colour's dark shade keeps the pastel tile ends at 3:1 against the card. */
 .gradient {
 }
 
 :global([data-theme='light']) .gradient {
-  stroke: rgba(12, 26, 48, 0.22);
-  stroke-width: 1;
+  stroke: var(--mark, var(--kc-control-line));
+  stroke-width: 1.5;
 }
 
 /* Context that is not part of the model, e.g. frameworks and libraries. */
@@ -181,7 +188,8 @@
 }
 
 .dashed {
-  stroke-dasharray: 5 4;
+  stroke-dasharray: 7 5;
+  stroke-linecap: butt;
 }
 
 /* A check mark on the brand gradient. */

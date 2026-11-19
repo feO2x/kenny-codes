@@ -1,7 +1,7 @@
 export type Method = 'guided-coding' | 'guided-learning';
 export type TimelineVariant = 'manual' | 'plan-and-review';
 
-export interface Step {
+interface Step {
   /** A skill you invoke, or something you do yourself. */
   kind: 'skill' | 'manual';
   title: string;
@@ -72,7 +72,7 @@ const guidedCodingPlanning: Record<TimelineVariant, Phase> = {
       {kind: 'manual', title: 'Further discussion', description: 'Question the draft; revise it with plain prompts.'},
       {kind: 'skill', title: 'guided-coding-review-plan', description: 'Optional second opinion, in a fresh conversation.'},
       {kind: 'manual', title: 'Further discussion', description: '"Would you change anything about the plan?"'},
-      {kind: 'skill', title: 'guided-coding-freeze-plan', description: 'Create any ticket first. Commit the frozen plan afterwards.'},
+      {kind: 'skill', title: 'guided-coding-freeze-plan', description: 'Create any ticket first. Timestamps and freezes the plan; commit it afterwards.'},
     ],
   },
   'plan-and-review': {
@@ -85,7 +85,7 @@ const guidedCodingPlanning: Record<TimelineVariant, Phase> = {
       {kind: 'skill', title: 'guided-coding-plan-and-review', description: 'In the same conversation: writes the draft; fresh reviewers refine it in rounds.'},
       {kind: 'manual', title: 'Read the report and the plan', description: 'Confirm the decision and scope changes it lists.'},
       {kind: 'manual', title: 'Further discussion', description: '"Would you change anything about the plan?"'},
-      {kind: 'skill', title: 'guided-coding-freeze-plan', description: 'Create any ticket first. Commit the frozen plan afterwards.'},
+      {kind: 'skill', title: 'guided-coding-freeze-plan', description: 'Create any ticket first. Timestamps and freezes the plan; commit it afterwards.'},
     ],
   },
 };

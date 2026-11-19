@@ -108,7 +108,7 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
                 width={BOX_W}
                 height={BOX_H}
                 rx="10"
-                {...(on ? {className: d.gradient, fill: tileUrl(id, tile)} : {className: d.box})}
+                {...(on ? {className: d.gradient, fill: tileUrl(id, tile), style: markStyle(tile)} : {className: d.box})}
               />
               <rect x={x + 14} y={BOX_Y + 16} width="32" height="32" rx="9" className={on ? d.badgeOnGradient : d.badge} />
               <text x={x + 30} y={BOX_Y + 38.5} textAnchor="middle" fontSize="18" className={clsx(d.strong, on && d.onGradient)}>
@@ -133,7 +133,7 @@ export default function GuidedCodingDiagram({highlight}: GuidedCodingDiagramProp
             width="92"
             height="42"
             rx="21"
-            {...(highlight ? {className: d.box} : {className: d.gradient, fill: tileUrl(id, 'brand')})}
+            {...(highlight ? {className: d.box} : {className: d.gradient, fill: tileUrl(id, 'brand'), style: markStyle('brand')})}
           />
           <path className={highlight ? d.line : d.check} d={`M 840 ${MID_Y} l 5 5 l 9 -10`} />
           <text x="862" y={MID_Y + 7} fontSize="20" className={clsx(d.strong, !highlight && d.onGradient)}>

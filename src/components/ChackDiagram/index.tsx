@@ -92,7 +92,9 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
   const active = (part: ChackPart) => !highlight || highlight === part;
   /** Tile fill for an active category, a neutral box otherwise. */
   const box = (part: ChackPart) =>
-    active(part) ? {className: d.gradient, fill: tileUrl(prefix, partTile[part])} : {className: d.box};
+    active(part)
+      ? {className: d.gradient, fill: tileUrl(prefix, partTile[part]), style: markStyle(partTile[part])}
+      : {className: d.box};
   const onBox = (part: ChackPart) => (active(part) ? d.onGradient : undefined);
   /** Connectors between `parts` take the highlighted category's colour. */
   const tone = (...parts: ChackPart[]): Tile | 'muted' =>
@@ -183,17 +185,21 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
         <line x1="808" y1="311" x2="732" y2="311" className={d.line} style={unitRef.style} markerEnd={unitRef.ref} />
         <line x1="852" y1="350" x2="852" y2="380" className={d.line} style={doubleRef.style} markerEnd={doubleRef.ref} />
         {/* Integration and E2E tests share references to the same collaborators. */}
+        {/* Dots mark where two connectors join; a gap marks where one only crosses another. */}
         <g style={broadToHumble.style}>
           <path d="M 924 272 V 200" className={d.line} />
           <path d="M 1000 272 V 200 H 280 V 288" className={d.line} markerEnd={broadToHumble.ref} />
+          <circle cx="924" cy="200" r="4.5" className={d.head} />
         </g>
         <g style={broadToThirdParty.style}>
-          <path d="M 948 272 V 30" className={d.line} />
+          <path d="M 948 272 V 209 M 948 191 V 30" className={d.line} />
           <path d="M 1032 272 V 30 H 68 V 196" className={d.line} markerEnd={broadToThirdParty.ref} />
+          <circle cx="948" cy="30" r="4.5" className={d.head} />
         </g>
         <g style={broadToRoot.style}>
           <path d="M 924 458 V 519" className={d.line} />
           <path d="M 1016 458 V 519 H 732" className={d.line} markerEnd={broadToRoot.ref} />
+          <circle cx="924" cy="519" r="4.5" className={d.head} />
         </g>
         <line x1="645" y1="488" x2="645" y2="390" className={d.line} style={rootToCore.style} markerEnd={rootToCore.ref} />
         <path d="M 540 519 H 280 V 368" className={d.line} style={rootToHumble.style} markerEnd={rootToHumble.ref} />
