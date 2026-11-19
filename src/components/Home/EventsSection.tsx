@@ -2,7 +2,9 @@ import React, {type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 import homeData from '@site/src/data/home-data.json';
 import EventRow from '../EventRow';
+import SpeakingRecord from '../SpeakingRecord';
 import {useToday} from '@site/src/utils/dateFormatting';
+import {deliveredSessions} from '@site/src/utils/eventUtils';
 import styles from './Home.module.css';
 
 interface HomeEvent {
@@ -25,9 +27,16 @@ const topics = [
   '.NET framework internals: ASP.NET Core, DI containers, ORMs, and serializers',
 ];
 
+function joinList(items: string[]): string {
+  if (items.length <= 1) return items.join('');
+  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+}
+
 export default function EventsSection(): ReactNode {
   const events = homeData.events as HomeEvent[];
   const today = useToday();
+  const delivered = deliveredSessions(events, today);
+  const firstYear = events[events.length - 1]?.date.slice(0, 4);
 
   // Nearest upcoming sessions first (cancelled ones included so visitors learn about the
   // change), then the most recent delivered sessions fill the remaining rows.
@@ -82,6 +91,22 @@ export default function EventsSection(): ReactNode {
               />
             ))}
           </div>
+        </div>
+
+        {/* The record backs up the section: what I speak about first, then how often. */}
+        <div className={styles.record}>
+          <div className={styles.recordIntro}>
+            <h3 className={styles.recordTitle}>
+              {delivered.length} talks, workshops, and webinars since {firstYear}
+            </h3>
+            <p className={styles.recordText}>
+              Regular speaker at {joinList(homeData.venues.slice(0, 5))}.
+            </p>
+            <Link to="/events" className={styles.textLink}>
+              Browse all events
+            </Link>
+          </div>
+          <SpeakingRecord events={events} interactive={false} className={styles.recordChart} />
         </div>
       </div>
     </section>

@@ -11,7 +11,7 @@
   align-items: center;
 }
 
-/* The name is sized against its own column (cqi), so it stays on one line at every width. */
+/* The greeting is sized against its own column (cqi), so it stays on one line at every width. */
 .heroText {
   container-type: inline-size;
   min-width: 0;
@@ -43,6 +43,11 @@
   margin: 0 0 2.25rem;
 }
 
+.heroFullName {
+  font-weight: 600;
+  color: var(--kc-ink);
+}
+
 .heroRole a {
   color: var(--kc-ink);
   font-weight: 600;
@@ -65,7 +70,19 @@
 
 .heroActions :global(.button--lg) {
   font-size: 1rem;
-  padding: 0.75rem 1.4rem;
+  padding: 0.75rem 1.3rem;
+}
+
+.ctaIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.ctaIcon svg {
+  flex: none;
+  font-size: 1.1rem;
 }
 
 /* The recording sits right under the main actions, where organizers decide. */
@@ -278,8 +295,11 @@
 }
 
 .methods {
+  /* Titles size against the card grid (cqi), not the card: containment on the card would
+     turn off its subgrid. */
+  container-type: inline-size;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
 }
 
@@ -374,44 +394,150 @@
   color: var(--kc-muted);
 }
 
-.chack {
-  display: grid;
-  gap: 0.55rem;
+.stages {
   list-style: none;
   margin: 0 0 2.25rem;
   padding: 0;
 }
 
-.chackItem {
+.stage {
   display: grid;
-  grid-template-columns: 2.5rem minmax(0, 1fr);
-  align-items: baseline;
+  /* Same 2rem marker column as the Guided Coding steps, so the text lines up across cards. */
+  grid-template-columns: 2rem minmax(0, 1fr);
   column-gap: 0.9rem;
   margin: 0;
+  padding-bottom: 1.1rem;
 }
 
-.chackLetter {
-  font-size: 2rem;
-  font-weight: 800;
-  font-stretch: 125%;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: var(--kc-ink);
+.stage:last-child {
+  padding-bottom: 0;
 }
 
-.chackItem:last-child .chackLetter {
-  color: transparent;
-  -webkit-text-stroke: 1.5px var(--kc-muted);
+/* Three squares per stage, filled up to the level: the speaking record's square, as a meter. */
+.meter {
+  grid-row: span 2;
+  display: flex;
+  gap: 2.5px;
+  height: 2rem;
+  align-items: center;
 }
 
-.chackWord {
-  font-size: 1rem;
+.meter > span {
+  box-sizing: border-box;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--kc-control-line);
+  border-radius: 2.5px;
+}
+
+.meter > .meterOn {
+  border-color: transparent;
+  background: var(--kc-ramp-from);
+}
+
+.meter > .meterOn:nth-child(2) {
+  background: color-mix(in oklab, var(--kc-ramp-to) 50%, var(--kc-ramp-from));
+}
+
+.meter > .meterOn:nth-child(3) {
+  background: var(--kc-ramp-to);
+}
+
+.stageName {
+  font-weight: 700;
+  font-stretch: 110%;
+  line-height: 2rem;
+}
+
+.stageMode {
   font-weight: 600;
   color: var(--kc-ink);
 }
 
-.chackItem:last-child .chackWord {
-  font-weight: 500;
+/* CHACK in miniature: the dashed box is the process boundary, Humble Objects straddle it. */
+.chackMap {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 0.75rem;
+  margin: 1.35rem 0 2.25rem;
+  padding: 0 1rem 1.5rem;
+  border: 1.5px dashed var(--kc-control-line);
+  border-radius: var(--kc-radius);
+}
+
+.chackBox {
+  display: grid;
+  place-items: center;
+  min-height: 2.6rem;
+  padding: 0.45rem 0.6rem;
+  border: 1.5px solid var(--kc-control-line);
+  border-radius: var(--kc-radius);
+  background: var(--kc-bg);
+  font-size: 0.875rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--kc-ink);
+}
+
+.chackHumble {
+  grid-column: 1 / -1;
+  justify-self: center;
+  min-width: 62%;
+  margin-top: -1.35rem;
+}
+
+.chackCore {
+  grid-column: 1 / -1;
+  min-height: 4.25rem;
+  border-color: transparent;
+  background: var(--kc-gradient);
+  color: #0c1a30;
+  font-size: 1.05rem;
+  font-weight: 750;
+  font-stretch: 112%;
+}
+
+.chackCore small {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 550;
+  font-stretch: 100%;
+  color: #12305a;
+}
+
+.chackDown,
+.chackUp {
+  display: grid;
+  place-items: center;
+  height: 1.75rem;
+  color: var(--kc-muted);
+}
+
+.chackDown {
+  grid-column: 1 / -1;
+}
+
+.chackArrow {
+  width: 12px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chackBoundary {
+  position: absolute;
+  right: 0.9rem;
+  bottom: 0;
+  translate: 0 50%;
+  padding: 0 0.4rem;
+  background: var(--kc-bg);
+  font-size: 0.75rem;
+  line-height: 1.2;
   color: var(--kc-muted);
 }
 
@@ -524,8 +650,71 @@
     position: static;
   }
 
+  /* Stacked, two sessions are enough, so the record follows sooner. Child 1 is the caption. */
+  .splitList > :nth-child(n + 4) {
+    display: none;
+  }
+
+  .record {
+    row-gap: 1.25rem;
+    margin-top: 2rem;
+  }
+}
+
+/* Three columns: title, text, visual, and link share rows across the cards. */
+@media (min-width: 1100px) {
+  .methods {
+    grid-template-rows: auto auto auto 1fr;
+  }
+
+  .method {
+    display: grid;
+    grid-row: span 4;
+    grid-template-rows: subgrid;
+    row-gap: 0;
+  }
+
+  /* "Guided Learning" stays on one line in a third of the grid. */
+  .methodName {
+    font-size: min(clamp(1.6rem, 1.3rem + 1vw, 2.1rem), 2.8cqi);
+  }
+
+  .methodLink {
+    align-self: end;
+  }
+}
+
+/* Three cards need room; below that, each card lays its visual beside the text. */
+@media (max-width: 1099px) {
   .methods {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .method {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "name visual"
+      "text visual"
+      "link visual";
+    column-gap: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .methodName { grid-area: name; }
+  .methodText { grid-area: text; }
+  .methodLink { grid-area: link; align-self: start; margin-top: 0; }
+
+  .methodVisual {
+    grid-area: visual;
+    align-self: center;
+    margin-bottom: 0;
+  }
+
+  .methodVisual > .chackMap {
+    margin-bottom: 0.75rem;
   }
 }
 
@@ -564,17 +753,29 @@
   }
 }
 
-@media (max-width: 640px) {
-
+/* Once the two buttons no longer fit on one row, both go full width instead of stacking raggedly. */
+@media (max-width: 840px) {
   .heroActions :global(.button) {
     flex: 1 1 auto;
   }
-
 }
 
 @media (forced-colors: active) {
+  .meter > .meterOn:nth-child(n),
+  .phase:not(:last-child)::after,
   .topics li::before {
     forced-color-adjust: none;
     background: CanvasText;
+  }
+
+  .phase::before {
+    outline: 1.5px solid CanvasText;
+  }
+
+  .chackCore,
+  .chackCore small {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
   }
 }

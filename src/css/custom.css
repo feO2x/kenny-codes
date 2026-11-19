@@ -11,6 +11,9 @@
   --kc-mint: #33ffdc;
   --kc-blue: #3393ff;
   --kc-gradient: linear-gradient(135deg, var(--kc-mint) 0%, var(--kc-blue) 100%);
+  /* Blue-to-mint ramp for small marks (record squares, stage meter), darkened for light mode. */
+  --kc-ramp-from: #0066d6;
+  --kc-ramp-to: #008f7a;
 
   /* Surfaces and text (light theme) */
   --kc-bg: #f5f8fc;
@@ -92,6 +95,8 @@
 }
 
 [data-theme='dark'] {
+  --kc-ramp-from: var(--kc-blue);
+  --kc-ramp-to: var(--kc-mint);
   --kc-bg: #0b1424;
   --kc-surface: #0f1b30;
   --kc-surface-raised: #15233d;
