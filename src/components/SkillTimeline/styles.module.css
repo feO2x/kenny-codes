@@ -9,9 +9,11 @@
   --step-gap: 0.7rem;
   /* Centre of a step's title line. */
   --marker-y: 0.75rem;
-  /* Brackets and arrows run in three lanes at the right edge of the middle cards, measured from
-     the card edge; each lane's label stands to the right of its run. All of them start and end
-     --arm before the inner lane, so every timeline has the same proportions. */
+  /* The step text stops at --text-max, so the arrows stay close to it on wide cards. Brackets
+     and arrows start and end just after it and run in three lanes, given here as distances from
+     the card edge on cards too narrow for the maximum (the band right of the text then holds
+     exactly the lanes); each lane's label stands to the right of its run. */
+  --text-max: 28rem;
   --inner-lane: 9.2rem;
   --small-lane: 5.6rem;
   --large-lane: 2.5rem;
@@ -113,6 +115,7 @@
 
 /* Steps: marker | text | optional bracket column. */
 .steps {
+  max-width: var(--text-max);
   display: grid;
   grid-template-columns: 1.25rem minmax(0, 1fr);
   column-gap: 0.65rem;
