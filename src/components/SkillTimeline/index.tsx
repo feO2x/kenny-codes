@@ -6,9 +6,9 @@ import styles from './styles.module.css';
 
 /**
  * Every bracket and arrow in the timeline follows one design: it starts and ends on one shared
- * column just after the text, runs vertically in its own lane in the text-free band at the
- * cards' right edge, and carries an upright label to the right of that run. The lanes, from the
- * text outwards: brackets inside a card, then "small issue", then "large issue".
+ * column a fixed distance from the card edge, runs vertically in its own lane in the text-free
+ * band at the cards' right edge, and carries an upright label to the right of that run. The
+ * lanes, from the text outwards: brackets inside a card, then "small issue", then "large issue".
  */
 type Lane = 'inner' | 'small' | 'large';
 
@@ -96,24 +96,12 @@ function useDrawing(list: React.RefObject<HTMLOListElement | null>, marks: Mark[
         const box = step(anchor)?.querySelector(`.${styles.marker}`)?.getBoundingClientRect();
         return box ? box.top + box.height / 2 - origin.top : NaN;
       };
-      /** Where the step's text lines end. */
-      const textRight = (anchor: string) => {
-        const lines = [...(step(anchor)?.querySelectorAll(`.${styles.stepTitle}, .${styles.stepText}`) ?? [])].flatMap(
-          (element) => {
-            const range = document.createRange();
-            range.selectNodeContents(element);
-            return [...range.getClientRects()];
-          },
-        );
-        return lines.length ? Math.max(...lines.map((r) => r.right)) - origin.left : NaN;
-      };
       const card = root.querySelector(`:scope > .${styles.planning}`);
       if (!card) return;
       const cardRight = card.getBoundingClientRect().right - origin.left;
       const length = (property: string) => lengthOf(root, property);
       const stroke = length('--arrow-width');
       const headLength = stroke * 3.2;
-      const gap = length('--arrow-gap');
       const labelGap = length('--label-gap');
       const labelSize = length('--label-size');
       const spread = length('--tail-spread');
@@ -123,21 +111,9 @@ function useDrawing(list: React.RefObject<HTMLOListElement | null>, marks: Mark[
         large: cardRight - length('--large-lane'),
       };
 
-      // One shared column for every end: just after the longest text line any mark touches,
-      // but never so close to the inner lane that an arrow loses its arm.
-      const touched = new Set<string>();
-      for (const mark of marks) {
-        touched.add(mark.top).add(mark.bottom);
-        if (mark.lane !== 'inner') continue;
-        const phase = mark.top.slice(0, mark.top.lastIndexOf('-')) as Phase['kind'];
-        const from = Number(mark.top.split('-').pop());
-        const to = Number(mark.bottom.split('-').pop());
-        for (let i = from; i <= to; i += 1) touched.add(stepAnchor(phase, i));
-      }
-      const column = Math.min(
-        Math.max(...[...touched].map(textRight)) + gap,
-        lane.inner - stroke * 3.5 - headLength - gap,
-      );
+      // One shared column for every end, a fixed arm's length before the inner lane, so every
+      // timeline has the same proportions. The cards' padding keeps their text left of it.
+      const column = lane.inner - length('--arm');
 
       const drawn: DrawnMark[] = marks.map((mark) => {
         const x = lane[mark.lane];

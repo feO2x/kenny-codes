@@ -10,13 +10,12 @@
   /* Centre of a step's title line. */
   --marker-y: 0.75rem;
   /* Brackets and arrows run in three lanes at the right edge of the middle cards, measured from
-     the card edge; each lane's label stands to the right of its run. The band (--reserve plus
-     the card padding) stays free of text. */
+     the card edge; each lane's label stands to the right of its run. All of them start and end
+     --arm before the inner lane, so every timeline has the same proportions. */
   --inner-lane: 9.2rem;
   --small-lane: 5.6rem;
   --large-lane: 2.5rem;
-  /* Room for the inner lane, the shortest arrow arm and head, and the gap to the text. */
-  --reserve: 12.8rem;
+  --arm: 4.6rem;
   --arrow-width: 7px;
   /* Space between the marks' ends and the text, between a run and its label, and between the
      two tails leaving the Iterate step. */
@@ -49,17 +48,19 @@
   background: var(--kc-bg);
 }
 
+/* The band right of the text: the inner lane, the arm, and a gap before the text. */
 .planning,
 .implementing,
 .guiding {
-  padding-right: calc(var(--pad) + var(--reserve));
+  --band: calc(var(--inner-lane) + var(--arm) + var(--arrow-gap));
+  padding-right: var(--band);
 }
 
 /* Headings only cross the two outer lanes, so they may run into the band up to the small lane. */
 .planning .phaseHead,
 .implementing .phaseHead,
 .guiding .phaseHead {
-  margin-right: calc(-1 * (var(--reserve) - var(--small-lane) - 0.75rem));
+  margin-right: calc(-1 * (var(--band) - var(--small-lane) - 0.75rem));
 }
 
 .planning { --phase: var(--kc-mark-blue); --tile: var(--kc-tile-blue); }
@@ -245,7 +246,7 @@
     --inner-lane: 6.1rem;
     --small-lane: 3.55rem;
     --large-lane: 1.6rem;
-    --reserve: 8.1rem;
+    --arm: 2.9rem;
     --arrow-width: 5px;
     --arrow-gap: 0.6rem;
     --label-gap: 0.45rem;
