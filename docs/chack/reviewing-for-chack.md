@@ -1,6 +1,7 @@
 ---
 sidebar_position: 9
 title: Reviewing for CHACK
+image: /img/social-cards/docs-chack-reviewing-for-chack.jpg
 ---
 
 # Reviewing for CHACK

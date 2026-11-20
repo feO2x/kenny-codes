@@ -1,6 +1,6 @@
 .diagram {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 8.5rem minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 11rem minmax(0, 1fr);
   grid-template-areas:
     "left-title tension right-title"
     "left-list . right-list";
@@ -19,8 +19,8 @@
   align-self: stretch;
   display: grid;
   place-items: center;
-  margin: 0 0 1.5rem;
-  padding: 0.7rem 1rem;
+  margin: 0 0 2rem;
+  padding: 0.85rem 1.25rem;
   border: 1.5px solid var(--kc-control-line);
   border-radius: var(--kc-radius);
   background: var(--kc-bg);
@@ -38,10 +38,14 @@
 .bullets li {
   position: relative;
   text-wrap: pretty;
-  margin: 0 0 0.6rem;
-  padding-left: 1.3rem;
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
   font-size: 0.925rem;
-  line-height: 1.5;
+  line-height: 1.55;
+}
+
+.bullets li:last-child {
+  margin-bottom: 0;
 }
 
 /* The home page's gradient square as the bullet. */
@@ -63,14 +67,14 @@
   place-items: center;
   align-self: center;
   height: 3.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .arrow {
   position: absolute;
   top: 50%;
-  left: 0.4rem;
-  right: 0.4rem;
+  left: 1.25rem;
+  right: 1.25rem;
   height: 2px;
   translate: 0 -50%;
   background: var(--kc-mark-amber);
@@ -131,7 +135,7 @@
 }
 
 /* Stacked when the card is narrow: the arrow turns vertical between the two extremes. */
-@container (max-width: 36rem) {
+@container (max-width: 40rem) {
   .diagram {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
@@ -143,8 +147,8 @@
   }
 
   .tension {
-    height: 5.5rem;
-    margin: 0.25rem 0 1.25rem;
+    height: 6.5rem;
+    margin: 0.75rem 0 1.75rem;
   }
 
   .arrow {

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 4
 title: Testing in .NET
+image: /img/social-cards/docs-chack-dotnet-testing.jpg
 ---
 
 # Testing in .NET

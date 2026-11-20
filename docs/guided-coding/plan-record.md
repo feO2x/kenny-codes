@@ -1,6 +1,7 @@
 ---
 sidebar_position: 7
 title: The Plan Record
+image: /img/social-cards/docs-guided-coding-plan-record.jpg
 ---
 
 # The Plan Record

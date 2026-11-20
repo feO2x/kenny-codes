@@ -1,6 +1,7 @@
 ---
 sidebar_position: 1
 title: CHACK in .NET
+image: /img/social-cards/docs-chack-dotnet.jpg
 ---
 
 # CHACK in .NET

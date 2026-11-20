@@ -1,6 +1,7 @@
 ---
 sidebar_position: 12
 title: "Security: Be Vigilant"
+image: /img/social-cards/docs-guided-coding-security.jpg
 ---
 
 # Security: Be Vigilant

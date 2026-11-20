@@ -1,6 +1,7 @@
 ---
 sidebar_position: 13
 title: Communication Is the New Superpower
+image: /img/social-cards/docs-guided-coding-communication.jpg
 ---
 
 # Communication Is the New Superpower

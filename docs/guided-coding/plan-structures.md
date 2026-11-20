@@ -1,6 +1,7 @@
 ---
 sidebar_position: 8
 title: Plan Structures
+image: /img/social-cards/docs-guided-coding-plan-structures.jpg
 ---
 
 # Plan Structures

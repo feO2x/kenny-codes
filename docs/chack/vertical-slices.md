@@ -1,6 +1,7 @@
 ---
 sidebar_position: 8
 title: Vertical Slices
+image: /img/social-cards/docs-chack-vertical-slices.jpg
 ---
 
 # Organizing Code with Vertical Slices

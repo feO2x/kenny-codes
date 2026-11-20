@@ -1,6 +1,7 @@
 ---
 sidebar_position: 5
 title: The Composition Root in .NET
+image: /img/social-cards/docs-chack-dotnet-composition-root.jpg
 ---
 
 # The Composition Root in .NET

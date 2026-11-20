@@ -42,7 +42,7 @@ const partTile: Record<ChackPart, Tile> = {
 };
 
 /** A label centred on (x, y), one tspan per line. */
-function Label({x, y, lines, size = 18, className}: {x: number; y: number; lines: string[]; size?: number; className?: string}): ReactNode {
+function Label({x, y, lines, size = 20, className}: {x: number; y: number; lines: string[]; size?: number; className?: string}): ReactNode {
   const lineHeight = size * 1.2;
   const top = y - ((lines.length - 1) * lineHeight) / 2 + size * 0.36;
   return (
@@ -131,16 +131,16 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
 
   return (
     <DiagramFrame
-      minWidth={680}
+      minWidth={700}
       label="CHACK diagram"
       caption="All four categories may depend on the frameworks and libraries. Those arrows are left out to keep the number of arrows manageable.">
       <svg
-        viewBox="0 0 1086 580"
+        viewBox="0 0 1192 660"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby={titleId}
         className={d.svg}
-        style={{maxWidth: 1086, '--line-width': 2.25} as CSSProperties}>
+        style={{maxWidth: 1192, '--line-width': 2.25} as CSSProperties}>
         <title id={titleId}>{descriptions[highlight ?? 'default']}</title>
 
         <defs>
@@ -152,127 +152,127 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
 
         {/* Process boundary - integration tests sit over its right edge; unit tests stay
             inside, while E2E tests drive the system under test from another process. */}
-        <rect x="250" y="58" width="686" height="512" rx="14" className={d.boundary} />
-        <rect x="503" y="44" width="180" height="28" rx="14" className={d.chip} />
-        <text x="593" y="64.5" textAnchor="middle" fontSize="18" className={clsx(d.muted, d.semibold)}>
+        <rect x="270" y="70" width="776" height="576" rx="14" className={d.boundary} />
+        <rect x="568" y="56" width="180" height="28" rx="14" className={d.chip} />
+        <text x="658" y="76.5" textAnchor="middle" fontSize="20" className={clsx(d.muted, d.semibold)}>
           Process boundary
         </text>
 
         {/* Frameworks and libraries */}
-        <rect x="268" y="94" width="650" height="94" rx="10" className={d.quiet} />
-        <text x="593" y="123" textAnchor="middle" fontSize="19" className={d.strong}>
+        <rect x="290" y="112" width="736" height="98" rx="10" className={d.quiet} />
+        <text x="658" y="140" textAnchor="middle" fontSize="21" className={d.strong}>
           Frameworks &amp; Libraries
         </text>
-        <text x="593" y="150" textAnchor="middle" fontSize="18" className={d.muted}>
+        <text x="658" y="168" textAnchor="middle" fontSize="20" className={d.muted}>
           Base Class Library, HTTP Server Frameworks, Data Access,
         </text>
-        <text x="593" y="173" textAnchor="middle" fontSize="18" className={d.muted}>
+        <text x="658" y="193" textAnchor="middle" fontSize="20" className={d.muted}>
           Validation Frameworks, Test Frameworks, …
         </text>
 
         {/* Third-party systems */}
-        <rect x="4" y="198" width="128" height="244" rx="10" className={d.box} />
-        <Label x={68} y={228} lines={['Third-Party', 'Systems']} />
+        <rect x="4" y="244" width="136" height="250" rx="10" className={d.box} />
+        <Label x={72} y={274} lines={['Third-Party', 'Systems']} />
         {['Databases', 'Web Services', 'Message Brokers'].map((name, index) => (
           <g key={name}>
-            <rect x="12" y={260 + index * 58} width="112" height="50" rx="8" className={d.inner} />
-            <Label x={68} y={285 + index * 58} lines={name === 'Databases' ? [name] : name.split(' ')} className={d.regular} />
+            <rect x="14" y={306 + index * 60} width="116" height="50" rx="8" className={d.inner} />
+            <Label x={72} y={331 + index * 60} lines={name === 'Databases' ? [name] : name.split(' ')} className={d.regular} />
           </g>
         ))}
 
         {/* Runtime I/O between third-party systems and humble objects */}
-        <line x1="134" y1="328" x2="181" y2="328" className={d.line} style={hoIo.style} markerEnd={hoIo.io} markerStart={hoIo.ioStart} />
+        <line x1="142" y1="375" x2="196" y2="375" className={d.line} style={hoIo.style} markerEnd={hoIo.io} markerStart={hoIo.ioStart} />
 
         {/* Implements / derives from */}
-        <line x1="315" y1="328" x2="356" y2="328" className={clsx(d.line, d.dashed)} style={hoImpl.style} markerEnd={hoImpl.impl} />
-        <path d="M 808 420 H 429 V 358" className={clsx(d.line, d.dashed)} style={tdImpl.style} markerEnd={tdImpl.impl} />
+        <line x1="340" y1="375" x2="402" y2="375" className={clsx(d.line, d.dashed)} style={hoImpl.style} markerEnd={hoImpl.impl} />
+        <path d="M 900 476 H 479 V 405" className={clsx(d.line, d.dashed)} style={tdImpl.style} markerEnd={tdImpl.impl} />
 
         {/* References */}
-        <line x1="540" y1="328" x2="502" y2="328" className={d.line} style={coreRef.style} markerEnd={coreRef.ref} />
-        <line x1="808" y1="311" x2="732" y2="311" className={d.line} style={unitRef.style} markerEnd={unitRef.ref} />
-        <line x1="852" y1="350" x2="852" y2="380" className={d.line} style={doubleRef.style} markerEnd={doubleRef.ref} />
+        <line x1="610" y1="375" x2="556" y2="375" className={d.line} style={coreRef.style} markerEnd={coreRef.ref} />
+        <line x1="900" y1="357" x2="822" y2="357" className={d.line} style={unitRef.style} markerEnd={unitRef.ref} />
+        <line x1="948" y1="396" x2="948" y2="436" className={d.line} style={doubleRef.style} markerEnd={doubleRef.ref} />
         {/* Integration and E2E tests share references to the same collaborators. */}
         {/* Dots mark where two connectors join; a gap marks where one only crosses another. */}
         <g style={broadToHumble.style}>
-          <path d="M 924 272 V 200" className={d.line} />
-          <path d="M 1000 272 V 200 H 280 V 288" className={d.line} markerEnd={broadToHumble.ref} />
-          <circle cx="924" cy="200" r="4.5" className={d.head} />
+          <path d="M 1034 318 V 232" className={d.line} />
+          <path d="M 1116 318 V 232 H 300 V 335" className={d.line} markerEnd={broadToHumble.ref} />
+          <circle cx="1034" cy="232" r="4.5" className={d.head} />
         </g>
         <g style={broadToThirdParty.style}>
-          <path d="M 948 272 V 209 M 948 191 V 30" className={d.line} />
-          <path d="M 1032 272 V 30 H 68 V 196" className={d.line} markerEnd={broadToThirdParty.ref} />
-          <circle cx="948" cy="30" r="4.5" className={d.head} />
+          <path d="M 1058 318 V 241 M 1058 223 V 30" className={d.line} />
+          <path d="M 1152 318 V 30 H 72 V 242" className={d.line} markerEnd={broadToThirdParty.ref} />
+          <circle cx="1058" cy="30" r="4.5" className={d.head} />
         </g>
         <g style={broadToRoot.style}>
-          <path d="M 924 458 V 519" className={d.line} />
-          <path d="M 1016 458 V 519 H 732" className={d.line} markerEnd={broadToRoot.ref} />
-          <circle cx="924" cy="519" r="4.5" className={d.head} />
+          <path d="M 1034 514 V 591" className={d.line} />
+          <path d="M 1134 514 V 591 H 822" className={d.line} markerEnd={broadToRoot.ref} />
+          <circle cx="1034" cy="591" r="4.5" className={d.head} />
         </g>
-        <line x1="645" y1="488" x2="645" y2="390" className={d.line} style={rootToCore.style} markerEnd={rootToCore.ref} />
-        <path d="M 540 519 H 280 V 368" className={d.line} style={rootToHumble.style} markerEnd={rootToHumble.ref} />
+        <line x1="715" y1="560" x2="715" y2="442" className={d.line} style={rootToCore.style} markerEnd={rootToCore.ref} />
+        <path d="M 610 591 H 300 V 415" className={d.line} style={rootToHumble.style} markerEnd={rootToHumble.ref} />
 
         {/* Humble objects, on the process boundary */}
-        <rect x="185" y="290" width="130" height="76" rx="10" {...box('humble-objects')} />
-        <Label x={250} y={328} lines={['Humble', 'Objects']} className={onBox('humble-objects')} />
+        <rect x="200" y="337" width="140" height="76" rx="10" {...box('humble-objects')} />
+        <Label x={270} y={375} lines={['Humble', 'Objects']} className={onBox('humble-objects')} />
 
         {/* I/O abstractions belong to the Core: a tint with the Core's gradient outline. */}
         <rect
-          x="358"
-          y="300"
-          width="142"
+          x="404"
+          y="347"
+          width="150"
           height="56"
           rx="10"
           {...(active('core') ? {className: d.soft, stroke: tileUrl(prefix, 'brandLine')} : {className: d.box})}
         />
-        <Label x={429} y={328} lines={['I/O', 'Abstractions']} />
+        <Label x={479} y={375} lines={['I/O', 'Abstractions']} />
 
         {/* Core */}
-        <rect x="540" y="268" width="190" height="120" rx="12" {...box('core')} />
-        <Label x={635} y={328} lines={['Core']} size={26} className={onBox('core')} />
+        <rect x="610" y="310" width="210" height="130" rx="12" {...box('core')} />
+        <Label x={715} y={375} lines={['Core']} size={28} className={onBox('core')} />
 
         {/* Automated tests - the group straddles the process boundary */}
         <g style={active('automated-tests') ? markStyle('magenta') : undefined}>
-          <rect x="790" y="254" width="290" height="226" rx="14" className={d.group} />
-          {/* Above the group, left of the integration test connectors at x=924. */}
-          <text x="792" y="226" fontSize="18" className={clsx(active('automated-tests') && d.markText, highlight === 'automated-tests' && d.markActive, d.strong)}>
-            <tspan x="792">Automated</tspan>
-            <tspan x="792" dy="21">
+          <rect x="880" y="306" width="306" height="226" rx="14" className={d.group} />
+          {/* Above the group, left of the integration test connectors at x=1034. */}
+          <text x="882" y="262" fontSize="20" className={clsx(active('automated-tests') && d.markText, highlight === 'automated-tests' && d.markActive, d.strong)}>
+            <tspan x="882">Automated</tspan>
+            <tspan x="882" dy="23">
               Tests
             </tspan>
           </text>
-          <rect x="808" y="272" width="88" height="78" rx="10" {...box('automated-tests')} />
-          <Label x={852} y={311} lines={['Unit', 'Tests']} className={onBox('automated-tests')} />
+          <rect x="900" y="318" width="96" height="78" rx="10" {...box('automated-tests')} />
+          <Label x={948} y={357} lines={['Unit', 'Tests']} className={onBox('automated-tests')} />
           {/* Test doubles implement the Core's abstractions: a lighter tint of the tests' colour. */}
-          <rect x="808" y="382" width="88" height="76" rx="10" className={active('automated-tests') ? d.tint : d.box} />
-          <Label x={852} y={420} lines={['Test', 'Doubles']} />
-          <rect x="912" y="272" width="48" height="186" rx="10" {...box('automated-tests')} />
-          <text transform="translate(936 365) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="18" className={clsx(d.strong, onBox('automated-tests'))}>
+          <rect x="900" y="438" width="96" height="76" rx="10" className={active('automated-tests') ? d.tint : d.box} />
+          <Label x={948} y={476} lines={['Test', 'Doubles']} />
+          <rect x="1020" y="318" width="52" height="196" rx="10" {...box('automated-tests')} />
+          <text transform="translate(1046 416) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="20" className={clsx(d.strong, onBox('automated-tests'))}>
             Integration Tests
           </text>
-          <rect x="984" y="272" width="64" height="186" rx="10" {...box('automated-tests')} />
-          <text transform="translate(1016 365) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="18" className={clsx(d.strong, onBox('automated-tests'))}>
+          <rect x="1100" y="318" width="68" height="196" rx="10" {...box('automated-tests')} />
+          <text transform="translate(1134 416) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="20" className={clsx(d.strong, onBox('automated-tests'))}>
             E2E Tests
           </text>
         </g>
 
         {/* Composition root */}
-        <rect x="540" y="488" width="190" height="62" rx="10" {...box('composition-root')} />
-        <Label x={635} y={519} lines={['Composition Root']} className={onBox('composition-root')} />
+        <rect x="610" y="560" width="210" height="62" rx="10" {...box('composition-root')} />
+        <Label x={715} y={591} lines={['Composition Root']} className={onBox('composition-root')} />
 
         {/* Legend */}
-        <line x1="8" y1="476" x2="56" y2="476" className={d.line} markerEnd={legend.ref} />
-        <text x="66" y="482" fontSize="18" className={d.muted}>
+        <line x1="8" y1="540" x2="56" y2="540" className={d.line} markerEnd={legend.ref} />
+        <text x="66" y="546" fontSize="20" className={d.muted}>
           references
         </text>
-        <line x1="8" y1="506" x2="56" y2="506" className={clsx(d.line, d.dashed)} markerEnd={legend.impl} />
-        <text x="66" y="512" fontSize="18" className={d.muted}>
+        <line x1="8" y1="574" x2="56" y2="574" className={clsx(d.line, d.dashed)} markerEnd={legend.impl} />
+        <text x="66" y="580" fontSize="20" className={d.muted}>
           <tspan x="66">implements /</tspan>
-          <tspan x="66" dy="21">
+          <tspan x="66" dy="23">
             derives from
           </tspan>
         </text>
-        <line x1="8" y1="560" x2="56" y2="560" className={d.line} markerEnd={legend.io} markerStart={legend.ioStart} />
-        <text x="66" y="566" fontSize="18" className={d.muted}>
+        <line x1="8" y1="632" x2="56" y2="632" className={d.line} markerEnd={legend.io} markerStart={legend.ioStart} />
+        <text x="66" y="638" fontSize="20" className={d.muted}>
           I/O call at runtime
         </text>
       </svg>

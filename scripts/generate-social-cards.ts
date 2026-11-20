@@ -3,25 +3,40 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { DEFAULT_PARSE_FRONT_MATTER, isDraft, parseMarkdownFile } from "@docusaurus/utils";
 import React from "react";
 import satori from "satori";
 import sharp from "sharp";
 
 import {
-  SocialCardTemplate,
-  type SocialCardTemplateModel,
+  CARD_HEIGHT,
+  CARD_WIDTH,
+  ARROW_HEIGHT,
+  CONTENT_META_HEIGHT,
+  DOCS_SECTION_HEIGHT,
+  STATEMENT,
+  SocialCard,
+  TEXT_WIDTH,
+  arrowSvg,
+  assertGlyphs,
+  createMeasurer,
+  fitText,
+  fitTitle,
+  type ChackPart,
+  type GuidedCodingPhase,
+  type SocialCardModel,
+  type TextMeasurer,
 } from "./social-card-template";
 
 /**
- * This script generates all build-time social cards for blog posts and events.
+ * This script generates all build-time social cards for blog posts, events, and docs pages.
  *
  * High-level flow:
  * 1. Discover markdown / MDX content files.
  * 2. Read their frontmatter and derive the data needed for a card.
- * 3. Render a text overlay with Satori.
- * 4. Composite that overlay onto a shared background using Sharp.
- * 5. Write the JPEG into `static/img/social-cards/`.
- * 6. Update markdown frontmatter so Docusaurus uses the generated card.
+ * 3. Render the card with Satori and encode it as JPEG with Sharp.
+ * 4. Write the JPEG into `static/img/social-cards/`.
+ * 5. Update markdown frontmatter so Docusaurus uses the generated card.
  *
  * The script is deterministic on purpose. Generated files are committed to git,
  * so identical content should always result in identical images.
@@ -29,18 +44,18 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const CARD_WIDTH = 1200;
-const CARD_HEIGHT = 630;
 const BLOG_DIR = path.join(__dirname, "../blog");
 const EVENTS_DIR = path.join(__dirname, "../events");
+const DOCS_DIR = path.join(__dirname, "../docs");
 const STATIC_DIR = path.join(__dirname, "../static");
 const OUTPUT_DIR = path.join(STATIC_DIR, "img/social-cards");
 const MANIFEST_PATH = path.join(OUTPUT_DIR, "manifest.json");
+/** The site path of the generated cards; an `image` in it belongs to this script. */
+const MANAGED_IMAGE_DIR = "/img/social-cards";
 /**
  * Cards are written as JPEG because they contain a photo and gradients, which
  * PNG compresses poorly (about 0.7 MB per card as PNG versus about 70 KB as
- * JPEG). Intermediate images used for compositing stay PNG to keep their alpha
- * channel; only the final, flattened card is encoded as JPEG.
+ * JPEG).
  */
 const CARD_EXTENSION = ".jpg";
 /**
@@ -49,36 +64,50 @@ const CARD_EXTENSION = ".jpg";
  * custom image, and stale PNG cards are removed.
  */
 const LEGACY_CARD_EXTENSION = ".png";
-const JPEG_OPTIONS = { quality: 85, mozjpeg: true } as const;
-const DEFAULT_SOCIAL_CARD_PATH = path.join(STATIC_DIR, `img/kenny-codes-social-card${CARD_EXTENSION}`);
+/** A card being written; never published, removed after every run. */
+const TEMPORARY_EXTENSION = ".tmp";
+const JPEG_OPTIONS = { quality: 88, mozjpeg: true } as const;
+const DEFAULT_SOCIAL_CARD_PATH = path.join(
+  STATIC_DIR,
+  `img/kenny-codes-social-card${CARD_EXTENSION}`
+);
 const LOGO_PATH = path.join(STATIC_DIR, "img/logo-dark.svg");
 const PHOTO_PATH = path.join(STATIC_DIR, "img/kenny-smiles.jpg");
 /**
  * The social-card renderer uses repo-local font files so builds do not depend
- * on OS-specific system font locations. The files are checked into
- * `scripts/assets/fonts/` together with their upstream license text.
+ * on OS-specific system font locations. They are the static instances of Mona
+ * Sans, the site's typeface, from https://github.com/github/mona-sans (v2.0.27),
+ * checked into `scripts/assets/fonts/` unmodified together with their license.
+ * Satori cannot read the variable WOFF2 files the site uses.
  */
+const TEMPLATE_PATH = path.join(__dirname, "social-card-template.tsx");
 const FONT_ASSETS_DIR = path.join(__dirname, "assets/fonts");
-const FONT_REGULAR_PATH = path.join(FONT_ASSETS_DIR, "DejaVuSans.ttf");
-const FONT_BOLD_PATH = path.join(FONT_ASSETS_DIR, "DejaVuSans-Bold.ttf");
+const FONTS = [
+  { file: "MonaSans-Regular.ttf", name: "Mona Sans", weight: 400 },
+  { file: "MonaSans-Medium.ttf", name: "Mona Sans", weight: 500 },
+  { file: "MonaSans-SemiBold.ttf", name: "Mona Sans", weight: 600 },
+  {
+    file: "MonaSansSemiExpanded-SemiBold.ttf",
+    name: "Mona Sans SemiExpanded",
+    weight: 600,
+  },
+] as const;
 /**
- * Bump this value whenever the rendering logic or visual design changes in a
- * way that should invalidate the cached images. The manifest stores this value
- * together with per-item hashes.
+ * A manual override: bump it to regenerate every card. It is rarely needed,
+ * because this script, the template, the fonts, the logo and the photo are
+ * already part of each card's hash. The manifest stores it with the hashes.
  */
-const TEMPLATE_VERSION = "2026-11-07-v14";
+const TEMPLATE_VERSION = "2026-11-20-v1";
 const CONCURRENCY = 4;
 
-type ContentKind = "blog" | "events";
+type ContentKind = "blog" | "events" | "docs";
 
 /**
- * Minimal frontmatter representation used by this script.
- *
- * We intentionally keep parsing lightweight instead of pulling in a full YAML
- * parser because the project's frontmatter structure is simple and predictable.
+ * Frontmatter as Docusaurus parses it, so the cards read the same values the
+ * pages do.
  */
 interface Frontmatter {
-  [key: string]: string | string[] | undefined;
+  [key: string]: unknown;
 }
 
 /**
@@ -89,13 +118,16 @@ interface Frontmatter {
  */
 interface FrontmatterBlock {
   body: string;
+  /** The file's line ending, kept when the block is rewritten. */
+  eol: string;
   bodyStart: number;
   bodyEnd: number;
 }
 
 /**
  * Normalized content data used by the generator. The raw markdown file is
- * converted into this shape before any rendering starts.
+ * converted into this shape before any rendering starts. It holds only what a
+ * card shows, so the hash changes only when the card would.
  */
 interface ContentItem {
   filePath: string;
@@ -103,14 +135,12 @@ interface ContentItem {
   slug: string;
   title: string;
   socialTitle?: string;
-  date: string;
-  tags: string[];
+  /** Blog posts and events only. */
+  date?: string;
   type?: string;
-  duration?: string;
-  language?: string;
-  location?: string;
-  country?: string;
   event?: string;
+  /** The `image` frontmatter as Docusaurus reads it. */
+  image?: string;
 }
 
 /**
@@ -128,9 +158,20 @@ interface SocialCardManifest {
  * Preloaded binary assets needed during rendering.
  */
 interface SocialCardAssets {
-  logoDataUri: string;
-  fonts: Array<{ name: string; data: Buffer; weight: 400 | 700; style: "normal" }>;
-  baseTemplate: Buffer;
+  logo: string;
+  portrait: string;
+  fonts: Array<{
+    name: string;
+    data: Buffer;
+    weight: 400 | 500 | 600;
+    style: "normal";
+  }>;
+  /** Measures the title face, for line breaking. */
+  measureTitle: TextMeasurer;
+  /** Measures the medium body face, for the site card's statement. */
+  measureBody: TextMeasurer;
+  /** A hash of the fonts, the logo and the portrait, for the cache. */
+  digest: string;
 }
 
 /**
@@ -138,8 +179,8 @@ interface SocialCardAssets {
  *
  * `custom-image` means the file already defines a different image and should be
  * left alone. That is the escape hatch for manual overrides. `migrated` means
- * the file pointed at the legacy PNG path of its generated card and now points
- * at the current one.
+ * the file pointed at an old path in the cards' folder and now points at the
+ * current one.
  */
 interface FrontmatterUpdateResult {
   content: string;
@@ -163,74 +204,17 @@ async function readRequiredFile(filePath: string, purpose: string): Promise<Buff
   }
 }
 
-/**
- * Parses the top frontmatter block into a simple key/value object.
- *
- * The parser supports:
- * - scalar values
- * - inline arrays like `[a, b, c]`
- * - basic YAML list syntax using leading `-`
- *
- * This is intentionally a narrow parser tailored to the repository's content.
- */
-function parseFrontmatter(content: string): Frontmatter {
-  const block = getFrontmatterBlock(content);
-  const lines = block.body.split("\n");
-  const frontmatter: Frontmatter = {};
-  let currentKey: string | null = null;
+/** An opening `---`, an optional body, and a closing `---`; `\uFEFF` is a byte-order mark. */
+const FRONTMATTER_PATTERN = /^(\uFEFF?)---(\r?\n)(?:([\s\S]*?)\r?\n)?---(?=\r?\n|$)/u;
 
-  for (const line of lines) {
-    const pair = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/u);
-    if (pair) {
-      const [, key, rawValue] = pair;
-      if (rawValue.length === 0) {
-        currentKey = key;
-        continue;
-      }
-
-      frontmatter[key] = parseFrontmatterValue(rawValue);
-      currentKey = key;
-      continue;
-    }
-
-    const listItem = line.match(/^\s*-\s+(.*)$/u);
-    if (listItem && currentKey) {
-      const existing = frontmatter[currentKey];
-      const nextValue = stripWrappingQuotes(listItem[1].trim());
-      if (Array.isArray(existing)) {
-        existing.push(nextValue);
-      } else {
-        frontmatter[currentKey] = [nextValue];
-      }
-    }
-  }
-
-  return frontmatter;
+/** Whether the file starts with a frontmatter block. Docs pages may have none. */
+function hasFrontmatter(content: string): boolean {
+  return FRONTMATTER_PATTERN.test(content);
 }
 
-/**
- * Parses one frontmatter value from its textual representation.
- */
-function parseFrontmatterValue(rawValue: string): string | string[] {
-  const trimmed = rawValue.trim();
-
-  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-    const inner = trimmed.slice(1, -1).trim();
-    if (!inner) {
-      return [];
-    }
-
-    return inner.split(",").map((entry) => stripWrappingQuotes(entry.trim()));
-  }
-
-  return stripWrappingQuotes(trimmed);
-}
-
-/**
- * Removes one layer of wrapping single or double quotes from a value.
- */
-function stripWrappingQuotes(value: string): string {
-  return value.replace(/^['"]|['"]$/gu, "");
+/** A YAML block scalar (`>-`, `|`, ...), whose value spans the following lines. */
+function isBlockScalar(value: string): boolean {
+  return /^[>|][+-]?\d?$/u.test(value);
 }
 
 /**
@@ -240,16 +224,14 @@ function stripWrappingQuotes(value: string): string {
  * `---` delimiters.
  */
 function getFrontmatterBlock(content: string): FrontmatterBlock {
-  const match = content.match(/^---\n([\s\S]*?)\n---/u);
-  if (!match || match.index !== 0) {
+  const match = content.match(FRONTMATTER_PATTERN);
+  if (!match) {
     throw new Error("Expected a frontmatter block at the top of the file.");
   }
 
-  return {
-    body: match[1],
-    bodyStart: 4,
-    bodyEnd: match[0].length - 4,
-  };
+  const [, bom, eol, body] = match;
+  const bodyStart = bom.length + 3 + eol.length;
+  return { body: body ?? "", eol, bodyStart, bodyEnd: bodyStart + (body?.length ?? 0) };
 }
 
 /**
@@ -260,6 +242,10 @@ async function getAllMarkdownFiles(dirPath: string): Promise<string[]> {
   const nested = await Promise.all(
     entries.map(async (entry) => {
       const fullPath = path.join(dirPath, entry.name);
+      // Docusaurus does not publish partials (`_file.md`, `_folder/`), so they get no card.
+      if (entry.name.startsWith("_")) {
+        return [];
+      }
       if (entry.isDirectory()) {
         return getAllMarkdownFiles(fullPath);
       }
@@ -276,7 +262,7 @@ async function getAllMarkdownFiles(dirPath: string): Promise<string[]> {
 }
 
 /**
- * Resolves the publication date for one content item.
+ * Resolves the publication date for one blog post or event.
  *
  * Priority:
  * 1. explicit `date` in frontmatter
@@ -284,9 +270,13 @@ async function getAllMarkdownFiles(dirPath: string): Promise<string[]> {
  * 3. date prefix in the parent directory name
  */
 function deriveDate(filePath: string, frontmatter: Frontmatter): string {
+  // YAML reads an unquoted date as a Date; a quoted one may carry a time of day.
   const explicitDate = frontmatter.date;
-  if (typeof explicitDate === "string" && explicitDate) {
-    return explicitDate;
+  if (explicitDate instanceof Date) {
+    return explicitDate.toISOString().slice(0, 10);
+  }
+  if (typeof explicitDate === "string" && /^\d{4}-\d{2}-\d{2}/u.test(explicitDate)) {
+    return explicitDate.slice(0, 10);
   }
 
   const basename = path.basename(filePath);
@@ -303,14 +293,25 @@ function deriveDate(filePath: string, frontmatter: Frontmatter): string {
 }
 
 /**
- * Resolves the slug for one content item.
+ * Resolves the slug for one content item, which names its card file.
  *
- * Priority:
+ * Blog posts and events:
  * 1. explicit `slug` in frontmatter
  * 2. file name without extension
  * 3. parent folder name for `index.md` / `index.mdx`
+ *
+ * Docs pages: `docs/` plus the path below `docs/`, without extension and
+ * without a trailing `index`, e.g. `docs/chack/the-core`.
  */
-function deriveSlug(filePath: string, frontmatter: Frontmatter): string {
+function deriveSlug(filePath: string, frontmatter: Frontmatter, kind: ContentKind): string {
+  if (kind === "docs") {
+    const relative = path.relative(DOCS_DIR, filePath).replace(/\.mdx?$/u, "");
+    return `docs/${relative
+      .split(path.sep)
+      .join("/")
+      .replace(/(^|\/)index$/u, "")}`;
+  }
+
   const explicitSlug = frontmatter.slug;
   if (typeof explicitSlug === "string" && explicitSlug) {
     return explicitSlug.replace(/^\/+|\/+$/gu, "");
@@ -333,46 +334,53 @@ function getStringField(frontmatter: Frontmatter, key: string): string | undefin
 }
 
 /**
- * Reads one string-array field from the parsed frontmatter object.
- */
-function getStringArrayField(frontmatter: Frontmatter, key: string): string[] {
-  const value = frontmatter[key];
-  return Array.isArray(value) ? value.filter((entry) => typeof entry === "string") : [];
-}
-
-/**
  * Converts all markdown files below a content root into normalized `ContentItem`
  * objects.
  */
-async function discoverContent(dirPath: string, kind: ContentKind): Promise<ContentItem[]> {
+async function discoverContent(
+  dirPath: string,
+  kind: ContentKind
+): Promise<{ items: ContentItem[]; draftSlugs: string[] }> {
   const files = await getAllMarkdownFiles(dirPath);
+  const draftSlugs: string[] = [];
 
-  return Promise.all(
-    files.map(async (filePath) => {
-      const content = await fs.readFile(filePath, "utf8");
-      const frontmatter = parseFrontmatter(content);
+  const items = await Promise.all(
+    files.map(async (filePath): Promise<ContentItem | undefined> => {
+      const { frontMatter: frontmatter, contentTitle } = await parseMarkdownFile({
+        filePath,
+        fileContent: await fs.readFile(filePath, "utf8"),
+        parseFrontMatter: DEFAULT_PARSE_FRONT_MATTER,
+      });
+
+      // Drafts are left out of the production build, so they get no public card either. Nothing
+      // else is read from them: a draft may still lack a date.
+      if (isDraft({ frontMatter: frontmatter, env: "production" })) {
+        draftSlugs.push(deriveSlug(filePath, frontmatter, kind));
+        return undefined;
+      }
 
       return {
         filePath,
         kind,
-        slug: deriveSlug(filePath, frontmatter),
-        title: getStringField(frontmatter, "title") ?? path.basename(filePath, path.extname(filePath)),
+        slug: deriveSlug(filePath, frontmatter, kind),
+        // The title Docusaurus shows: the frontmatter's, else the first heading, else the file name.
+        title:
+          getStringField(frontmatter, "title") ??
+          contentTitle ??
+          path.basename(filePath, path.extname(filePath)),
         socialTitle: getStringField(frontmatter, "socialTitle"),
-        date: deriveDate(filePath, frontmatter),
-        tags: getStringArrayField(frontmatter, "tags"),
+        date: kind === "docs" ? undefined : deriveDate(filePath, frontmatter),
         type: getStringField(frontmatter, "type"),
-        duration: getStringField(frontmatter, "duration"),
-        language: getStringField(frontmatter, "language"),
-        location: getStringField(frontmatter, "location"),
-        country: getStringField(frontmatter, "country"),
         event: getStringField(frontmatter, "event"),
+        image: getStringField(frontmatter, "image"),
       };
     })
   );
+  return { items: items.filter((item) => item !== undefined), draftSlugs };
 }
 
 /**
- * Converts a content slug into a file-system-safe PNG file name.
+ * Converts a content slug into a file-system-safe card file name.
  */
 function slugToFileName(slug: string): string {
   return slug.replace(/^\/+|\/+$/gu, "").replace(/\//gu, "-");
@@ -382,52 +390,35 @@ function slugToFileName(slug: string): string {
  * Returns the public site path used in frontmatter and final HTML metadata.
  */
 function getManagedImagePath(slug: string): string {
-  return `/img/social-cards/${slugToFileName(slug)}${CARD_EXTENSION}`;
+  return `${MANAGED_IMAGE_DIR}/${slugToFileName(slug)}${CARD_EXTENSION}`;
 }
 
 /**
- * Returns the path that `getManagedImagePath` produced before cards were
- * written as JPEG. Used to migrate existing frontmatter.
+ * Calculates a stable hash of everything one card shows: the card model and
+ * the assets and the code it is drawn with. If it changes, the image must be
+ * regenerated.
  */
-function getLegacyManagedImagePath(slug: string): string {
-  return `/img/social-cards/${slugToFileName(slug)}${LEGACY_CARD_EXTENSION}`;
-}
-
-/**
- * Calculates a stable content hash for one card input.
- *
- * If any of these values change, the corresponding image must be regenerated.
- */
-function hashItem(item: ContentItem): string {
+function hashCard(model: SocialCardModel, assets: SocialCardAssets): string {
+  const { logo: _logo, portrait: _portrait, ...content } = model;
   return crypto
     .createHash("sha256")
     .update(
       JSON.stringify({
         templateVersion: TEMPLATE_VERSION,
-        kind: item.kind,
-        slug: item.slug,
-        title: item.title,
-        socialTitle: item.socialTitle,
-        date: item.date,
-        tags: item.tags,
-        type: item.type,
-        duration: item.duration,
-        language: item.language,
-        location: item.location,
-        country: item.country,
-        event: item.event,
+        assets: assets.digest,
+        content,
       })
     )
     .digest("hex");
 }
 
 /**
- * Formats the card date in the short English style used by the design.
+ * Formats the card date in the long English style, e.g. "May 6, 2024".
  */
 function formatDate(dateValue: string): string {
   const date = new Date(`${dateValue}T00:00:00Z`);
   return new Intl.DateTimeFormat("en-US", {
-    month: "short",
+    month: "long",
     day: "numeric",
     year: "numeric",
     timeZone: "UTC",
@@ -435,59 +426,184 @@ function formatDate(dateValue: string): string {
 }
 
 /**
- * Shortens long supporting strings such as conference names.
+ * Sets a line at the largest of `sizes` at which it fits the text column, and
+ * shortens it with an ellipsis only if it does not fit at the smallest.
  */
-function truncateText(value: string, maxLength: number): string {
-  if (value.length <= maxLength) {
-    return value;
+function fitLine(
+  value: string,
+  measure: TextMeasurer,
+  sizes: number[]
+): { text: string; fontSize: number } {
+  const fontSize =
+    sizes.find((size) => measure(value, size) <= TEXT_WIDTH) ?? sizes[sizes.length - 1];
+  assertGlyphs(value, measure);
+  if (measure(value, fontSize) <= TEXT_WIDTH) {
+    return { text: value, fontSize };
   }
-
-  return `${value.slice(0, maxLength - 1).trimEnd()}\u2026`;
+  let text = value;
+  while (text.length > 1 && measure(`${text}\u2026`, fontSize) > TEXT_WIDTH) {
+    text = text.slice(0, -1).trimEnd();
+  }
+  return {
+    text: text === value ? value : `${text.replace(/[\s,.:;/-]+$/u, "")}\u2026`,
+    fontSize,
+  };
 }
 
-/**
- * Turns frontmatter tags like `cloud-native` into nicer card labels.
- */
-function formatTag(tag: string): string {
-  return tag.replace(/-/gu, " ");
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
+/** Words in an event's name or title that already say what kind of event it is. */
+const FORMAT_WORDS = ["Talk", "Workshop", "Webinar", "Lecture"];
+
+/** The docs sections and the method motif each one shows. */
+type DocsSection =
+  | {
+      prefix: string;
+      section: string;
+      method: "guided-coding";
+      highlights: Record<string, GuidedCodingPhase>;
+    }
+  | {
+      prefix: string;
+      section: string;
+      method: "chack";
+      highlights: Record<string, ChackPart>;
+    };
+
+/** The most specific prefix first, so a page finds its own section before the enclosing one. */
+function byPrefixLength(sections: DocsSection[]): DocsSection[] {
+  return [...sections].sort((left, right) => right.prefix.length - left.prefix.length);
+}
+
+const DOCS_SECTIONS = byPrefixLength([
+  {
+    prefix: "docs/chack/dotnet",
+    section: "CHACK in .NET",
+    method: "chack",
+    highlights: {
+      "the-core": "core",
+      "clients-and-sessions": "humble",
+      testing: "tests",
+      "composition-root": "root",
+    },
+  },
+  {
+    prefix: "docs/chack",
+    section: "CHACK",
+    method: "chack",
+    highlights: {
+      "the-core": "core",
+      "humble-objects": "humble",
+      "clients-and-sessions": "humble",
+      "automated-tests": "tests",
+      "composition-root": "root",
+    },
+  },
+  {
+    prefix: "docs/guided-coding",
+    section: "Guided Coding & Guided Learning",
+    method: "guided-coding",
+    highlights: {
+      "planning-phase": "planning",
+      "automated-plan-review": "planning",
+      "plan-structures": "planning",
+      "finding-the-right-plan-size": "planning",
+      "implementing-phase": "implementing",
+      "guiding-phase": "guiding",
+    },
+  },
+]);
+
 /**
- * Maps normalized content into the text model expected by the visual template.
+ * Maps normalized content into the model of its card.
  */
-function buildTemplateModel(item: ContentItem, assets: SocialCardAssets): SocialCardTemplateModel {
+function buildCardModel(item: ContentItem, assets: SocialCardAssets): SocialCardModel {
   const title = item.socialTitle?.trim() || item.title;
-  const detailLabel = formatDate(item.date);
+  const images = { logo: assets.logo, portrait: assets.portrait };
 
-  if (item.kind === "blog") {
+  if (item.kind === "docs") {
+    const index = DOCS_SECTIONS.findIndex(
+      ({ prefix }) => item.slug === prefix || item.slug.startsWith(`${prefix}/`)
+    );
+    const docs = DOCS_SECTIONS[index];
+    if (!docs) {
+      // A new docs folder: a card with the portrait until it gets a section and a motif.
+      return {
+        kind: "docs",
+        ...images,
+        section: "Documentation",
+        title: fitTitle(title, assets.measureTitle, DOCS_SECTION_HEIGHT),
+      };
+    }
+    const page = item.slug.slice(docs.prefix.length + 1);
+    // A section's own page is titled like the section: name the enclosing one instead.
+    const parent = DOCS_SECTIONS.slice(index + 1).find(({ prefix }) =>
+      docs.prefix.startsWith(`${prefix}/`)
+    );
+    const section = item.slug === docs.prefix ? (parent?.section ?? "Documentation") : docs.section;
     return {
-      contentKind: "blog",
-      categoryLabel: "Blog Post",
-      detailLabel,
-      title,
-      supportingLine: undefined,
-      chips: item.tags.slice(0, 3).map(formatTag),
-      footerLabel: "kenny-codes.net",
-      logoDataUri: assets.logoDataUri,
+      kind: "docs",
+      ...images,
+      section,
+      title: fitTitle(title, assets.measureTitle, DOCS_SECTION_HEIGHT),
+      motif:
+        docs.method === "guided-coding"
+          ? { method: "guided-coding", highlight: docs.highlights[page] }
+          : { method: "chack", highlight: docs.highlights[page] },
     };
   }
 
-  const supportingLine = item.event
-    ? truncateText(item.event, 48)
-    : [item.location, item.country].filter(Boolean).join(", ");
-  const chips = [item.location, item.language, item.duration]
-    .filter((value): value is string => Boolean(value))
-    .slice(0, 3);
+  const date = formatDate(item.date ?? "");
+  const event = (item.event ?? "Kenny Pflug").replace(/ - /gu, " \u2013 ");
+  const type = item.type ?? "Event";
+  // "Thinktecture Webinar", "Visiting Lecture" or "Async Workshop: …" already say what it is: the
+  // date alone follows. Whole words only: "Talking to LLMs" is no "Talk".
+  const saysType = [type, ...FORMAT_WORDS].some((word) =>
+    new RegExp(`(^|[^\\p{L}])${escapeRegExp(word)}($|[^\\p{L}])`, "iu").test(`${event} ${title}`)
+  );
+  const [primary, secondary] =
+    item.kind === "blog"
+      ? ["Blog post by Kenny Pflug", date]
+      : [event, saysType ? date : `${type} on ${date}`];
 
   return {
-    contentKind: "event",
-    categoryLabel: item.type ?? "Event",
-    detailLabel,
-    title,
-    supportingLine: supportingLine || undefined,
-    chips,
-    footerLabel: "kenny-codes.net",
-    logoDataUri: assets.logoDataUri,
+    kind: "content",
+    ...images,
+    title: fitTitle(title, assets.measureTitle, CONTENT_META_HEIGHT),
+    primary: fitLine(primary, assets.measureBody, [28, 26, 24]),
+    secondary,
+  };
+}
+
+/**
+ * The card for the home page and for every page without a card of its own:
+ * the greeting, the statement and the two methods of the home page.
+ */
+function buildSiteCardModel(assets: SocialCardAssets): SocialCardModel {
+  const greeting = "Hi, I’m Kenny.";
+  const greetingSize = [96, 92, 88, 84, 80, 76, 72].find(
+    (size) => assets.measureTitle(greeting, size, -0.03) <= TEXT_WIDTH * 0.97
+  );
+  const statement = fitText(
+    "I build cloud-native .NET systems and help teams stay in control when AI agents write the code.",
+    {
+      measure: assets.measureBody,
+      maxWidth: STATEMENT.maxWidth,
+      maxHeight: 4 * STATEMENT.lineHeight,
+      sizes: [STATEMENT.fontSize],
+      lineHeight: STATEMENT.lineHeight / STATEMENT.fontSize,
+      tracking: STATEMENT.tracking,
+    }
+  );
+
+  return {
+    kind: "site",
+    logo: assets.logo,
+    portrait: assets.portrait,
+    greetingSize: greetingSize ?? 72,
+    statement: statement.lines,
   };
 }
 
@@ -495,126 +611,67 @@ function buildTemplateModel(item: ContentItem, assets: SocialCardAssets): Social
  * Loads all static assets needed for rendering.
  *
  * Fonts are loaded eagerly because Satori requires explicit font data instead
- * of reading system fonts by itself.
+ * of reading system fonts by itself. The portrait is cropped to the square the
+ * card shows, at twice its size.
  */
 async function loadAssets(): Promise<SocialCardAssets> {
-  const [logo, regularFont, boldFont, baseTemplate] = await Promise.all([
-    fs.readFile(LOGO_PATH, "utf8"),
-    readRequiredFile(FONT_REGULAR_PATH, "regular social-card font"),
-    readRequiredFile(FONT_BOLD_PATH, "bold social-card font"),
-    createBaseTemplate(),
+  // The renderer silently drops an embedded SVG it cannot parse, so check them up front.
+  await Promise.all(
+    [true, false].map((isImplements) =>
+      sharp(Buffer.from(arrowSvg(isImplements, ARROW_HEIGHT))).metadata()
+    )
+  );
+  const [logo, portrait, ...fontData] = await Promise.all([
+    fs.readFile(LOGO_PATH),
+    // The home page's crop: object-position 60% 45% on the 1600 x 1200 photo.
+    sharp(PHOTO_PATH)
+      .extract({ left: 240, top: 0, width: 1200, height: 1200 })
+      .resize(760, 760)
+      .jpeg({ quality: 90 })
+      .toBuffer(),
+    ...FONTS.map((font) =>
+      readRequiredFile(path.join(FONT_ASSETS_DIR, font.file), `social-card font ${font.file}`)
+    ),
   ]);
 
+  const fonts = FONTS.map((font, index) => ({
+    name: font.name,
+    data: fontData[index],
+    weight: font.weight,
+    style: "normal" as const,
+  }));
+
+  // The key covers the source files, not sharp's output, which may differ between platforms.
+  // The code that draws the cards (including the portrait's crop) belongs to it too.
+  const sources = await Promise.all(
+    [PHOTO_PATH, __filename, TEMPLATE_PATH].map((file) => fs.readFile(file))
+  );
+  const digest = crypto.createHash("sha256");
+  for (const data of [logo, ...fontData, ...sources]) digest.update(data);
+
   return {
-    logoDataUri: `data:image/svg+xml;base64,${Buffer.from(logo).toString("base64")}`,
-    fonts: [
-      { name: "DejaVu Sans", data: regularFont, weight: 400, style: "normal" },
-      { name: "DejaVu Sans", data: boldFont, weight: 700, style: "normal" },
-    ],
-    baseTemplate,
+    digest: digest.digest("hex"),
+    logo: `data:image/svg+xml;base64,${logo.toString("base64")}`,
+    portrait: `data:image/jpeg;base64,${portrait.toString("base64")}`,
+    fonts,
+    measureTitle: createMeasurer(
+      fontData[FONTS.findIndex((font) => font.name === "Mona Sans SemiExpanded")]
+    ),
+    measureBody: createMeasurer(fontData[FONTS.findIndex((font) => font.weight === 500)]),
   };
 }
 
 /**
- * Builds the shared image background used for all cards.
- *
- * The text overlay is rendered separately. This split keeps design work
- * manageable: background composition lives here, dynamic text layout lives in
- * the React template.
+ * Renders one card via Satori and encodes it as JPEG.
  */
-async function createBaseTemplate(): Promise<Buffer> {
-  const backgroundSvg = `
-    <svg width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#081018" />
-          <stop offset="58%" stop-color="#0d1623" />
-          <stop offset="100%" stop-color="#101a28" />
-        </linearGradient>
-        <radialGradient id="glowA" cx="0.18" cy="0.22" r="0.62">
-          <stop offset="0%" stop-color="rgba(49, 217, 208, 0.38)" />
-          <stop offset="100%" stop-color="rgba(49, 217, 208, 0)" />
-        </radialGradient>
-        <radialGradient id="glowB" cx="0.72" cy="0.82" r="0.48">
-          <stop offset="0%" stop-color="rgba(56, 126, 255, 0.22)" />
-          <stop offset="100%" stop-color="rgba(56, 126, 255, 0)" />
-        </radialGradient>
-        <linearGradient id="divider" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="rgba(53, 216, 208, 0.78)" />
-          <stop offset="100%" stop-color="rgba(73, 140, 255, 0.18)" />
-        </linearGradient>
-      </defs>
-      <rect width="${CARD_WIDTH}" height="${CARD_HEIGHT}" fill="url(#bg)" />
-      <rect x="0" y="0" width="780" height="${CARD_HEIGHT}" fill="url(#glowA)" />
-      <rect x="0" y="0" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" fill="url(#glowB)" />
-      <path d="M0 485 C200 430 370 405 640 456 C742 474 820 505 920 545 L920 630 L0 630 Z" fill="rgba(18, 31, 48, 0.84)" />
-      <path d="M0 76 C140 38 270 24 384 42 C516 63 612 132 710 162 L710 208 C612 178 515 136 382 116 C261 99 141 110 0 144 Z" fill="rgba(43, 67, 97, 0.22)" />
-      <rect x="716" y="0" width="4" height="${CARD_HEIGHT}" rx="2" fill="url(#divider)" />
-    </svg>
-  `;
-
-  const photoOverlaySvg = `
-    <svg width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="photoShade" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="rgba(6, 11, 18, 0.86)" />
-          <stop offset="28%" stop-color="rgba(6, 11, 18, 0.34)" />
-          <stop offset="100%" stop-color="rgba(6, 11, 18, 0.08)" />
-        </linearGradient>
-        <linearGradient id="photoTint" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="rgba(55, 116, 255, 0.18)" />
-          <stop offset="100%" stop-color="rgba(15, 24, 38, 0.44)" />
-        </linearGradient>
-      </defs>
-      <rect x="720" y="0" width="480" height="${CARD_HEIGHT}" fill="url(#photoShade)" />
-      <rect x="720" y="0" width="480" height="${CARD_HEIGHT}" fill="url(#photoTint)" />
-      <circle cx="1125" cy="92" r="118" fill="rgba(53, 216, 208, 0.16)" />
-    </svg>
-  `;
-
-  const photo = await sharp(PHOTO_PATH)
-    .resize(480, CARD_HEIGHT, {
-      fit: "cover",
-      position: "centre",
-    })
-    .modulate({
-      brightness: 0.96,
-      saturation: 0.95,
-    })
-    .toBuffer();
-
-  return sharp({
-    create: {
-      width: CARD_WIDTH,
-      height: CARD_HEIGHT,
-      channels: 4,
-      background: "#071019",
-    },
-  })
-    .composite([
-      { input: Buffer.from(backgroundSvg), top: 0, left: 0 },
-      { input: photo, top: 0, left: 720 },
-      { input: Buffer.from(photoOverlaySvg), top: 0, left: 0 },
-    ])
-    .png()
-    .toBuffer();
-}
-
-/**
- * Renders the React overlay to SVG via Satori and then converts it to a PNG
- * buffer so Sharp can composite it.
- */
-async function renderOverlay(
-  model: SocialCardTemplateModel,
-  assets: SocialCardAssets
-): Promise<Buffer> {
-  const svg = await satori(React.createElement(SocialCardTemplate, model), {
+async function renderCard(model: SocialCardModel, assets: SocialCardAssets): Promise<Buffer> {
+  const svg = await satori(React.createElement(SocialCard, model), {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     fonts: assets.fonts,
   });
 
-  return sharp(Buffer.from(svg)).png().toBuffer();
+  return sharp(Buffer.from(svg)).flatten({ background: "#0b1424" }).jpeg(JPEG_OPTIONS).toBuffer();
 }
 
 /**
@@ -622,31 +679,26 @@ async function renderOverlay(
  * their own dedicated card.
  */
 async function generateDefaultSiteCard(assets: SocialCardAssets): Promise<void> {
-  const model: SocialCardTemplateModel = {
-    contentKind: "blog",
-    categoryLabel: "Kenny Codes",
-    detailLabel: "AI, Cloud-Native, and .NET",
-    title: "Distributed Systems, Software Architecture, and Guided Coding",
-    supportingLine: "Blog posts, speaking events, and practical guidance by Kenny Pflug.",
-    chips: ["Blog", "Events", "Guided Coding"],
-    footerLabel: "kenny-codes.net",
-    logoDataUri: assets.logoDataUri,
-  };
-
-  const overlay = await renderOverlay(model, assets);
-  const image = await sharp(assets.baseTemplate)
-    .composite([{ input: overlay, top: 0, left: 0 }])
-    .jpeg(JPEG_OPTIONS)
-    .toBuffer();
-
-  await fs.writeFile(DEFAULT_SOCIAL_CARD_PATH, image);
+  await fs.writeFile(
+    DEFAULT_SOCIAL_CARD_PATH,
+    await renderCard(buildSiteCardModel(assets), assets)
+  );
 }
 
 /**
- * Normalizes the raw frontmatter value of an `image` field for comparisons.
+ * Parses rewritten content the way Docusaurus will and checks that it reads the
+ * new image, so an unusual YAML value (a block scalar, a flow mapping) is never
+ * saved half-edited.
  */
-function normalizeImageValue(imageValue: string): string {
-  return stripWrappingQuotes(imageValue.trim());
+async function verifyFrontmatter(filePath: string, content: string, imagePath: string) {
+  const { frontMatter } = await parseMarkdownFile({
+    filePath,
+    fileContent: content,
+    parseFrontMatter: DEFAULT_PARSE_FRONT_MATTER,
+  }).catch(() => ({ frontMatter: {} as Frontmatter }));
+  if (frontMatter.image !== imagePath) {
+    throw new Error(`could not set its image. Add "image: ${imagePath}" to its frontmatter.`);
+  }
 }
 
 /**
@@ -654,58 +706,63 @@ function normalizeImageValue(imageValue: string): string {
  *
  * Important behavior:
  * - if the file already uses our managed path, we do nothing
- * - if the file uses the legacy PNG path of its card, we rewrite it
+ * - if the file uses another path in the cards' folder (a renamed page, or a
+ *   card from when they were PNG files), we rewrite it
  * - if the file uses a different image, we treat it as a custom override
  * - otherwise we insert the generated image path into the frontmatter
  */
 function updateFrontmatterImage(
   content: string,
-  managedImagePath: string,
-  legacyManagedImagePath: string
+  image: string | undefined,
+  managedImagePath: string
 ): FrontmatterUpdateResult {
-  const block = getFrontmatterBlock(content);
-  const lines = block.body.split("\n");
-  const imageIndex = lines.findIndex((line) => /^image:\s*/u.test(line));
+  // Docusaurus already read the value; the raw block is only touched to write it.
+  if (image === managedImagePath) {
+    return { content, status: "unchanged" };
+  }
+  // Any other image in the cards' folder is a card of ours under an old name: a renamed page, or
+  // a card from when they were PNG files. Everything else is the author's own image.
+  const isOurs = image?.startsWith(`${MANAGED_IMAGE_DIR}/`) ?? false;
+  if (image !== undefined && !isOurs) {
+    return { content, status: "custom-image" };
+  }
 
-  if (imageIndex >= 0) {
-    const currentValue = normalizeImageValue(lines[imageIndex].replace(/^image:\s*/u, ""));
-    if (currentValue === managedImagePath) {
-      return {
-        content,
-        status: "unchanged",
-      };
-    }
-
-    if (currentValue === legacyManagedImagePath) {
-      lines[imageIndex] = `image: ${managedImagePath}`;
-      return {
-        content: `${content.slice(0, block.bodyStart)}${lines.join("\n")}${content.slice(block.bodyEnd)}`,
-        status: "migrated",
-      };
-    }
-
+  const imageLine = `image: ${managedImagePath}`;
+  if (!hasFrontmatter(content)) {
+    const eol = content.includes("\r\n") ? "\r\n" : "\n";
+    const bom = content.startsWith("\uFEFF") ? "\uFEFF" : "";
     return {
-      content,
-      status: "custom-image",
+      content: `${bom}---${eol}${imageLine}${eol}---${eol}${content.slice(bom.length)}`,
+      status: "inserted",
     };
   }
 
-  const insertAfterIndex = lines.findIndex((line) => /^socialTitle:\s*/u.test(line));
-  const fallbackIndex = lines.findIndex((line) => /^title:\s*/u.test(line));
-  const targetIndex =
-    insertAfterIndex >= 0
-      ? insertAfterIndex
-      : fallbackIndex >= 0
-        ? fallbackIndex
-        : lines.length - 1;
+  const block = getFrontmatterBlock(content);
+  const replaceBody = (body: string) =>
+    `${content.slice(0, block.bodyStart)}${body}${content.slice(block.bodyEnd)}`;
+  if (block.body === "") {
+    // An empty block (`---` right after `---`): the line goes in with its own line ending.
+    return { content: replaceBody(`${imageLine}${block.eol}`), status: "inserted" };
+  }
 
-  lines.splice(targetIndex + 1, 0, `image: ${managedImagePath}`);
-  const updatedBlock = lines.join("\n");
+  const lines = block.body.split(block.eol);
+  if (isOurs) {
+    const imageIndex = lines.findIndex((line) => /^(["']?)image\1\s*:/u.test(line));
+    lines[imageIndex] = imageLine;
+    return { content: replaceBody(lines.join(block.eol)), status: "migrated" };
+  }
 
-  return {
-    content: `${content.slice(0, block.bodyStart)}${updatedBlock}${content.slice(block.bodyEnd)}`,
-    status: "inserted",
-  };
+  // After the (social) title if that is a one-line value; otherwise at the end of the block, so a
+  // multi-line value is never split.
+  const titleIndex = [/^socialTitle:\s*/u, /^title:\s*/u]
+    .map((pattern) => lines.findIndex((line) => pattern.test(line)))
+    .find((index) => index >= 0);
+  const isOneLine =
+    titleIndex !== undefined &&
+    !isBlockScalar(lines[titleIndex].replace(/^\w+:\s*/u, "").trim()) &&
+    !/^\s/u.test(lines[titleIndex + 1] ?? "");
+  lines.splice(isOneLine ? titleIndex + 1 : lines.length, 0, imageLine);
+  return { content: replaceBody(lines.join(block.eol)), status: "inserted" };
 }
 
 /**
@@ -768,14 +825,39 @@ async function main(): Promise<void> {
   const startTime = performance.now();
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
-  const [assets, previousManifest, blogItems, eventItems] = await Promise.all([
+  const [assets, previousManifest, blog, events, docs] = await Promise.all([
     loadAssets(),
     loadManifest(),
     discoverContent(BLOG_DIR, "blog"),
     discoverContent(EVENTS_DIR, "events"),
+    discoverContent(DOCS_DIR, "docs"),
   ]);
 
-  const items = [...blogItems, ...eventItems];
+  const items = [...blog.items, ...events.items, ...docs.items];
+  const docsSlugs = [...docs.items.map((item) => item.slug), ...docs.draftSlugs];
+  // A highlight for a page that no longer exists means the page was renamed: say so.
+  // Drafts count as pages here: they may be highlighted before they are published.
+  for (const section of DOCS_SECTIONS) {
+    for (const page of Object.keys(section.highlights)) {
+      if (!docsSlugs.includes(`${section.prefix}/${page}`)) {
+        throw new Error(
+          `DOCS_SECTIONS highlights "${section.prefix}/${page}", which is not a docs page.`
+        );
+      }
+    }
+  }
+  // Different paths can flatten to the same file name ("a-b/c" and "a/b-c"): stop before writing.
+  const owners = new Map<string, string>();
+  for (const item of items) {
+    const fileName = getManagedImagePath(item.slug);
+    const owner = owners.get(fileName);
+    if (owner) {
+      throw new Error(
+        `${owner} and ${item.filePath} would both get ${fileName}. Rename one, or give it a slug.`
+      );
+    }
+    owners.set(fileName, item.filePath);
+  }
   const nextManifest: SocialCardManifest = {
     templateVersion: TEMPLATE_VERSION,
     items: {},
@@ -786,54 +868,67 @@ async function main(): Promise<void> {
   let skippedCustomImageCount = 0;
   let updatedFrontmatterCount = 0;
 
-  await runWithConcurrency(items, CONCURRENCY, async (item) => {
-    const managedImagePath = getManagedImagePath(item.slug);
-    const absoluteOutputPath = path.join(STATIC_DIR, managedImagePath.replace(/^\//u, ""));
-    const content = await fs.readFile(item.filePath, "utf8");
-    const frontmatterResult = updateFrontmatterImage(
-      content,
-      managedImagePath,
-      getLegacyManagedImagePath(item.slug)
-    );
+  // Plan every card before writing anything: a title that does not fit, or frontmatter that
+  // cannot take the image, stops the run with all files untouched.
+  const plans = await Promise.all(
+    items.map(async (item) => {
+      const managedImagePath = getManagedImagePath(item.slug);
+      const content = await fs.readFile(item.filePath, "utf8");
+      const frontmatter = updateFrontmatterImage(content, item.image, managedImagePath);
+      if (frontmatter.status === "custom-image") {
+        return { item, managedImagePath, frontmatter };
+      }
+      try {
+        if (frontmatter.status !== "unchanged") {
+          await verifyFrontmatter(item.filePath, frontmatter.content, managedImagePath);
+        }
+        return { item, managedImagePath, frontmatter, model: buildCardModel(item, assets) };
+      } catch (error) {
+        throw new Error(`${item.filePath}: ${(error as Error).message}`);
+      }
+    })
+  );
 
-    if (frontmatterResult.status === "custom-image") {
-      skippedCustomImageCount += 1;
-      return;
+  await runWithConcurrency(
+    plans,
+    CONCURRENCY,
+    async ({ item, managedImagePath, frontmatter, model }) => {
+      if (!model) {
+        skippedCustomImageCount += 1;
+        return;
+      }
+
+      const absoluteOutputPath = path.join(STATIC_DIR, managedImagePath.replace(/^\//u, ""));
+      const currentHash = hashCard(model, assets);
+      const outputAlreadyExists = await fs
+        .access(absoluteOutputPath)
+        .then(() => true)
+        .catch(() => false);
+
+      // The hash covers TEMPLATE_VERSION, so an equal hash means an up-to-date card.
+      if (previousManifest.items[item.slug] === currentHash && outputAlreadyExists) {
+        cachedCount += 1;
+      } else {
+        // Through a temporary file, so a failed write never leaves a half-written card. The
+        // temporary file is removed either way; the sweep below also catches one left by a crash.
+        const temporaryPath = `${absoluteOutputPath}${TEMPORARY_EXTENSION}`;
+        try {
+          await fs.writeFile(temporaryPath, await renderCard(model, assets));
+          await fs.rename(temporaryPath, absoluteOutputPath);
+        } finally {
+          await fs.rm(temporaryPath, { force: true });
+        }
+        generatedCount += 1;
+      }
+      nextManifest.items[item.slug] = currentHash;
+
+      // Only once the card exists does the page point at it.
+      if (frontmatter.status !== "unchanged") {
+        await fs.writeFile(item.filePath, frontmatter.content);
+        updatedFrontmatterCount += 1;
+      }
     }
-
-    if (frontmatterResult.status === "inserted" || frontmatterResult.status === "migrated") {
-      await fs.writeFile(item.filePath, frontmatterResult.content);
-      updatedFrontmatterCount += 1;
-    }
-
-    const currentHash = hashItem(item);
-    nextManifest.items[item.slug] = currentHash;
-
-    const previousHash = previousManifest.items[item.slug];
-    const outputAlreadyExists = await fs
-      .access(absoluteOutputPath)
-      .then(() => true)
-      .catch(() => false);
-
-    if (
-      previousManifest.templateVersion === TEMPLATE_VERSION &&
-      previousHash === currentHash &&
-      outputAlreadyExists
-    ) {
-      cachedCount += 1;
-      return;
-    }
-
-    const model = buildTemplateModel(item, assets);
-    const overlay = await renderOverlay(model, assets);
-    const image = await sharp(assets.baseTemplate)
-      .composite([{ input: overlay, top: 0, left: 0 }])
-      .jpeg(JPEG_OPTIONS)
-      .toBuffer();
-
-    await fs.writeFile(absoluteOutputPath, image);
-    generatedCount += 1;
-  });
+  );
 
   const desiredFiles = new Set(
     Object.keys(nextManifest.items).map((slug) => `${slugToFileName(slug)}${CARD_EXTENSION}`)
@@ -842,6 +937,10 @@ async function main(): Promise<void> {
   let removedCount = 0;
 
   for (const fileName of existingOutputFiles) {
+    if (fileName.endsWith(TEMPORARY_EXTENSION)) {
+      await fs.rm(path.join(OUTPUT_DIR, fileName), { force: true });
+      continue;
+    }
     if (!fileName.endsWith(CARD_EXTENSION) && !fileName.endsWith(LEGACY_CARD_EXTENSION)) {
       continue;
     }
