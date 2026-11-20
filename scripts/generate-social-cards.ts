@@ -3,6 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { DEFAULT_PARSE_FRONT_MATTER, parseMarkdownFile } from "@docusaurus/utils";
 import React from "react";
 import satori from "satori";
 import sharp from "sharp";
@@ -10,11 +11,13 @@ import sharp from "sharp";
 import {
   CARD_HEIGHT,
   CARD_WIDTH,
+  ARROW_HEIGHT,
   CONTENT_META_HEIGHT,
   DOCS_SECTION_HEIGHT,
   STATEMENT,
   SocialCard,
   TEXT_WIDTH,
+  arrowSvg,
   createMeasurer,
   fitText,
   fitTitle,
@@ -96,13 +99,11 @@ const CONCURRENCY = 4;
 type ContentKind = "blog" | "events" | "docs";
 
 /**
- * Minimal frontmatter representation used by this script.
- *
- * We intentionally keep parsing lightweight instead of pulling in a full YAML
- * parser because the project's frontmatter structure is simple and predictable.
+ * Frontmatter as Docusaurus parses it, so the cards read the same values the
+ * pages do.
  */
 interface Frontmatter {
-  [key: string]: string | string[] | undefined;
+  [key: string]: unknown;
 }
 
 /**
@@ -113,6 +114,8 @@ interface Frontmatter {
  */
 interface FrontmatterBlock {
   body: string;
+  /** The file's line ending, kept when the block is rewritten. */
+  eol: string;
   bodyStart: number;
   bodyEnd: number;
 }
@@ -196,86 +199,22 @@ async function readRequiredFile(filePath: string, purpose: string): Promise<Buff
 }
 
 /**
- * Parses the top frontmatter block into a simple key/value object.
- *
- * The parser supports:
- * - scalar values
- * - inline arrays like `[a, b, c]`
- * - basic YAML list syntax using leading `-`
- *
- * This is intentionally a narrow parser tailored to the repository's content.
- */
-function parseFrontmatter(content: string): Frontmatter {
-  if (!hasFrontmatter(content)) {
-    return {};
-  }
-  const block = getFrontmatterBlock(content);
-  const lines = block.body.split("\n");
-  const frontmatter: Frontmatter = {};
-  let currentKey: string | null = null;
-
-  for (const line of lines) {
-    const pair = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/u);
-    if (pair) {
-      const [, key, rawValue] = pair;
-      if (rawValue.length === 0) {
-        currentKey = key;
-        continue;
-      }
-
-      frontmatter[key] = parseFrontmatterValue(rawValue);
-      currentKey = key;
-      continue;
-    }
-
-    const listItem = line.match(/^\s*-\s+(.*)$/u);
-    if (listItem && currentKey) {
-      const existing = frontmatter[currentKey];
-      const nextValue = stripWrappingQuotes(listItem[1].trim());
-      if (Array.isArray(existing)) {
-        existing.push(nextValue);
-      } else {
-        frontmatter[currentKey] = [nextValue];
-      }
-    }
-  }
-
-  return frontmatter;
-}
-
-/**
- * Parses one frontmatter value from its textual representation.
- */
-function parseFrontmatterValue(rawValue: string): string | string[] {
-  const trimmed = rawValue.trim();
-
-  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-    const inner = trimmed.slice(1, -1).trim();
-    if (!inner) {
-      return [];
-    }
-
-    return inner.split(",").map((entry) => stripWrappingQuotes(entry.trim()));
-  }
-
-  return stripWrappingQuotes(trimmed);
-}
-
-/**
  * Removes one layer of wrapping single or double quotes from a value.
  */
 function stripWrappingQuotes(value: string): string {
   return value.replace(/^['"]|['"]$/gu, "");
 }
 
+const FRONTMATTER_PATTERN = /^---(\r?\n)([\s\S]*?)\r?\n---/u;
+
 /** Whether the file starts with a frontmatter block. Docs pages may have none. */
 function hasFrontmatter(content: string): boolean {
-  return /^---\n[\s\S]*?\n---/u.test(content);
+  return FRONTMATTER_PATTERN.test(content);
 }
 
-/** A YAML block scalar (`>-`, `|`, ...), which this parser does not read. */
-function isBlockScalar(value: string | undefined): boolean {
-  return value !== undefined && /^[>|][+-]?$/u.test(value);
+/** A YAML block scalar (`>-`, `|`, ...), whose value spans the following lines. */
+function isBlockScalar(value: string): boolean {
+  return /^[>|][+-]?\d?$/u.test(value);
 }
 
 /**
@@ -285,16 +224,14 @@ function isBlockScalar(value: string | undefined): boolean {
  * `---` delimiters.
  */
 function getFrontmatterBlock(content: string): FrontmatterBlock {
-  const match = content.match(/^---\n([\s\S]*?)\n---/u);
-  if (!match || match.index !== 0) {
+  const match = content.match(FRONTMATTER_PATTERN);
+  if (!match) {
     throw new Error("Expected a frontmatter block at the top of the file.");
   }
 
-  return {
-    body: match[1],
-    bodyStart: 4,
-    bodyEnd: match[0].length - 4,
-  };
+  const [, eol, body] = match;
+  const bodyStart = 3 + eol.length;
+  return { body, eol, bodyStart, bodyEnd: bodyStart + body.length };
 }
 
 /**
@@ -329,7 +266,11 @@ async function getAllMarkdownFiles(dirPath: string): Promise<string[]> {
  * 3. date prefix in the parent directory name
  */
 function deriveDate(filePath: string, frontmatter: Frontmatter): string {
+  // YAML reads an unquoted date as a Date.
   const explicitDate = frontmatter.date;
+  if (explicitDate instanceof Date) {
+    return explicitDate.toISOString().slice(0, 10);
+  }
   if (typeof explicitDate === "string" && explicitDate) {
     return explicitDate;
   }
@@ -389,20 +330,6 @@ function getStringField(frontmatter: Frontmatter, key: string): string | undefin
 }
 
 /**
- * The title Docusaurus shows: the frontmatter `title`, else the first `#` heading, else the file
- * name.
- */
-function titleOf(filePath: string, content: string, frontmatter: Frontmatter): string {
-  const title = getStringField(frontmatter, "title");
-  if (title && !isBlockScalar(title)) {
-    return title;
-  }
-  return (
-    content.match(/^#\s+(.+?)\s*#*\s*$/mu)?.[1] ?? path.basename(filePath, path.extname(filePath))
-  );
-}
-
-/**
  * Converts all markdown files below a content root into normalized `ContentItem`
  * objects.
  */
@@ -411,14 +338,21 @@ async function discoverContent(dirPath: string, kind: ContentKind): Promise<Cont
 
   return Promise.all(
     files.map(async (filePath) => {
-      const content = await fs.readFile(filePath, "utf8");
-      const frontmatter = parseFrontmatter(content);
+      const { frontMatter: frontmatter, contentTitle } = await parseMarkdownFile({
+        filePath,
+        fileContent: await fs.readFile(filePath, "utf8"),
+        parseFrontMatter: DEFAULT_PARSE_FRONT_MATTER,
+      });
 
       return {
         filePath,
         kind,
         slug: deriveSlug(filePath, frontmatter, kind),
-        title: titleOf(filePath, content, frontmatter),
+        // The title Docusaurus shows: the frontmatter's, else the first heading, else the file name.
+        title:
+          getStringField(frontmatter, "title") ??
+          contentTitle ??
+          path.basename(filePath, path.extname(filePath)),
         socialTitle: getStringField(frontmatter, "socialTitle"),
         date: kind === "docs" ? undefined : deriveDate(filePath, frontmatter),
         type: getStringField(frontmatter, "type"),
@@ -452,8 +386,8 @@ function getLegacyManagedImagePath(slug: string): string {
 
 /**
  * Calculates a stable hash of everything one card shows: the card model and
- * the assets it is drawn with. If it changes, the image must be regenerated.
- * Changes to the template's code need a new `TEMPLATE_VERSION`.
+ * the assets and the code it is drawn with. If it changes, the image must be
+ * regenerated.
  */
 function hashCard(model: SocialCardModel, assets: SocialCardAssets): string {
   const { logo: _logo, portrait: _portrait, ...content } = model;
@@ -569,14 +503,22 @@ function buildCardModel(item: ContentItem, assets: SocialCardAssets): SocialCard
     );
     const docs = DOCS_SECTIONS[index];
     if (!docs) {
-      throw new Error(`No docs section for ${item.filePath}. Add it to DOCS_SECTIONS.`);
+      // A new docs folder: a card with the portrait until it gets a section and a motif.
+      return {
+        kind: "docs",
+        ...images,
+        section: "Documentation",
+        title: fitTitle(title, assets.measureTitle, DOCS_SECTION_HEIGHT),
+      };
     }
     const page = item.slug.slice(docs.prefix.length + 1);
     // A section's own page is titled like the section: name the enclosing one instead.
     const parent = DOCS_SECTIONS.slice(index + 1).find(({ prefix }) =>
       docs.prefix.startsWith(`${prefix}/`)
     );
-    const section = title === docs.section ? (parent?.section ?? "Documentation") : docs.section;
+    const section = title.startsWith(docs.section)
+      ? (parent?.section ?? "Documentation")
+      : docs.section;
     return {
       kind: "docs",
       ...images,
@@ -593,7 +535,10 @@ function buildCardModel(item: ContentItem, assets: SocialCardAssets): SocialCard
   const [primary, secondary] =
     item.kind === "blog"
       ? ["Blog post by Kenny Pflug", date]
-      : [item.event ?? "Kenny Pflug", `${item.type ?? "Event"} on ${date}`];
+      : [
+          (item.event ?? "Kenny Pflug").replace(/ - /gu, " \u2013 "),
+          `${item.type ?? "Event"} on ${date}`,
+        ];
 
   return {
     kind: "content",
@@ -642,6 +587,12 @@ function buildSiteCardModel(assets: SocialCardAssets): SocialCardModel {
  * card shows, at twice its size.
  */
 async function loadAssets(): Promise<SocialCardAssets> {
+  // The renderer silently drops an embedded SVG it cannot parse, so check them up front.
+  await Promise.all(
+    [true, false].map((isImplements) =>
+      sharp(Buffer.from(arrowSvg(isImplements, ARROW_HEIGHT))).metadata()
+    )
+  );
   const [logo, portrait, ...fontData] = await Promise.all([
     fs.readFile(LOGO_PATH),
     // The home page's crop: object-position 60% 45% on the 1600 x 1200 photo.
@@ -725,14 +676,15 @@ function updateFrontmatterImage(
   legacyManagedImagePath: string
 ): FrontmatterUpdateResult {
   if (!hasFrontmatter(content)) {
+    const eol = content.includes("\r\n") ? "\r\n" : "\n";
     return {
-      content: `---\nimage: ${managedImagePath}\n---\n${content}`,
+      content: `---${eol}image: ${managedImagePath}${eol}---${eol}${content}`,
       status: "inserted",
     };
   }
 
   const block = getFrontmatterBlock(content);
-  const lines = block.body.split("\n");
+  const lines = block.body.split(block.eol);
   const imageIndex = lines.findIndex((line) => /^image:\s*/u.test(line));
 
   if (imageIndex >= 0) {
@@ -747,7 +699,7 @@ function updateFrontmatterImage(
     if (currentValue === legacyManagedImagePath) {
       lines[imageIndex] = `image: ${managedImagePath}`;
       return {
-        content: `${content.slice(0, block.bodyStart)}${lines.join("\n")}${content.slice(block.bodyEnd)}`,
+        content: `${content.slice(0, block.bodyStart)}${lines.join(block.eol)}${content.slice(block.bodyEnd)}`,
         status: "migrated",
       };
     }
@@ -770,7 +722,7 @@ function updateFrontmatterImage(
   const targetIndex = isOneLine ? titleIndex : lines.length - 1;
 
   lines.splice(targetIndex + 1, 0, `image: ${managedImagePath}`);
-  const updatedBlock = lines.join("\n");
+  const updatedBlock = lines.join(block.eol);
 
   return {
     content: `${content.slice(0, block.bodyStart)}${updatedBlock}${content.slice(block.bodyEnd)}`,

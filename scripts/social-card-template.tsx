@@ -204,7 +204,7 @@ function linePenalty(
   let penalty = 0;
   if (next?.glued) penalty += 400; // breaks a hyphenated word
   if (!isLast && CONNECTOR_WORDS.has(bare(last))) penalty += 250;
-  if (units[0].text === "&") penalty += 120; // "&" belongs to the line before
+  if (units[0].text === "&") penalty += 450; // "&" belongs to the line before
   if (next && /^\d/u.test(next.text)) penalty += 120; // keeps "Windows 10" together
   if (!isLast && /[:–—]$/u.test(last)) penalty -= 60; // a natural pause
   // A lone short word on the last line; short titles may break where they like.
@@ -287,7 +287,8 @@ export function fitText(
     maxLines?: number;
   }
 ): FittedText {
-  const units = unitsOf(text.replace(/\s+/gu, " ").trim());
+  // Only plain white space collapses: a non-breaking space keeps two words together.
+  const units = unitsOf(text.replace(/[ \t\r\n]+/gu, " ").trim());
   let best: (FittedText & { cost: number }) | undefined;
   for (const fontSize of options.sizes) {
     const lineHeight = Math.round(fontSize * options.lineHeight);
@@ -356,7 +357,8 @@ export interface DocsCardModel extends CardAssets {
   kind: "docs";
   section: string;
   title: FittedText;
-  motif:
+  /** The method's motif; a section without one shows the portrait. */
+  motif?:
     | { method: "guided-coding"; highlight?: GuidedCodingPhase }
     | { method: "chack"; highlight?: ChackPart };
 }
@@ -688,11 +690,18 @@ function GuidedCodingMotif({ highlight }: { highlight?: GuidedCodingPhase }) {
  * A vertical arrow as an SVG image, in the notation of the CHACK diagram: an open head for
  * "references", a dashed line with a hollow triangle for "implements".
  */
-function Arrow({ implements: isImplements, height }: { implements?: boolean; height: number }) {
-  const line = `stroke="${color.muted}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"`;
-  const svg = isImplements
+export function arrowSvg(isImplements: boolean, height: number): string {
+  const line = `stroke="${color.muted}" stroke-width="2.5" stroke-linejoin="round"`;
+  return isImplements
     ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="${height}" viewBox="0 0 16 ${height}"><path d="M8 0 V ${height - 12}" ${line} stroke-dasharray="5 4" stroke-linecap="butt" fill="none"/><path d="M2.5 ${height - 12} L8 ${height - 2} L13.5 ${height - 12} Z" ${line} fill="${color.bg}"/></svg>`
-    : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="${height}" viewBox="0 0 16 ${height}"><path d="M8 3 V ${height}" ${line} fill="none"/><path d="M2 9 L8 2 L14 9" ${line} fill="none"/></svg>`;
+    : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="${height}" viewBox="0 0 16 ${height}"><path d="M8 3 V ${height}" ${line} stroke-linecap="round" fill="none"/><path d="M2 9 L8 2 L14 9" ${line} stroke-linecap="round" fill="none"/></svg>`;
+}
+
+/** The arrow heights the CHACK motif uses, so the generator can check their SVG. */
+export const ARROW_HEIGHT = 34;
+
+function Arrow({ implements: isImplements, height }: { implements?: boolean; height: number }) {
+  const svg = arrowSvg(Boolean(isImplements), height);
   return (
     <img
       src={`data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`}
@@ -739,7 +748,7 @@ function ChackMotif({ highlight }: { highlight?: ChackPart }) {
           borderRadius: "18px",
         }}
       >
-        <Arrow implements height={34} />
+        <Arrow implements height={ARROW_HEIGHT} />
         <div
           style={{
             ...label,
@@ -762,8 +771,8 @@ function ChackMotif({ highlight }: { highlight?: ChackPart }) {
             marginTop: "8px",
           }}
         >
-          <Arrow height={34} />
-          <Arrow height={34} />
+          <Arrow height={ARROW_HEIGHT} />
+          <Arrow height={ARROW_HEIGHT} />
         </div>
         <div
           style={{
@@ -829,12 +838,13 @@ export function SocialCard(model: SocialCardModel) {
     visual = <Portrait src={model.portrait} />;
   } else {
     text = <DocsText section={model.section} title={model.title} />;
-    visual =
-      model.motif.method === "guided-coding" ? (
-        <GuidedCodingMotif highlight={model.motif.highlight} />
-      ) : (
-        <ChackMotif highlight={model.motif.highlight} />
-      );
+    visual = !model.motif ? (
+      <Portrait src={model.portrait} />
+    ) : model.motif.method === "guided-coding" ? (
+      <GuidedCodingMotif highlight={model.motif.highlight} />
+    ) : (
+      <ChackMotif highlight={model.motif.highlight} />
+    );
   }
 
   // Satori lays out the root box as content-box, so the margins come from an inner box.
