@@ -1,6 +1,7 @@
 ---
 sidebar_position: 10
 title: What Belongs in a Rules File
+description: "What belongs in a rules file like AGENTS.md: only what an agent cannot discover from the code itself, such as workflow rules and feedback loops."
 image: /img/social-cards/docs-guided-coding-rules-files.jpg
 ---
 

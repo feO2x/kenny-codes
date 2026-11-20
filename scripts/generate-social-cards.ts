@@ -64,6 +64,8 @@ const CARD_EXTENSION = ".jpg";
  * custom image, and stale PNG cards are removed.
  */
 const LEGACY_CARD_EXTENSION = ".png";
+/** A card being written; never published, removed after every run. */
+const TEMPORARY_EXTENSION = ".tmp";
 const JPEG_OPTIONS = { quality: 88, mozjpeg: true } as const;
 const DEFAULT_SOCIAL_CARD_PATH = path.join(
   STATIC_DIR,
@@ -139,7 +141,6 @@ interface ContentItem {
   event?: string;
   /** The `image` frontmatter as Docusaurus reads it. */
   image?: string;
-  draft: boolean;
 }
 
 /**
@@ -336,16 +337,27 @@ function getStringField(frontmatter: Frontmatter, key: string): string | undefin
  * Converts all markdown files below a content root into normalized `ContentItem`
  * objects.
  */
-async function discoverContent(dirPath: string, kind: ContentKind): Promise<ContentItem[]> {
+async function discoverContent(
+  dirPath: string,
+  kind: ContentKind
+): Promise<{ items: ContentItem[]; draftSlugs: string[] }> {
   const files = await getAllMarkdownFiles(dirPath);
+  const draftSlugs: string[] = [];
 
   const items = await Promise.all(
-    files.map(async (filePath) => {
+    files.map(async (filePath): Promise<ContentItem | undefined> => {
       const { frontMatter: frontmatter, contentTitle } = await parseMarkdownFile({
         filePath,
         fileContent: await fs.readFile(filePath, "utf8"),
         parseFrontMatter: DEFAULT_PARSE_FRONT_MATTER,
       });
+
+      // Drafts are left out of the production build, so they get no public card either. Nothing
+      // else is read from them: a draft may still lack a date.
+      if (isDraft({ frontMatter: frontmatter, env: "production" })) {
+        draftSlugs.push(deriveSlug(filePath, frontmatter, kind));
+        return undefined;
+      }
 
       return {
         filePath,
@@ -361,12 +373,10 @@ async function discoverContent(dirPath: string, kind: ContentKind): Promise<Cont
         type: getStringField(frontmatter, "type"),
         event: getStringField(frontmatter, "event"),
         image: getStringField(frontmatter, "image"),
-        // Drafts are left out of the production build, so they get no public card either.
-        draft: isDraft({ frontMatter: frontmatter, env: "production" }),
       };
     })
   );
-  return items.filter((item) => !item.draft);
+  return { items: items.filter((item) => item !== undefined), draftSlugs };
 }
 
 /**
@@ -438,6 +448,10 @@ function fitLine(
     text: text === value ? value : `${text.replace(/[\s,.:;/-]+$/u, "")}\u2026`,
     fontSize,
   };
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
 /** Words in an event's name or title that already say what kind of event it is. */
@@ -547,7 +561,7 @@ function buildCardModel(item: ContentItem, assets: SocialCardAssets): SocialCard
   // "Thinktecture Webinar", "Visiting Lecture" or "Async Workshop: …" already say what it is: the
   // date alone follows. Whole words only: "Talking to LLMs" is no "Talk".
   const saysType = [type, ...FORMAT_WORDS].some((word) =>
-    new RegExp(`(^|[^\\p{L}])${word}($|[^\\p{L}])`, "iu").test(`${event} ${title}`)
+    new RegExp(`(^|[^\\p{L}])${escapeRegExp(word)}($|[^\\p{L}])`, "iu").test(`${event} ${title}`)
   );
   const [primary, secondary] =
     item.kind === "blog"
@@ -811,7 +825,7 @@ async function main(): Promise<void> {
   const startTime = performance.now();
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
-  const [assets, previousManifest, blogItems, eventItems, docsItems] = await Promise.all([
+  const [assets, previousManifest, blog, events, docs] = await Promise.all([
     loadAssets(),
     loadManifest(),
     discoverContent(BLOG_DIR, "blog"),
@@ -819,13 +833,15 @@ async function main(): Promise<void> {
     discoverContent(DOCS_DIR, "docs"),
   ]);
 
-  const items = [...blogItems, ...eventItems, ...docsItems];
+  const items = [...blog.items, ...events.items, ...docs.items];
+  const docsSlugs = [...docs.items.map((item) => item.slug), ...docs.draftSlugs];
   // A highlight for a page that no longer exists means the page was renamed: say so.
-  for (const docs of DOCS_SECTIONS) {
-    for (const page of Object.keys(docs.highlights)) {
-      if (!docsItems.some((item) => item.slug === `${docs.prefix}/${page}`)) {
+  // Drafts count as pages here: they may be highlighted before they are published.
+  for (const section of DOCS_SECTIONS) {
+    for (const page of Object.keys(section.highlights)) {
+      if (!docsSlugs.includes(`${section.prefix}/${page}`)) {
         throw new Error(
-          `DOCS_SECTIONS highlights "${docs.prefix}/${page}", which is not a docs page.`
+          `DOCS_SECTIONS highlights "${section.prefix}/${page}", which is not a docs page.`
         );
       }
     }
@@ -893,10 +909,15 @@ async function main(): Promise<void> {
       if (previousManifest.items[item.slug] === currentHash && outputAlreadyExists) {
         cachedCount += 1;
       } else {
-        // Through a temporary file, so a failed write never leaves a half-written card.
-        const temporaryPath = `${absoluteOutputPath}.tmp`;
-        await fs.writeFile(temporaryPath, await renderCard(model, assets));
-        await fs.rename(temporaryPath, absoluteOutputPath);
+        // Through a temporary file, so a failed write never leaves a half-written card. The
+        // temporary file is removed either way; the sweep below also catches one left by a crash.
+        const temporaryPath = `${absoluteOutputPath}${TEMPORARY_EXTENSION}`;
+        try {
+          await fs.writeFile(temporaryPath, await renderCard(model, assets));
+          await fs.rename(temporaryPath, absoluteOutputPath);
+        } finally {
+          await fs.rm(temporaryPath, { force: true });
+        }
         generatedCount += 1;
       }
       nextManifest.items[item.slug] = currentHash;
@@ -916,6 +937,10 @@ async function main(): Promise<void> {
   let removedCount = 0;
 
   for (const fileName of existingOutputFiles) {
+    if (fileName.endsWith(TEMPORARY_EXTENSION)) {
+      await fs.rm(path.join(OUTPUT_DIR, fileName), { force: true });
+      continue;
+    }
     if (!fileName.endsWith(CARD_EXTENSION) && !fileName.endsWith(LEGACY_CARD_EXTENSION)) {
       continue;
     }

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 11
 title: Finding the Right Plan Size
+description: "How large should a plan be? The signs of a plan that is too small or too large, and why your review sets the limit, not the model."
 image: /img/social-cards/docs-guided-coding-finding-the-right-plan-size.jpg
 ---
 

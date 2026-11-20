@@ -175,24 +175,17 @@ const config: Config = {
         content: "telephone=no, address=no, email=no",
       },
       {
-        name: "og:site_name",
+        // Open Graph reads `property`; Docusaurus emits its own og: tags the same way.
+        property: "og:site_name",
         content: "Kenny Codes",
       },
       {
-        name: "og:locale",
-        content: "en_IE",
-      },
-      {
-        name: "og:image:width",
+        property: "og:image:width",
         content: "1200",
       },
       {
-        name: "og:image:height",
+        property: "og:image:height",
         content: "630",
-      },
-      {
-        name: "og:type",
-        content: "website",
       },
       {
         name: "twitter:card",

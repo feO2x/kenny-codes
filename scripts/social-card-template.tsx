@@ -233,7 +233,7 @@ function linePenalty(
   if (!isLast && CONNECTOR_WORDS.has(bare(last))) penalty += 250;
   if (units[0].text === "&") penalty += 450; // "&" belongs to the line before
   if (next && /^\d/u.test(next.text)) penalty += 120; // keeps "Windows 10" together
-  if (!isLast && /[:–—]$/u.test(last)) penalty -= 60; // a natural pause
+  if (!isLast && /[:,–—]$/u.test(last)) penalty -= 60; // a natural pause
   // A lone short word on the last line; short titles may break where they like.
   if (isLast && wordCount > 3 && words.length === 1 && bare(last).length <= 8) penalty += 160;
   // A lone word between two lines: "Software / Applications" reads as a list, not a title.

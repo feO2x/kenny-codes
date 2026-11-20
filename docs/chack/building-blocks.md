@@ -1,6 +1,7 @@
 ---
 sidebar_position: 7
 title: Building Blocks of a Backend Feature
+description: "The building blocks you meet in every backend feature, such as endpoints, DTOs, and validators, and the CHACK category each one belongs to."
 image: /img/social-cards/docs-chack-building-blocks.jpg
 ---
 
