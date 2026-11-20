@@ -67,7 +67,11 @@ export type ChackPart = keyof typeof CHACK_TILES;
 /* ---------- Text measurement ---------- */
 
 /** Width of `text` in pixels at `fontSize`, with `tracking` in em per character. */
-export type TextMeasurer = (text: string, fontSize: number, tracking?: number) => number;
+export interface TextMeasurer {
+  (text: string, fontSize: number, tracking?: number): number;
+  /** The characters of `text` the font has no glyph for; it would draw them as a placeholder. */
+  missing(text: string): string[];
+}
 
 /**
  * Reads the advance widths of a TrueType font: `cmap` (format 4) maps characters to glyphs and
@@ -128,11 +132,24 @@ export function createMeasurer(font: Buffer): TextMeasurer {
     return width;
   };
 
-  return (text, fontSize, tracking = 0) => {
+  const measure = (text: string, fontSize: number, tracking = 0) => {
     const chars = Array.from(text);
     const em = chars.reduce((total, char) => total + advanceOf(char), 0);
     return (em + tracking * Math.max(0, chars.length - 1)) * fontSize;
   };
+  const missing = (text: string) =>
+    [...new Set(Array.from(text))].filter(
+      (char) => !/\s/u.test(char) && glyphOf(char.codePointAt(0) ?? 0) === 0
+    );
+  return Object.assign(measure, { missing });
+}
+
+/** Fails for text with characters the font lacks, such as emoji. */
+export function assertGlyphs(text: string, measure: TextMeasurer): void {
+  const missing = measure.missing(text);
+  if (missing.length > 0) {
+    throw new Error(`"${text}" contains characters Mona Sans cannot draw: ${missing.join(" ")}`);
+  }
 }
 
 /* ---------- Line breaking ---------- */
@@ -170,6 +187,7 @@ const UNBREAKABLE = [
   "Humble Objects",
   "Composition Root",
   "Automated Tests",
+  "Vibe Coding",
 ];
 
 function unitsOf(text: string): Unit[] {
@@ -302,6 +320,7 @@ export function fitText(
   }
 ): FittedText {
   // Only plain white space collapses: a non-breaking space keeps two words together.
+  assertGlyphs(text, options.measure);
   const units = unitsOf(text.replace(/[ \t\r\n]+/gu, " ").trim());
   let best: (FittedText & { cost: number }) | undefined;
   for (const fontSize of options.sizes) {

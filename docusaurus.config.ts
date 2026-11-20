@@ -175,18 +175,6 @@ const config: Config = {
         content: "telephone=no, address=no, email=no",
       },
       {
-        name: "og:title",
-        content: "Kenny Codes",
-      },
-      {
-        name: "og:description",
-        content: description,
-      },
-      {
-        name: "og:url",
-        content: "https://kenny-codes.net/",
-      },
-      {
         name: "og:site_name",
         content: "Kenny Codes",
       },
@@ -203,10 +191,6 @@ const config: Config = {
         content: "630",
       },
       {
-        name: "og:image:alt",
-        content: "Kenny Codes",
-      },
-      {
         name: "og:type",
         content: "website",
       },
@@ -221,14 +205,6 @@ const config: Config = {
       {
         name: "twitter:creator",
         content: "@feO2x",
-      },
-      {
-        name: "twitter:title",
-        content: "Kenny Codes",
-      },
-      {
-        name: "twitter:description",
-        content: description,
       },
       {
         name: "referrer",

@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { DEFAULT_PARSE_FRONT_MATTER, parseMarkdownFile } from "@docusaurus/utils";
+import { DEFAULT_PARSE_FRONT_MATTER, isDraft, parseMarkdownFile } from "@docusaurus/utils";
 import React from "react";
 import satori from "satori";
 import sharp from "sharp";
@@ -18,6 +18,7 @@ import {
   SocialCard,
   TEXT_WIDTH,
   arrowSvg,
+  assertGlyphs,
   createMeasurer,
   fitText,
   fitTitle,
@@ -138,6 +139,7 @@ interface ContentItem {
   event?: string;
   /** The `image` frontmatter as Docusaurus reads it. */
   image?: string;
+  draft: boolean;
 }
 
 /**
@@ -337,7 +339,7 @@ function getStringField(frontmatter: Frontmatter, key: string): string | undefin
 async function discoverContent(dirPath: string, kind: ContentKind): Promise<ContentItem[]> {
   const files = await getAllMarkdownFiles(dirPath);
 
-  return Promise.all(
+  const items = await Promise.all(
     files.map(async (filePath) => {
       const { frontMatter: frontmatter, contentTitle } = await parseMarkdownFile({
         filePath,
@@ -359,9 +361,12 @@ async function discoverContent(dirPath: string, kind: ContentKind): Promise<Cont
         type: getStringField(frontmatter, "type"),
         event: getStringField(frontmatter, "event"),
         image: getStringField(frontmatter, "image"),
+        // Drafts are left out of the production build, so they get no public card either.
+        draft: isDraft({ frontMatter: frontmatter, env: "production" }),
       };
     })
   );
+  return items.filter((item) => !item.draft);
 }
 
 /**
@@ -421,6 +426,7 @@ function fitLine(
 ): { text: string; fontSize: number } {
   const fontSize =
     sizes.find((size) => measure(value, size) <= TEXT_WIDTH) ?? sizes[sizes.length - 1];
+  assertGlyphs(value, measure);
   if (measure(value, fontSize) <= TEXT_WIDTH) {
     return { text: value, fontSize };
   }
@@ -434,8 +440,11 @@ function fitLine(
   };
 }
 
+/** Words in an event's name or title that already say what kind of event it is. */
+const FORMAT_WORDS = ["Talk", "Workshop", "Webinar", "Lecture"];
+
 /** The docs sections and the method motif each one shows. */
-const DOCS_SECTIONS: Array<
+type DocsSection =
   | {
       prefix: string;
       section: string;
@@ -447,8 +456,14 @@ const DOCS_SECTIONS: Array<
       section: string;
       method: "chack";
       highlights: Record<string, ChackPart>;
-    }
-> = [
+    };
+
+/** The most specific prefix first, so a page finds its own section before the enclosing one. */
+function byPrefixLength(sections: DocsSection[]): DocsSection[] {
+  return [...sections].sort((left, right) => right.prefix.length - left.prefix.length);
+}
+
+const DOCS_SECTIONS = byPrefixLength([
   {
     prefix: "docs/chack/dotnet",
     section: "CHACK in .NET",
@@ -485,7 +500,7 @@ const DOCS_SECTIONS: Array<
       "guiding-phase": "guiding",
     },
   },
-];
+]);
 
 /**
  * Maps normalized content into the model of its card.
@@ -529,8 +544,11 @@ function buildCardModel(item: ContentItem, assets: SocialCardAssets): SocialCard
   const date = formatDate(item.date ?? "");
   const event = (item.event ?? "Kenny Pflug").replace(/ - /gu, " \u2013 ");
   const type = item.type ?? "Event";
-  // "Thinktecture Webinar" or "Async Workshop: …" already say what it is: the date alone follows.
-  const saysType = `${event} ${title}`.toLowerCase().includes(type.toLowerCase());
+  // "Thinktecture Webinar", "Visiting Lecture" or "Async Workshop: …" already say what it is: the
+  // date alone follows. Whole words only: "Talking to LLMs" is no "Talk".
+  const saysType = [type, ...FORMAT_WORDS].some((word) =>
+    new RegExp(`(^|[^\\p{L}])${word}($|[^\\p{L}])`, "iu").test(`${event} ${title}`)
+  );
   const [primary, secondary] =
     item.kind === "blog"
       ? ["Blog post by Kenny Pflug", date]
@@ -802,6 +820,16 @@ async function main(): Promise<void> {
   ]);
 
   const items = [...blogItems, ...eventItems, ...docsItems];
+  // A highlight for a page that no longer exists means the page was renamed: say so.
+  for (const docs of DOCS_SECTIONS) {
+    for (const page of Object.keys(docs.highlights)) {
+      if (!docsItems.some((item) => item.slug === `${docs.prefix}/${page}`)) {
+        throw new Error(
+          `DOCS_SECTIONS highlights "${docs.prefix}/${page}", which is not a docs page.`
+        );
+      }
+    }
+  }
   // Different paths can flatten to the same file name ("a-b/c" and "a/b-c"): stop before writing.
   const owners = new Map<string, string>();
   for (const item of items) {
@@ -854,32 +882,30 @@ async function main(): Promise<void> {
         return;
       }
 
-      if (frontmatter.status !== "unchanged") {
-        await fs.writeFile(item.filePath, frontmatter.content);
-        updatedFrontmatterCount += 1;
-      }
-
       const absoluteOutputPath = path.join(STATIC_DIR, managedImagePath.replace(/^\//u, ""));
       const currentHash = hashCard(model, assets);
-      nextManifest.items[item.slug] = currentHash;
-
-      const previousHash = previousManifest.items[item.slug];
       const outputAlreadyExists = await fs
         .access(absoluteOutputPath)
         .then(() => true)
         .catch(() => false);
 
-      if (
-        previousManifest.templateVersion === TEMPLATE_VERSION &&
-        previousHash === currentHash &&
-        outputAlreadyExists
-      ) {
+      // The hash covers TEMPLATE_VERSION, so an equal hash means an up-to-date card.
+      if (previousManifest.items[item.slug] === currentHash && outputAlreadyExists) {
         cachedCount += 1;
-        return;
+      } else {
+        // Through a temporary file, so a failed write never leaves a half-written card.
+        const temporaryPath = `${absoluteOutputPath}.tmp`;
+        await fs.writeFile(temporaryPath, await renderCard(model, assets));
+        await fs.rename(temporaryPath, absoluteOutputPath);
+        generatedCount += 1;
       }
+      nextManifest.items[item.slug] = currentHash;
 
-      await fs.writeFile(absoluteOutputPath, await renderCard(model, assets));
-      generatedCount += 1;
+      // Only once the card exists does the page point at it.
+      if (frontmatter.status !== "unchanged") {
+        await fs.writeFile(item.filePath, frontmatter.content);
+        updatedFrontmatterCount += 1;
+      }
     }
   );
 
