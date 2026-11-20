@@ -1,6 +1,7 @@
 ---
 sidebar_position: 3
 title: Clients and Sessions in .NET
+image: /img/social-cards/docs-chack-dotnet-clients-and-sessions.jpg
 ---
 
 # Clients and Sessions in .NET

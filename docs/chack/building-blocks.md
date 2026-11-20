@@ -1,6 +1,7 @@
 ---
 sidebar_position: 7
 title: Building Blocks of a Backend Feature
+image: /img/social-cards/docs-chack-building-blocks.jpg
 ---
 
 # Building Blocks of a Backend Feature

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 6
 title: Clients and Sessions
+image: /img/social-cards/docs-chack-clients-and-sessions.jpg
 ---
 
 # Clients and Sessions

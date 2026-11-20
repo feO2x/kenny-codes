@@ -8,20 +8,31 @@ import satori from "satori";
 import sharp from "sharp";
 
 import {
-  SocialCardTemplate,
-  type SocialCardTemplateModel,
+  CARD_HEIGHT,
+  CARD_WIDTH,
+  CONTENT_META_HEIGHT,
+  DOCS_SECTION_HEIGHT,
+  STATEMENT,
+  SocialCard,
+  TEXT_WIDTH,
+  createMeasurer,
+  fitText,
+  fitTitle,
+  type ChackPart,
+  type GuidedCodingPhase,
+  type SocialCardModel,
+  type TextMeasurer,
 } from "./social-card-template";
 
 /**
- * This script generates all build-time social cards for blog posts and events.
+ * This script generates all build-time social cards for blog posts, events, and docs pages.
  *
  * High-level flow:
  * 1. Discover markdown / MDX content files.
  * 2. Read their frontmatter and derive the data needed for a card.
- * 3. Render a text overlay with Satori.
- * 4. Composite that overlay onto a shared background using Sharp.
- * 5. Write the JPEG into `static/img/social-cards/`.
- * 6. Update markdown frontmatter so Docusaurus uses the generated card.
+ * 3. Render the card with Satori and encode it as JPEG with Sharp.
+ * 4. Write the JPEG into `static/img/social-cards/`.
+ * 5. Update markdown frontmatter so Docusaurus uses the generated card.
  *
  * The script is deterministic on purpose. Generated files are committed to git,
  * so identical content should always result in identical images.
@@ -29,18 +40,16 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const CARD_WIDTH = 1200;
-const CARD_HEIGHT = 630;
 const BLOG_DIR = path.join(__dirname, "../blog");
 const EVENTS_DIR = path.join(__dirname, "../events");
+const DOCS_DIR = path.join(__dirname, "../docs");
 const STATIC_DIR = path.join(__dirname, "../static");
 const OUTPUT_DIR = path.join(STATIC_DIR, "img/social-cards");
 const MANIFEST_PATH = path.join(OUTPUT_DIR, "manifest.json");
 /**
  * Cards are written as JPEG because they contain a photo and gradients, which
  * PNG compresses poorly (about 0.7 MB per card as PNG versus about 70 KB as
- * JPEG). Intermediate images used for compositing stay PNG to keep their alpha
- * channel; only the final, flattened card is encoded as JPEG.
+ * JPEG).
  */
 const CARD_EXTENSION = ".jpg";
 /**
@@ -49,27 +58,33 @@ const CARD_EXTENSION = ".jpg";
  * custom image, and stale PNG cards are removed.
  */
 const LEGACY_CARD_EXTENSION = ".png";
-const JPEG_OPTIONS = { quality: 85, mozjpeg: true } as const;
+const JPEG_OPTIONS = { quality: 88, mozjpeg: true } as const;
 const DEFAULT_SOCIAL_CARD_PATH = path.join(STATIC_DIR, `img/kenny-codes-social-card${CARD_EXTENSION}`);
 const LOGO_PATH = path.join(STATIC_DIR, "img/logo-dark.svg");
 const PHOTO_PATH = path.join(STATIC_DIR, "img/kenny-smiles.jpg");
 /**
  * The social-card renderer uses repo-local font files so builds do not depend
- * on OS-specific system font locations. The files are checked into
- * `scripts/assets/fonts/` together with their upstream license text.
+ * on OS-specific system font locations. They are the static instances of Mona
+ * Sans, the site's typeface, from https://github.com/github/mona-sans (v2.0.27),
+ * checked into `scripts/assets/fonts/` unmodified together with their license.
+ * Satori cannot read the variable WOFF2 files the site uses.
  */
 const FONT_ASSETS_DIR = path.join(__dirname, "assets/fonts");
-const FONT_REGULAR_PATH = path.join(FONT_ASSETS_DIR, "DejaVuSans.ttf");
-const FONT_BOLD_PATH = path.join(FONT_ASSETS_DIR, "DejaVuSans-Bold.ttf");
+const FONTS = [
+  { file: "MonaSans-Regular.ttf", name: "Mona Sans", weight: 400 },
+  { file: "MonaSans-Medium.ttf", name: "Mona Sans", weight: 500 },
+  { file: "MonaSans-SemiBold.ttf", name: "Mona Sans", weight: 600 },
+  { file: "MonaSansSemiExpanded-SemiBold.ttf", name: "Mona Sans SemiExpanded", weight: 600 },
+] as const;
 /**
  * Bump this value whenever the rendering logic or visual design changes in a
  * way that should invalidate the cached images. The manifest stores this value
  * together with per-item hashes.
  */
-const TEMPLATE_VERSION = "2026-11-07-v14";
+const TEMPLATE_VERSION = "2026-11-20-v1";
 const CONCURRENCY = 4;
 
-type ContentKind = "blog" | "events";
+type ContentKind = "blog" | "events" | "docs";
 
 /**
  * Minimal frontmatter representation used by this script.
@@ -95,7 +110,8 @@ interface FrontmatterBlock {
 
 /**
  * Normalized content data used by the generator. The raw markdown file is
- * converted into this shape before any rendering starts.
+ * converted into this shape before any rendering starts. It holds only what a
+ * card shows, so the hash changes only when the card would.
  */
 interface ContentItem {
   filePath: string;
@@ -103,13 +119,9 @@ interface ContentItem {
   slug: string;
   title: string;
   socialTitle?: string;
-  date: string;
-  tags: string[];
+  /** Blog posts and events only. */
+  date?: string;
   type?: string;
-  duration?: string;
-  language?: string;
-  location?: string;
-  country?: string;
   event?: string;
 }
 
@@ -128,9 +140,13 @@ interface SocialCardManifest {
  * Preloaded binary assets needed during rendering.
  */
 interface SocialCardAssets {
-  logoDataUri: string;
-  fonts: Array<{ name: string; data: Buffer; weight: 400 | 700; style: "normal" }>;
-  baseTemplate: Buffer;
+  logo: string;
+  portrait: string;
+  fonts: Array<{ name: string; data: Buffer; weight: 400 | 500 | 600; style: "normal" }>;
+  /** Measures the title face, for line breaking. */
+  measureTitle: TextMeasurer;
+  /** Measures the medium body face, for the site card's statement. */
+  measureBody: TextMeasurer;
 }
 
 /**
@@ -283,6 +299,15 @@ async function getAllMarkdownFiles(dirPath: string): Promise<string[]> {
  * 2. date prefix in the file name
  * 3. date prefix in the parent directory name
  */
+
+/**
+ * Resolves the publication date for one blog post or event.
+ *
+ * Priority:
+ * 1. explicit `date` in frontmatter
+ * 2. date prefix in the file name
+ * 3. date prefix in the parent directory name
+ */
 function deriveDate(filePath: string, frontmatter: Frontmatter): string {
   const explicitDate = frontmatter.date;
   if (typeof explicitDate === "string" && explicitDate) {
@@ -303,14 +328,22 @@ function deriveDate(filePath: string, frontmatter: Frontmatter): string {
 }
 
 /**
- * Resolves the slug for one content item.
+ * Resolves the slug for one content item, which names its card file.
  *
- * Priority:
+ * Blog posts and events:
  * 1. explicit `slug` in frontmatter
  * 2. file name without extension
  * 3. parent folder name for `index.md` / `index.mdx`
+ *
+ * Docs pages: `docs/` plus the path below `docs/`, without extension and
+ * without a trailing `index`, e.g. `docs/chack/the-core`.
  */
-function deriveSlug(filePath: string, frontmatter: Frontmatter): string {
+function deriveSlug(filePath: string, frontmatter: Frontmatter, kind: ContentKind): string {
+  if (kind === "docs") {
+    const relative = path.relative(DOCS_DIR, filePath).replace(/\.mdx?$/u, "");
+    return `docs/${relative.split(path.sep).join("/").replace(/\/?index$/u, "")}`;
+  }
+
   const explicitSlug = frontmatter.slug;
   if (typeof explicitSlug === "string" && explicitSlug) {
     return explicitSlug.replace(/^\/+|\/+$/gu, "");
@@ -333,14 +366,6 @@ function getStringField(frontmatter: Frontmatter, key: string): string | undefin
 }
 
 /**
- * Reads one string-array field from the parsed frontmatter object.
- */
-function getStringArrayField(frontmatter: Frontmatter, key: string): string[] {
-  const value = frontmatter[key];
-  return Array.isArray(value) ? value.filter((entry) => typeof entry === "string") : [];
-}
-
-/**
  * Converts all markdown files below a content root into normalized `ContentItem`
  * objects.
  */
@@ -355,21 +380,17 @@ async function discoverContent(dirPath: string, kind: ContentKind): Promise<Cont
       return {
         filePath,
         kind,
-        slug: deriveSlug(filePath, frontmatter),
+        slug: deriveSlug(filePath, frontmatter, kind),
         title: getStringField(frontmatter, "title") ?? path.basename(filePath, path.extname(filePath)),
         socialTitle: getStringField(frontmatter, "socialTitle"),
-        date: deriveDate(filePath, frontmatter),
-        tags: getStringArrayField(frontmatter, "tags"),
+        date: kind === "docs" ? undefined : deriveDate(filePath, frontmatter),
         type: getStringField(frontmatter, "type"),
-        duration: getStringField(frontmatter, "duration"),
-        language: getStringField(frontmatter, "language"),
-        location: getStringField(frontmatter, "location"),
-        country: getStringField(frontmatter, "country"),
         event: getStringField(frontmatter, "event"),
       };
     })
   );
 }
+
 
 /**
  * Converts a content slug into a file-system-safe PNG file name.
@@ -398,6 +419,11 @@ function getLegacyManagedImagePath(slug: string): string {
  *
  * If any of these values change, the corresponding image must be regenerated.
  */
+/**
+ * Calculates a stable content hash for one card input.
+ *
+ * If any of these values change, the corresponding image must be regenerated.
+ */
 function hashItem(item: ContentItem): string {
   return crypto
     .createHash("sha256")
@@ -409,12 +435,7 @@ function hashItem(item: ContentItem): string {
         title: item.title,
         socialTitle: item.socialTitle,
         date: item.date,
-        tags: item.tags,
         type: item.type,
-        duration: item.duration,
-        language: item.language,
-        location: item.location,
-        country: item.country,
         event: item.event,
       })
     )
@@ -422,12 +443,12 @@ function hashItem(item: ContentItem): string {
 }
 
 /**
- * Formats the card date in the short English style used by the design.
+ * Formats the card date in the long English style, e.g. "May 6, 2024".
  */
 function formatDate(dateValue: string): string {
   const date = new Date(`${dateValue}T00:00:00Z`);
   return new Intl.DateTimeFormat("en-US", {
-    month: "short",
+    month: "long",
     day: "numeric",
     year: "numeric",
     timeZone: "UTC",
@@ -435,59 +456,103 @@ function formatDate(dateValue: string): string {
 }
 
 /**
- * Shortens long supporting strings such as conference names.
+ * Shortens a line of known font size so it fits the text column.
  */
-function truncateText(value: string, maxLength: number): string {
-  if (value.length <= maxLength) {
-    return value;
+function fitLine(value: string, measure: TextMeasurer, fontSize: number): string {
+  let result = value;
+  while (result.length > 1 && measure(`${result}…`, fontSize) > TEXT_WIDTH) {
+    result = result.slice(0, -1).trimEnd();
   }
-
-  return `${value.slice(0, maxLength - 1).trimEnd()}\u2026`;
+  return result === value ? value : `${result.replace(/[\s,.:;/-]+$/u, "")}…`;
 }
 
-/**
- * Turns frontmatter tags like `cloud-native` into nicer card labels.
- */
-function formatTag(tag: string): string {
-  return tag.replace(/-/gu, " ");
-}
+/** The docs sections and the method motif each one shows. */
+const DOCS_SECTIONS: Array<{ prefix: string; section: string; method: "guided-coding" | "chack" }> = [
+  { prefix: "docs/chack/dotnet", section: "CHACK in .NET", method: "chack" },
+  { prefix: "docs/chack", section: "CHACK", method: "chack" },
+  { prefix: "docs/guided-coding", section: "Guided Coding & Guided Learning", method: "guided-coding" },
+];
+
+/** Pages about one phase or one category highlight it in the motif, like their diagrams do. */
+const DOCS_HIGHLIGHTS: Record<string, GuidedCodingPhase | ChackPart> = {
+  "docs/guided-coding/planning-phase": "planning",
+  "docs/guided-coding/implementing-phase": "implementing",
+  "docs/guided-coding/guiding-phase": "guiding",
+  "docs/chack/the-core": "core",
+  "docs/chack/humble-objects": "humble",
+  "docs/chack/automated-tests": "tests",
+  "docs/chack/composition-root": "root",
+  "docs/chack/dotnet/the-core": "core",
+  "docs/chack/dotnet/testing": "tests",
+  "docs/chack/dotnet/composition-root": "root",
+};
 
 /**
- * Maps normalized content into the text model expected by the visual template.
+ * Maps normalized content into the model of its card.
  */
-function buildTemplateModel(item: ContentItem, assets: SocialCardAssets): SocialCardTemplateModel {
+function buildCardModel(item: ContentItem, assets: SocialCardAssets): SocialCardModel {
   const title = item.socialTitle?.trim() || item.title;
-  const detailLabel = formatDate(item.date);
+  const images = { logo: assets.logo, portrait: assets.portrait };
 
-  if (item.kind === "blog") {
+  if (item.kind === "docs") {
+    const docs = DOCS_SECTIONS.find(({ prefix }) => item.slug === prefix || item.slug.startsWith(`${prefix}/`));
+    if (!docs) {
+      throw new Error(`No docs section for ${item.filePath}. Add it to DOCS_SECTIONS.`);
+    }
+    const highlight = DOCS_HIGHLIGHTS[item.slug];
     return {
-      contentKind: "blog",
-      categoryLabel: "Blog Post",
-      detailLabel,
-      title,
-      supportingLine: undefined,
-      chips: item.tags.slice(0, 3).map(formatTag),
-      footerLabel: "kenny-codes.net",
-      logoDataUri: assets.logoDataUri,
+      kind: "docs",
+      ...images,
+      section: docs.section,
+      title: fitTitle(title, assets.measureTitle, DOCS_SECTION_HEIGHT),
+      motif:
+        docs.method === "guided-coding"
+          ? { method: "guided-coding", highlight: highlight as GuidedCodingPhase | undefined }
+          : { method: "chack", highlight: highlight as ChackPart | undefined },
     };
   }
 
-  const supportingLine = item.event
-    ? truncateText(item.event, 48)
-    : [item.location, item.country].filter(Boolean).join(", ");
-  const chips = [item.location, item.language, item.duration]
-    .filter((value): value is string => Boolean(value))
-    .slice(0, 3);
+  const date = formatDate(item.date ?? "");
+  const [primary, secondary] =
+    item.kind === "blog"
+      ? ["Blog post by Kenny Pflug", date]
+      : [item.event ?? "Kenny Pflug", `${item.type ?? "Event"} on ${date}`];
 
   return {
-    contentKind: "event",
-    categoryLabel: item.type ?? "Event",
-    detailLabel,
-    title,
-    supportingLine: supportingLine || undefined,
-    chips,
-    footerLabel: "kenny-codes.net",
-    logoDataUri: assets.logoDataUri,
+    kind: "content",
+    ...images,
+    title: fitTitle(title, assets.measureTitle, CONTENT_META_HEIGHT),
+    primary: fitLine(primary, assets.measureBody, 28),
+    secondary,
+  };
+}
+
+/**
+ * The card for the home page and for every page without a card of its own:
+ * the greeting, the statement and the two methods of the home page.
+ */
+function buildSiteCardModel(assets: SocialCardAssets): SocialCardModel {
+  const greeting = "Hi, I’m Kenny.";
+  const greetingSize = [96, 92, 88, 84, 80, 76, 72].find(
+    (size) => assets.measureTitle(greeting, size, -0.03) <= TEXT_WIDTH * 0.97
+  );
+  const statement = fitText(
+    "I build cloud-native .NET systems and help teams stay in control when AI agents write the code.",
+    {
+      measure: assets.measureBody,
+      maxWidth: STATEMENT.maxWidth,
+      maxHeight: 4 * STATEMENT.lineHeight,
+      sizes: [STATEMENT.fontSize],
+      lineHeight: STATEMENT.lineHeight / STATEMENT.fontSize,
+    }
+  );
+
+  return {
+    kind: "site",
+    logo: assets.logo,
+    portrait: assets.portrait,
+    greetingSize: greetingSize ?? 72,
+    statement: statement.lines,
   };
 }
 
@@ -495,126 +560,48 @@ function buildTemplateModel(item: ContentItem, assets: SocialCardAssets): Social
  * Loads all static assets needed for rendering.
  *
  * Fonts are loaded eagerly because Satori requires explicit font data instead
- * of reading system fonts by itself.
+ * of reading system fonts by itself. The portrait is cropped to the square the
+ * card shows, at twice its size.
  */
 async function loadAssets(): Promise<SocialCardAssets> {
-  const [logo, regularFont, boldFont, baseTemplate] = await Promise.all([
-    fs.readFile(LOGO_PATH, "utf8"),
-    readRequiredFile(FONT_REGULAR_PATH, "regular social-card font"),
-    readRequiredFile(FONT_BOLD_PATH, "bold social-card font"),
-    createBaseTemplate(),
+  const [logo, portrait, ...fontData] = await Promise.all([
+    fs.readFile(LOGO_PATH),
+    // The home page's crop: object-position 60% 45% on the 1600 x 1200 photo.
+    sharp(PHOTO_PATH)
+      .extract({ left: 240, top: 0, width: 1200, height: 1200 })
+      .resize(760, 760)
+      .jpeg({ quality: 90 })
+      .toBuffer(),
+    ...FONTS.map((font) => readRequiredFile(path.join(FONT_ASSETS_DIR, font.file), `social-card font ${font.file}`)),
   ]);
 
+  const fonts = FONTS.map((font, index) => ({
+    name: font.name,
+    data: fontData[index],
+    weight: font.weight,
+    style: "normal" as const,
+  }));
+
   return {
-    logoDataUri: `data:image/svg+xml;base64,${Buffer.from(logo).toString("base64")}`,
-    fonts: [
-      { name: "DejaVu Sans", data: regularFont, weight: 400, style: "normal" },
-      { name: "DejaVu Sans", data: boldFont, weight: 700, style: "normal" },
-    ],
-    baseTemplate,
+    logo: `data:image/svg+xml;base64,${logo.toString("base64")}`,
+    portrait: `data:image/jpeg;base64,${portrait.toString("base64")}`,
+    fonts,
+    measureTitle: createMeasurer(fontData[FONTS.findIndex((font) => font.name === "Mona Sans SemiExpanded")]),
+    measureBody: createMeasurer(fontData[FONTS.findIndex((font) => font.weight === 500)]),
   };
 }
 
 /**
- * Builds the shared image background used for all cards.
- *
- * The text overlay is rendered separately. This split keeps design work
- * manageable: background composition lives here, dynamic text layout lives in
- * the React template.
+ * Renders one card via Satori and encodes it as JPEG.
  */
-async function createBaseTemplate(): Promise<Buffer> {
-  const backgroundSvg = `
-    <svg width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#081018" />
-          <stop offset="58%" stop-color="#0d1623" />
-          <stop offset="100%" stop-color="#101a28" />
-        </linearGradient>
-        <radialGradient id="glowA" cx="0.18" cy="0.22" r="0.62">
-          <stop offset="0%" stop-color="rgba(49, 217, 208, 0.38)" />
-          <stop offset="100%" stop-color="rgba(49, 217, 208, 0)" />
-        </radialGradient>
-        <radialGradient id="glowB" cx="0.72" cy="0.82" r="0.48">
-          <stop offset="0%" stop-color="rgba(56, 126, 255, 0.22)" />
-          <stop offset="100%" stop-color="rgba(56, 126, 255, 0)" />
-        </radialGradient>
-        <linearGradient id="divider" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="rgba(53, 216, 208, 0.78)" />
-          <stop offset="100%" stop-color="rgba(73, 140, 255, 0.18)" />
-        </linearGradient>
-      </defs>
-      <rect width="${CARD_WIDTH}" height="${CARD_HEIGHT}" fill="url(#bg)" />
-      <rect x="0" y="0" width="780" height="${CARD_HEIGHT}" fill="url(#glowA)" />
-      <rect x="0" y="0" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" fill="url(#glowB)" />
-      <path d="M0 485 C200 430 370 405 640 456 C742 474 820 505 920 545 L920 630 L0 630 Z" fill="rgba(18, 31, 48, 0.84)" />
-      <path d="M0 76 C140 38 270 24 384 42 C516 63 612 132 710 162 L710 208 C612 178 515 136 382 116 C261 99 141 110 0 144 Z" fill="rgba(43, 67, 97, 0.22)" />
-      <rect x="716" y="0" width="4" height="${CARD_HEIGHT}" rx="2" fill="url(#divider)" />
-    </svg>
-  `;
-
-  const photoOverlaySvg = `
-    <svg width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="photoShade" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="rgba(6, 11, 18, 0.86)" />
-          <stop offset="28%" stop-color="rgba(6, 11, 18, 0.34)" />
-          <stop offset="100%" stop-color="rgba(6, 11, 18, 0.08)" />
-        </linearGradient>
-        <linearGradient id="photoTint" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="rgba(55, 116, 255, 0.18)" />
-          <stop offset="100%" stop-color="rgba(15, 24, 38, 0.44)" />
-        </linearGradient>
-      </defs>
-      <rect x="720" y="0" width="480" height="${CARD_HEIGHT}" fill="url(#photoShade)" />
-      <rect x="720" y="0" width="480" height="${CARD_HEIGHT}" fill="url(#photoTint)" />
-      <circle cx="1125" cy="92" r="118" fill="rgba(53, 216, 208, 0.16)" />
-    </svg>
-  `;
-
-  const photo = await sharp(PHOTO_PATH)
-    .resize(480, CARD_HEIGHT, {
-      fit: "cover",
-      position: "centre",
-    })
-    .modulate({
-      brightness: 0.96,
-      saturation: 0.95,
-    })
-    .toBuffer();
-
-  return sharp({
-    create: {
-      width: CARD_WIDTH,
-      height: CARD_HEIGHT,
-      channels: 4,
-      background: "#071019",
-    },
-  })
-    .composite([
-      { input: Buffer.from(backgroundSvg), top: 0, left: 0 },
-      { input: photo, top: 0, left: 720 },
-      { input: Buffer.from(photoOverlaySvg), top: 0, left: 0 },
-    ])
-    .png()
-    .toBuffer();
-}
-
-/**
- * Renders the React overlay to SVG via Satori and then converts it to a PNG
- * buffer so Sharp can composite it.
- */
-async function renderOverlay(
-  model: SocialCardTemplateModel,
-  assets: SocialCardAssets
-): Promise<Buffer> {
-  const svg = await satori(React.createElement(SocialCardTemplate, model), {
+async function renderCard(model: SocialCardModel, assets: SocialCardAssets): Promise<Buffer> {
+  const svg = await satori(React.createElement(SocialCard, model), {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     fonts: assets.fonts,
   });
 
-  return sharp(Buffer.from(svg)).png().toBuffer();
+  return sharp(Buffer.from(svg)).flatten({ background: "#0b1424" }).jpeg(JPEG_OPTIONS).toBuffer();
 }
 
 /**
@@ -622,25 +609,9 @@ async function renderOverlay(
  * their own dedicated card.
  */
 async function generateDefaultSiteCard(assets: SocialCardAssets): Promise<void> {
-  const model: SocialCardTemplateModel = {
-    contentKind: "blog",
-    categoryLabel: "Kenny Codes",
-    detailLabel: "AI, Cloud-Native, and .NET",
-    title: "Distributed Systems, Software Architecture, and Guided Coding",
-    supportingLine: "Blog posts, speaking events, and practical guidance by Kenny Pflug.",
-    chips: ["Blog", "Events", "Guided Coding"],
-    footerLabel: "kenny-codes.net",
-    logoDataUri: assets.logoDataUri,
-  };
-
-  const overlay = await renderOverlay(model, assets);
-  const image = await sharp(assets.baseTemplate)
-    .composite([{ input: overlay, top: 0, left: 0 }])
-    .jpeg(JPEG_OPTIONS)
-    .toBuffer();
-
-  await fs.writeFile(DEFAULT_SOCIAL_CARD_PATH, image);
+  await fs.writeFile(DEFAULT_SOCIAL_CARD_PATH, await renderCard(buildSiteCardModel(assets), assets));
 }
+
 
 /**
  * Normalizes the raw frontmatter value of an `image` field for comparisons.
@@ -768,14 +739,15 @@ async function main(): Promise<void> {
   const startTime = performance.now();
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
-  const [assets, previousManifest, blogItems, eventItems] = await Promise.all([
+  const [assets, previousManifest, blogItems, eventItems, docsItems] = await Promise.all([
     loadAssets(),
     loadManifest(),
     discoverContent(BLOG_DIR, "blog"),
     discoverContent(EVENTS_DIR, "events"),
+    discoverContent(DOCS_DIR, "docs"),
   ]);
 
-  const items = [...blogItems, ...eventItems];
+  const items = [...blogItems, ...eventItems, ...docsItems];
   const nextManifest: SocialCardManifest = {
     templateVersion: TEMPLATE_VERSION,
     items: {},
@@ -824,14 +796,7 @@ async function main(): Promise<void> {
       return;
     }
 
-    const model = buildTemplateModel(item, assets);
-    const overlay = await renderOverlay(model, assets);
-    const image = await sharp(assets.baseTemplate)
-      .composite([{ input: overlay, top: 0, left: 0 }])
-      .jpeg(JPEG_OPTIONS)
-      .toBuffer();
-
-    await fs.writeFile(absoluteOutputPath, image);
+    await fs.writeFile(absoluteOutputPath, await renderCard(buildCardModel(item, assets), assets));
     generatedCount += 1;
   });
 

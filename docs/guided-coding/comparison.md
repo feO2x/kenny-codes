@@ -1,6 +1,7 @@
 ---
 sidebar_position: 14
 title: "Comparison: Vise Coding & Spec-Driven Development"
+image: /img/social-cards/docs-guided-coding-comparison.jpg
 ---
 
 # Comparison: Vise Coding & Spec-Driven Development

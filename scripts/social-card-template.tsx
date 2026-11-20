@@ -1,756 +1,718 @@
 import React from "react";
 
 /**
- * This module contains the presentational part of the build-time social-card
- * pipeline. It does two jobs:
+ * The presentational part of the build-time social-card pipeline. It does two jobs:
  *
- * 1. It decides how a title should be wrapped and scaled so it fits into the
- *    fixed card area.
- * 2. It renders the final text overlay as a React tree that Satori can turn
- *    into SVG.
+ * 1. It measures text with the real font metrics and breaks titles into balanced lines at the
+ *    largest size that fits.
+ * 2. It renders a card as a React tree that Satori turns into SVG.
  *
- * The functions below deliberately keep layout decisions deterministic. That is
- * important because these images are committed to git, so two runs with the
- * same content should produce the same output.
+ * Everything is deterministic: the cards are committed to git, so the same content must always
+ * produce the same image.
+ *
+ * The cards follow the site's home page: navy page colour, Mona Sans, the mint-to-blue brand
+ * gradient on the one focal element, and the phase and category colours of Guided Coding and
+ * CHACK.
  */
-const CARD_WIDTH = 1200;
-const CARD_HEIGHT = 630;
-const LEFT_PANEL_WIDTH = 718;
-const CONTENT_HEIGHT = 514;
-const HEADER_BLOCK_HEIGHT = 100;
-const MIN_BODY_GAP = 54;
-const TITLE_MAX_LINES = 5;
-const TITLE_MAX_WIDTH = 560;
-const BLOG_TITLE_FONT_SIZES = [68, 64, 60, 56, 52, 48, 44, 40, 36, 34, 32, 30];
-const EVENT_TITLE_FONT_SIZES = [60, 56, 52, 48, 44, 40, 36, 34, 32, 30];
-const TITLE_LINE_HEIGHT_MULTIPLIER = 1.05;
-const SUPPORTING_LINE_FONT_SIZE = 26;
-const SUPPORTING_LINE_HEIGHT = 34;
-const SUPPORTING_LINE_MAX_WIDTH = 560;
-const SUPPORTING_LINE_MAX_LINES = 2;
-const CHIPS_MAX_WIDTH = 580;
-const CHIP_HORIZONTAL_PADDING = 36;
-const CHIP_FONT_SIZE = 19;
-const CHIP_ROW_HEIGHT = 44;
-const CHIP_ROW_GAP = 12;
-const FOOTER_BLOCK_HEIGHT = 24;
-const BOTTOM_SECTION_GAP = 24;
+export const CARD_WIDTH = 1200;
+export const CARD_HEIGHT = 630;
+
+const PAD_X = 72;
+const PAD_Y = 64;
+/** The right column: the portrait, or the method motif on docs cards. */
+const VISUAL_WIDTH = 380;
+const COLUMN_GAP = 64;
+/** The left column, where all text lives. */
+const TEXT_WIDTH = CARD_WIDTH - 2 * PAD_X - VISUAL_WIDTH - COLUMN_GAP;
+const BRAND_ROW_HEIGHT = 48;
+
+const TITLE_FONT = "Mona Sans SemiExpanded";
+const TITLE_TRACKING = -0.025;
+const TITLE_LINE_HEIGHT = 1.08;
+const TITLE_SIZES = [76, 72, 68, 64, 60, 56, 52, 48, 44, 40];
+
+/** The site's dark theme, from `src/css/custom.css`. */
+const color = {
+  bg: "#0b1424",
+  ink: "#e8eef8",
+  muted: "#9eadc5",
+  line: "rgba(160, 185, 230, 0.26)",
+  dashed: "rgba(160, 185, 230, 0.5)",
+  onTile: "#0c1a30",
+  brand: "linear-gradient(135deg, #33ffdc 0%, #3393ff 100%)",
+  brandText: "linear-gradient(100deg, #3393ff 0%, #33ffdc 100%)",
+  blue: "linear-gradient(135deg, #7cbcff, #3393ff)",
+  amber: "linear-gradient(135deg, #ffd780, #ffa63d)",
+  violet: "linear-gradient(135deg, #b9a4ff, #8b6cff)",
+  magenta: "linear-gradient(135deg, #ff9fd0, #ff5c9e)",
+};
+
+const PHASES = [
+  { key: "planning", number: 1, label: "Plan", tile: color.blue },
+  { key: "implementing", number: 2, label: "Implement", tile: color.amber },
+  { key: "guiding", number: 3, label: "Guide", tile: color.violet },
+] as const;
+
+/** The four CHACK categories in the colours of the CHACK diagram. */
+const CHACK_TILES = {
+  core: color.brand,
+  humble: color.violet,
+  tests: color.magenta,
+  root: color.amber,
+} as const;
+
+export type GuidedCodingPhase = (typeof PHASES)[number]["key"];
+export type ChackPart = keyof typeof CHACK_TILES;
+
+/* ---------- Text measurement ---------- */
+
+/** Width of `text` in pixels at `fontSize`, with `tracking` in em per character. */
+export type TextMeasurer = (text: string, fontSize: number, tracking?: number) => number;
 
 /**
- * Input model for the text overlay. The generator script prepares this data
- * from markdown frontmatter, and this template focuses purely on layout.
+ * Reads the advance widths of a TrueType font: `cmap` (format 4) maps characters to glyphs and
+ * `hmtx` holds each glyph's width. Kerning is left out; the fitter keeps a small margin for it.
  */
-export interface SocialCardTemplateModel {
-  contentKind: "blog" | "event";
-  categoryLabel: string;
-  detailLabel: string;
-  title: string;
-  supportingLine?: string;
-  chips: string[];
-  footerLabel: string;
-  logoDataUri: string;
+export function createMeasurer(font: Buffer): TextMeasurer {
+  const view = new DataView(font.buffer, font.byteOffset, font.byteLength);
+  const tables: Record<string, number> = {};
+  for (let index = 0; index < view.getUint16(4); index += 1) {
+    const record = 12 + 16 * index;
+    tables[font.toString("latin1", record, record + 4)] = view.getUint32(record + 8);
+  }
+
+  const unitsPerEm = view.getUint16(tables.head + 18);
+  const metricCount = view.getUint16(tables.hhea + 34);
+  const cmap = tables.cmap;
+  let format4 = -1;
+  for (let index = 0; index < view.getUint16(cmap + 2); index += 1) {
+    const record = cmap + 4 + 8 * index;
+    const subtable = cmap + view.getUint32(record + 4);
+    const isUnicode = view.getUint16(record) === 0 || view.getUint16(record + 2) === 1;
+    if (isUnicode && view.getUint16(subtable) === 4) {
+      format4 = subtable;
+      break;
+    }
+  }
+  if (format4 < 0) {
+    throw new Error("The social-card font has no Unicode cmap of format 4.");
+  }
+
+  const segments = view.getUint16(format4 + 6) / 2;
+  const ends = format4 + 14;
+  const starts = ends + 2 * segments + 2;
+  const deltas = starts + 2 * segments;
+  const ranges = deltas + 2 * segments;
+  const glyphOf = (code: number): number => {
+    for (let segment = 0; segment < segments; segment += 1) {
+      if (code > view.getUint16(ends + 2 * segment)) continue;
+      const start = view.getUint16(starts + 2 * segment);
+      if (code < start) return 0;
+      const delta = view.getInt16(deltas + 2 * segment);
+      const range = view.getUint16(ranges + 2 * segment);
+      if (range === 0) return (code + delta) & 0xffff;
+      const glyph = view.getUint16(ranges + 2 * segment + range + 2 * (code - start));
+      return glyph === 0 ? 0 : (glyph + delta) & 0xffff;
+    }
+    return 0;
+  };
+
+  const widths = new Map<string, number>();
+  const advanceOf = (char: string): number => {
+    let width = widths.get(char);
+    if (width === undefined) {
+      const glyph = glyphOf(char.codePointAt(0) ?? 0);
+      width = view.getUint16(tables.hmtx + 4 * Math.min(glyph, metricCount - 1)) / unitsPerEm;
+      widths.set(char, width);
+    }
+    return width;
+  };
+
+  return (text, fontSize, tracking = 0) => {
+    const chars = Array.from(text);
+    const em = chars.reduce((total, char) => total + advanceOf(char), 0);
+    return (em + tracking * Math.max(0, chars.length - 1)) * fontSize;
+  };
 }
 
-/**
- * Final title layout chosen by the fitter. The rendering component consumes
- * this structure directly.
- */
-export interface FittedTitle {
+/* ---------- Line breaking ---------- */
+
+const CONNECTOR_WORDS = new Set([
+  "a", "an", "and", "as", "at", "by", "for", "in", "of", "on", "or", "the", "to", "with", "&",
+]);
+
+/** A word, or the part of a hyphenated word after a hyphen (glued to the part before). */
+interface Unit {
+  text: string;
+  glued: boolean;
+}
+
+function unitsOf(text: string): Unit[] {
+  return text
+    .split(/\s+/u)
+    .filter(Boolean)
+    .flatMap((word) =>
+      word
+        .split(/(?<=-)(?=\p{L})/u)
+        .map((part, index) => ({ text: part, glued: index > 0 }))
+    );
+}
+
+function joinUnits(units: Unit[]): string {
+  return units.map((unit, index) => (index > 0 && !unit.glued ? ` ${unit.text}` : unit.text)).join("");
+}
+
+const bare = (word: string) => word.replace(/^[^\p{L}\p{N}&]+|[^\p{L}\p{N}&]+$/gu, "").toLowerCase();
+
+/** How bad a line looks, apart from its fill. Lower is better. */
+function linePenalty(units: Unit[], next: Unit | undefined, isLast: boolean): number {
+  const words = joinUnits(units).split(" ");
+  const last = words[words.length - 1];
+  let penalty = 0;
+  if (next?.glued) penalty += 400; // breaks a hyphenated word
+  if (!isLast && CONNECTOR_WORDS.has(bare(last))) penalty += 250;
+  if (units[0].text === "&") penalty += 120; // "&" belongs to the line before
+  if (!isLast && /[:–—]$/u.test(last)) penalty -= 60; // a natural pause
+  if (isLast && words.length === 1 && bare(last).length <= 8) penalty += 160; // a widow
+  return penalty;
+}
+
+export interface FittedText {
   lines: string[];
   fontSize: number;
   lineHeight: number;
 }
 
 /**
- * Internal helper type: while comparing alternative title layouts we keep a
- * numeric score. Lower scores mean "looks better" according to our heuristics.
+ * Breaks `units` into at most `maxLines` lines of at most `maxWidth`, so that the lines are about
+ * equally full (like `text-wrap: balance`) and avoid bad breaks. Returns `undefined` if no break
+ * fits.
  */
-interface FittedTitleCandidate extends FittedTitle {
-  score: number;
-}
-
-/**
- * Result used for smaller text blocks such as the event name below the title.
- */
-interface TextLayoutResult {
-  lines: string[];
-  height: number;
-}
-
-/**
- * Smallest unit that the title wrapper can move between lines.
- *
- * `gluedToPrevious` is used for fragments that came from splitting a hyphenated
- * word. Example:
- * - "Cloud-Native" becomes ["Cloud-", "Native"]
- * - the second fragment is glued to the previous fragment, so we can render
- *   "Cloud-" and "Native" without inserting an extra space.
- */
-interface TitleUnit {
-  text: string;
-  gluedToPrevious: boolean;
-}
-
-/**
- * Very small text-width approximation.
- *
- * We do not need pixel-perfect typography metrics here. We only need a stable,
- * fast estimate that is "good enough" to decide whether a line probably fits.
- */
-function estimateTextWidth(text: string, fontSize: number): number {
-  return text.length * fontSize * 0.54;
-}
-
-/**
- * Removes trailing punctuation and separators before appending an ellipsis.
- *
- * This avoids awkward endings like:
- * - "Cloud-..."
- * - "Hello ,..."
- */
-function trimTrailingPunctuation(value: string): string {
-  return value.replace(/[\s,.:;/-]+$/u, "");
-}
-
-/**
- * Truncates a single text fragment so it fits into the given width.
- *
- * This is a last-resort fallback. The normal path tries to keep whole words and
- * hyphen fragments intact. We only truncate when there is no cleaner option.
- */
-function truncateToWidth(text: string, maxWidth: number, fontSize: number): string {
-  if (estimateTextWidth(text, fontSize) <= maxWidth) {
-    return text;
+function breakLines(
+  units: Unit[],
+  maxLines: number,
+  fits: (text: string) => number | undefined
+): { lines: string[]; cost: number } | undefined {
+  const count = units.length;
+  // best[lines][end]: the cheapest way to set units 0..end-1 on `lines` lines.
+  const best: { cost: number; from: number }[][] = Array.from({ length: maxLines + 1 }, () => []);
+  best[0][0] = { cost: 0, from: -1 };
+  for (let lines = 1; lines <= maxLines; lines += 1) {
+    for (let end = 1; end <= count; end += 1) {
+      for (let start = end - 1; start >= 0; start -= 1) {
+        const previous = best[lines - 1][start];
+        const slice = units.slice(start, end);
+        const slack = fits(joinUnits(slice));
+        if (slack === undefined) break;
+        if (!previous) continue;
+        const isLast = end === count;
+        const fill = slack * slack * (isLast ? 60 : 130);
+        const cost = previous.cost + fill + linePenalty(slice, units[end], isLast) + 40;
+        if (!best[lines][end] || cost < best[lines][end].cost) {
+          best[lines][end] = { cost, from: start };
+        }
+      }
+    }
   }
 
-  let result = text;
-  while (result.length > 1 && estimateTextWidth(`${result}\u2026`, fontSize) > maxWidth) {
-    result = result.slice(0, -1);
+  let bestLines = 0;
+  for (let lines = 1; lines <= maxLines; lines += 1) {
+    if (best[lines][count] && (!bestLines || best[lines][count].cost < best[bestLines][count].cost)) {
+      bestLines = lines;
+    }
   }
-
-  return `${trimTrailingPunctuation(result)}\u2026`;
-}
-
-/**
- * Greedily fills title lines from left to right.
- *
- * This is intentionally simple:
- * - break at spaces
- * - allow splitting only at hyphens
- * - never rebalance lines afterwards
- *
- * The resulting layout is easy to reason about and usually matches how a human
- * would expect text to flow in a constrained card.
- */
-function wrapTitle(title: string, maxWidth: number, fontSize: number): string[] {
-  const tokens = createTitleUnits(title, fontSize, maxWidth);
+  if (!bestLines) return undefined;
 
   const lines: string[] = [];
-  let current: string | null = null;
-
-  for (const token of tokens) {
-    const next: string = current
-      ? `${current}${token.gluedToPrevious ? "" : " "}${token.text}`
-      : token.text;
-    if (current && estimateTextWidth(next, fontSize) > maxWidth) {
-      lines.push(current);
-      current =
-        estimateTextWidth(token.text, fontSize) > maxWidth
-          ? truncateToWidth(token.text, maxWidth, fontSize)
-          : token.text;
-      continue;
-    }
-
-    current = next;
+  for (let lines_ = bestLines, end = count; lines_ > 0; lines_ -= 1) {
+    const { from } = best[lines_][end];
+    lines.unshift(joinUnits(units.slice(from, end)));
+    end = from;
   }
-
-  if (current) {
-    lines.push(current);
-  }
-
-  return lines;
+  return { lines, cost: best[bestLines][count].cost };
 }
 
 /**
- * Converts a raw title into movable layout units.
- *
- * Most words stay untouched. Overlong hyphenated words may be split into
- * hyphen-based fragments so they can wrap more naturally.
+ * Sets `text` at the largest of `sizes` that fits `maxWidth` and `maxHeight`, trading a slightly
+ * smaller size for clearly better breaks.
  */
-function createTitleUnits(title: string, fontSize: number, maxWidth: number): TitleUnit[] {
-  return title
-    .split(/\s+/u)
-    .filter(Boolean)
-    .flatMap((token) => splitTitleToken(token, fontSize, maxWidth));
-}
-
-/**
- * Decides whether a single token needs special handling.
- *
- * Our current policy is intentionally strict:
- * - if the token fits, keep it whole
- * - if it does not fit, try splitting at hyphens
- * - otherwise keep it whole and let the caller truncate as a last resort
- *
- * We do not split at dots, slashes, or arbitrary characters because those
- * breaks look especially bad for technical names such as
- * "Microsoft.Extensions.AI" or ".NET".
- */
-function splitTitleToken(token: string, fontSize: number, maxWidth: number): TitleUnit[] {
-  if (estimateTextWidth(token, fontSize) <= maxWidth) {
-    return [{ text: token, gluedToPrevious: false }];
-  }
-
-  const preferredSegments = splitAtPreferredBoundaries(token);
-  if (
-    preferredSegments.length > 1 &&
-    preferredSegments.every((segment) => estimateTextWidth(segment, fontSize) <= maxWidth)
-  ) {
-    return preferredSegments.map((segment, index) => ({
-      text: segment,
-      gluedToPrevious: index > 0,
-    }));
-  }
-
-  return [{ text: token, gluedToPrevious: false }];
-}
-
-/**
- * Splits a token at hyphens while preserving the hyphen on the preceding
- * fragment. Example:
- * - "Cloud-Native" -> ["Cloud-", "Native"]
- *
- * Keeping the hyphen on the first fragment makes the wrap look natural when the
- * break happens exactly at that point.
- */
-function splitAtPreferredBoundaries(token: string): string[] {
-  const segments: string[] = [];
-  let current = "";
-
-  for (const char of Array.from(token)) {
-    current += char;
-    if (char === "-") {
-      segments.push(current);
-      current = "";
-    }
-  }
-
-  if (current) {
-    segments.push(current);
-  }
-
-  return segments.length > 1 ? segments : [token];
-}
-
-/**
- * Returns how many title lines fit into the currently available vertical space.
- *
- * The available height changes depending on whether the card has an event name
- * and how many tag chips are rendered below the title.
- */
-function getMaxLinesForHeight(maxHeight: number, lineHeight: number): number {
-  let maxLines = 0;
-
-  for (let lineCount = 1; lineCount <= TITLE_MAX_LINES; lineCount += 1) {
-    if (estimateTextBlockHeight(lineCount, lineHeight) <= maxHeight) {
-      maxLines = lineCount;
-    }
-  }
-
-  return maxLines;
-}
-
-const CONNECTOR_WORDS = new Set([
-  "a",
-  "an",
-  "and",
-  "as",
-  "at",
-  "for",
-  "in",
-  "of",
-  "on",
-  "or",
-  "the",
-  "to",
-  "with",
-]);
-
-/**
- * Normalizes a word before we compare it against small heuristics such as the
- * connector-word list.
- */
-function normalizeWordForPenalty(word: string): string {
-  return word.replace(/^[^a-z0-9]+|[^a-z0-9]+$/giu, "").toLowerCase();
-}
-
-/**
- * Assigns a "looks worse" penalty to one rendered line.
- *
- * The fitter compares several font sizes. This score helps us choose between
- * layouts that all technically fit:
- * - short dangling lines are discouraged
- * - ending a line with "and", "with", etc. is discouraged
- * - starting a line with a connector is also discouraged
- * - ending a line with a hyphen costs extra
- *
- * Lower score is better.
- */
-function scoreTitleLine(lineText: string, fontSize: number, isLastLine: boolean): number {
-  const width = estimateTextWidth(lineText, fontSize);
-  const remainingWidth = Math.max(0, TITLE_MAX_WIDTH - width);
-  const words = lineText.split(/\s+/u).filter(Boolean);
-  const firstWord = normalizeWordForPenalty(words[0] ?? "");
-  const lastWord = normalizeWordForPenalty(words[words.length - 1] ?? "");
-  let score = Math.pow(remainingWidth / TITLE_MAX_WIDTH, 2) * (isLastLine ? 55 : 160);
-
-  if (CONNECTOR_WORDS.has(lastWord)) {
-    score += 320;
-  }
-
-  if (!isLastLine && words.length === 1 && firstWord.length <= 6) {
-    score += 220;
-  }
-
-  if (isLastLine && words.length === 1 && firstWord.length <= 8) {
-    score += 140;
-  }
-
-  if (lineText.endsWith("-")) {
-    score += 140;
-  }
-
-  if (!isLastLine && CONNECTOR_WORDS.has(firstWord)) {
-    score += 220;
-  }
-
-  return score;
-}
-
-/**
- * Builds one complete title layout for a specific font size.
- *
- * If the title does not fit the available height at this size, the function
- * returns `null` so the caller can try a smaller size.
- */
-function fitTitleForFontSize(
-  title: string,
-  fontSize: number,
-  maxHeight: number
-): FittedTitleCandidate | null {
-  const lineHeight = Math.round(fontSize * TITLE_LINE_HEIGHT_MULTIPLIER);
-  const maxLines = getMaxLinesForHeight(maxHeight, lineHeight);
-  if (maxLines === 0) {
-    return null;
-  }
-
-  const lines = wrapTitle(title, TITLE_MAX_WIDTH, fontSize);
-  if (lines.length > maxLines) {
-    return null;
-  }
-
-  const score = lines.reduce(
-    (total, lineText, index) =>
-      total + scoreTitleLine(lineText, fontSize, index === lines.length - 1),
-    0
-  );
-
-  return {
-    lines,
-    fontSize,
-    lineHeight,
-    score,
-  };
-}
-
-/**
- * Ensures a wrapped text block does not exceed the allowed line count.
- *
- * The first lines are preserved and the remaining content is folded into the
- * final line with an ellipsis.
- */
-function createEllipsizedLines(
-  lines: string[],
-  maxLines: number,
-  maxWidth: number,
-  fontSize: number
-): string[] {
-  if (lines.length <= maxLines) {
-    return lines;
-  }
-
-  const head = lines.slice(0, maxLines - 1);
-  const tail = lines.slice(maxLines - 1).join(" ");
-  return [...head, truncateToWidth(tail, maxWidth, fontSize)];
-}
-
-/**
- * Estimates the vertical space used by a multi-line title block.
- */
-function estimateTextBlockHeight(lineCount: number, lineHeight: number): number {
-  return lineCount * lineHeight + Math.max(0, lineCount - 1) * 8;
-}
-
-/**
- * Wraps the smaller supporting line below the title.
- *
- * We reuse the same greedy wrapper as the title because it already follows the
- * project's line-break policy.
- */
-function layoutSupportingLine(text?: string): TextLayoutResult {
-  if (!text) {
-    return {
-      lines: [],
-      height: 0,
-    };
-  }
-
-  const wrappedLines = wrapTitle(
-    text.replace(/\s+/gu, " ").trim(),
-    SUPPORTING_LINE_MAX_WIDTH,
-    SUPPORTING_LINE_FONT_SIZE
-  );
-  const lines = createEllipsizedLines(
-    wrappedLines,
-    SUPPORTING_LINE_MAX_LINES,
-    SUPPORTING_LINE_MAX_WIDTH,
-    SUPPORTING_LINE_FONT_SIZE
-  );
-
-  return {
-    lines,
-    height: lines.length * SUPPORTING_LINE_HEIGHT,
-  };
-}
-
-/**
- * Estimates how many rows of chips we need at the bottom of the card.
- *
- * This matters because the title fitter must know how much vertical space is
- * left after rendering the chips.
- */
-function estimateChipRows(chips: string[]): number {
-  if (chips.length === 0) {
-    return 0;
-  }
-
-  let rows = 1;
-  let currentRowWidth = 0;
-
-  for (const chip of chips) {
-    const chipWidth = estimateTextWidth(chip, CHIP_FONT_SIZE) + CHIP_HORIZONTAL_PADDING;
-    const nextWidth = currentRowWidth === 0 ? chipWidth : currentRowWidth + 12 + chipWidth;
-
-    if (currentRowWidth > 0 && nextWidth > CHIPS_MAX_WIDTH) {
-      rows += 1;
-      currentRowWidth = chipWidth;
-      continue;
-    }
-
-    currentRowWidth = nextWidth;
-  }
-
-  return rows;
-}
-
-/**
- * Calculates how much vertical space the lower card section consumes.
- *
- * The title fitter uses this value to decide how large the title may become
- * without colliding with the event name, chips, or footer.
- */
-function estimateBottomBlockHeight(supportingLine?: string, chips: string[] = []): number {
-  const supportingLayout = layoutSupportingLine(supportingLine);
-  const chipRows = estimateChipRows(chips);
-  const chipsHeight =
-    chipRows > 0 ? chipRows * CHIP_ROW_HEIGHT + Math.max(0, chipRows - 1) * CHIP_ROW_GAP : 0;
-
-  let height = FOOTER_BLOCK_HEIGHT;
-
-  if (supportingLayout.height > 0) {
-    height += BOTTOM_SECTION_GAP + supportingLayout.height;
-  }
-
-  if (chipsHeight > 0) {
-    height += BOTTOM_SECTION_GAP + chipsHeight;
-  }
-
-  return height;
-}
-
-/**
- * Chooses the best title layout across several candidate font sizes.
- *
- * Strategy:
- * - start with larger sizes
- * - reject any size that does not fit vertically
- * - score the remaining layouts
- * - add a small penalty for shrinking too far
- *
- * This gives us the largest title that still looks reasonable.
- */
-export function fitTitle(
-  title: string,
+export function fitText(
+  text: string,
   options: {
+    measure: TextMeasurer;
+    maxWidth: number;
     maxHeight: number;
-    fontSizes: number[];
+    sizes: number[];
+    lineHeight: number;
+    tracking?: number;
+    /** More lines than four read as a paragraph, not a title. */
+    maxLines?: number;
   }
-): FittedTitle {
-  const normalizedTitle = title.replace(/\s+/gu, " ").trim();
-  let bestCandidate: FittedTitleCandidate | null = null;
-
-  for (const fontSize of options.fontSizes) {
-    const fittedTitle = fitTitleForFontSize(normalizedTitle, fontSize, options.maxHeight);
-    if (!fittedTitle) {
-      continue;
+): FittedText {
+  const units = unitsOf(text.replace(/\s+/gu, " ").trim());
+  let best: (FittedText & { cost: number }) | undefined;
+  for (const fontSize of options.sizes) {
+    const lineHeight = Math.round(fontSize * options.lineHeight);
+    const maxLines = Math.min(options.maxLines ?? 4, Math.floor(options.maxHeight / lineHeight));
+    if (maxLines < 1) continue;
+    // Two percent of margin for kerning, which the measurer leaves out.
+    const width = options.maxWidth * 0.98;
+    const result = breakLines(units, maxLines, (line) => {
+      const used = options.measure(line, fontSize, options.tracking);
+      return used <= width ? 1 - used / width : undefined;
+    });
+    if (!result) continue;
+    const cost = result.cost + (options.sizes[0] - fontSize) * 14;
+    if (!best || cost < best.cost) {
+      best = { lines: result.lines, fontSize, lineHeight, cost };
     }
-
-    const fontSizePenalty = (options.fontSizes[0] - fittedTitle.fontSize) * 6;
-    const candidateScore = fittedTitle.score + fontSizePenalty;
-
-    if (!bestCandidate || candidateScore < bestCandidate.score) {
-      bestCandidate = {
-        ...fittedTitle,
-    score: candidateScore,
-      };
-    }
   }
-
-  if (bestCandidate) {
-    return bestCandidate;
+  if (!best && (options.maxLines ?? 4) < 6) {
+    return fitText(text, { ...options, maxLines: (options.maxLines ?? 4) + 1 });
   }
+  if (!best) {
+    throw new Error(`"${text}" does not fit on a social card. Give it a shorter socialTitle.`);
+  }
+  return { lines: best.lines, fontSize: best.fontSize, lineHeight: best.lineHeight };
+}
 
-  const fontSize = options.fontSizes[options.fontSizes.length - 1];
-  const lines = wrapTitle(normalizedTitle, TITLE_MAX_WIDTH, fontSize);
-  const truncatedLines = createEllipsizedLines(lines, TITLE_MAX_LINES, TITLE_MAX_WIDTH, fontSize);
+/** Fits a card title into the text column above `reserved` pixels of other content. */
+export function fitTitle(title: string, measure: TextMeasurer, reserved: number): FittedText {
+  return fitText(title, {
+    measure: (text, size, tracking) => measure(text, size, tracking),
+    maxWidth: TEXT_WIDTH,
+    maxHeight: CARD_HEIGHT - 2 * PAD_Y - BRAND_ROW_HEIGHT - 48 - reserved,
+    sizes: TITLE_SIZES,
+    lineHeight: TITLE_LINE_HEIGHT,
+    tracking: TITLE_TRACKING,
+  });
+}
 
-  return {
-    lines: truncatedLines,
-    fontSize,
-    lineHeight: Math.round(fontSize * TITLE_LINE_HEIGHT_MULTIPLIER),
+/* ---------- Card models ---------- */
+
+interface CardAssets {
+  logo: string;
+  portrait: string;
+}
+
+/** The card for the home page and every page without a card of its own. */
+export interface SiteCardModel extends CardAssets {
+  kind: "site";
+  greetingSize: number;
+  statement: string[];
+}
+
+/** A blog post or an event: the title, what and when, and the portrait. */
+export interface ContentCardModel extends CardAssets {
+  kind: "content";
+  title: FittedText;
+  primary: string;
+  secondary: string;
+}
+
+/** A docs page: the section, the title, and the motif of its method. */
+export interface DocsCardModel extends CardAssets {
+  kind: "docs";
+  section: string;
+  title: FittedText;
+  motif:
+    | { method: "guided-coding"; highlight?: GuidedCodingPhase }
+    | { method: "chack"; highlight?: ChackPart };
+}
+
+export type SocialCardModel = SiteCardModel | ContentCardModel | DocsCardModel;
+
+/** Space the meta lines below a content card's title take, for `fitTitle`. */
+export const CONTENT_META_HEIGHT = 30 + 36 + 6 + 32;
+/** Space the section line above a docs card's title takes, for `fitTitle`. */
+export const DOCS_SECTION_HEIGHT = 34 + 22;
+
+export const STATEMENT = {
+  fontSize: 31,
+  lineHeight: 41,
+  maxWidth: TEXT_WIDTH,
+};
+
+/* ---------- Rendering ---------- */
+
+function BrandRow({ logo }: { logo: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "14px", height: `${BRAND_ROW_HEIGHT}px` }}>
+      <img src={logo} width={44} height={44} alt="" />
+      <span
+        style={{
+          fontFamily: TITLE_FONT,
+          fontSize: "27px",
+          fontWeight: 600,
+          letterSpacing: "-0.01em",
+          color: color.ink,
+        }}
+      >
+        Kenny Codes
+      </span>
+    </div>
+  );
+}
+
+/** The home page's portrait: a squircle in a ring of the brand gradient. */
+function Portrait({ src }: { src: string }) {
+  const ring = 7;
+  const inner = VISUAL_WIDTH - 2 * ring;
+  return (
+    <div
+      style={{
+        display: "flex",
+        padding: `${ring}px`,
+        borderRadius: `${Math.round(VISUAL_WIDTH * 0.31)}px`,
+        backgroundImage: color.brand,
+      }}
+    >
+      <img
+        src={src}
+        width={inner}
+        height={inner}
+        alt=""
+        style={{ borderRadius: `${Math.round(inner * 0.31) - 1}px`, objectFit: "cover" }}
+      />
+    </div>
+  );
+}
+
+function Title({ title }: { title: FittedText }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      {title.lines.map((line, index) => (
+        <span
+          key={index}
+          style={{
+            fontFamily: TITLE_FONT,
+            fontSize: `${title.fontSize}px`,
+            lineHeight: `${title.lineHeight}px`,
+            fontWeight: 600,
+            letterSpacing: `${TITLE_TRACKING}em`,
+            color: color.ink,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {line}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** Small squares in the method's colours, like the step badges on the home page. */
+function Swatches({ tiles }: { tiles: string[] }) {
+  return (
+    <div style={{ display: "flex", gap: "6px", width: `${4 * 18 + 3 * 6}px` }}>
+      {tiles.map((tile, index) => (
+        <div key={index} style={{ width: "18px", height: "18px", borderRadius: "5px", backgroundImage: tile }} />
+      ))}
+    </div>
+  );
+}
+
+function SiteText({ greetingSize, statement }: Pick<SiteCardModel, "greetingSize" | "statement">) {
+  const methods = [
+    { tiles: PHASES.map((phase) => phase.tile), name: "Guided Coding & Guided Learning" },
+    { tiles: [CHACK_TILES.core, CHACK_TILES.humble, CHACK_TILES.tests, CHACK_TILES.root], name: "CHACK" },
+  ];
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <div
+        style={{
+          display: "flex",
+          fontFamily: TITLE_FONT,
+          fontSize: `${greetingSize}px`,
+          lineHeight: `${Math.round(greetingSize * 1.12)}px`,
+          fontWeight: 600,
+          letterSpacing: "-0.03em",
+          color: color.ink,
+        }}
+      >
+        <span>Hi, I’m&nbsp;</span>
+        <span style={{ backgroundImage: color.brandText, backgroundClip: "text", color: "transparent" }}>
+          Kenny.
+        </span>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", marginTop: "18px" }}>
+        {statement.map((line, index) => (
+          <span
+            key={index}
+            style={{
+              fontSize: `${STATEMENT.fontSize}px`,
+              lineHeight: `${STATEMENT.lineHeight}px`,
+              fontWeight: 500,
+              color: color.ink,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {line}
+          </span>
+        ))}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginTop: "40px" }}>
+        {methods.map((method) => (
+          <div key={method.name} style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+            <Swatches tiles={method.tiles} />
+            <span style={{ fontSize: "27px", lineHeight: "34px", fontWeight: 600, color: color.ink }}>
+              {method.name}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ContentText({ title, primary, secondary }: Pick<ContentCardModel, "title" | "primary" | "secondary">) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <Title title={title} />
+      <span
+        style={{
+          marginTop: "30px",
+          fontSize: "28px",
+          lineHeight: "36px",
+          fontWeight: 500,
+          color: color.ink,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {primary}
+      </span>
+      <span style={{ marginTop: "6px", fontSize: "25px", lineHeight: "32px", color: color.muted }}>
+        {secondary}
+      </span>
+    </div>
+  );
+}
+
+function DocsText({ section, title }: Pick<DocsCardModel, "section" | "title">) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <span style={{ fontSize: "27px", lineHeight: "34px", fontWeight: 500, color: color.muted }}>{section}</span>
+      <div style={{ display: "flex", marginTop: "22px" }}>
+        <Title title={title} />
+      </div>
+    </div>
+  );
+}
+
+/** A box of the motifs: a colour tile, or an outline once another part is highlighted. */
+function tileStyle(tile: string, active: boolean): React.CSSProperties {
+  return active
+    ? { backgroundImage: tile, color: color.onTile, border: "2px solid transparent" }
+    : { border: `2px solid ${color.line}`, color: color.muted };
+}
+
+/** The three phases as on the home page: numbered squircle badges on a line. */
+function GuidedCodingMotif({ highlight }: { highlight?: GuidedCodingPhase }) {
+  const badge = 76;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", width: `${VISUAL_WIDTH}px` }}>
+      {PHASES.map((phase, index) => {
+        const active = !highlight || highlight === phase.key;
+        return (
+          <div key={phase.key} style={{ display: "flex", flexDirection: "column" }}>
+            {index > 0 && (
+              <div
+                style={{
+                  width: "3px",
+                  height: "44px",
+                  marginLeft: `${badge / 2 - 1.5}px`,
+                  backgroundColor: color.line,
+                }}
+              />
+            )}
+            <div style={{ display: "flex", alignItems: "center", gap: "30px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: `${badge}px`,
+                  height: `${badge}px`,
+                  borderRadius: "22px",
+                  fontFamily: TITLE_FONT,
+                  fontSize: "36px",
+                  fontWeight: 600,
+                  ...tileStyle(phase.tile, active),
+                }}
+              >
+                {phase.number}
+              </div>
+              <span
+                style={{
+                  fontFamily: TITLE_FONT,
+                  fontSize: "40px",
+                  fontWeight: 600,
+                  letterSpacing: "-0.02em",
+                  color: active ? color.ink : color.muted,
+                }}
+              >
+                {phase.label}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** An arrow along the y axis, pointing up or down, as an SVG image. */
+function Arrow({ up, dashed, height }: { up: boolean; dashed?: boolean; height: number }) {
+  const stroke = "#9eadc5";
+  const head = up ? "M2 9 L8 2 L14 9" : `M2 ${height - 9} L8 ${height - 2} L14 ${height - 9}`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="${height}" viewBox="0 0 16 ${height}"><path d="M8 ${up ? 3 : 0} V ${up ? height : height - 3}" stroke="${stroke}" stroke-width="2.5" fill="none" ${dashed ? 'stroke-dasharray="5 4"' : ""}/><path d="${head}" stroke="${stroke}" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+  return <img src={`data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`} width={16} height={height} alt="" />;
+}
+
+/** The CHACK map of the home page: Humble Objects outside, Core, Tests and Root below. */
+function ChackMotif({ highlight }: { highlight?: ChackPart }) {
+  const active = (part: ChackPart) => !highlight || highlight === part;
+  const label: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    borderRadius: "14px",
+    fontSize: "23px",
+    lineHeight: "27px",
+    fontWeight: 600,
   };
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        position: "relative",
+        width: `${VISUAL_WIDTH}px`,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: `${VISUAL_WIDTH}px`,
+          marginTop: "32px",
+          padding: "42px 22px 22px",
+          border: `2px dashed ${color.dashed}`,
+          borderRadius: "18px",
+        }}
+      >
+        <Arrow up={false} dashed height={34} />
+        <div
+          style={{
+            ...label,
+            width: "100%",
+            height: "112px",
+            marginTop: "8px",
+            fontFamily: TITLE_FONT,
+            fontSize: "40px",
+            letterSpacing: "-0.02em",
+            ...tileStyle(CHACK_TILES.core, active("core")),
+          }}
+        >
+          Core
+        </div>
+        <div style={{ display: "flex", width: "100%", justifyContent: "space-around", marginTop: "8px" }}>
+          <Arrow up height={34} />
+          <Arrow up height={34} />
+        </div>
+        <div style={{ display: "flex", width: "100%", gap: "16px", marginTop: "8px" }}>
+          <div style={{ ...label, flex: 1, height: "84px", ...tileStyle(CHACK_TILES.tests, active("tests")) }}>
+            Automated Tests
+          </div>
+          <div style={{ ...label, flex: 1, height: "84px", ...tileStyle(CHACK_TILES.root, active("root")) }}>
+            Composition Root
+          </div>
+        </div>
+      </div>
+      {/* After the boundary, so the boundary runs behind it. */}
+      <div
+        style={{
+          ...label,
+          position: "absolute",
+          top: 0,
+          left: `${(VISUAL_WIDTH - 250) / 2}px`,
+          width: "250px",
+          height: "64px",
+          backgroundColor: color.bg,
+          ...tileStyle(CHACK_TILES.humble, active("humble")),
+        }}
+      >
+        Humble Objects
+      </div>
+    </div>
+  );
 }
 
 /**
- * Renders the complete text overlay for one social card.
- *
- * The actual PNG is produced later by Satori + Sharp. This component only
- * describes the layout tree.
+ * One card: the brand row and text on the left, the portrait or the motif on the right. The text
+ * sits at the bottom of its column, so the title always starts from the same baseline grid.
  */
-export function SocialCardTemplate({
-  contentKind,
-  categoryLabel,
-  detailLabel,
-  title,
-  supportingLine,
-  chips,
-  footerLabel,
-  logoDataUri,
-}: SocialCardTemplateModel) {
-  const bottomBlockHeight = estimateBottomBlockHeight(supportingLine, chips);
-  const fittedTitle = fitTitle(title, {
-    fontSizes: contentKind === "event" ? EVENT_TITLE_FONT_SIZES : BLOG_TITLE_FONT_SIZES,
-    maxHeight: Math.max(
-      120,
-      CONTENT_HEIGHT - HEADER_BLOCK_HEIGHT - bottomBlockHeight - MIN_BODY_GAP
-    ),
-  });
-  const supportingLayout = layoutSupportingLine(supportingLine);
+export function SocialCard(model: SocialCardModel) {
+  let text: React.ReactNode;
+  let visual: React.ReactNode;
+  if (model.kind === "site") {
+    text = <SiteText greetingSize={model.greetingSize} statement={model.statement} />;
+    visual = <Portrait src={model.portrait} />;
+  } else if (model.kind === "content") {
+    text = <ContentText title={model.title} primary={model.primary} secondary={model.secondary} />;
+    visual = <Portrait src={model.portrait} />;
+  } else {
+    text = <DocsText section={model.section} title={model.title} />;
+    visual =
+      model.motif.method === "guided-coding" ? (
+        <GuidedCodingMotif highlight={model.motif.highlight} />
+      ) : (
+        <ChackMotif highlight={model.motif.highlight} />
+      );
+  }
 
+  // Satori lays out the root box as content-box, so the margins come from an inner box.
   return (
     <div
       style={{
         width: `${CARD_WIDTH}px`,
         height: `${CARD_HEIGHT}px`,
         display: "flex",
-        backgroundColor: "rgba(0,0,0,0)",
-        color: "#f8fbff",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: color.bg,
+        fontFamily: "Mona Sans",
+        color: color.ink,
       }}
     >
       <div
         style={{
-          width: `${LEFT_PANEL_WIDTH}px`,
-          height: "100%",
+          width: `${CARD_WIDTH - 2 * PAD_X}px`,
+          height: `${CARD_HEIGHT - 2 * PAD_Y}px`,
+          display: "flex",
+          alignItems: "center",
+          gap: `${COLUMN_GAP}px`,
+        }}
+      >
+      <div
+        style={{
+          width: `${TEXT_WIDTH}px`,
+          height: `${CARD_HEIGHT - 2 * PAD_Y}px`,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "62px 64px 54px 70px",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "28px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "20px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "14px",
-              }}
-            >
-              <img src={logoDataUri} width={52} height={52} alt="Kenny Codes logo" />
-              <span
-                style={{
-                  fontSize: "27px",
-                  lineHeight: "32px",
-                  fontWeight: 700,
-                  letterSpacing: "-0.03em",
-                  color: "#f8fbff",
-                }}
-              >
-                Kenny Codes
-              </span>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                fontSize: "20px",
-                fontWeight: 700,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: "#8ee7df",
-              }}
-            >
-              <div
-                style={{
-                  width: "12px",
-                  height: "12px",
-                  borderRadius: "999px",
-                  backgroundColor: "#36d7cf",
-                  marginRight: "12px",
-                }}
-              />
-              <span style={{ marginRight: "20px" }}>{categoryLabel}</span>
-              <div
-                style={{
-                  width: "12px",
-                  height: "12px",
-                  borderRadius: "999px",
-                  backgroundColor: "#6ba1ff",
-                  marginRight: "12px",
-                }}
-              />
-              <span style={{ color: "#b8cce6", letterSpacing: "0.01em", textTransform: "none" }}>
-                {detailLabel}
-              </span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "6px",
-            }}
-          >
-            {fittedTitle.lines.map((line, index) => (
-              <div
-                key={`${line}-${index}`}
-                style={{
-                  display: "block",
-                  maxWidth: `${TITLE_MAX_WIDTH}px`,
-                  fontSize: `${fittedTitle.fontSize}px`,
-                  lineHeight: `${fittedTitle.lineHeight}px`,
-                  fontWeight: 700,
-                  letterSpacing: "-0.035em",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {line}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "24px",
-          }}
-        >
-          {supportingLine ? (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0px",
-                maxWidth: "560px",
-                fontSize: "26px",
-                lineHeight: "34px",
-                color: "#d7e3f4",
-              }}
-            >
-              {supportingLayout.lines.map((line, index) => (
-                <span key={`${line}-${index}`} style={{ whiteSpace: "nowrap" }}>
-                  {line}
-                </span>
-              ))}
-            </div>
-          ) : null}
-
-          {chips.length > 0 ? (
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "12px",
-                maxWidth: "580px",
-              }}
-            >
-              {chips.map((chip) => (
-                <div
-                  key={chip}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "10px 18px",
-                    borderRadius: "999px",
-                    border: "1px solid rgba(112, 169, 255, 0.42)",
-                    backgroundColor: "rgba(17, 29, 44, 0.72)",
-                    fontSize: "19px",
-                    fontWeight: 600,
-                    color: "#dfe9f7",
-                  }}
-                >
-                  {chip}
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              fontSize: "24px",
-              fontWeight: 600,
-              color: "#8da8c9",
-            }}
-          >
-            <div
-              style={{
-                width: "96px",
-                height: "2px",
-                background: "linear-gradient(90deg, #35d8d0 0%, #4a8cff 100%)",
-              }}
-            />
-            <span>{footerLabel}</span>
-          </div>
-        </div>
+        <BrandRow logo={model.logo} />
+        {text}
+      </div>
+      <div style={{ display: "flex", width: `${VISUAL_WIDTH}px`, justifyContent: "center" }}>{visual}</div>
       </div>
     </div>
   );
 }
+
+export { TEXT_WIDTH };

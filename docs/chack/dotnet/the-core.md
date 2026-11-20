@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: The Core in .NET
+image: /img/social-cards/docs-chack-dotnet-the-core.jpg
 ---
 
 # The Core in .NET

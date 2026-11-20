@@ -1,6 +1,7 @@
 ---
 sidebar_position: 10
 title: What Belongs in a Rules File
+image: /img/social-cards/docs-guided-coding-rules-files.jpg
 ---
 
 # What Belongs in a Rules File

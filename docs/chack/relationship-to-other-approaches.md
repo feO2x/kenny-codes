@@ -1,6 +1,7 @@
 ---
 sidebar_position: 10
 title: Relationship to Other Approaches
+image: /img/social-cards/docs-chack-relationship-to-other-approaches.jpg
 ---
 
 # Relationship to Other Approaches

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 11
 title: Finding the Right Plan Size
+image: /img/social-cards/docs-guided-coding-finding-the-right-plan-size.jpg
 ---
 
 # Finding the Right Plan Size

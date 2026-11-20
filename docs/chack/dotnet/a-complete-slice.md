@@ -1,6 +1,7 @@
 ---
 sidebar_position: 6
 title: A Complete Slice in ASP.NET Core
+image: /img/social-cards/docs-chack-dotnet-a-complete-slice.jpg
 ---
 
 # A Complete Slice in ASP.NET Core

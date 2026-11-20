@@ -1,6 +1,7 @@
 ---
 sidebar_position: 15
 title: Release Notes
+image: /img/social-cards/docs-guided-coding-release-notes.jpg
 ---
 
 # Release Notes
