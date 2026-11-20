@@ -161,7 +161,16 @@ interface Unit {
 }
 
 /** Names that must not break across lines. */
-const UNBREAKABLE = ["ASP.NET Core", "EF Core", "Native AOT"];
+const UNBREAKABLE = [
+  "ASP.NET Core",
+  "EF Core",
+  "Native AOT",
+  "Guided Coding",
+  "Guided Learning",
+  "Humble Objects",
+  "Composition Root",
+  "Automated Tests",
+];
 
 function unitsOf(text: string): Unit[] {
   const units: Unit[] = [];
@@ -596,6 +605,7 @@ function ContentText({
           marginTop: `${META.secondaryGap}px`,
           fontSize: `${META.secondarySize}px`,
           lineHeight: `${META.secondaryLineHeight}px`,
+          fontWeight: 500,
           color: color.muted,
         }}
       >
@@ -829,8 +839,9 @@ function ChackMotif({ highlight }: { highlight?: ChackPart }) {
 }
 
 /**
- * One card: the brand row and text on the left, the portrait or the motif on the right. The text
- * sits at the bottom of its column, so the title always starts from the same baseline grid.
+ * One card: the text on the left, starting at the top, and the brand row at the bottom, the only
+ * part X's link overlay may cover. The portrait or the motif on the right lines up with the top
+ * of the text.
  */
 export function SocialCard(model: SocialCardModel) {
   let text: React.ReactNode;
@@ -892,6 +903,8 @@ export function SocialCard(model: SocialCardModel) {
             display: "flex",
             width: `${VISUAL_WIDTH}px`,
             justifyContent: "center",
+            // Lines up with the cap height of a large title or greeting, not its line box.
+            marginTop: model.kind === "docs" ? 0 : "12px",
           }}
         >
           {visual}

@@ -49,6 +49,8 @@ const DOCS_DIR = path.join(__dirname, "../docs");
 const STATIC_DIR = path.join(__dirname, "../static");
 const OUTPUT_DIR = path.join(STATIC_DIR, "img/social-cards");
 const MANIFEST_PATH = path.join(OUTPUT_DIR, "manifest.json");
+/** The site path of the generated cards; an `image` in it belongs to this script. */
+const MANAGED_IMAGE_DIR = "/img/social-cards";
 /**
  * Cards are written as JPEG because they contain a photo and gradients, which
  * PNG compresses poorly (about 0.7 MB per card as PNG versus about 70 KB as
@@ -88,10 +90,9 @@ const FONTS = [
   },
 ] as const;
 /**
- * Bump this value to regenerate every card. Changes to this script, the
- * template, the fonts, the logo and the portrait already do so: they are part
- * of each card's hash. The manifest stores this value together with per-item
- * hashes.
+ * A manual override: bump it to regenerate every card. It is rarely needed,
+ * because this script, the template, the fonts, the logo and the photo are
+ * already part of each card's hash. The manifest stores it with the hashes.
  */
 const TEMPLATE_VERSION = "2026-11-20-v1";
 const CONCURRENCY = 4;
@@ -175,8 +176,8 @@ interface SocialCardAssets {
  *
  * `custom-image` means the file already defines a different image and should be
  * left alone. That is the escape hatch for manual overrides. `migrated` means
- * the file pointed at the legacy PNG path of its generated card and now points
- * at the current one.
+ * the file pointed at an old path in the cards' folder and now points at the
+ * current one.
  */
 interface FrontmatterUpdateResult {
   content: string;
@@ -374,15 +375,7 @@ function slugToFileName(slug: string): string {
  * Returns the public site path used in frontmatter and final HTML metadata.
  */
 function getManagedImagePath(slug: string): string {
-  return `/img/social-cards/${slugToFileName(slug)}${CARD_EXTENSION}`;
-}
-
-/**
- * Returns the path that `getManagedImagePath` produced before cards were
- * written as JPEG. Used to migrate existing frontmatter.
- */
-function getLegacyManagedImagePath(slug: string): string {
-  return `/img/social-cards/${slugToFileName(slug)}${LEGACY_CARD_EXTENSION}`;
+  return `${MANAGED_IMAGE_DIR}/${slugToFileName(slug)}${CARD_EXTENSION}`;
 }
 
 /**
@@ -536,11 +529,12 @@ function buildCardModel(item: ContentItem, assets: SocialCardAssets): SocialCard
   const date = formatDate(item.date ?? "");
   const event = (item.event ?? "Kenny Pflug").replace(/ - /gu, " \u2013 ");
   const type = item.type ?? "Event";
-  // "Thinktecture Webinar" already says what it is: the date alone follows.
+  // "Thinktecture Webinar" or "Async Workshop: …" already say what it is: the date alone follows.
+  const saysType = `${event} ${title}`.toLowerCase().includes(type.toLowerCase());
   const [primary, secondary] =
     item.kind === "blog"
       ? ["Blog post by Kenny Pflug", date]
-      : [event, event.toLowerCase().includes(type.toLowerCase()) ? date : `${type} on ${date}`];
+      : [event, saysType ? date : `${type} on ${date}`];
 
   return {
     kind: "content",
@@ -660,25 +654,44 @@ async function generateDefaultSiteCard(assets: SocialCardAssets): Promise<void> 
 }
 
 /**
+ * Parses rewritten content the way Docusaurus will and checks that it reads the
+ * new image, so an unusual YAML value (a block scalar, a flow mapping) is never
+ * saved half-edited.
+ */
+async function verifyFrontmatter(filePath: string, content: string, imagePath: string) {
+  const { frontMatter } = await parseMarkdownFile({
+    filePath,
+    fileContent: content,
+    parseFrontMatter: DEFAULT_PARSE_FRONT_MATTER,
+  }).catch(() => ({ frontMatter: {} as Frontmatter }));
+  if (frontMatter.image !== imagePath) {
+    throw new Error(`could not set its image. Add "image: ${imagePath}" to its frontmatter.`);
+  }
+}
+
+/**
  * Ensures the markdown frontmatter points at the generated social card.
  *
  * Important behavior:
  * - if the file already uses our managed path, we do nothing
- * - if the file uses the legacy PNG path of its card, we rewrite it
+ * - if the file uses another path in the cards' folder (a renamed page, or a
+ *   card from when they were PNG files), we rewrite it
  * - if the file uses a different image, we treat it as a custom override
  * - otherwise we insert the generated image path into the frontmatter
  */
 function updateFrontmatterImage(
   content: string,
   image: string | undefined,
-  managedImagePath: string,
-  legacyManagedImagePath: string
+  managedImagePath: string
 ): FrontmatterUpdateResult {
   // Docusaurus already read the value; the raw block is only touched to write it.
   if (image === managedImagePath) {
     return { content, status: "unchanged" };
   }
-  if (image !== undefined && image !== legacyManagedImagePath) {
+  // Any other image in the cards' folder is a card of ours under an old name: a renamed page, or
+  // a card from when they were PNG files. Everything else is the author's own image.
+  const isOurs = image?.startsWith(`${MANAGED_IMAGE_DIR}/`) ?? false;
+  if (image !== undefined && !isOurs) {
     return { content, status: "custom-image" };
   }
 
@@ -701,7 +714,7 @@ function updateFrontmatterImage(
   }
 
   const lines = block.body.split(block.eol);
-  if (image === legacyManagedImagePath) {
+  if (isOurs) {
     const imageIndex = lines.findIndex((line) => /^(["']?)image\1\s*:/u.test(line));
     lines[imageIndex] = imageLine;
     return { content: replaceBody(lines.join(block.eol)), status: "migrated" };
@@ -811,49 +824,64 @@ async function main(): Promise<void> {
   let skippedCustomImageCount = 0;
   let updatedFrontmatterCount = 0;
 
-  await runWithConcurrency(items, CONCURRENCY, async (item) => {
-    const managedImagePath = getManagedImagePath(item.slug);
-    const absoluteOutputPath = path.join(STATIC_DIR, managedImagePath.replace(/^\//u, ""));
-    const content = await fs.readFile(item.filePath, "utf8");
-    const frontmatterResult = updateFrontmatterImage(
-      content,
-      item.image,
-      managedImagePath,
-      getLegacyManagedImagePath(item.slug)
-    );
+  // Plan every card before writing anything: a title that does not fit, or frontmatter that
+  // cannot take the image, stops the run with all files untouched.
+  const plans = await Promise.all(
+    items.map(async (item) => {
+      const managedImagePath = getManagedImagePath(item.slug);
+      const content = await fs.readFile(item.filePath, "utf8");
+      const frontmatter = updateFrontmatterImage(content, item.image, managedImagePath);
+      if (frontmatter.status === "custom-image") {
+        return { item, managedImagePath, frontmatter };
+      }
+      try {
+        if (frontmatter.status !== "unchanged") {
+          await verifyFrontmatter(item.filePath, frontmatter.content, managedImagePath);
+        }
+        return { item, managedImagePath, frontmatter, model: buildCardModel(item, assets) };
+      } catch (error) {
+        throw new Error(`${item.filePath}: ${(error as Error).message}`);
+      }
+    })
+  );
 
-    if (frontmatterResult.status === "custom-image") {
-      skippedCustomImageCount += 1;
-      return;
+  await runWithConcurrency(
+    plans,
+    CONCURRENCY,
+    async ({ item, managedImagePath, frontmatter, model }) => {
+      if (!model) {
+        skippedCustomImageCount += 1;
+        return;
+      }
+
+      if (frontmatter.status !== "unchanged") {
+        await fs.writeFile(item.filePath, frontmatter.content);
+        updatedFrontmatterCount += 1;
+      }
+
+      const absoluteOutputPath = path.join(STATIC_DIR, managedImagePath.replace(/^\//u, ""));
+      const currentHash = hashCard(model, assets);
+      nextManifest.items[item.slug] = currentHash;
+
+      const previousHash = previousManifest.items[item.slug];
+      const outputAlreadyExists = await fs
+        .access(absoluteOutputPath)
+        .then(() => true)
+        .catch(() => false);
+
+      if (
+        previousManifest.templateVersion === TEMPLATE_VERSION &&
+        previousHash === currentHash &&
+        outputAlreadyExists
+      ) {
+        cachedCount += 1;
+        return;
+      }
+
+      await fs.writeFile(absoluteOutputPath, await renderCard(model, assets));
+      generatedCount += 1;
     }
-
-    if (frontmatterResult.status === "inserted" || frontmatterResult.status === "migrated") {
-      await fs.writeFile(item.filePath, frontmatterResult.content);
-      updatedFrontmatterCount += 1;
-    }
-
-    const model = buildCardModel(item, assets);
-    const currentHash = hashCard(model, assets);
-    nextManifest.items[item.slug] = currentHash;
-
-    const previousHash = previousManifest.items[item.slug];
-    const outputAlreadyExists = await fs
-      .access(absoluteOutputPath)
-      .then(() => true)
-      .catch(() => false);
-
-    if (
-      previousManifest.templateVersion === TEMPLATE_VERSION &&
-      previousHash === currentHash &&
-      outputAlreadyExists
-    ) {
-      cachedCount += 1;
-      return;
-    }
-
-    await fs.writeFile(absoluteOutputPath, await renderCard(model, assets));
-    generatedCount += 1;
-  });
+  );
 
   const desiredFiles = new Set(
     Object.keys(nextManifest.items).map((slug) => `${slugToFileName(slug)}${CARD_EXTENSION}`)
