@@ -135,6 +135,8 @@ interface ContentItem {
   date?: string;
   type?: string;
   event?: string;
+  /** The `image` frontmatter as Docusaurus reads it. */
+  image?: string;
 }
 
 /**
@@ -198,14 +200,8 @@ async function readRequiredFile(filePath: string, purpose: string): Promise<Buff
   }
 }
 
-/**
- * Removes one layer of wrapping single or double quotes from a value.
- */
-function stripWrappingQuotes(value: string): string {
-  return value.replace(/^['"]|['"]$/gu, "");
-}
-
-const FRONTMATTER_PATTERN = /^---(\r?\n)([\s\S]*?)\r?\n---/u;
+/** An opening `---`, an optional body, and a closing `---`; `\uFEFF` is a byte-order mark. */
+const FRONTMATTER_PATTERN = /^(\uFEFF?)---(\r?\n)(?:([\s\S]*?)\r?\n)?---(?=\r?\n|$)/u;
 
 /** Whether the file starts with a frontmatter block. Docs pages may have none. */
 function hasFrontmatter(content: string): boolean {
@@ -229,9 +225,9 @@ function getFrontmatterBlock(content: string): FrontmatterBlock {
     throw new Error("Expected a frontmatter block at the top of the file.");
   }
 
-  const [, eol, body] = match;
-  const bodyStart = 3 + eol.length;
-  return { body, eol, bodyStart, bodyEnd: bodyStart + body.length };
+  const [, bom, eol, body] = match;
+  const bodyStart = bom.length + 3 + eol.length;
+  return { body: body ?? "", eol, bodyStart, bodyEnd: bodyStart + (body?.length ?? 0) };
 }
 
 /**
@@ -242,6 +238,10 @@ async function getAllMarkdownFiles(dirPath: string): Promise<string[]> {
   const nested = await Promise.all(
     entries.map(async (entry) => {
       const fullPath = path.join(dirPath, entry.name);
+      // Docusaurus does not publish partials (`_file.md`, `_folder/`), so they get no card.
+      if (entry.name.startsWith("_")) {
+        return [];
+      }
       if (entry.isDirectory()) {
         return getAllMarkdownFiles(fullPath);
       }
@@ -266,13 +266,13 @@ async function getAllMarkdownFiles(dirPath: string): Promise<string[]> {
  * 3. date prefix in the parent directory name
  */
 function deriveDate(filePath: string, frontmatter: Frontmatter): string {
-  // YAML reads an unquoted date as a Date.
+  // YAML reads an unquoted date as a Date; a quoted one may carry a time of day.
   const explicitDate = frontmatter.date;
   if (explicitDate instanceof Date) {
     return explicitDate.toISOString().slice(0, 10);
   }
-  if (typeof explicitDate === "string" && explicitDate) {
-    return explicitDate;
+  if (typeof explicitDate === "string" && /^\d{4}-\d{2}-\d{2}/u.test(explicitDate)) {
+    return explicitDate.slice(0, 10);
   }
 
   const basename = path.basename(filePath);
@@ -305,7 +305,7 @@ function deriveSlug(filePath: string, frontmatter: Frontmatter, kind: ContentKin
     return `docs/${relative
       .split(path.sep)
       .join("/")
-      .replace(/\/?index$/u, "")}`;
+      .replace(/(^|\/)index$/u, "")}`;
   }
 
   const explicitSlug = frontmatter.slug;
@@ -357,6 +357,7 @@ async function discoverContent(dirPath: string, kind: ContentKind): Promise<Cont
         date: kind === "docs" ? undefined : deriveDate(filePath, frontmatter),
         type: getStringField(frontmatter, "type"),
         event: getStringField(frontmatter, "event"),
+        image: getStringField(frontmatter, "image"),
       };
     })
   );
@@ -427,6 +428,9 @@ function fitLine(
 ): { text: string; fontSize: number } {
   const fontSize =
     sizes.find((size) => measure(value, size) <= TEXT_WIDTH) ?? sizes[sizes.length - 1];
+  if (measure(value, fontSize) <= TEXT_WIDTH) {
+    return { text: value, fontSize };
+  }
   let text = value;
   while (text.length > 1 && measure(`${text}\u2026`, fontSize) > TEXT_WIDTH) {
     text = text.slice(0, -1).trimEnd();
@@ -516,9 +520,7 @@ function buildCardModel(item: ContentItem, assets: SocialCardAssets): SocialCard
     const parent = DOCS_SECTIONS.slice(index + 1).find(({ prefix }) =>
       docs.prefix.startsWith(`${prefix}/`)
     );
-    const section = title.startsWith(docs.section)
-      ? (parent?.section ?? "Documentation")
-      : docs.section;
+    const section = item.slug === docs.prefix ? (parent?.section ?? "Documentation") : docs.section;
     return {
       kind: "docs",
       ...images,
@@ -532,13 +534,13 @@ function buildCardModel(item: ContentItem, assets: SocialCardAssets): SocialCard
   }
 
   const date = formatDate(item.date ?? "");
+  const event = (item.event ?? "Kenny Pflug").replace(/ - /gu, " \u2013 ");
+  const type = item.type ?? "Event";
+  // "Thinktecture Webinar" already says what it is: the date alone follows.
   const [primary, secondary] =
     item.kind === "blog"
       ? ["Blog post by Kenny Pflug", date]
-      : [
-          (item.event ?? "Kenny Pflug").replace(/ - /gu, " \u2013 "),
-          `${item.type ?? "Event"} on ${date}`,
-        ];
+      : [event, event.toLowerCase().includes(type.toLowerCase()) ? date : `${type} on ${date}`];
 
   return {
     kind: "content",
@@ -613,10 +615,13 @@ async function loadAssets(): Promise<SocialCardAssets> {
     style: "normal" as const,
   }));
 
-  // The code that draws the cards belongs to the cache key too.
-  const code = await Promise.all([__filename, TEMPLATE_PATH].map((file) => fs.readFile(file)));
+  // The key covers the source files, not sharp's output, which may differ between platforms.
+  // The code that draws the cards (including the portrait's crop) belongs to it too.
+  const sources = await Promise.all(
+    [PHOTO_PATH, __filename, TEMPLATE_PATH].map((file) => fs.readFile(file))
+  );
   const digest = crypto.createHash("sha256");
-  for (const data of [logo, portrait, ...fontData, ...code]) digest.update(data);
+  for (const data of [logo, ...fontData, ...sources]) digest.update(data);
 
   return {
     digest: digest.digest("hex"),
@@ -655,13 +660,6 @@ async function generateDefaultSiteCard(assets: SocialCardAssets): Promise<void> 
 }
 
 /**
- * Normalizes the raw frontmatter value of an `image` field for comparisons.
- */
-function normalizeImageValue(imageValue: string): string {
-  return stripWrappingQuotes(imageValue.trim());
-}
-
-/**
  * Ensures the markdown frontmatter points at the generated social card.
  *
  * Important behavior:
@@ -672,42 +670,41 @@ function normalizeImageValue(imageValue: string): string {
  */
 function updateFrontmatterImage(
   content: string,
+  image: string | undefined,
   managedImagePath: string,
   legacyManagedImagePath: string
 ): FrontmatterUpdateResult {
+  // Docusaurus already read the value; the raw block is only touched to write it.
+  if (image === managedImagePath) {
+    return { content, status: "unchanged" };
+  }
+  if (image !== undefined && image !== legacyManagedImagePath) {
+    return { content, status: "custom-image" };
+  }
+
+  const imageLine = `image: ${managedImagePath}`;
   if (!hasFrontmatter(content)) {
     const eol = content.includes("\r\n") ? "\r\n" : "\n";
+    const bom = content.startsWith("\uFEFF") ? "\uFEFF" : "";
     return {
-      content: `---${eol}image: ${managedImagePath}${eol}---${eol}${content}`,
+      content: `${bom}---${eol}${imageLine}${eol}---${eol}${content.slice(bom.length)}`,
       status: "inserted",
     };
   }
 
   const block = getFrontmatterBlock(content);
+  const replaceBody = (body: string) =>
+    `${content.slice(0, block.bodyStart)}${body}${content.slice(block.bodyEnd)}`;
+  if (block.body === "") {
+    // An empty block (`---` right after `---`): the line goes in with its own line ending.
+    return { content: replaceBody(`${imageLine}${block.eol}`), status: "inserted" };
+  }
+
   const lines = block.body.split(block.eol);
-  const imageIndex = lines.findIndex((line) => /^image:\s*/u.test(line));
-
-  if (imageIndex >= 0) {
-    const currentValue = normalizeImageValue(lines[imageIndex].replace(/^image:\s*/u, ""));
-    if (currentValue === managedImagePath) {
-      return {
-        content,
-        status: "unchanged",
-      };
-    }
-
-    if (currentValue === legacyManagedImagePath) {
-      lines[imageIndex] = `image: ${managedImagePath}`;
-      return {
-        content: `${content.slice(0, block.bodyStart)}${lines.join(block.eol)}${content.slice(block.bodyEnd)}`,
-        status: "migrated",
-      };
-    }
-
-    return {
-      content,
-      status: "custom-image",
-    };
+  if (image === legacyManagedImagePath) {
+    const imageIndex = lines.findIndex((line) => /^(["']?)image\1\s*:/u.test(line));
+    lines[imageIndex] = imageLine;
+    return { content: replaceBody(lines.join(block.eol)), status: "migrated" };
   }
 
   // After the (social) title if that is a one-line value; otherwise at the end of the block, so a
@@ -719,15 +716,8 @@ function updateFrontmatterImage(
     titleIndex !== undefined &&
     !isBlockScalar(lines[titleIndex].replace(/^\w+:\s*/u, "").trim()) &&
     !/^\s/u.test(lines[titleIndex + 1] ?? "");
-  const targetIndex = isOneLine ? titleIndex : lines.length - 1;
-
-  lines.splice(targetIndex + 1, 0, `image: ${managedImagePath}`);
-  const updatedBlock = lines.join(block.eol);
-
-  return {
-    content: `${content.slice(0, block.bodyStart)}${updatedBlock}${content.slice(block.bodyEnd)}`,
-    status: "inserted",
-  };
+  lines.splice(isOneLine ? titleIndex + 1 : lines.length, 0, imageLine);
+  return { content: replaceBody(lines.join(block.eol)), status: "inserted" };
 }
 
 /**
@@ -799,6 +789,18 @@ async function main(): Promise<void> {
   ]);
 
   const items = [...blogItems, ...eventItems, ...docsItems];
+  // Different paths can flatten to the same file name ("a-b/c" and "a/b-c"): stop before writing.
+  const owners = new Map<string, string>();
+  for (const item of items) {
+    const fileName = getManagedImagePath(item.slug);
+    const owner = owners.get(fileName);
+    if (owner) {
+      throw new Error(
+        `${owner} and ${item.filePath} would both get ${fileName}. Rename one, or give it a slug.`
+      );
+    }
+    owners.set(fileName, item.filePath);
+  }
   const nextManifest: SocialCardManifest = {
     templateVersion: TEMPLATE_VERSION,
     items: {},
@@ -815,6 +817,7 @@ async function main(): Promise<void> {
     const content = await fs.readFile(item.filePath, "utf8");
     const frontmatterResult = updateFrontmatterImage(
       content,
+      item.image,
       managedImagePath,
       getLegacyManagedImagePath(item.slug)
     );

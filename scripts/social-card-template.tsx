@@ -152,7 +152,6 @@ const CONNECTOR_WORDS = new Set([
   "the",
   "to",
   "with",
-  "&",
 ]);
 
 /** A word, or the part of a hyphenated word after a hyphen (glued to the part before). */
@@ -196,6 +195,7 @@ const bare = (word: string) =>
 function linePenalty(
   units: Unit[],
   next: Unit | undefined,
+  isFirst: boolean,
   isLast: boolean,
   wordCount: number
 ): number {
@@ -209,6 +209,10 @@ function linePenalty(
   if (!isLast && /[:–—]$/u.test(last)) penalty -= 60; // a natural pause
   // A lone short word on the last line; short titles may break where they like.
   if (isLast && wordCount > 3 && words.length === 1 && bare(last).length <= 8) penalty += 160;
+  // A lone word between two lines: "Software / Applications" reads as a list, not a title.
+  if (!isFirst && !isLast && units.length === 1 && !units[0].text.includes("\u00a0")) {
+    penalty += 150;
+  }
   return penalty;
 }
 
@@ -242,7 +246,8 @@ function breakLines(
         if (!previous) continue;
         const isLast = end === count;
         const fill = slack * slack * (isLast ? 80 : 400);
-        const cost = previous.cost + fill + linePenalty(slice, units[end], isLast, count) + 80;
+        const cost =
+          previous.cost + fill + linePenalty(slice, units[end], start === 0, isLast, count) + 80;
         if (!best[lines][end] || cost < best[lines][end].cost) {
           best[lines][end] = { cost, from: start };
         }
@@ -691,7 +696,7 @@ function GuidedCodingMotif({ highlight }: { highlight?: GuidedCodingPhase }) {
  * "references", a dashed line with a hollow triangle for "implements".
  */
 export function arrowSvg(isImplements: boolean, height: number): string {
-  const line = `stroke="${color.muted}" stroke-width="2.5" stroke-linejoin="round"`;
+  const line = `stroke="${color.muted}" stroke-width="3" stroke-linejoin="round"`;
   return isImplements
     ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="${height}" viewBox="0 0 16 ${height}"><path d="M8 0 V ${height - 12}" ${line} stroke-dasharray="5 4" stroke-linecap="butt" fill="none"/><path d="M2.5 ${height - 12} L8 ${height - 2} L13.5 ${height - 12} Z" ${line} fill="${color.bg}"/></svg>`
     : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="${height}" viewBox="0 0 16 ${height}"><path d="M8 3 V ${height}" ${line} stroke-linecap="round" fill="none"/><path d="M2 9 L8 2 L14 9" ${line} stroke-linecap="round" fill="none"/></svg>`;
@@ -866,7 +871,7 @@ export function SocialCard(model: SocialCardModel) {
           width: `${CARD_WIDTH - 2 * PAD_X}px`,
           height: `${CARD_HEIGHT - 2 * PAD_Y}px`,
           display: "flex",
-          alignItems: "flex-end",
+          alignItems: "flex-start",
           gap: `${COLUMN_GAP}px`,
         }}
       >
@@ -879,8 +884,8 @@ export function SocialCard(model: SocialCardModel) {
             justifyContent: "space-between",
           }}
         >
-          <BrandRow logo={model.logo} />
           {text}
+          <BrandRow logo={model.logo} />
         </div>
         <div
           style={{
