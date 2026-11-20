@@ -59,7 +59,10 @@ const CARD_EXTENSION = ".jpg";
  */
 const LEGACY_CARD_EXTENSION = ".png";
 const JPEG_OPTIONS = { quality: 88, mozjpeg: true } as const;
-const DEFAULT_SOCIAL_CARD_PATH = path.join(STATIC_DIR, `img/kenny-codes-social-card${CARD_EXTENSION}`);
+const DEFAULT_SOCIAL_CARD_PATH = path.join(
+  STATIC_DIR,
+  `img/kenny-codes-social-card${CARD_EXTENSION}`
+);
 const LOGO_PATH = path.join(STATIC_DIR, "img/logo-dark.svg");
 const PHOTO_PATH = path.join(STATIC_DIR, "img/kenny-smiles.jpg");
 /**
@@ -69,17 +72,23 @@ const PHOTO_PATH = path.join(STATIC_DIR, "img/kenny-smiles.jpg");
  * checked into `scripts/assets/fonts/` unmodified together with their license.
  * Satori cannot read the variable WOFF2 files the site uses.
  */
+const TEMPLATE_PATH = path.join(__dirname, "social-card-template.tsx");
 const FONT_ASSETS_DIR = path.join(__dirname, "assets/fonts");
 const FONTS = [
   { file: "MonaSans-Regular.ttf", name: "Mona Sans", weight: 400 },
   { file: "MonaSans-Medium.ttf", name: "Mona Sans", weight: 500 },
   { file: "MonaSans-SemiBold.ttf", name: "Mona Sans", weight: 600 },
-  { file: "MonaSansSemiExpanded-SemiBold.ttf", name: "Mona Sans SemiExpanded", weight: 600 },
+  {
+    file: "MonaSansSemiExpanded-SemiBold.ttf",
+    name: "Mona Sans SemiExpanded",
+    weight: 600,
+  },
 ] as const;
 /**
- * Bump this value whenever the rendering logic or visual design changes in a
- * way that should invalidate the cached images. The manifest stores this value
- * together with per-item hashes.
+ * Bump this value to regenerate every card. Changes to this script, the
+ * template, the fonts, the logo and the portrait already do so: they are part
+ * of each card's hash. The manifest stores this value together with per-item
+ * hashes.
  */
 const TEMPLATE_VERSION = "2026-11-20-v1";
 const CONCURRENCY = 4;
@@ -142,11 +151,18 @@ interface SocialCardManifest {
 interface SocialCardAssets {
   logo: string;
   portrait: string;
-  fonts: Array<{ name: string; data: Buffer; weight: 400 | 500 | 600; style: "normal" }>;
+  fonts: Array<{
+    name: string;
+    data: Buffer;
+    weight: 400 | 500 | 600;
+    style: "normal";
+  }>;
   /** Measures the title face, for line breaking. */
   measureTitle: TextMeasurer;
   /** Measures the medium body face, for the site card's statement. */
   measureBody: TextMeasurer;
+  /** A hash of the fonts, the logo and the portrait, for the cache. */
+  digest: string;
 }
 
 /**
@@ -190,6 +206,9 @@ async function readRequiredFile(filePath: string, purpose: string): Promise<Buff
  * This is intentionally a narrow parser tailored to the repository's content.
  */
 function parseFrontmatter(content: string): Frontmatter {
+  if (!hasFrontmatter(content)) {
+    return {};
+  }
   const block = getFrontmatterBlock(content);
   const lines = block.body.split("\n");
   const frontmatter: Frontmatter = {};
@@ -249,6 +268,16 @@ function stripWrappingQuotes(value: string): string {
   return value.replace(/^['"]|['"]$/gu, "");
 }
 
+/** Whether the file starts with a frontmatter block. Docs pages may have none. */
+function hasFrontmatter(content: string): boolean {
+  return /^---\n[\s\S]*?\n---/u.test(content);
+}
+
+/** A YAML block scalar (`>-`, `|`, ...), which this parser does not read. */
+function isBlockScalar(value: string | undefined): boolean {
+  return value !== undefined && /^[>|][+-]?$/u.test(value);
+}
+
 /**
  * Extracts the first frontmatter block from the beginning of a file.
  *
@@ -292,15 +321,6 @@ async function getAllMarkdownFiles(dirPath: string): Promise<string[]> {
 }
 
 /**
- * Resolves the publication date for one content item.
- *
- * Priority:
- * 1. explicit `date` in frontmatter
- * 2. date prefix in the file name
- * 3. date prefix in the parent directory name
- */
-
-/**
  * Resolves the publication date for one blog post or event.
  *
  * Priority:
@@ -341,7 +361,10 @@ function deriveDate(filePath: string, frontmatter: Frontmatter): string {
 function deriveSlug(filePath: string, frontmatter: Frontmatter, kind: ContentKind): string {
   if (kind === "docs") {
     const relative = path.relative(DOCS_DIR, filePath).replace(/\.mdx?$/u, "");
-    return `docs/${relative.split(path.sep).join("/").replace(/\/?index$/u, "")}`;
+    return `docs/${relative
+      .split(path.sep)
+      .join("/")
+      .replace(/\/?index$/u, "")}`;
   }
 
   const explicitSlug = frontmatter.slug;
@@ -366,6 +389,20 @@ function getStringField(frontmatter: Frontmatter, key: string): string | undefin
 }
 
 /**
+ * The title Docusaurus shows: the frontmatter `title`, else the first `#` heading, else the file
+ * name.
+ */
+function titleOf(filePath: string, content: string, frontmatter: Frontmatter): string {
+  const title = getStringField(frontmatter, "title");
+  if (title && !isBlockScalar(title)) {
+    return title;
+  }
+  return (
+    content.match(/^#\s+(.+?)\s*#*\s*$/mu)?.[1] ?? path.basename(filePath, path.extname(filePath))
+  );
+}
+
+/**
  * Converts all markdown files below a content root into normalized `ContentItem`
  * objects.
  */
@@ -381,7 +418,7 @@ async function discoverContent(dirPath: string, kind: ContentKind): Promise<Cont
         filePath,
         kind,
         slug: deriveSlug(filePath, frontmatter, kind),
-        title: getStringField(frontmatter, "title") ?? path.basename(filePath, path.extname(filePath)),
+        title: titleOf(filePath, content, frontmatter),
         socialTitle: getStringField(frontmatter, "socialTitle"),
         date: kind === "docs" ? undefined : deriveDate(filePath, frontmatter),
         type: getStringField(frontmatter, "type"),
@@ -391,9 +428,8 @@ async function discoverContent(dirPath: string, kind: ContentKind): Promise<Cont
   );
 }
 
-
 /**
- * Converts a content slug into a file-system-safe PNG file name.
+ * Converts a content slug into a file-system-safe card file name.
  */
 function slugToFileName(slug: string): string {
   return slug.replace(/^\/+|\/+$/gu, "").replace(/\//gu, "-");
@@ -415,28 +451,19 @@ function getLegacyManagedImagePath(slug: string): string {
 }
 
 /**
- * Calculates a stable content hash for one card input.
- *
- * If any of these values change, the corresponding image must be regenerated.
+ * Calculates a stable hash of everything one card shows: the card model and
+ * the assets it is drawn with. If it changes, the image must be regenerated.
+ * Changes to the template's code need a new `TEMPLATE_VERSION`.
  */
-/**
- * Calculates a stable content hash for one card input.
- *
- * If any of these values change, the corresponding image must be regenerated.
- */
-function hashItem(item: ContentItem): string {
+function hashCard(model: SocialCardModel, assets: SocialCardAssets): string {
+  const { logo: _logo, portrait: _portrait, ...content } = model;
   return crypto
     .createHash("sha256")
     .update(
       JSON.stringify({
         templateVersion: TEMPLATE_VERSION,
-        kind: item.kind,
-        slug: item.slug,
-        title: item.title,
-        socialTitle: item.socialTitle,
-        date: item.date,
-        type: item.type,
-        event: item.event,
+        assets: assets.digest,
+        content,
       })
     )
     .digest("hex");
@@ -456,36 +483,78 @@ function formatDate(dateValue: string): string {
 }
 
 /**
- * Shortens a line of known font size so it fits the text column.
+ * Sets a line at the largest of `sizes` at which it fits the text column, and
+ * shortens it with an ellipsis only if it does not fit at the smallest.
  */
-function fitLine(value: string, measure: TextMeasurer, fontSize: number): string {
-  let result = value;
-  while (result.length > 1 && measure(`${result}…`, fontSize) > TEXT_WIDTH) {
-    result = result.slice(0, -1).trimEnd();
+function fitLine(
+  value: string,
+  measure: TextMeasurer,
+  sizes: number[]
+): { text: string; fontSize: number } {
+  const fontSize =
+    sizes.find((size) => measure(value, size) <= TEXT_WIDTH) ?? sizes[sizes.length - 1];
+  let text = value;
+  while (text.length > 1 && measure(`${text}\u2026`, fontSize) > TEXT_WIDTH) {
+    text = text.slice(0, -1).trimEnd();
   }
-  return result === value ? value : `${result.replace(/[\s,.:;/-]+$/u, "")}…`;
+  return {
+    text: text === value ? value : `${text.replace(/[\s,.:;/-]+$/u, "")}\u2026`,
+    fontSize,
+  };
 }
 
 /** The docs sections and the method motif each one shows. */
-const DOCS_SECTIONS: Array<{ prefix: string; section: string; method: "guided-coding" | "chack" }> = [
-  { prefix: "docs/chack/dotnet", section: "CHACK in .NET", method: "chack" },
-  { prefix: "docs/chack", section: "CHACK", method: "chack" },
-  { prefix: "docs/guided-coding", section: "Guided Coding & Guided Learning", method: "guided-coding" },
+const DOCS_SECTIONS: Array<
+  | {
+      prefix: string;
+      section: string;
+      method: "guided-coding";
+      highlights: Record<string, GuidedCodingPhase>;
+    }
+  | {
+      prefix: string;
+      section: string;
+      method: "chack";
+      highlights: Record<string, ChackPart>;
+    }
+> = [
+  {
+    prefix: "docs/chack/dotnet",
+    section: "CHACK in .NET",
+    method: "chack",
+    highlights: {
+      "the-core": "core",
+      "clients-and-sessions": "humble",
+      testing: "tests",
+      "composition-root": "root",
+    },
+  },
+  {
+    prefix: "docs/chack",
+    section: "CHACK",
+    method: "chack",
+    highlights: {
+      "the-core": "core",
+      "humble-objects": "humble",
+      "clients-and-sessions": "humble",
+      "automated-tests": "tests",
+      "composition-root": "root",
+    },
+  },
+  {
+    prefix: "docs/guided-coding",
+    section: "Guided Coding & Guided Learning",
+    method: "guided-coding",
+    highlights: {
+      "planning-phase": "planning",
+      "automated-plan-review": "planning",
+      "plan-structures": "planning",
+      "finding-the-right-plan-size": "planning",
+      "implementing-phase": "implementing",
+      "guiding-phase": "guiding",
+    },
+  },
 ];
-
-/** Pages about one phase or one category highlight it in the motif, like their diagrams do. */
-const DOCS_HIGHLIGHTS: Record<string, GuidedCodingPhase | ChackPart> = {
-  "docs/guided-coding/planning-phase": "planning",
-  "docs/guided-coding/implementing-phase": "implementing",
-  "docs/guided-coding/guiding-phase": "guiding",
-  "docs/chack/the-core": "core",
-  "docs/chack/humble-objects": "humble",
-  "docs/chack/automated-tests": "tests",
-  "docs/chack/composition-root": "root",
-  "docs/chack/dotnet/the-core": "core",
-  "docs/chack/dotnet/testing": "tests",
-  "docs/chack/dotnet/composition-root": "root",
-};
 
 /**
  * Maps normalized content into the model of its card.
@@ -495,20 +564,28 @@ function buildCardModel(item: ContentItem, assets: SocialCardAssets): SocialCard
   const images = { logo: assets.logo, portrait: assets.portrait };
 
   if (item.kind === "docs") {
-    const docs = DOCS_SECTIONS.find(({ prefix }) => item.slug === prefix || item.slug.startsWith(`${prefix}/`));
+    const index = DOCS_SECTIONS.findIndex(
+      ({ prefix }) => item.slug === prefix || item.slug.startsWith(`${prefix}/`)
+    );
+    const docs = DOCS_SECTIONS[index];
     if (!docs) {
       throw new Error(`No docs section for ${item.filePath}. Add it to DOCS_SECTIONS.`);
     }
-    const highlight = DOCS_HIGHLIGHTS[item.slug];
+    const page = item.slug.slice(docs.prefix.length + 1);
+    // A section's own page is titled like the section: name the enclosing one instead.
+    const parent = DOCS_SECTIONS.slice(index + 1).find(({ prefix }) =>
+      docs.prefix.startsWith(`${prefix}/`)
+    );
+    const section = title === docs.section ? (parent?.section ?? "Documentation") : docs.section;
     return {
       kind: "docs",
       ...images,
-      section: docs.section,
+      section,
       title: fitTitle(title, assets.measureTitle, DOCS_SECTION_HEIGHT),
       motif:
         docs.method === "guided-coding"
-          ? { method: "guided-coding", highlight: highlight as GuidedCodingPhase | undefined }
-          : { method: "chack", highlight: highlight as ChackPart | undefined },
+          ? { method: "guided-coding", highlight: docs.highlights[page] }
+          : { method: "chack", highlight: docs.highlights[page] },
     };
   }
 
@@ -522,7 +599,7 @@ function buildCardModel(item: ContentItem, assets: SocialCardAssets): SocialCard
     kind: "content",
     ...images,
     title: fitTitle(title, assets.measureTitle, CONTENT_META_HEIGHT),
-    primary: fitLine(primary, assets.measureBody, 28),
+    primary: fitLine(primary, assets.measureBody, [28, 26, 24]),
     secondary,
   };
 }
@@ -544,6 +621,7 @@ function buildSiteCardModel(assets: SocialCardAssets): SocialCardModel {
       maxHeight: 4 * STATEMENT.lineHeight,
       sizes: [STATEMENT.fontSize],
       lineHeight: STATEMENT.lineHeight / STATEMENT.fontSize,
+      tracking: STATEMENT.tracking,
     }
   );
 
@@ -572,7 +650,9 @@ async function loadAssets(): Promise<SocialCardAssets> {
       .resize(760, 760)
       .jpeg({ quality: 90 })
       .toBuffer(),
-    ...FONTS.map((font) => readRequiredFile(path.join(FONT_ASSETS_DIR, font.file), `social-card font ${font.file}`)),
+    ...FONTS.map((font) =>
+      readRequiredFile(path.join(FONT_ASSETS_DIR, font.file), `social-card font ${font.file}`)
+    ),
   ]);
 
   const fonts = FONTS.map((font, index) => ({
@@ -582,11 +662,19 @@ async function loadAssets(): Promise<SocialCardAssets> {
     style: "normal" as const,
   }));
 
+  // The code that draws the cards belongs to the cache key too.
+  const code = await Promise.all([__filename, TEMPLATE_PATH].map((file) => fs.readFile(file)));
+  const digest = crypto.createHash("sha256");
+  for (const data of [logo, portrait, ...fontData, ...code]) digest.update(data);
+
   return {
+    digest: digest.digest("hex"),
     logo: `data:image/svg+xml;base64,${logo.toString("base64")}`,
     portrait: `data:image/jpeg;base64,${portrait.toString("base64")}`,
     fonts,
-    measureTitle: createMeasurer(fontData[FONTS.findIndex((font) => font.name === "Mona Sans SemiExpanded")]),
+    measureTitle: createMeasurer(
+      fontData[FONTS.findIndex((font) => font.name === "Mona Sans SemiExpanded")]
+    ),
     measureBody: createMeasurer(fontData[FONTS.findIndex((font) => font.weight === 500)]),
   };
 }
@@ -609,9 +697,11 @@ async function renderCard(model: SocialCardModel, assets: SocialCardAssets): Pro
  * their own dedicated card.
  */
 async function generateDefaultSiteCard(assets: SocialCardAssets): Promise<void> {
-  await fs.writeFile(DEFAULT_SOCIAL_CARD_PATH, await renderCard(buildSiteCardModel(assets), assets));
+  await fs.writeFile(
+    DEFAULT_SOCIAL_CARD_PATH,
+    await renderCard(buildSiteCardModel(assets), assets)
+  );
 }
-
 
 /**
  * Normalizes the raw frontmatter value of an `image` field for comparisons.
@@ -634,6 +724,13 @@ function updateFrontmatterImage(
   managedImagePath: string,
   legacyManagedImagePath: string
 ): FrontmatterUpdateResult {
+  if (!hasFrontmatter(content)) {
+    return {
+      content: `---\nimage: ${managedImagePath}\n---\n${content}`,
+      status: "inserted",
+    };
+  }
+
   const block = getFrontmatterBlock(content);
   const lines = block.body.split("\n");
   const imageIndex = lines.findIndex((line) => /^image:\s*/u.test(line));
@@ -661,14 +758,16 @@ function updateFrontmatterImage(
     };
   }
 
-  const insertAfterIndex = lines.findIndex((line) => /^socialTitle:\s*/u.test(line));
-  const fallbackIndex = lines.findIndex((line) => /^title:\s*/u.test(line));
-  const targetIndex =
-    insertAfterIndex >= 0
-      ? insertAfterIndex
-      : fallbackIndex >= 0
-        ? fallbackIndex
-        : lines.length - 1;
+  // After the (social) title if that is a one-line value; otherwise at the end of the block, so a
+  // multi-line value is never split.
+  const titleIndex = [/^socialTitle:\s*/u, /^title:\s*/u]
+    .map((pattern) => lines.findIndex((line) => pattern.test(line)))
+    .find((index) => index >= 0);
+  const isOneLine =
+    titleIndex !== undefined &&
+    !isBlockScalar(lines[titleIndex].replace(/^\w+:\s*/u, "").trim()) &&
+    !/^\s/u.test(lines[titleIndex + 1] ?? "");
+  const targetIndex = isOneLine ? titleIndex : lines.length - 1;
 
   lines.splice(targetIndex + 1, 0, `image: ${managedImagePath}`);
   const updatedBlock = lines.join("\n");
@@ -778,7 +877,8 @@ async function main(): Promise<void> {
       updatedFrontmatterCount += 1;
     }
 
-    const currentHash = hashItem(item);
+    const model = buildCardModel(item, assets);
+    const currentHash = hashCard(model, assets);
     nextManifest.items[item.slug] = currentHash;
 
     const previousHash = previousManifest.items[item.slug];
@@ -796,7 +896,7 @@ async function main(): Promise<void> {
       return;
     }
 
-    await fs.writeFile(absoluteOutputPath, await renderCard(buildCardModel(item, assets), assets));
+    await fs.writeFile(absoluteOutputPath, await renderCard(model, assets));
     generatedCount += 1;
   });
 

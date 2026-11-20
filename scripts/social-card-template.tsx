@@ -23,21 +23,21 @@ const PAD_Y = 64;
 const VISUAL_WIDTH = 380;
 const COLUMN_GAP = 64;
 /** The left column, where all text lives. */
-const TEXT_WIDTH = CARD_WIDTH - 2 * PAD_X - VISUAL_WIDTH - COLUMN_GAP;
+export const TEXT_WIDTH = CARD_WIDTH - 2 * PAD_X - VISUAL_WIDTH - COLUMN_GAP;
 const BRAND_ROW_HEIGHT = 48;
 
 const TITLE_FONT = "Mona Sans SemiExpanded";
 const TITLE_TRACKING = -0.025;
 const TITLE_LINE_HEIGHT = 1.08;
-const TITLE_SIZES = [76, 72, 68, 64, 60, 56, 52, 48, 44, 40];
+const TITLE_SIZES = [76, 72, 68, 64, 60, 56, 52, 48, 44];
 
 /** The site's dark theme, from `src/css/custom.css`. */
 const color = {
   bg: "#0b1424",
   ink: "#e8eef8",
   muted: "#9eadc5",
-  line: "rgba(160, 185, 230, 0.26)",
-  dashed: "rgba(160, 185, 230, 0.5)",
+  /** The site's `--kc-control-line`: outlines of neutral boxes and the process boundary. */
+  line: "rgba(160, 185, 230, 0.5)",
   onTile: "#0c1a30",
   brand: "linear-gradient(135deg, #33ffdc 0%, #3393ff 100%)",
   brandText: "linear-gradient(100deg, #3393ff 0%, #33ffdc 100%)",
@@ -138,7 +138,21 @@ export function createMeasurer(font: Buffer): TextMeasurer {
 /* ---------- Line breaking ---------- */
 
 const CONNECTOR_WORDS = new Set([
-  "a", "an", "and", "as", "at", "by", "for", "in", "of", "on", "or", "the", "to", "with", "&",
+  "a",
+  "an",
+  "and",
+  "as",
+  "at",
+  "by",
+  "for",
+  "in",
+  "of",
+  "on",
+  "or",
+  "the",
+  "to",
+  "with",
+  "&",
 ]);
 
 /** A word, or the part of a hyphenated word after a hyphen (glued to the part before). */
@@ -147,33 +161,54 @@ interface Unit {
   glued: boolean;
 }
 
+/** Names that must not break across lines. */
+const UNBREAKABLE = ["ASP.NET Core", "EF Core", "Native AOT"];
+
 function unitsOf(text: string): Unit[] {
-  return text
-    .split(/\s+/u)
-    .filter(Boolean)
-    .flatMap((word) =>
-      word
-        .split(/(?<=-)(?=\p{L})/u)
-        .map((part, index) => ({ text: part, glued: index > 0 }))
-    );
+  const units: Unit[] = [];
+  const glued = UNBREAKABLE.reduce(
+    (all, name) => all.replaceAll(name, name.replace(/ /gu, "\u00a0")),
+    text
+  );
+  for (const word of glued.split(/[ \t\n]+/u).filter(Boolean)) {
+    // A dash between words ends the line before it, never starts one; " - " is set as " – ".
+    if (/^[-–—]$/u.test(word) && units.length > 0) {
+      units[units.length - 1].text += ` ${word === "-" ? "–" : word}`;
+      continue;
+    }
+    word
+      .split(/(?<=-)(?=\p{L})/u)
+      .forEach((part, index) => units.push({ text: part, glued: index > 0 }));
+  }
+  return units;
 }
 
 function joinUnits(units: Unit[]): string {
-  return units.map((unit, index) => (index > 0 && !unit.glued ? ` ${unit.text}` : unit.text)).join("");
+  return units
+    .map((unit, index) => (index > 0 && !unit.glued ? ` ${unit.text}` : unit.text))
+    .join("");
 }
 
-const bare = (word: string) => word.replace(/^[^\p{L}\p{N}&]+|[^\p{L}\p{N}&]+$/gu, "").toLowerCase();
+const bare = (word: string) =>
+  word.replace(/^[^\p{L}\p{N}&]+|[^\p{L}\p{N}&]+$/gu, "").toLowerCase();
 
 /** How bad a line looks, apart from its fill. Lower is better. */
-function linePenalty(units: Unit[], next: Unit | undefined, isLast: boolean): number {
+function linePenalty(
+  units: Unit[],
+  next: Unit | undefined,
+  isLast: boolean,
+  wordCount: number
+): number {
   const words = joinUnits(units).split(" ");
   const last = words[words.length - 1];
   let penalty = 0;
   if (next?.glued) penalty += 400; // breaks a hyphenated word
   if (!isLast && CONNECTOR_WORDS.has(bare(last))) penalty += 250;
   if (units[0].text === "&") penalty += 120; // "&" belongs to the line before
+  if (next && /^\d/u.test(next.text)) penalty += 120; // keeps "Windows 10" together
   if (!isLast && /[:–—]$/u.test(last)) penalty -= 60; // a natural pause
-  if (isLast && words.length === 1 && bare(last).length <= 8) penalty += 160; // a widow
+  // A lone short word on the last line; short titles may break where they like.
+  if (isLast && wordCount > 3 && words.length === 1 && bare(last).length <= 8) penalty += 160;
   return penalty;
 }
 
@@ -206,8 +241,8 @@ function breakLines(
         if (slack === undefined) break;
         if (!previous) continue;
         const isLast = end === count;
-        const fill = slack * slack * (isLast ? 60 : 130);
-        const cost = previous.cost + fill + linePenalty(slice, units[end], isLast) + 40;
+        const fill = slack * slack * (isLast ? 80 : 400);
+        const cost = previous.cost + fill + linePenalty(slice, units[end], isLast, count) + 80;
         if (!best[lines][end] || cost < best[lines][end].cost) {
           best[lines][end] = { cost, from: start };
         }
@@ -217,7 +252,10 @@ function breakLines(
 
   let bestLines = 0;
   for (let lines = 1; lines <= maxLines; lines += 1) {
-    if (best[lines][count] && (!bestLines || best[lines][count].cost < best[bestLines][count].cost)) {
+    if (
+      best[lines][count] &&
+      (!bestLines || best[lines][count].cost < best[bestLines][count].cost)
+    ) {
       bestLines = lines;
     }
   }
@@ -262,24 +300,25 @@ export function fitText(
       return used <= width ? 1 - used / width : undefined;
     });
     if (!result) continue;
-    const cost = result.cost + (options.sizes[0] - fontSize) * 14;
+    const cost = result.cost + (options.sizes[0] - fontSize) * 22;
     if (!best || cost < best.cost) {
       best = { lines: result.lines, fontSize, lineHeight, cost };
     }
   }
-  if (!best && (options.maxLines ?? 4) < 6) {
-    return fitText(text, { ...options, maxLines: (options.maxLines ?? 4) + 1 });
-  }
   if (!best) {
     throw new Error(`"${text}" does not fit on a social card. Give it a shorter socialTitle.`);
   }
-  return { lines: best.lines, fontSize: best.fontSize, lineHeight: best.lineHeight };
+  return {
+    lines: best.lines,
+    fontSize: best.fontSize,
+    lineHeight: best.lineHeight,
+  };
 }
 
 /** Fits a card title into the text column above `reserved` pixels of other content. */
 export function fitTitle(title: string, measure: TextMeasurer, reserved: number): FittedText {
   return fitText(title, {
-    measure: (text, size, tracking) => measure(text, size, tracking),
+    measure,
     maxWidth: TEXT_WIDTH,
     maxHeight: CARD_HEIGHT - 2 * PAD_Y - BRAND_ROW_HEIGHT - 48 - reserved,
     sizes: TITLE_SIZES,
@@ -306,7 +345,9 @@ export interface SiteCardModel extends CardAssets {
 export interface ContentCardModel extends CardAssets {
   kind: "content";
   title: FittedText;
-  primary: string;
+  /** The event, or the author; shrunk to fit on one line. */
+  primary: { text: string; fontSize: number };
+  /** What it is, and when. */
   secondary: string;
 }
 
@@ -322,12 +363,25 @@ export interface DocsCardModel extends CardAssets {
 
 export type SocialCardModel = SiteCardModel | ContentCardModel | DocsCardModel;
 
+/** The two lines below a content card's title. */
+const META = {
+  gap: 30,
+  primaryLineHeight: 36,
+  secondaryGap: 6,
+  secondarySize: 27,
+  secondaryLineHeight: 34,
+};
+/** The section line above a docs card's title. */
+const SECTION = { fontSize: 27, lineHeight: 34, gap: 22 };
+
 /** Space the meta lines below a content card's title take, for `fitTitle`. */
-export const CONTENT_META_HEIGHT = 30 + 36 + 6 + 32;
+export const CONTENT_META_HEIGHT =
+  META.gap + META.primaryLineHeight + META.secondaryGap + META.secondaryLineHeight;
 /** Space the section line above a docs card's title takes, for `fitTitle`. */
-export const DOCS_SECTION_HEIGHT = 34 + 22;
+export const DOCS_SECTION_HEIGHT = SECTION.lineHeight + SECTION.gap;
 
 export const STATEMENT = {
+  tracking: -0.01,
   fontSize: 31,
   lineHeight: 41,
   maxWidth: TEXT_WIDTH,
@@ -337,7 +391,14 @@ export const STATEMENT = {
 
 function BrandRow({ logo }: { logo: string }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "14px", height: `${BRAND_ROW_HEIGHT}px` }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "14px",
+        height: `${BRAND_ROW_HEIGHT}px`,
+      }}
+    >
       <img src={logo} width={44} height={44} alt="" />
       <span
         style={{
@@ -356,7 +417,7 @@ function BrandRow({ logo }: { logo: string }) {
 
 /** The home page's portrait: a squircle in a ring of the brand gradient. */
 function Portrait({ src }: { src: string }) {
-  const ring = 7;
+  const ring = 5;
   const inner = VISUAL_WIDTH - 2 * ring;
   return (
     <div
@@ -372,7 +433,10 @@ function Portrait({ src }: { src: string }) {
         width={inner}
         height={inner}
         alt=""
-        style={{ borderRadius: `${Math.round(inner * 0.31) - 1}px`, objectFit: "cover" }}
+        style={{
+          borderRadius: `${Math.round(inner * 0.31) - 1}px`,
+          objectFit: "cover",
+        }}
       />
     </div>
   );
@@ -406,7 +470,15 @@ function Swatches({ tiles }: { tiles: string[] }) {
   return (
     <div style={{ display: "flex", gap: "6px", width: `${4 * 18 + 3 * 6}px` }}>
       {tiles.map((tile, index) => (
-        <div key={index} style={{ width: "18px", height: "18px", borderRadius: "5px", backgroundImage: tile }} />
+        <div
+          key={index}
+          style={{
+            width: "18px",
+            height: "18px",
+            borderRadius: "5px",
+            backgroundImage: tile,
+          }}
+        />
       ))}
     </div>
   );
@@ -414,8 +486,14 @@ function Swatches({ tiles }: { tiles: string[] }) {
 
 function SiteText({ greetingSize, statement }: Pick<SiteCardModel, "greetingSize" | "statement">) {
   const methods = [
-    { tiles: PHASES.map((phase) => phase.tile), name: "Guided Coding & Guided Learning" },
-    { tiles: [CHACK_TILES.core, CHACK_TILES.humble, CHACK_TILES.tests, CHACK_TILES.root], name: "CHACK" },
+    {
+      tiles: PHASES.map((phase) => phase.tile),
+      name: "Guided Coding & Guided Learning",
+    },
+    {
+      tiles: [CHACK_TILES.core, CHACK_TILES.humble, CHACK_TILES.tests, CHACK_TILES.root],
+      name: "CHACK",
+    },
   ];
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -431,7 +509,13 @@ function SiteText({ greetingSize, statement }: Pick<SiteCardModel, "greetingSize
         }}
       >
         <span>Hi, I’m&nbsp;</span>
-        <span style={{ backgroundImage: color.brandText, backgroundClip: "text", color: "transparent" }}>
+        <span
+          style={{
+            backgroundImage: color.brandText,
+            backgroundClip: "text",
+            color: "transparent",
+          }}
+        >
           Kenny.
         </span>
       </div>
@@ -443,6 +527,7 @@ function SiteText({ greetingSize, statement }: Pick<SiteCardModel, "greetingSize
               fontSize: `${STATEMENT.fontSize}px`,
               lineHeight: `${STATEMENT.lineHeight}px`,
               fontWeight: 500,
+              letterSpacing: `${STATEMENT.tracking}em`,
               color: color.ink,
               whiteSpace: "nowrap",
             }}
@@ -451,11 +536,25 @@ function SiteText({ greetingSize, statement }: Pick<SiteCardModel, "greetingSize
           </span>
         ))}
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginTop: "40px" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "14px",
+          marginTop: "40px",
+        }}
+      >
         {methods.map((method) => (
           <div key={method.name} style={{ display: "flex", alignItems: "center", gap: "18px" }}>
             <Swatches tiles={method.tiles} />
-            <span style={{ fontSize: "27px", lineHeight: "34px", fontWeight: 600, color: color.ink }}>
+            <span
+              style={{
+                fontSize: "27px",
+                lineHeight: "34px",
+                fontWeight: 600,
+                color: color.ink,
+              }}
+            >
               {method.name}
             </span>
           </div>
@@ -465,23 +564,34 @@ function SiteText({ greetingSize, statement }: Pick<SiteCardModel, "greetingSize
   );
 }
 
-function ContentText({ title, primary, secondary }: Pick<ContentCardModel, "title" | "primary" | "secondary">) {
+function ContentText({
+  title,
+  primary,
+  secondary,
+}: Pick<ContentCardModel, "title" | "primary" | "secondary">) {
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Title title={title} />
       <span
         style={{
-          marginTop: "30px",
-          fontSize: "28px",
-          lineHeight: "36px",
+          marginTop: `${META.gap}px`,
+          fontSize: `${primary.fontSize}px`,
+          lineHeight: `${META.primaryLineHeight}px`,
           fontWeight: 500,
           color: color.ink,
           whiteSpace: "nowrap",
         }}
       >
-        {primary}
+        {primary.text}
       </span>
-      <span style={{ marginTop: "6px", fontSize: "25px", lineHeight: "32px", color: color.muted }}>
+      <span
+        style={{
+          marginTop: `${META.secondaryGap}px`,
+          fontSize: `${META.secondarySize}px`,
+          lineHeight: `${META.secondaryLineHeight}px`,
+          color: color.muted,
+        }}
+      >
         {secondary}
       </span>
     </div>
@@ -491,8 +601,17 @@ function ContentText({ title, primary, secondary }: Pick<ContentCardModel, "titl
 function DocsText({ section, title }: Pick<DocsCardModel, "section" | "title">) {
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <span style={{ fontSize: "27px", lineHeight: "34px", fontWeight: 500, color: color.muted }}>{section}</span>
-      <div style={{ display: "flex", marginTop: "22px" }}>
+      <span
+        style={{
+          fontSize: `${SECTION.fontSize}px`,
+          lineHeight: `${SECTION.lineHeight}px`,
+          fontWeight: 500,
+          color: color.muted,
+        }}
+      >
+        {section}
+      </span>
+      <div style={{ display: "flex", marginTop: `${SECTION.gap}px` }}>
         <Title title={title} />
       </div>
     </div>
@@ -502,7 +621,11 @@ function DocsText({ section, title }: Pick<DocsCardModel, "section" | "title">) 
 /** A box of the motifs: a colour tile, or an outline once another part is highlighted. */
 function tileStyle(tile: string, active: boolean): React.CSSProperties {
   return active
-    ? { backgroundImage: tile, color: color.onTile, border: "2px solid transparent" }
+    ? {
+        backgroundImage: tile,
+        color: color.onTile,
+        border: "2px solid transparent",
+      }
     : { border: `2px solid ${color.line}`, color: color.muted };
 }
 
@@ -510,7 +633,7 @@ function tileStyle(tile: string, active: boolean): React.CSSProperties {
 function GuidedCodingMotif({ highlight }: { highlight?: GuidedCodingPhase }) {
   const badge = 76;
   return (
-    <div style={{ display: "flex", flexDirection: "column", width: `${VISUAL_WIDTH}px` }}>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {PHASES.map((phase, index) => {
         const active = !highlight || highlight === phase.key;
         return (
@@ -561,12 +684,23 @@ function GuidedCodingMotif({ highlight }: { highlight?: GuidedCodingPhase }) {
   );
 }
 
-/** An arrow along the y axis, pointing up or down, as an SVG image. */
-function Arrow({ up, dashed, height }: { up: boolean; dashed?: boolean; height: number }) {
-  const stroke = "#9eadc5";
-  const head = up ? "M2 9 L8 2 L14 9" : `M2 ${height - 9} L8 ${height - 2} L14 ${height - 9}`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="${height}" viewBox="0 0 16 ${height}"><path d="M8 ${up ? 3 : 0} V ${up ? height : height - 3}" stroke="${stroke}" stroke-width="2.5" fill="none" ${dashed ? 'stroke-dasharray="5 4"' : ""}/><path d="${head}" stroke="${stroke}" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
-  return <img src={`data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`} width={16} height={height} alt="" />;
+/**
+ * A vertical arrow as an SVG image, in the notation of the CHACK diagram: an open head for
+ * "references", a dashed line with a hollow triangle for "implements".
+ */
+function Arrow({ implements: isImplements, height }: { implements?: boolean; height: number }) {
+  const line = `stroke="${color.muted}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"`;
+  const svg = isImplements
+    ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="${height}" viewBox="0 0 16 ${height}"><path d="M8 0 V ${height - 12}" ${line} stroke-dasharray="5 4" stroke-linecap="butt" fill="none"/><path d="M2.5 ${height - 12} L8 ${height - 2} L13.5 ${height - 12} Z" ${line} fill="${color.bg}"/></svg>`
+    : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="${height}" viewBox="0 0 16 ${height}"><path d="M8 3 V ${height}" ${line} fill="none"/><path d="M2 9 L8 2 L14 9" ${line} fill="none"/></svg>`;
+  return (
+    <img
+      src={`data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`}
+      width={16}
+      height={height}
+      alt=""
+    />
+  );
 }
 
 /** The CHACK map of the home page: Humble Objects outside, Core, Tests and Root below. */
@@ -578,8 +712,8 @@ function ChackMotif({ highlight }: { highlight?: ChackPart }) {
     justifyContent: "center",
     textAlign: "center",
     borderRadius: "14px",
-    fontSize: "23px",
-    lineHeight: "27px",
+    fontSize: "24px",
+    lineHeight: "28px",
     fontWeight: 600,
   };
   return (
@@ -597,14 +731,15 @@ function ChackMotif({ highlight }: { highlight?: ChackPart }) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          width: `${VISUAL_WIDTH}px`,
+          // Satori sizes boxes as content-box: the padding and border come on top.
+          width: `${VISUAL_WIDTH - 2 * 16 - 2 * 2}px`,
           marginTop: "32px",
-          padding: "42px 22px 22px",
-          border: `2px dashed ${color.dashed}`,
+          padding: "42px 16px 22px",
+          border: `2px dashed ${color.line}`,
           borderRadius: "18px",
         }}
       >
-        <Arrow up={false} dashed height={34} />
+        <Arrow implements height={34} />
         <div
           style={{
             ...label,
@@ -619,15 +754,43 @@ function ChackMotif({ highlight }: { highlight?: ChackPart }) {
         >
           Core
         </div>
-        <div style={{ display: "flex", width: "100%", justifyContent: "space-around", marginTop: "8px" }}>
-          <Arrow up height={34} />
-          <Arrow up height={34} />
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            justifyContent: "space-around",
+            marginTop: "8px",
+          }}
+        >
+          <Arrow height={34} />
+          <Arrow height={34} />
         </div>
-        <div style={{ display: "flex", width: "100%", gap: "16px", marginTop: "8px" }}>
-          <div style={{ ...label, flex: 1, height: "84px", ...tileStyle(CHACK_TILES.tests, active("tests")) }}>
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            gap: "12px",
+            marginTop: "8px",
+          }}
+        >
+          <div
+            style={{
+              ...label,
+              flex: 1,
+              height: "84px",
+              ...tileStyle(CHACK_TILES.tests, active("tests")),
+            }}
+          >
             Automated Tests
           </div>
-          <div style={{ ...label, flex: 1, height: "84px", ...tileStyle(CHACK_TILES.root, active("root")) }}>
+          <div
+            style={{
+              ...label,
+              flex: 1,
+              height: "84px",
+              ...tileStyle(CHACK_TILES.root, active("root")),
+            }}
+          >
             Composition Root
           </div>
         </div>
@@ -693,26 +856,32 @@ export function SocialCard(model: SocialCardModel) {
           width: `${CARD_WIDTH - 2 * PAD_X}px`,
           height: `${CARD_HEIGHT - 2 * PAD_Y}px`,
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-end",
           gap: `${COLUMN_GAP}px`,
         }}
       >
-      <div
-        style={{
-          width: `${TEXT_WIDTH}px`,
-          height: `${CARD_HEIGHT - 2 * PAD_Y}px`,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
-      >
-        <BrandRow logo={model.logo} />
-        {text}
-      </div>
-      <div style={{ display: "flex", width: `${VISUAL_WIDTH}px`, justifyContent: "center" }}>{visual}</div>
+        <div
+          style={{
+            width: `${TEXT_WIDTH}px`,
+            height: `${CARD_HEIGHT - 2 * PAD_Y}px`,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <BrandRow logo={model.logo} />
+          {text}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            width: `${VISUAL_WIDTH}px`,
+            justifyContent: "center",
+          }}
+        >
+          {visual}
+        </div>
       </div>
     </div>
   );
 }
-
-export { TEXT_WIDTH };
