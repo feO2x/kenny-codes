@@ -547,12 +547,12 @@
   --top-h: 4rem; /* the Humble Objects, straddling the top edge */
   --bottom-h: 5.5rem; /* the Composition Root and the Automated Tests */
   --boundary-gap: 1.5rem; /* between the bottom row and the bottom edge */
-  --cross: 0.75rem; /* how far the Automated Tests run past the bottom edge */
+  --cross: 2rem; /* how far the Automated Tests run past the bottom edge, as far as the Humble Objects rise above the top */
   position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 0.75rem;
-  margin: calc(var(--top-h) / 2) 0 2.25rem;
+  margin: calc(var(--top-h) / 2) 0 calc(var(--cross) + 1rem);
   padding: 0 1rem var(--boundary-gap);
   border: 1.5px dashed var(--kc-control-line);
   border-radius: var(--kc-radius);
@@ -647,12 +647,16 @@
 
 /*
  * Bottom row: the Composition Root and the Automated Tests. Both stretch to the row's height, which
- * grows with the text on a narrow screen, and both start at the top, so their labels line up.
+ * grows with the text on a narrow screen. Both start their text at the same height, so the labels line up.
  */
 .chackBottom {
   align-self: stretch;
   min-height: var(--bottom-h);
-  justify-content: center;
+  justify-content: flex-start;
+}
+
+.chackBox.chackBottom {
+  padding-top: 0.9rem;
 }
 
 /*
@@ -661,11 +665,6 @@
  */
 .chackTests {
   margin-bottom: calc(-1 * (var(--boundary-gap) + var(--cross)));
-}
-
-/* The bottom padding keeps the contents centred on the row, level with the Composition Root's. */
-.chackBox.chackTests {
-  padding-bottom: calc(var(--boundary-gap) + var(--cross));
 }
 
 .chackDown,
@@ -891,7 +890,7 @@
 
   /* Room for the Automated Tests running past the bottom edge. */
   .methodVisual > .chackMap {
-    margin-bottom: 1.75rem;
+    margin-bottom: calc(var(--cross) + 0.75rem);
   }
 }
 
