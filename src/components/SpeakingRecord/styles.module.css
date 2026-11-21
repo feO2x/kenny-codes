@@ -458,6 +458,11 @@
   color: var(--ifm-color-primary);
 }
 
+.detailsCueHint {
+  pointer-events: none;
+  cursor: default;
+}
+
 .legend {
   display: flex;
   flex-wrap: wrap;

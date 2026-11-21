@@ -201,10 +201,17 @@ function revealElementIfObscured(element: HTMLElement): void {
   const rect = element.getBoundingClientRect();
   const vp = getVisibleViewport();
   const visibleTop = Math.max(vp.top, getNavbarBottom());
-  if (rect.bottom > vp.bottom - 12 || rect.top < visibleTop + 8) {
+  const obscuredVertically = rect.bottom > vp.bottom - 12 || rect.top < visibleTop + 8;
+  const obscuredHorizontally = rect.right > vp.right - 8 || rect.left < vp.left + 8;
+  if (obscuredVertically || obscuredHorizontally) {
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const block: ScrollLogicalPosition =
+      rect.height > vp.bottom - visibleTop - 16 ? 'start' : 'nearest';
+    const inline: ScrollLogicalPosition =
+      rect.width > vp.right - vp.left - 16 ? 'start' : 'nearest';
     element.scrollIntoView({
-      block: 'nearest',
+      block,
+      inline,
       behavior: reducedMotion ? 'auto' : 'smooth',
     });
   }
@@ -222,22 +229,35 @@ function rectsEqual(
   );
 }
 
+function bracketRatioThresholds(ratio: number): number[] {
+  const eps = 1e-4;
+  const low = Math.max(0, ratio - eps);
+  const high = Math.min(1, ratio + eps);
+  return [...new Set([0, low, high, 1])].sort((a, b) => a - b);
+}
+
 /**
  * Observes position-only shifts of an element (e.g. content expanding above the chart)
- * without polling, by wrapping the element's current rect in an IntersectionObserver rootMargin.
+ * without polling, using IntersectionObserver rootMargins:
+ * - A tight-box observer around the element's current rect detects any movement when unclipped.
+ * - When partially clipped (0 < ratio < 1), two orthogonal half-plane observers cut through the
+ *   visible midpoint along each axis so slides parallel or perpendicular to a single clipping
+ *   edge still cross a ratio threshold.
+ * - Elements clipped on both opposing edges of an axis simultaneously, or completely occluded
+ *   (ratio === 0), cannot change ratio until an edge re-enters or scroll/resize fires.
  */
 function observeElementMove(element: Element, onMove: () => void): () => void {
   if (typeof IntersectionObserver === 'undefined') return () => {};
-  let io: IntersectionObserver | null = null;
+  const observers = new Set<IntersectionObserver>();
   let stopped = false;
 
-  const disconnect = () => {
-    io?.disconnect();
-    io = null;
+  const disconnectAll = () => {
+    observers.forEach((observer) => observer.disconnect());
+    observers.clear();
   };
 
-  const refresh = (armedRatio: number | null = null) => {
-    disconnect();
+  const refresh = () => {
+    disconnectAll();
     if (stopped) return;
     const rect = element.getBoundingClientRect();
     const rootWidth = document.documentElement.clientWidth;
@@ -251,59 +271,90 @@ function observeElementMove(element: Element, onMove: () => void): () => void {
       height: Math.round(rect.height),
     };
 
+    const addMarginObserver = (
+      rootMargin: string,
+      armedRatio: number | null,
+      onFirstStableEntry?: (entry: IntersectionObserverEntry) => void,
+    ) => {
+      if (stopped) return;
+      const threshold =
+        armedRatio !== null && armedRatio > 0 && armedRatio < 1
+          ? bracketRatioThresholds(armedRatio)
+          : [0, 1];
+
+      let isFirstObservation = true;
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (stopped) return;
+          const entry = entries[entries.length - 1];
+          const nextRect = element.getBoundingClientRect();
+          if (!rectsEqual(observed, nextRect)) {
+            onMove();
+            refresh();
+            return;
+          }
+
+          if (isFirstObservation) {
+            isFirstObservation = false;
+            const ratio = entry?.intersectionRatio ?? 1;
+            if (
+              ratio > 0 &&
+              ratio < 1 &&
+              (armedRatio === null || Math.abs(ratio - armedRatio) > 1e-4)
+            ) {
+              io.disconnect();
+              observers.delete(io);
+              addMarginObserver(rootMargin, ratio);
+            }
+            if (entry) {
+              onFirstStableEntry?.(entry);
+            }
+          }
+        },
+        {
+          root: document.documentElement,
+          rootMargin,
+          threshold,
+        },
+      );
+      observers.add(io);
+      io.observe(element);
+    };
+
     const insetTop = Math.floor(rect.top);
     const insetLeft = Math.floor(rect.left);
     const insetRight = Math.floor(rootWidth - (rect.left + rect.width));
     const insetBottom = Math.floor(rootHeight - (rect.top + rect.height));
-    const rootMargin = `${-insetTop}px ${-insetRight}px ${-insetBottom}px ${-insetLeft}px`;
+    const tightMargin = `${-insetTop}px ${-insetRight}px ${-insetBottom}px ${-insetLeft}px`;
 
-    // When the anchor is partially clipped (0 < ratio < 1), bracket the current ratio tightly
-    // so movement between two partially intersecting positions still crosses a threshold.
-    let threshold: number | number[] = [0, 1];
-    if (armedRatio !== null && armedRatio > 0 && armedRatio < 1) {
-      const eps = 1e-4;
-      const low = Math.max(0, armedRatio - eps);
-      const high = Math.min(1, armedRatio + eps);
-      threshold = [...new Set([0, low, high, 1])].sort((a, b) => a - b);
-    }
+    addMarginObserver(tightMargin, null, (entry) => {
+      const ratio = entry.intersectionRatio;
+      if (ratio <= 0 || ratio >= 1) return;
 
-    let isFirstObservation = true;
-    io = new IntersectionObserver(
-      (entries) => {
-        if (stopped) return;
-        const entry = entries[entries.length - 1];
-        const nextRect = element.getBoundingClientRect();
-        if (!rectsEqual(observed, nextRect)) {
-          onMove();
-          refresh(null);
-          return;
-        }
+      const vis = entry.intersectionRect;
+      if (vis.width <= 1 || vis.height <= 1) return;
 
-        if (isFirstObservation) {
-          isFirstObservation = false;
-          const ratio = entry?.intersectionRatio ?? 1;
-          if (
-            ratio > 0 &&
-            ratio < 1 &&
-            (armedRatio === null || Math.abs(ratio - armedRatio) > 1e-4)
-          ) {
-            refresh(ratio);
-          }
-        }
-      },
-      {
-        root: document.documentElement,
-        rootMargin,
-        threshold,
-      },
-    );
-    io.observe(element);
+      const openMargin = 10000;
+      const cutY = Math.round(vis.top + vis.height / 2);
+      const topClipped = vis.top > rect.top + 0.5;
+      const verticalMargin = topClipped
+        ? `${-cutY}px ${openMargin}px ${openMargin}px ${openMargin}px`
+        : `${openMargin}px ${openMargin}px ${cutY - rootHeight}px ${openMargin}px`;
+      addMarginObserver(verticalMargin, null);
+
+      const cutX = Math.round(vis.left + vis.width / 2);
+      const leftClipped = vis.left > rect.left + 0.5;
+      const horizontalMargin = leftClipped
+        ? `${openMargin}px ${openMargin}px ${openMargin}px ${-cutX}px`
+        : `${openMargin}px ${cutX - rootWidth}px ${openMargin}px ${openMargin}px`;
+      addMarginObserver(horizontalMargin, null);
+    });
   };
 
-  refresh(null);
+  refresh();
   return () => {
     stopped = true;
-    disconnect();
+    disconnectAll();
   };
 }
 
@@ -551,25 +602,37 @@ function SessionPopover({
   );
 }
 
+type CueDirection = 'up' | 'down' | 'left' | 'right';
+
+const CUE_ARROWS: Record<CueDirection, string> = {
+  up: '↑',
+  down: '↓',
+  left: '←',
+  right: '→',
+};
+
 interface OffscreenDetailsCueLayout {
   left: number;
   top: number;
   maxWidth: number;
-  direction: 'up' | 'down';
+  direction: CueDirection;
 }
 
 interface OffscreenDetailsCueProps {
   containerRef: RefObject<HTMLDivElement | null>;
   targetRef: RefObject<HTMLDivElement | null>;
-  cueRef: RefObject<HTMLButtonElement | null>;
+  cueRef?: RefObject<HTMLButtonElement | null>;
   label: string;
-  onReveal: () => void;
+  onReveal?: () => void;
 }
 
 /**
  * Floating viewport-anchored cue shown only when an open inline preview or details panel
- * lies outside the current visual viewport (e.g. under extreme pinch zoom or on short screens),
- * giving pointer and keyboard users a visible way to reach the details without forced scrolling.
+ * lies outside the current visual viewport (vertically or horizontally, e.g. under extreme
+ * pinch zoom or on short screens), giving users a visible way to reach the details without
+ * forced scrolling. Renders an interactive button when `onReveal` is provided (for persistent
+ * details panels) and a non-interactive visual shortcut hint otherwise (for focus-driven
+ * inline previews where Space on the focused square opens the details panel).
  */
 function OffscreenDetailsCue({
   containerRef,
@@ -578,7 +641,18 @@ function OffscreenDetailsCue({
   label,
   onReveal,
 }: OffscreenDetailsCueProps): ReactNode {
+  const localElRef = useRef<HTMLElement | null>(null);
   const [cueLayout, setCueLayout] = useState<OffscreenDetailsCueLayout | null>(null);
+
+  const setCueNode = useCallback(
+    (node: HTMLElement | null) => {
+      localElRef.current = node;
+      if (cueRef) {
+        cueRef.current = node instanceof HTMLButtonElement ? node : null;
+      }
+    },
+    [cueRef],
+  );
 
   useIsomorphicLayoutEffect(() => {
     let active = true;
@@ -587,7 +661,7 @@ function OffscreenDetailsCue({
       if (!active) return;
       const containerEl = containerRef.current;
       const targetEl = targetRef.current;
-      const cueEl = cueRef.current;
+      const cueEl = localElRef.current;
       if (!containerEl || !targetEl || !cueEl) {
         setCueLayout(null);
         return;
@@ -598,19 +672,33 @@ function OffscreenDetailsCue({
       const containerRect = containerEl.getBoundingClientRect();
 
       // Hide the cue when the chart itself is no longer in the visible viewport.
-      if (containerRect.bottom <= visibleTop + 4 || containerRect.top >= vp.bottom - 4) {
+      if (
+        containerRect.bottom <= visibleTop + 4 ||
+        containerRect.top >= vp.bottom - 4 ||
+        containerRect.right <= vp.left + 4 ||
+        containerRect.left >= vp.right - 4
+      ) {
         setCueLayout(null);
         return;
       }
 
       const targetRect = targetEl.getBoundingClientRect();
-      const targetVisible = targetRect.top < vp.bottom - 24 && targetRect.bottom > visibleTop + 24;
-      if (targetVisible) {
+      const targetVisibleVertically =
+        targetRect.top < vp.bottom - 24 && targetRect.bottom > visibleTop + 24;
+      const targetVisibleHorizontally =
+        targetRect.left < vp.right - 24 && targetRect.right > vp.left + 24;
+      if (targetVisibleVertically && targetVisibleHorizontally) {
         setCueLayout(null);
         return;
       }
 
-      const direction: 'up' | 'down' = targetRect.top >= vp.bottom - 24 ? 'down' : 'up';
+      let direction: CueDirection;
+      if (!targetVisibleVertically) {
+        direction = targetRect.top >= vp.bottom - 24 ? 'down' : 'up';
+      } else {
+        direction = targetRect.left >= vp.right - 24 ? 'right' : 'left';
+      }
+
       const viewportMargin = 8;
       const maxWidth = Math.max(110, Math.floor(vp.right - vp.left - viewportMargin * 2));
       cueEl.style.maxWidth = `${maxWidth}px`;
@@ -678,27 +766,42 @@ function OffscreenDetailsCue({
       resizeObserver?.disconnect();
       stopTargetMoveObserver();
     };
-  }, [containerRef, cueRef, targetRef]);
+  }, [containerRef, targetRef]);
+
+  const cueStyle: CSSProperties = cueLayout
+    ? {
+        left: `${cueLayout.left}px`,
+        top: `${cueLayout.top}px`,
+        maxWidth: `${cueLayout.maxWidth}px`,
+      }
+    : {visibility: 'hidden', pointerEvents: 'none'};
+
+  const arrow = CUE_ARROWS[cueLayout?.direction ?? 'down'];
+
+  if (!onReveal) {
+    return (
+      <div
+        ref={setCueNode}
+        className={clsx(styles.detailsCue, styles.detailsCueHint)}
+        aria-hidden="true"
+        style={cueStyle}>
+        <span>{label}</span>
+        <span>{arrow}</span>
+      </div>
+    );
+  }
 
   return (
     <button
-      ref={cueRef}
+      ref={setCueNode}
       type="button"
       className={styles.detailsCue}
       tabIndex={cueLayout ? 0 : -1}
       aria-hidden={cueLayout ? undefined : true}
-      style={
-        cueLayout
-          ? {
-              left: `${cueLayout.left}px`,
-              top: `${cueLayout.top}px`,
-              maxWidth: `${cueLayout.maxWidth}px`,
-            }
-          : {visibility: 'hidden', pointerEvents: 'none'}
-      }
+      style={cueStyle}
       onClick={onReveal}>
       <span>{label}</span>
-      <span aria-hidden="true">{cueLayout?.direction === 'up' ? '↑' : '↓'}</span>
+      <span aria-hidden="true">{arrow}</span>
     </button>
   );
 }
@@ -1493,6 +1596,7 @@ export default function SpeakingRecord({
 
       {activeDetails ? (
         <OffscreenDetailsCue
+          key="details"
           containerRef={containerRef}
           targetRef={detailsBarRef}
           cueRef={detailsCueRef}
@@ -1504,11 +1608,10 @@ export default function SpeakingRecord({
         effectivePopoverSource === 'focus' &&
         isFocusPopoverInline && (
           <OffscreenDetailsCue
+            key="inline"
             containerRef={containerRef}
             targetRef={popoverElRef}
-            cueRef={detailsCueRef}
-            label="View session details (Space)"
-            onReveal={() => openKeyboardDetails(popoverSession.permalink)}
+            label="Press Space for details"
           />
         )
       )}
