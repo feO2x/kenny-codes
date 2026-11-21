@@ -87,15 +87,11 @@ export default function EventsSection(): ReactNode {
           </div>
         </div>
 
-        {/* The record backs up the section: what I speak about first, then how often. */}
         <div className={styles.record}>
           <div className={styles.recordIntro}>
             <h3 className={styles.recordTitle}>
               {delivered.length} talks, workshops, and webinars since {firstYear}
             </h3>
-            <p className={styles.recordText}>
-              Regular speaker at conferences and user groups.
-            </p>
             <Link to="/events" className={styles.textLink}>
               Browse all events
             </Link>
