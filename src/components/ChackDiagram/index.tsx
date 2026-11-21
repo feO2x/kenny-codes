@@ -70,7 +70,9 @@ const rootY = 662;
 const humble = onRow(200, mainY, 140, 80);
 const ioAbstractions = onRow(404, mainY, 150, 64);
 const core = onRow(610, mainY, 210, 140);
-const root = onRow(610, rootY, 210, 64);
+/** The Composition Root shares the Core's column, so its arrow meets the Core's centre. */
+const rootWidth = 210;
+const root = onRow(centerX(core) - rootWidth / 2, rootY, rootWidth, 64);
 
 /** Unit tests and test doubles stack between the tops and bottoms of the broad tests. */
 const testTop = 356;
@@ -80,7 +82,7 @@ const unitTests: Box = {x: 900, y: testTop, width: 96, height: testCardHeight};
 const testDoubles: Box = {x: 900, y: testBottom - testCardHeight, width: 96, height: testCardHeight};
 const integrationTests: Box = {x: 1020, y: testTop, width: 52, height: testBottom - testTop};
 const e2eTests: Box = {x: 1100, y: testTop, width: 68, height: testBottom - testTop};
-const testGroup: Box = {x: 880, y: testTop - 16, width: 306, height: testBottom - testTop + 32};
+const testGroup: Box = {x: unitTests.x - 20, y: testTop - 16, width: right(e2eTests) + 18 - (unitTests.x - 20), height: testBottom - testTop + 32};
 
 /** Third-party systems: the middle card is centred on the runtime I/O call. */
 const thirdPartyCardHeight = 66;
@@ -88,19 +90,30 @@ const thirdPartyCardStep = 76;
 const thirdPartyCardTop = mainY - thirdPartyCardStep - thirdPartyCardHeight / 2;
 const thirdParty: Box = {x: 4, y: thirdPartyCardTop - 73, width: 144, height: 73 + 2 * thirdPartyCardStep + thirdPartyCardHeight + 12};
 
+/**
+ * The process boundary runs through the middle of the Humble Objects and the integration tests,
+ * which sit on it, and leaves room below the Composition Root.
+ */
+const boundary: Box = {x: centerX(humble), y: 70, width: centerX(integrationTests) - centerX(humble), height: bottom(root) + 26 - 70};
+/** Frameworks & Libraries span the top of the process boundary. */
+const frameworks: Box = {x: boundary.x + 20, y: boundary.y + 42, width: boundary.width - 40, height: 98};
+/** The legend sits below the third-party systems. */
+const legendY = bottom(thirdParty) + 67;
+
 /** Vertical lanes of the broad tests' connectors, and the lane into the Humble Objects. */
 const lane = {
-  integrationShared: 1034,
-  integrationThirdParty: 1058,
-  e2eHumble: 1116,
+  integrationShared: centerX(integrationTests) - 12,
+  integrationThirdParty: centerX(integrationTests) + 12,
+  e2eHumble: centerX(e2eTests) - 18,
   e2eRoot: centerX(e2eTests),
-  e2eThirdParty: 1152,
-  intoHumble: 300,
+  e2eThirdParty: centerX(e2eTests) + 18,
+  /** Right of the process boundary, which crosses the Humble Objects' centre. */
+  intoHumble: right(humble) - 40,
 };
 
 /**
- * Connectors stop this far short of a box: their heads, like the lines' round caps, reach about
- * half a stroke width past the end point, so the painted tip meets the edge.
+ * Connectors stop this far short of a box: their heads, like the lines' round caps, reach half a
+ * stroke width past the end point, so the painted tip meets the edge.
  */
 const inset = 1;
 /** Half the gap that marks where one connector only crosses another. */
@@ -128,11 +141,11 @@ function Markers({prefix, tone}: {prefix: string; tone: Tile | 'muted'}): ReactN
   return (
     <>
       {/* Open arrowhead: "references" */}
-      <marker id={id('ref')} markerWidth="9" markerHeight="7" refX="8.4" refY="3.5" orient="auto" style={style}>
+      <marker id={id('ref')} markerWidth="9" markerHeight="7" refX="8.35" refY="3.5" orient="auto" style={style}>
         <path d="M 0.6 0.6 L 8.4 3.5 L 0.6 6.4" className={d.line} style={{strokeWidth: 0.9}} />
       </marker>
       {/* Hollow triangle: "implements / derives from" */}
-      <marker id={id('impl')} markerWidth="9" markerHeight="8" refX="8.5" refY="4" orient="auto" style={style}>
+      <marker id={id('impl')} markerWidth="9" markerHeight="8" refX="8.45" refY="4" orient="auto" style={style}>
         <polygon points="0.5 0.6, 8.5 4, 0.5 7.4" className={d.headHollow} style={{strokeWidth: 0.9}} />
       </marker>
       {/* Solid heads: runtime I/O. Short, so that the shaft between two heads stays visible. */}
@@ -200,7 +213,7 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
       label="CHACK diagram"
       caption="All four categories may depend on the frameworks and libraries. Those arrows are left out to keep the number of arrows manageable.">
       <svg
-        viewBox="0 0 1192 734"
+        viewBox={`0 0 1192 ${bottom(boundary) + 14}`}
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby={titleId}
@@ -217,21 +230,21 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
 
         {/* Process boundary - integration tests sit over its right edge; unit tests stay
             inside, while E2E tests drive the system under test from another process. */}
-        <rect x="270" y="70" width="776" height="650" rx="14" className={d.boundary} />
-        <rect x="568" y="56" width="180" height="28" rx="14" className={d.chip} />
-        <text x="658" y="76.5" textAnchor="middle" fontSize="20" className={clsx(d.muted, d.semibold)}>
+        <rect {...boundary} rx="14" className={d.boundary} />
+        <rect x={centerX(boundary) - 90} y={boundary.y - 14} width="180" height="28" rx="14" className={d.chip} />
+        <text x={centerX(boundary)} y={boundary.y + 6.5} textAnchor="middle" fontSize="20" className={clsx(d.muted, d.semibold)}>
           Process boundary
         </text>
 
         {/* Frameworks and libraries */}
-        <rect x="290" y="112" width="736" height="98" rx="10" className={d.quiet} />
-        <text x="658" y="140" textAnchor="middle" fontSize="21" className={d.strong}>
+        <rect {...frameworks} rx="10" className={d.quiet} />
+        <text x={centerX(frameworks)} y={frameworks.y + 28} textAnchor="middle" fontSize="21" className={d.strong}>
           Frameworks &amp; Libraries
         </text>
-        <text x="658" y="168" textAnchor="middle" fontSize="20" className={d.muted}>
+        <text x={centerX(frameworks)} y={frameworks.y + 56} textAnchor="middle" fontSize="20" className={d.muted}>
           Base Class Library, HTTP Server Frameworks, Data Access,
         </text>
-        <text x="658" y="193" textAnchor="middle" fontSize="20" className={d.muted}>
+        <text x={centerX(frameworks)} y={frameworks.y + 81} textAnchor="middle" fontSize="20" className={d.muted}>
           Validation Frameworks, Test Frameworks, …
         </text>
 
@@ -365,19 +378,19 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
         <Label x={centerX(root)} y={rootY} lines={['Composition Root']} className={onBox('composition-root')} />
 
         {/* Legend */}
-        <line x1="8" y1="608" x2="56" y2="608" className={d.line} markerEnd={legend.ref} />
-        <text x="66" y="614" fontSize="20" className={d.muted}>
+        <line x1="8" y1={legendY} x2="56" y2={legendY} className={d.line} markerEnd={legend.ref} />
+        <text x="66" y={legendY + 6} fontSize="20" className={d.muted}>
           references
         </text>
-        <line x1="8" y1="642" x2="56" y2="642" className={clsx(d.line, d.dashed)} markerEnd={legend.impl} />
-        <text x="66" y="648" fontSize="20" className={d.muted}>
+        <line x1="8" y1={legendY + 34} x2="56" y2={legendY + 34} className={clsx(d.line, d.dashed)} markerEnd={legend.impl} />
+        <text x="66" y={legendY + 40} fontSize="20" className={d.muted}>
           <tspan x="66">implements /</tspan>
           <tspan x="66" dy="23">
             derives from
           </tspan>
         </text>
-        <line x1="8" y1="700" x2="56" y2="700" className={d.line} markerEnd={legend.io} markerStart={legend.ioStart} />
-        <text x="66" y="706" fontSize="20" className={d.muted}>
+        <line x1="8" y1={legendY + 92} x2="56" y2={legendY + 92} className={d.line} markerEnd={legend.io} markerStart={legend.ioStart} />
+        <text x="66" y={legendY + 98} fontSize="20" className={d.muted}>
           I/O call at runtime
         </text>
       </svg>
