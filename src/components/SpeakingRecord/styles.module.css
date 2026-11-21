@@ -6,6 +6,10 @@
   margin: 0;
 }
 
+.figure {
+  margin: 0;
+}
+
 .chart {
   display: grid;
   grid-auto-flow: column;
@@ -337,7 +341,10 @@
 }
 
 .detailsTitleLink {
-  display: inline;
+  display: inline-block;
+  min-width: 24px;
+  min-height: 24px;
+  padding-block: 0.15rem;
   font-size: 0.95rem;
   font-weight: 650;
   font-stretch: 104%;
@@ -510,6 +517,10 @@
 
   .detailsBar {
     flex-wrap: wrap;
+  }
+
+  .detailsBody {
+    flex: 1 0 100%;
   }
 
   .detailsActions {

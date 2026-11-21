@@ -52,6 +52,7 @@ interface FloatingPopoverPosition {
   top: number;
   arrowX: number;
   placement: 'top' | 'bottom';
+  maxWidth: number;
 }
 
 interface InlinePopoverPosition {
@@ -64,6 +65,8 @@ interface HiddenPopoverPosition {
 
 type PopoverLayout = FloatingPopoverPosition | InlinePopoverPosition | HiddenPopoverPosition;
 
+type DetailsOpener = {kind: 'browse'} | {kind: 'square'; permalink: string};
+
 interface PendingPointer {
   permalink: string;
   pointerType: string;
@@ -72,6 +75,7 @@ interface PendingPointer {
 
 const POINTER_GESTURE_TTL_MS = 1000;
 const HOVER_LEAVE_DELAY_MS = 180;
+const MIN_FLOATING_POPOVER_WIDTH = 160;
 
 function getFreshPendingPointer(
   ref: RefObject<PendingPointer | null>,
@@ -184,6 +188,87 @@ function getNavbarBottom(): number {
   return Math.max(0, document.querySelector('.navbar')?.getBoundingClientRect().bottom ?? 0);
 }
 
+function revealElementIfObscured(element: HTMLElement): void {
+  const rect = element.getBoundingClientRect();
+  const vp = getVisibleViewport();
+  const visibleTop = Math.max(vp.top, getNavbarBottom());
+  if (rect.bottom > vp.bottom - 12 || rect.top < visibleTop + 8) {
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    element.scrollIntoView({
+      block: 'nearest',
+      behavior: reducedMotion ? 'auto' : 'smooth',
+    });
+  }
+}
+
+/**
+ * Observes position-only shifts of an element (e.g. content expanding above the chart)
+ * without polling, by wrapping the element's current rect in an IntersectionObserver rootMargin.
+ */
+function observeElementMove(element: Element, onMove: () => void): () => void {
+  if (typeof IntersectionObserver === 'undefined') return () => {};
+  let io: IntersectionObserver | null = null;
+  let stopped = false;
+
+  const disconnect = () => {
+    io?.disconnect();
+    io = null;
+  };
+
+  const refresh = () => {
+    disconnect();
+    if (stopped) return;
+    const rect = element.getBoundingClientRect();
+    const rootWidth = document.documentElement.clientWidth;
+    const rootHeight = document.documentElement.clientHeight;
+    if (rootWidth === 0 || rootHeight === 0 || rect.width === 0 || rect.height === 0) return;
+
+    const observedLeft = Math.round(rect.left);
+    const observedTop = Math.round(rect.top);
+    const observedWidth = Math.round(rect.width);
+    const observedHeight = Math.round(rect.height);
+
+    const insetTop = Math.floor(rect.top);
+    const insetLeft = Math.floor(rect.left);
+    const insetRight = Math.floor(rootWidth - (rect.left + rect.width));
+    const insetBottom = Math.floor(rootHeight - (rect.top + rect.height));
+    const rootMargin = `${-insetTop}px ${-insetRight}px ${-insetBottom}px ${-insetLeft}px`;
+
+    let isFirstObservation = true;
+    io = new IntersectionObserver(
+      () => {
+        if (stopped) return;
+        if (isFirstObservation) {
+          isFirstObservation = false;
+          return;
+        }
+        const nextRect = element.getBoundingClientRect();
+        if (
+          Math.round(nextRect.left) !== observedLeft ||
+          Math.round(nextRect.top) !== observedTop ||
+          Math.round(nextRect.width) !== observedWidth ||
+          Math.round(nextRect.height) !== observedHeight
+        ) {
+          onMove();
+          refresh();
+        }
+      },
+      {
+        root: document.documentElement,
+        rootMargin,
+        threshold: [0, 1],
+      },
+    );
+    io.observe(element);
+  };
+
+  refresh();
+  return () => {
+    stopped = true;
+    disconnect();
+  };
+}
+
 function SessionPreviewContent({
   session,
   titleSlot,
@@ -208,10 +293,12 @@ function SessionPreviewContent({
 
 interface SessionPopoverProps {
   session: RecordSession;
-  figureRef: RefObject<HTMLElement | null>;
+  source: 'hover' | 'focus';
+  containerRef: RefObject<HTMLDivElement | null>;
   squareRefs: RefObject<Map<string, HTMLAnchorElement>>;
   onPointerEnter: (event: PointerEvent<HTMLDivElement>) => void;
   onPointerLeave: (event: PointerEvent<HTMLDivElement>) => void;
+  onHoverInlineFallback: (permalink: string) => void;
 }
 
 function isSamePopoverLayout(a: PopoverLayout | null, b: PopoverLayout | null): boolean {
@@ -222,7 +309,8 @@ function isSamePopoverLayout(a: PopoverLayout | null, b: PopoverLayout | null): 
       a.left === b.left &&
       a.top === b.top &&
       a.arrowX === b.arrowX &&
-      a.placement === b.placement
+      a.placement === b.placement &&
+      a.maxWidth === b.maxWidth
     );
   }
   return true;
@@ -230,28 +318,27 @@ function isSamePopoverLayout(a: PopoverLayout | null, b: PopoverLayout | null): 
 
 function SessionPopover({
   session,
-  figureRef,
+  source,
+  containerRef,
   squareRefs,
   onPointerEnter,
   onPointerLeave,
+  onHoverInlineFallback,
 }: SessionPopoverProps): ReactNode {
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const [layout, setLayout] = useState<PopoverLayout | null>(null);
 
   const computeLayout = useCallback((): PopoverLayout | null => {
-    const figureEl = figureRef.current;
+    const containerEl = containerRef.current;
     const squareEl = squareRefs.current.get(session.permalink);
     const popoverEl = popoverRef.current;
-    if (!figureEl || !squareEl || !popoverEl) return null;
+    if (!containerEl || !squareEl || !popoverEl) return null;
 
     // Measure the unscaled, non-animated slot wrapper so entrance animations or hover scale
     // never skew anchor coordinates.
     const anchorEl = squareEl.parentElement ?? squareEl;
-    const figureRect = figureEl.getBoundingClientRect();
+    const containerRect = containerEl.getBoundingClientRect();
     const anchorRect = anchorEl.getBoundingClientRect();
-    const popoverWidth = popoverEl.offsetWidth;
-    const popoverHeight = popoverEl.offsetHeight;
-    if (popoverWidth === 0 || popoverHeight === 0) return null;
 
     const vp = getVisibleViewport();
     const navbarBottom = getNavbarBottom();
@@ -269,6 +356,22 @@ function SessionPopover({
 
     const gap = 10;
     const viewportMargin = 12;
+    const availableWidth = Math.floor(vp.right - vp.left - viewportMargin * 2);
+
+    // Under extreme pinch zoom where a floating card would be unreadably narrow,
+    // use the inline / details fallback instead.
+    if (availableWidth < MIN_FLOATING_POPOVER_WIDTH) {
+      popoverEl.style.maxWidth = '';
+      return {kind: 'inline'};
+    }
+
+    // Cap width against the visual viewport before measuring height so wrapped dimensions
+    // reflect pinch zoom accurately and floating cards never clip horizontally.
+    popoverEl.style.maxWidth = `min(19.5rem, ${availableWidth}px)`;
+    const popoverWidth = popoverEl.offsetWidth;
+    const popoverHeight = popoverEl.offsetHeight;
+    if (popoverWidth === 0 || popoverHeight === 0) return null;
+
     const topBound = visibleTop + 8;
     const bottomBound = vp.bottom - viewportMargin;
 
@@ -278,8 +381,9 @@ function SessionPopover({
     const fitsBelow = spaceBelow >= popoverHeight;
 
     // If neither side has enough room without clipping or covering the trigger,
-    // fall back to an in-flow card beneath the chart so all content stays readable.
+    // fall back to an in-flow presentation so all content stays readable.
     if (!fitsAbove && !fitsBelow) {
+      popoverEl.style.maxWidth = '';
       return {kind: 'inline'};
     }
 
@@ -287,23 +391,30 @@ function SessionPopover({
     const viewportTop =
       placement === 'top' ? anchorRect.top - gap - popoverHeight : anchorRect.bottom + gap;
 
-    const centerX = anchorRect.left + anchorRect.width / 2 - figureRect.left;
-    const minLeft = vp.left + viewportMargin - figureRect.left;
-    const maxLeft = vp.right - viewportMargin - popoverWidth - figureRect.left;
+    const centerX = anchorRect.left + anchorRect.width / 2 - containerRect.left;
+    const minLeft = vp.left + viewportMargin - containerRect.left;
+    const maxLeft = vp.right - viewportMargin - popoverWidth - containerRect.left;
     const desiredLeft = centerX - popoverWidth / 2;
     const left = Math.round(
       maxLeft < minLeft ? minLeft : Math.max(minLeft, Math.min(desiredLeft, maxLeft)),
     );
-    const top = Math.round(viewportTop - figureRect.top);
+    const top = Math.round(viewportTop - containerRect.top);
     const arrowX = Math.round(Math.max(14, Math.min(centerX - left, popoverWidth - 14)));
-    return {kind: 'floating', left, top, arrowX, placement};
-  }, [figureRef, session.permalink, squareRefs]);
+    return {kind: 'floating', left, top, arrowX, placement, maxWidth: availableWidth};
+  }, [containerRef, session.permalink, squareRefs]);
 
   useIsomorphicLayoutEffect(() => {
     let active = true;
     const applyLayout = () => {
       if (!active) return;
       const next = computeLayout();
+      // Route hover-triggered inline fallbacks to the persistent, dismissible details panel so
+      // moving the pointer across other squares to reach the preview never switches or dismisses it.
+      if (next?.kind === 'inline' && source === 'hover') {
+        setLayout({kind: 'hidden'});
+        onHoverInlineFallback(session.permalink);
+        return;
+      }
       setLayout((prev) => (isSamePopoverLayout(prev, next) ? prev : next));
     };
 
@@ -311,7 +422,7 @@ function SessionPopover({
 
     let rafId = 0;
     const scheduleUpdate = () => {
-      if (rafId !== 0) return;
+      if (!active || rafId !== 0) return;
       rafId = window.requestAnimationFrame(() => {
         rafId = 0;
         applyLayout();
@@ -319,7 +430,7 @@ function SessionPopover({
     };
 
     window.addEventListener('resize', scheduleUpdate);
-    window.addEventListener('scroll', scheduleUpdate, {passive: true});
+    window.addEventListener('scroll', scheduleUpdate, {passive: true, capture: true});
 
     const vv = window.visualViewport;
     vv?.addEventListener('resize', scheduleUpdate);
@@ -328,22 +439,32 @@ function SessionPopover({
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver(scheduleUpdate);
-      if (figureRef.current) resizeObserver.observe(figureRef.current);
+      if (containerRef.current) resizeObserver.observe(containerRef.current);
       if (popoverRef.current) resizeObserver.observe(popoverRef.current);
+      if (document.body) resizeObserver.observe(document.body);
     }
 
-    document.fonts?.ready.then(scheduleUpdate).catch(() => {});
+    const squareEl = squareRefs.current.get(session.permalink);
+    const anchorEl = squareEl?.parentElement ?? squareEl ?? null;
+    const stopMoveObserver = anchorEl ? observeElementMove(anchorEl, scheduleUpdate) : () => {};
+
+    document.fonts?.ready
+      .then(() => {
+        if (active) scheduleUpdate();
+      })
+      .catch(() => {});
 
     return () => {
       active = false;
       if (rafId !== 0) window.cancelAnimationFrame(rafId);
       window.removeEventListener('resize', scheduleUpdate);
-      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('scroll', scheduleUpdate, {capture: true});
       vv?.removeEventListener('resize', scheduleUpdate);
       vv?.removeEventListener('scroll', scheduleUpdate);
       resizeObserver?.disconnect();
+      stopMoveObserver();
     };
-  }, [computeLayout, figureRef]);
+  }, [computeLayout, containerRef, onHoverInlineFallback, session.permalink, source, squareRefs]);
 
   const isInline = layout?.kind === 'inline';
   const isFloating = layout?.kind === 'floating';
@@ -360,14 +481,15 @@ function SessionPopover({
           ? ({
               left: `${layout.left}px`,
               top: `${layout.top}px`,
+              maxWidth: `min(19.5rem, ${layout.maxWidth}px)`,
               '--arrow-x': `${layout.arrowX}px`,
             } as CSSProperties)
           : isInline
             ? undefined
             : {visibility: 'hidden', pointerEvents: 'none'}
       }
-      onPointerEnter={onPointerEnter}
-      onPointerLeave={onPointerLeave}>
+      onPointerEnter={isFloating ? onPointerEnter : undefined}
+      onPointerLeave={isFloating ? onPointerLeave : undefined}>
       <SessionPreviewContent
         session={session}
         titleSlot={<p className={styles.cardTitle}>{session.title}</p>}
@@ -499,9 +621,10 @@ export default function SpeakingRecord({
   const [previewSource, setPreviewSource] = useState<'hover' | 'focus'>('hover');
   const [dismissedFocusPermalink, setDismissedFocusPermalink] = useState<string | null>(null);
   const [selectedPermalink, setSelectedPermalink] = useState<string | null>(null);
+  const [hoverLockedByDetails, setHoverLockedByDetails] = useState(false);
   const [activeTabPermalink, setActiveTabPermalink] = useState<string | null>(null);
 
-  const figureRef = useRef<HTMLElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const detailsBarRef = useRef<HTMLDivElement | null>(null);
   const browseButtonRef = useRef<HTMLButtonElement | null>(null);
   const prevButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -510,7 +633,8 @@ export default function SpeakingRecord({
   const squareRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const pendingPointerRef = useRef<PendingPointer | null>(null);
   const suppressNextFocusPreviewRef = useRef<string | null>(null);
-  const detailsOpenerRef = useRef<'square' | 'browse'>('square');
+  const detailsOpenerRef = useRef<DetailsOpener>({kind: 'browse'});
+  const detailsAutoScrollRef = useRef(true);
   const hoverLeaveTimerRef = useRef<number | null>(null);
   const keyboardHintId = useId();
   const detailsBarId = useId();
@@ -537,18 +661,33 @@ export default function SpeakingRecord({
     [allSessions, selectedPermalink],
   );
   const selectedSession = selectedIndex >= 0 ? allSessions[selectedIndex] : null;
+  const selectedSessionPermalink = selectedSession?.permalink ?? null;
+  const isHoverLocked = hoverLockedByDetails && Boolean(selectedSession);
 
   const activeFocusedPermalink =
     focusedPermalink &&
     focusedPermalink !== dismissedFocusPermalink &&
-    focusedPermalink !== selectedPermalink
+    focusedPermalink !== selectedSessionPermalink
       ? focusedPermalink
       : null;
 
-  const popoverPermalink =
-    previewSource === 'focus'
-      ? activeFocusedPermalink ?? hoveredPermalink
-      : hoveredPermalink ?? activeFocusedPermalink;
+  let popoverPermalink: string | null = null;
+  let effectivePopoverSource: 'hover' | 'focus' = 'hover';
+  if (previewSource === 'focus') {
+    if (activeFocusedPermalink) {
+      popoverPermalink = activeFocusedPermalink;
+      effectivePopoverSource = 'focus';
+    } else if (hoveredPermalink) {
+      popoverPermalink = hoveredPermalink;
+      effectivePopoverSource = 'hover';
+    }
+  } else if (hoveredPermalink) {
+    popoverPermalink = hoveredPermalink;
+    effectivePopoverSource = 'hover';
+  } else if (activeFocusedPermalink) {
+    popoverPermalink = activeFocusedPermalink;
+    effectivePopoverSource = 'focus';
+  }
 
   const popoverSession = popoverPermalink
     ? sessionByPermalink.get(popoverPermalink) ?? null
@@ -565,37 +704,47 @@ export default function SpeakingRecord({
 
   const closeDetailsBar = useCallback(
     (restoreFocus: boolean) => {
-      const current = selectedPermalink;
       const opener = detailsOpenerRef.current;
       setSelectedPermalink(null);
+      setHoverLockedByDetails(false);
       if (!restoreFocus) return;
 
-      if (opener === 'browse' && browseButtonRef.current) {
-        browseButtonRef.current.focus({preventScroll: true});
+      if (opener.kind === 'browse') {
+        const browseBtn = browseButtonRef.current;
+        if (browseBtn) {
+          browseBtn.focus();
+          revealElementIfObscured(browseBtn);
+        }
         return;
       }
-      if (current) {
-        const target = squareRefs.current.get(current);
+
+      const targetPermalink = sessionByPermalink.has(opener.permalink)
+        ? opener.permalink
+        : effectiveTabPermalink;
+      if (targetPermalink) {
+        const target = squareRefs.current.get(targetPermalink);
         if (target) {
-          suppressNextFocusPreviewRef.current = current;
-          setDismissedFocusPermalink(current);
-          target.focus({preventScroll: true});
+          setActiveTabPermalink(targetPermalink);
+          suppressNextFocusPreviewRef.current = targetPermalink;
+          setDismissedFocusPermalink(targetPermalink);
+          target.focus();
+          revealElementIfObscured(target);
           // Clear synchronously after focus() so stale suppression never lingers if already focused.
           suppressNextFocusPreviewRef.current = null;
         }
       }
     },
-    [selectedPermalink],
+    [effectiveTabPermalink, sessionByPermalink],
   );
 
   // Dismiss any open preview (hovered, focused, or details bar) on Escape from anywhere.
   useEffect(() => {
-    if (!popoverPermalink && !selectedPermalink) return;
+    if (!popoverSession && !selectedSession) return;
 
     const handleEscape = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       clearHoverLeaveTimer();
-      if (selectedPermalink) {
+      if (selectedSession) {
         const focusInsideDetails = Boolean(
           detailsBarRef.current?.contains(document.activeElement),
         );
@@ -611,37 +760,29 @@ export default function SpeakingRecord({
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [clearHoverLeaveTimer, closeDetailsBar, focusedPermalink, popoverPermalink, selectedPermalink]);
+  }, [clearHoverLeaveTimer, closeDetailsBar, focusedPermalink, popoverSession, selectedSession]);
 
   // Dismiss the details bar when tapping outside the chart.
   useEffect(() => {
-    if (!selectedPermalink) return;
+    if (!selectedSession) return;
 
     const handleOutsidePointerDown = (event: globalThis.PointerEvent) => {
-      if (figureRef.current && !figureRef.current.contains(event.target as Node)) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setSelectedPermalink(null);
+        setHoverLockedByDetails(false);
       }
     };
     document.addEventListener('pointerdown', handleOutsidePointerDown);
     return () => {
       document.removeEventListener('pointerdown', handleOutsidePointerDown);
     };
-  }, [selectedPermalink]);
+  }, [selectedSession]);
 
   // Reveal the details bar with the minimum necessary scroll if it opens offscreen.
   useEffect(() => {
-    if (!selectedPermalink || !detailsBarRef.current) return;
-    const rect = detailsBarRef.current.getBoundingClientRect();
-    const vp = getVisibleViewport();
-    const visibleTop = Math.max(vp.top, getNavbarBottom());
-    if (rect.bottom > vp.bottom - 12 || rect.top < visibleTop + 8) {
-      const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-      detailsBarRef.current.scrollIntoView({
-        block: 'nearest',
-        behavior: reducedMotion ? 'auto' : 'smooth',
-      });
-    }
-  }, [selectedPermalink]);
+    if (!selectedSessionPermalink || !detailsBarRef.current || !detailsAutoScrollRef.current) return;
+    revealElementIfObscured(detailsBarRef.current);
+  }, [selectedSessionPermalink]);
 
   const stepSelectedSession = useCallback(
     (delta: -1 | 1) => {
@@ -662,7 +803,7 @@ export default function SpeakingRecord({
   );
 
   const toggleBrowsePanel = useCallback(() => {
-    if (selectedPermalink) {
+    if (selectedSession) {
       closeDetailsBar(false);
       return;
     }
@@ -673,7 +814,9 @@ export default function SpeakingRecord({
     if (!target) return;
     clearHoverLeaveTimer();
     setHoveredPermalink(null);
-    detailsOpenerRef.current = 'browse';
+    detailsOpenerRef.current = {kind: 'browse'};
+    detailsAutoScrollRef.current = true;
+    setHoverLockedByDetails(false);
     setActiveTabPermalink(target);
     setSelectedPermalink(target);
   }, [
@@ -681,9 +824,22 @@ export default function SpeakingRecord({
     clearHoverLeaveTimer,
     closeDetailsBar,
     lastPermalink,
-    selectedPermalink,
+    selectedSession,
     sessionByPermalink,
   ]);
+
+  const handleHoverInlineFallback = useCallback(
+    (permalink: string) => {
+      clearHoverLeaveTimer();
+      setHoveredPermalink(null);
+      detailsOpenerRef.current = {kind: 'square', permalink};
+      detailsAutoScrollRef.current = false;
+      setHoverLockedByDetails(true);
+      setActiveTabPermalink(permalink);
+      setSelectedPermalink(permalink);
+    },
+    [clearHoverLeaveTimer],
+  );
 
   const focusSquare = useCallback(
     (permalink: string) => {
@@ -762,12 +918,12 @@ export default function SpeakingRecord({
 
   const handleSquarePointerEnter = useCallback(
     (event: PointerEvent<HTMLAnchorElement>, permalink: string) => {
-      if (event.pointerType === 'touch') return;
+      if (event.pointerType === 'touch' || isHoverLocked) return;
       clearHoverLeaveTimer();
       setHoveredPermalink(permalink);
       setPreviewSource('hover');
     },
-    [clearHoverLeaveTimer],
+    [clearHoverLeaveTimer, isHoverLocked],
   );
 
   const handleSquarePointerLeave = useCallback(
@@ -847,103 +1003,147 @@ export default function SpeakingRecord({
         event.preventDefault();
         clearHoverLeaveTimer();
         setHoveredPermalink(null);
-        detailsOpenerRef.current = 'square';
+        detailsOpenerRef.current = {kind: 'square', permalink};
+        detailsAutoScrollRef.current = true;
+        setHoverLockedByDetails(false);
         setActiveTabPermalink(permalink);
-        setSelectedPermalink((prev) => (prev === permalink ? null : permalink));
+        setSelectedPermalink((prev) =>
+          prev === permalink && selectedSessionPermalink === permalink ? null : permalink,
+        );
       }
     },
-    [clearHoverLeaveTimer],
+    [clearHoverLeaveTimer, selectedSessionPermalink],
   );
 
   return (
-    <figure
-      ref={figureRef}
+    <div
+      ref={containerRef}
       className={clsx(styles.record, className)}
       style={{'--columns': columns.length} as CSSProperties}
-      data-bleed={columns.length > 10 || undefined}
-      aria-label="Talks, workshops, and webinars per year">
-      <p id={keyboardHintId} className="kc-sr-only">
-        Use arrow keys, Home, or End to move between sessions. Press Enter to open a session page,
-        or Escape to dismiss the preview.
-      </p>
-      <ol className={styles.chart} style={{'--rows': tallest} as CSSProperties}>
-        {columns.map((column, col) => {
-          const total = column.sessions.length;
-          const deliveredCount = column.delivered.length;
-          const upcomingCount = column.upcoming.length;
-          const yearSummary =
-            upcomingCount > 0
-              ? `${column.year}: ${sessionsLabel(deliveredCount)} delivered, ${upcomingCount} upcoming`
-              : `${column.year}: ${sessionsLabel(deliveredCount)}`;
-          const yearHref =
-            total > 0
-              ? deliveredCount > 0
-                ? yearLink?.(column.year)
-                : upcomingLink
-              : undefined;
+      data-bleed={columns.length > 10 || undefined}>
+      <figure className={styles.figure} aria-label="Talks, workshops, and webinars per year">
+        <p id={keyboardHintId} className="kc-sr-only">
+          Use arrow keys, Home, or End to move between sessions. Press Enter to open a session page,
+          or Escape to dismiss the preview.
+        </p>
+        <ol className={styles.chart} style={{'--rows': tallest} as CSSProperties}>
+          {columns.map((column, col) => {
+            const total = column.sessions.length;
+            const deliveredCount = column.delivered.length;
+            const upcomingCount = column.upcoming.length;
+            const yearSummary =
+              upcomingCount > 0
+                ? `${column.year}: ${sessionsLabel(deliveredCount)} delivered, ${upcomingCount} upcoming`
+                : `${column.year}: ${sessionsLabel(deliveredCount)}`;
+            const yearHref =
+              total > 0
+                ? deliveredCount > 0
+                  ? yearLink?.(column.year)
+                  : upcomingLink
+                : undefined;
 
-          return (
-            <li
-              key={column.year}
-              className={styles.column}
-              style={{'--col': col, '--t': col / Math.max(1, columns.length - 1)} as CSSProperties}>
-              <div className={styles.columnBody}>
-                <span className="kc-sr-only">{yearSummary}</span>
-                <div className={styles.stack}>
-                  {column.sessions.map((session, i) => (
-                    <RecordSquare
-                      key={session.permalink}
-                      session={session}
-                      colIndex={col}
-                      rowIndex={i}
-                      isTabStop={session.permalink === effectiveTabPermalink}
-                      isPreviewed={popoverPermalink === session.permalink}
-                      isSelected={selectedPermalink === session.permalink}
-                      keyboardHintId={keyboardHintId}
-                      registerSquare={registerSquare}
-                      onPointerDown={handleSquarePointerDown}
-                      onPointerCancel={handleSquarePointerCancel}
-                      onPointerEnter={handleSquarePointerEnter}
-                      onPointerLeave={handleSquarePointerLeave}
-                      onFocus={handleSquareFocus}
-                      onBlur={handleSquareBlur}
-                      onKeyDown={handleSquareKeyDown}
-                      onClick={handleSquareClick}
-                    />
-                  ))}
-                  {total > 0 && (
-                    <span className={styles.count} aria-hidden="true">
-                      {total}
+            return (
+              <li
+                key={column.year}
+                className={styles.column}
+                style={{'--col': col, '--t': col / Math.max(1, columns.length - 1)} as CSSProperties}>
+                <div className={styles.columnBody}>
+                  <span className="kc-sr-only">{yearSummary}</span>
+                  <div className={styles.stack}>
+                    {column.sessions.map((session, i) => (
+                      <RecordSquare
+                        key={session.permalink}
+                        session={session}
+                        colIndex={col}
+                        rowIndex={i}
+                        isTabStop={session.permalink === effectiveTabPermalink}
+                        isPreviewed={popoverPermalink === session.permalink}
+                        isSelected={selectedSessionPermalink === session.permalink}
+                        keyboardHintId={keyboardHintId}
+                        registerSquare={registerSquare}
+                        onPointerDown={handleSquarePointerDown}
+                        onPointerCancel={handleSquarePointerCancel}
+                        onPointerEnter={handleSquarePointerEnter}
+                        onPointerLeave={handleSquarePointerLeave}
+                        onFocus={handleSquareFocus}
+                        onBlur={handleSquareBlur}
+                        onKeyDown={handleSquareKeyDown}
+                        onClick={handleSquareClick}
+                      />
+                    ))}
+                    {total > 0 && (
+                      <span className={styles.count} aria-hidden="true">
+                        {total}
+                      </span>
+                    )}
+                  </div>
+                  {yearHref ? (
+                    <Link
+                      to={yearHref}
+                      className={clsx(styles.year, styles.yearLink)}
+                      aria-label={
+                        deliveredCount > 0
+                          ? `Jump to ${column.year} sessions (${sessionsLabel(deliveredCount)} delivered${upcomingCount > 0 ? `, ${upcomingCount} upcoming` : ''})`
+                          : `Jump to upcoming sessions (${column.year})`
+                      }>
+                      <span className={styles.yearLong} aria-hidden="true">
+                        {column.year}
+                      </span>
+                      <span className={styles.yearShort} aria-hidden="true">
+                        ’{String(column.year).slice(2)}
+                      </span>
+                    </Link>
+                  ) : (
+                    <span className={styles.year} aria-hidden="true">
+                      <span className={styles.yearLong}>{column.year}</span>
+                      <span className={styles.yearShort}>’{String(column.year).slice(2)}</span>
                     </span>
                   )}
                 </div>
-                {yearHref ? (
-                  <Link
-                    to={yearHref}
-                    className={clsx(styles.year, styles.yearLink)}
-                    aria-label={
-                      deliveredCount > 0
-                        ? `Jump to ${column.year} sessions (${sessionsLabel(deliveredCount)} delivered${upcomingCount > 0 ? `, ${upcomingCount} upcoming` : ''})`
-                        : `Jump to upcoming sessions (${column.year})`
-                    }>
-                    <span className={styles.yearLong} aria-hidden="true">
-                      {column.year}
-                    </span>
-                    <span className={styles.yearShort} aria-hidden="true">
-                      ’{String(column.year).slice(2)}
-                    </span>
-                  </Link>
-                ) : (
-                  <span className={styles.year} aria-hidden="true">
-                    <span className={styles.yearLong}>{column.year}</span>
-                    <span className={styles.yearShort}>’{String(column.year).slice(2)}</span>
-                  </span>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+              </li>
+            );
+          })}
+        </ol>
+
+        <figcaption className={styles.legend}>
+          <span className={styles.legendItem}>
+            <span className={styles.square} aria-hidden="true" /> One talk, workshop, or webinar
+          </span>
+          {hasUpcoming && (
+            <span className={styles.legendItem}>
+              <span className={clsx(styles.square, styles.squareUpcoming)} aria-hidden="true" /> Upcoming
+            </span>
+          )}
+          <span>
+            <span className={styles.hintPointer}>
+              {yearLink
+                ? 'Hover or focus a square to preview, click to open, or select a year to jump to its sessions.'
+                : 'Hover or focus a square to preview; click to open.'}
+            </span>
+            <span className={styles.hintHybrid}>
+              {yearLink
+                ? 'Hover, focus, or tap a square for details, click to open, or select a year to jump to its sessions.'
+                : 'Hover, focus, or tap a square for details; click to open.'}
+            </span>
+            <span className={styles.hintTouch}>
+              {yearLink
+                ? 'Tap or focus a square for details, or select a year to jump to its sessions.'
+                : 'Tap or focus a square for session details.'}
+            </span>
+          </span>
+          {allSessions.length > 0 && (
+            <button
+              ref={browseButtonRef}
+              type="button"
+              className={styles.browseButton}
+              aria-expanded={Boolean(selectedSession)}
+              aria-controls={selectedSession ? detailsBarId : undefined}
+              onClick={toggleBrowsePanel}>
+              {selectedSession ? 'Hide session browser' : 'Browse sessions'}
+            </button>
+          )}
+        </figcaption>
+      </figure>
 
       <div className="kc-sr-only" role="status" aria-live="polite" aria-atomic="true">
         {liveAnnouncement}
@@ -952,10 +1152,12 @@ export default function SpeakingRecord({
       {popoverSession && (
         <SessionPopover
           session={popoverSession}
-          figureRef={figureRef}
+          source={effectivePopoverSource}
+          containerRef={containerRef}
           squareRefs={squareRefs}
           onPointerEnter={handlePopoverPointerEnter}
           onPointerLeave={handlePopoverPointerLeave}
+          onHoverInlineFallback={handleHoverInlineFallback}
         />
       )}
 
@@ -1017,45 +1219,6 @@ export default function SpeakingRecord({
           </div>
         </div>
       )}
-
-      <figcaption className={styles.legend}>
-        <span className={styles.legendItem}>
-          <span className={styles.square} aria-hidden="true" /> One talk, workshop, or webinar
-        </span>
-        {hasUpcoming && (
-          <span className={styles.legendItem}>
-            <span className={clsx(styles.square, styles.squareUpcoming)} aria-hidden="true" /> Upcoming
-          </span>
-        )}
-        <span>
-          <span className={styles.hintPointer}>
-            {yearLink
-              ? 'Hover or focus a square to preview, click to open, or select a year to jump to its sessions.'
-              : 'Hover or focus a square to preview; click to open.'}
-          </span>
-          <span className={styles.hintHybrid}>
-            {yearLink
-              ? 'Hover, focus, or tap a square for details, click to open, or select a year to jump to its sessions.'
-              : 'Hover, focus, or tap a square for details; click to open.'}
-          </span>
-          <span className={styles.hintTouch}>
-            {yearLink
-              ? 'Tap or focus a square for details, or select a year to jump to its sessions.'
-              : 'Tap or focus a square for session details.'}
-          </span>
-        </span>
-        {allSessions.length > 0 && (
-          <button
-            ref={browseButtonRef}
-            type="button"
-            className={styles.browseButton}
-            aria-expanded={Boolean(selectedSession)}
-            aria-controls={selectedSession ? detailsBarId : undefined}
-            onClick={toggleBrowsePanel}>
-            {selectedSession ? 'Hide session browser' : 'Browse sessions'}
-          </button>
-        )}
-      </figcaption>
-    </figure>
+    </div>
   );
 }
