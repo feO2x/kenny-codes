@@ -8,10 +8,10 @@ const LEVELS = 3;
 
 /** Who writes the code in the Implementing Phase depends on how well you know the domain. */
 const implementers = {
-  coding: {name: 'Mastering', level: 3, text: 'The agent writes the code.'},
+  coding: {name: 'Senior', level: 3, text: 'The agent writes the code. You save time.'},
   learning: [
-    {name: 'Advancing', level: 2, text: 'You write the code; the agent coaches you.'},
-    {name: 'Beginning', level: 1, text: 'The agent shows the code; you type it in.'},
+    {name: 'Advanced', level: 2, text: 'You write the code, the agent challenges you.'},
+    {name: 'Beginner', level: 1, text: 'The agent shows the code and explains, you type.'},
   ],
 };
 
@@ -83,22 +83,21 @@ export default function MethodsSection(): ReactNode {
       <div className="container">
         <div className={styles.sectionHead}>
           <h2 id="methods-title" className={styles.sectionTitle}>
-            Methods I teach
+            How I approach Software Development
           </h2>
           <p className={styles.sectionLede}>
-            Free, complete documentation for the approaches I use in my own projects and teach in
-            workshops.
+            Free docs for the approaches I use in my own projects.
           </p>
         </div>
 
         <div className={styles.methods}>
           <article className={styles.method}>
             <Heading as="h3" className={styles.methodName}>
-              Guided Coding
+              Guided Coding & Guided Learning
             </Heading>
             <p className={styles.methodText}>
               Write enterprise-grade software with coding agents without losing control of your
-              codebase. New to a domain? Guided Learning lets you write the code yourself while
+              codebase. Are you a junior developer? Guided Learning lets you write the code yourself while
               the agent teaches you.
             </p>
             <ol className={clsx(styles.methodVisual, styles.phases)}>
@@ -111,8 +110,8 @@ export default function MethodsSection(): ReactNode {
               <li className={styles.phase}>
                 <span className={styles.phaseName}>Implement</span>
                 <span className={styles.phaseText}>
-                  One focused plan, verified by feedback loops. Who writes the code depends on how
-                  well you know the domain:
+                  One focused plan, verified by feedback loops. Let the agent write the code and save time,
+                  or write the code yourself and learn from the agent.
                 </span>
                 <div className={styles.implementers}>
                   <ul className={styles.levels}>
@@ -131,7 +130,7 @@ export default function MethodsSection(): ReactNode {
               <li className={styles.phase}>
                 <span className={styles.phaseName}>Guide</span>
                 <span className={styles.phaseText}>
-                  You review every change and steer with fixes or follow-up plans.
+                  You review the changes and iterate with fixes or follow-up plans.
                 </span>
               </li>
             </ol>
@@ -151,7 +150,7 @@ export default function MethodsSection(): ReactNode {
             </Heading>
             <p className={styles.methodText}>
               A simple way to structure an application: every piece of code belongs to one of four
-              categories. And the K? That’s me.
+              categories.
             </p>
             <div className={clsx(styles.methodVisual, styles.chackVisual)}>
               <ChackMap />
