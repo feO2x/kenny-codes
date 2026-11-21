@@ -157,10 +157,10 @@
   stroke-width: 1.25;
 }
 
-/* A labelled group of boxes, e.g. the automated tests. */
+/* A labelled group of boxes, e.g. the automated tests; outlined in its mark colour while active. */
 .group {
   fill: none;
-  stroke: var(--kc-control-line);
+  stroke: var(--mark, var(--kc-control-line));
   stroke-width: 1.5;
 }
 

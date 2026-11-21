@@ -1,3 +1,5 @@
+import type {EventFrontMatter, RecordEvent} from '@site/src/types/event';
+
 /**
  * Route base path for the events blog plugin.
  * This should match the routeBasePath in docusaurus.config.ts
@@ -94,5 +96,36 @@ export function deliveredSessions<T extends {date: string; cancelled?: boolean}>
  */
 export function isHiddenFromArchive(session: {date: string; cancelled?: boolean}, today: string): boolean {
   return Boolean(session.cancelled) && session.date.slice(0, 10) < today;
+}
+
+interface BlogEventItem {
+  content: {
+    metadata: {
+      title: string;
+      permalink: string;
+      date: string;
+    };
+    frontMatter: Record<string, unknown>;
+  };
+}
+
+/** Converts Docusaurus event blog items into `RecordEvent` entries for `SpeakingRecord`. */
+export function toRecordEvents(items: ReadonlyArray<BlogEventItem>): RecordEvent[] {
+  return items.map((item) => {
+    const {metadata, frontMatter} = item.content;
+    const fm = frontMatter as EventFrontMatter;
+    return {
+      title: metadata.title,
+      date: metadata.date,
+      permalink: metadata.permalink,
+      type: fm.type,
+      duration: fm.duration,
+      language: fm.language,
+      location: fm.location,
+      country: fm.country,
+      event: fm.event,
+      cancelled: fm.cancelled,
+    };
+  });
 }
 

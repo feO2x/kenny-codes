@@ -8,10 +8,10 @@ const LEVELS = 3;
 
 /** Who writes the code in the Implementing Phase depends on how well you know the domain. */
 const implementers = {
-  coding: {name: 'Mastering', level: 3, text: 'The agent writes the code.'},
+  coding: {name: 'Senior', level: 3, text: 'The agent writes the code. You save time.'},
   learning: [
-    {name: 'Advancing', level: 2, text: 'You write the code; the agent coaches you.'},
-    {name: 'Beginning', level: 1, text: 'The agent shows the code; you type it in.'},
+    {name: 'Advanced', level: 2, text: 'You write the code, the agent challenges you.'},
+    {name: 'Beginner', level: 1, text: 'The agent shows the code and explains, you type.'},
   ],
 };
 
@@ -47,14 +47,20 @@ function Arrow({up = false, implementsAbstraction = false}: {up?: boolean; imple
   );
 }
 
-/** A pocket version of the CHACK diagram: the Core in the middle, every arrow points to it. */
+/**
+ * A pocket version of the CHACK diagram: the Core in the middle, every arrow points to it. The Humble
+ * Objects and the Automated Tests sit on the process boundary, as they do in the diagram.
+ */
 function ChackMap(): ReactNode {
   return (
     <div
       className={styles.chackMap}
       role="img"
-      aria-label="CHACK in miniature: the Humble Objects sit on the process boundary and implement the Core's I/O abstractions. Unit tests and the Composition Root reference the Core, which performs no I/O itself.">
-      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackHumble)}>Humble Objects</span>
+      aria-label="CHACK in miniature. A dashed box marks the process boundary. The Humble Objects are centred across its top edge, with a dashed, hollow-headed arrow pointing down to the full-width Core. They perform I/O calls, map data, and implement the Core's I/O abstractions. The Core contains in-memory logic and performs no I/O itself. The Automated Tests sit at the lower left, crossing the bottom edge, and the Composition Root sits level with them at the lower right, inside the boundary. Two solid arrows point up to the Core, from the Automated Tests and the Composition Root, because both reference it. The Core and the Composition Root sit inside the process boundary, while the Automated Tests extend across it, because tests may run inside or outside the process. The Automated Tests are unit, integration, and end-to-end tests, following the Test Pyramid. The Composition Root assembles all parts of the app. The process boundary's label sits on its lower-right edge.">
+      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackHumble)}>
+        Humble Objects
+        <small className={styles.chackNote}>Perform I/O calls and map data</small>
+      </span>
       <span className={styles.chackDown}>
         <Arrow implementsAbstraction />
       </span>
@@ -68,8 +74,16 @@ function ChackMap(): ReactNode {
       <span className={styles.chackUp}>
         <Arrow up />
       </span>
-      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackTests)}>Automated Tests</span>
-      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackRoot)}>Composition Root</span>
+      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackBottom, styles.chackTests)}>
+        Automated Tests
+        <small className={styles.chackNote}>
+          Unit, Integration, <span className={styles.chackNowrap}>E2E -</span> following the Test Pyramid
+        </small>
+      </span>
+      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackBottom, styles.chackRoot)}>
+        Composition Root
+        <small className={styles.chackNote}>Assembles all parts of the app</small>
+      </span>
       <span className={styles.chackBoundary} aria-hidden="true">
         process boundary
       </span>
@@ -83,22 +97,21 @@ export default function MethodsSection(): ReactNode {
       <div className="container">
         <div className={styles.sectionHead}>
           <h2 id="methods-title" className={styles.sectionTitle}>
-            Methods I teach
+            How I approach Software Development
           </h2>
           <p className={styles.sectionLede}>
-            Free, complete documentation for the approaches I use in my own projects and teach in
-            workshops.
+            Free docs for the approaches I use in my own projects.
           </p>
         </div>
 
         <div className={styles.methods}>
           <article className={styles.method}>
             <Heading as="h3" className={styles.methodName}>
-              Guided Coding
+              Guided Coding & Guided Learning
             </Heading>
             <p className={styles.methodText}>
               Write enterprise-grade software with coding agents without losing control of your
-              codebase. New to a domain? Guided Learning lets you write the code yourself while
+              codebase. Are you a junior developer? Guided Learning lets you write the code yourself while
               the agent teaches you.
             </p>
             <ol className={clsx(styles.methodVisual, styles.phases)}>
@@ -111,8 +124,8 @@ export default function MethodsSection(): ReactNode {
               <li className={styles.phase}>
                 <span className={styles.phaseName}>Implement</span>
                 <span className={styles.phaseText}>
-                  One focused plan, verified by feedback loops. Who writes the code depends on how
-                  well you know the domain:
+                  One focused plan, verified by feedback loops. Let the agent write the code and save time,
+                  or write the code yourself and learn from the agent.
                 </span>
                 <div className={styles.implementers}>
                   <ul className={styles.levels}>
@@ -131,7 +144,7 @@ export default function MethodsSection(): ReactNode {
               <li className={styles.phase}>
                 <span className={styles.phaseName}>Guide</span>
                 <span className={styles.phaseText}>
-                  You review every change and steer with fixes or follow-up plans.
+                  You review the changes and iterate with fixes or follow-up plans.
                 </span>
               </li>
             </ol>
@@ -151,7 +164,7 @@ export default function MethodsSection(): ReactNode {
             </Heading>
             <p className={styles.methodText}>
               A simple way to structure an application: every piece of code belongs to one of four
-              categories. And the K? That’s me.
+              categories.
             </p>
             <div className={clsx(styles.methodVisual, styles.chackVisual)}>
               <ChackMap />

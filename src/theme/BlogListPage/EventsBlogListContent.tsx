@@ -4,11 +4,10 @@ import Heading from '@theme/Heading';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Link from '@docusaurus/Link';
 import type {Props} from '@theme/BlogListPage';
-import type {EventFrontMatter} from '@site/src/types/event';
 import SpeakingRecord from '@site/src/components/SpeakingRecord';
 import EventsListing from '@site/src/components/EventsListing';
 import {useToday} from '@site/src/utils/dateFormatting';
-import {deliveredSessions} from '@site/src/utils/eventUtils';
+import {deliveredSessions, toRecordEvents} from '@site/src/utils/eventUtils';
 import {CONTACT_EMAIL, CONTACT_MAILTO, LINKEDIN_URL} from '@site/src/utils/contact';
 import styles from './styles.module.css';
 
@@ -31,11 +30,7 @@ export function EventsContact(): ReactNode {
 
 export default function EventsBlogListContent({items}: EventsBlogListContentProps): ReactNode {
   const today = useToday();
-  const sessions = items.map((item) => ({
-    date: item.content.metadata.date,
-    cancelled: (item.content.frontMatter as EventFrontMatter).cancelled,
-    language: (item.content.frontMatter as EventFrontMatter).language,
-  }));
+  const sessions = toRecordEvents(items);
   const delivered = deliveredSessions(sessions, today);
   const firstYear = Math.min(...sessions.map((s) => Number(s.date.slice(0, 4))));
   const hasUpcoming = sessions.some((s) => s.date.slice(0, 10) >= today);

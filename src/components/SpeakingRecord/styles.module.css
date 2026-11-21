@@ -1,6 +1,12 @@
 .record {
   --square: 18px;
-  --gap: 4px;
+  --gap: 6px;
+  --square-hover-scale: 1.1;
+  position: relative;
+  margin: 0;
+}
+
+.figure {
   margin: 0;
 }
 
@@ -26,21 +32,8 @@
   align-items: center;
   gap: 0.5rem;
   padding-top: 0.5rem;
-  border-radius: var(--kc-radius-sm);
   color: var(--kc-muted);
-  text-decoration: none;
   position: relative;
-}
-
-/* Inset focus ring so the outermost columns are not clipped at the screen edge. */
-a.columnBody:focus-visible {
-  outline-offset: -2px;
-}
-
-a.columnBody:hover {
-  color: var(--kc-ink);
-  text-decoration: none;
-  background: var(--kc-accent-soft);
 }
 
 .count {
@@ -58,6 +51,16 @@ a.columnBody:hover {
   /* Room for the tallest column plus its count label. */
   height: calc(var(--rows) * (var(--square) + var(--gap)) + 1.05rem);
   justify-content: flex-start;
+  align-items: center;
+}
+
+.squareSlot {
+  display: inline-flex;
+  flex: none;
+  width: var(--square);
+  height: var(--square);
+  align-items: center;
+  justify-content: center;
 }
 
 .square {
@@ -68,8 +71,59 @@ a.columnBody:hover {
   border-radius: 5px;
   /* Colour follows time: the oldest year is blue, the latest mint. */
   background: color-mix(in oklab, var(--kc-ramp-to) calc(var(--t, 0.5) * 100%), var(--kc-ramp-from));
-  animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  /* `backwards` applies the initial keyframe during the delay without locking `transform` afterward. */
+  animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
   animation-delay: calc(var(--col, 0) * 45ms + var(--i, 0) * 28ms);
+}
+
+.squareLink {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.squareLink:hover,
+.squarePreviewed:not(:focus-visible) {
+  transform: scale(var(--square-hover-scale));
+  z-index: 2;
+  box-shadow: 0 0 0 1px var(--kc-bg), 0 0 0 2px var(--ifm-color-primary);
+}
+
+.squareLink:focus-visible {
+  transform: none;
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 1px;
+  z-index: 3;
+}
+
+/* Persistent selection marker stays inside the square so it remains distinct next to an
+   adjacent focus ring and survives hover/focus states on hybrid devices. */
+.squareSelected {
+  z-index: 2;
+  box-shadow: inset 0 0 0 2px var(--kc-bg), inset 0 0 0 3.5px var(--kc-ink);
+}
+
+.squareSelected::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--kc-bg);
+  box-shadow: 0 0 0 1px var(--kc-ink);
+  pointer-events: none;
+}
+
+.squareSelected.squareLink:hover,
+.squareSelected.squarePreviewed:not(:focus-visible) {
+  box-shadow:
+    inset 0 0 0 2px var(--kc-bg),
+    inset 0 0 0 3.5px var(--kc-ink),
+    0 0 0 1px var(--kc-bg),
+    0 0 0 2px var(--ifm-color-primary);
 }
 
 .squareUpcoming {
@@ -77,25 +131,342 @@ a.columnBody:hover {
   box-shadow: inset 0 0 0 2px var(--kc-upcoming);
 }
 
-/* Dark mode can brighten on hover; light mode keeps its contrast and relies on the column tint. */
-:global([data-theme='dark']) a.columnBody:hover .square:not(.squareUpcoming) {
+.squareUpcoming.squareLink:hover,
+.squareUpcoming.squarePreviewed:not(:focus-visible) {
+  background: color-mix(in srgb, var(--kc-upcoming) 18%, transparent);
+  box-shadow:
+    inset 0 0 0 2px var(--kc-upcoming),
+    0 0 0 1px var(--kc-bg),
+    0 0 0 2px var(--ifm-color-primary);
+}
+
+.squareUpcoming.squareSelected {
+  background: color-mix(in srgb, var(--kc-upcoming) 28%, transparent);
+  box-shadow: inset 0 0 0 2px var(--kc-upcoming);
+}
+
+.squareUpcoming.squareSelected::after {
+  background: var(--kc-upcoming);
+  box-shadow: none;
+}
+
+.squareUpcoming.squareSelected.squareLink:hover,
+.squareUpcoming.squareSelected.squarePreviewed:not(:focus-visible) {
+  background: color-mix(in srgb, var(--kc-upcoming) 34%, transparent);
+  box-shadow:
+    inset 0 0 0 2px var(--kc-upcoming),
+    0 0 0 1px var(--kc-bg),
+    0 0 0 2px var(--ifm-color-primary);
+}
+
+/* Dark mode can brighten on hover; light mode keeps its contrast and relies on the ring. */
+:global([data-theme='dark']) .squareLink:hover:not(.squareUpcoming),
+:global([data-theme='dark']) .squarePreviewed:not(.squareUpcoming) {
   filter: brightness(1.12) saturate(1.1);
 }
 
 .year {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
   font-size: 0.78rem;
   font-weight: 500;
-  padding: 0.5rem 0 0.6rem;
+  padding: 0.35rem 0.25rem 0.45rem;
   line-height: 1;
+  color: var(--kc-muted);
+}
+
+.yearLink {
+  color: var(--kc-muted);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: var(--kc-line-strong);
+  border-radius: var(--kc-radius-sm);
+  transition: color 0.15s ease, background-color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.yearLink:hover,
+.yearLink:focus-visible {
+  color: var(--kc-ink);
+  text-decoration-color: var(--ifm-color-primary);
+  background: var(--kc-accent-soft);
+}
+
+.yearLink:focus-visible {
+  outline-offset: -2px;
 }
 
 .yearShort {
   display: none;
 }
 
+/* Floating event summary popover (hover & keyboard focus) */
+.popover {
+  position: absolute;
+  z-index: 20;
+  pointer-events: auto;
+  width: max-content;
+  max-width: min(19.5rem, calc(100vw - 1.5rem));
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--kc-radius);
+  background: var(--kc-surface);
+  border: 1px solid var(--kc-line-strong);
+  box-shadow: var(--kc-shadow);
+  color: var(--kc-ink);
+}
+
+/* Transparent hover bridge over the gap between trigger and popover (WCAG 1.4.13). */
+.popover[data-arrow='true']::before {
+  content: '';
+  position: absolute;
+  left: var(--arrow-x, 50%);
+  transform: translateX(-50%);
+  width: 36px;
+  height: 12px;
+}
+
+.popover[data-placement='top'][data-arrow='true']::before {
+  bottom: -12px;
+}
+
+.popover[data-placement='bottom'][data-arrow='true']::before {
+  top: -12px;
+}
+
+.popover::after {
+  content: '';
+  position: absolute;
+  left: var(--arrow-x, 50%);
+  width: 10px;
+  height: 10px;
+  background: var(--kc-surface);
+  border-right: 1px solid var(--kc-line-strong);
+  border-bottom: 1px solid var(--kc-line-strong);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.popover[data-placement='top']::after {
+  bottom: -6px;
+}
+
+.popover[data-placement='bottom']::after {
+  top: -6px;
+  transform: translateX(-50%) rotate(225deg);
+}
+
+.popover[data-arrow='false']::after {
+  display: none;
+}
+
+/* In-flow fallback when neither side of the trigger has enough viewport height. */
+.popoverInline {
+  position: static;
+  width: fit-content;
+  max-width: min(19.5rem, 100%);
+  margin-top: 0.75rem;
+}
+
+.cardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.25rem;
+}
+
+.cardDate {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--kc-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.badgeUpcoming {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 650;
+  line-height: 1;
+  padding: 0.22rem 0.45rem;
+  border-radius: 999px;
+  color: var(--kc-upcoming);
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+  font-stretch: 104%;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  color: var(--kc-ink);
+  overflow-wrap: break-word;
+}
+
+.cardVenue {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--kc-muted);
+  overflow-wrap: break-word;
+}
+
+.cardFormat {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--kc-muted);
+  overflow-wrap: break-word;
+}
+
+/* Touch / mobile details bar beneath the chart */
+.detailsBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.8rem 0.95rem;
+  border-radius: var(--kc-radius);
+  background: var(--kc-surface);
+  border: 1px solid var(--kc-line-strong);
+  box-shadow: var(--kc-shadow);
+}
+
+.detailsBody {
+  min-width: 0;
+  flex: 1;
+}
+
+.detailsTitleLink {
+  display: inline-block;
+  min-width: 24px;
+  min-height: 24px;
+  padding-block: 0.15rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+  font-stretch: 104%;
+  line-height: 1.35;
+  color: var(--kc-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--kc-control-line);
+  overflow-wrap: break-word;
+}
+
+.detailsTitleLink:hover,
+.detailsTitleLink:focus-visible {
+  color: var(--ifm-color-primary-darkest);
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+:global([data-theme='dark']) .detailsTitleLink:hover,
+:global([data-theme='dark']) .detailsTitleLink:focus-visible {
+  color: var(--ifm-color-primary);
+}
+
+.detailsArrow {
+  white-space: nowrap;
+  color: var(--ifm-color-primary);
+}
+
+.detailsActions {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: -0.25rem -0.35rem 0 0;
+}
+
+.detailsNav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.detailsCounter {
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--kc-muted);
+  padding-inline: 0.2rem;
+  white-space: nowrap;
+}
+
+.detailsControl {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: var(--kc-radius-sm);
+  background: transparent;
+  color: var(--kc-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.detailsControl:hover:not(:disabled),
+.detailsControl:focus-visible:not(:disabled) {
+  color: var(--kc-ink);
+  background: var(--kc-accent-soft);
+}
+
+.detailsControl:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Viewport-anchored cue shown only when an open details panel or inline preview is offscreen. */
+.detailsCue {
+  position: absolute;
+  z-index: 25;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--kc-line-strong);
+  border-radius: 999px;
+  background: var(--kc-surface);
+  color: var(--kc-ink);
+  box-shadow: var(--kc-shadow);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.detailsCue:hover,
+.detailsCue:focus-visible {
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary-darkest);
+}
+
+:global([data-theme='dark']) .detailsCue:hover,
+:global([data-theme='dark']) .detailsCue:focus-visible {
+  color: var(--ifm-color-primary);
+}
+
+.detailsCueHint {
+  pointer-events: none;
+  cursor: default;
+}
+
 .legend {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem 1.5rem;
   margin-top: 0.9rem;
   font-size: 0.85rem;
@@ -108,18 +479,53 @@ a.columnBody:hover {
   gap: 0.5rem;
 }
 
-.legendLink {
+.browseButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--kc-control-line);
+  border-radius: var(--kc-radius-sm);
+  background: transparent;
   color: var(--kc-ink);
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
-  text-decoration-color: var(--kc-control-line);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
-.legendLink:hover {
-  color: var(--kc-ink);
-  text-decoration-color: var(--ifm-color-primary);
+.browseButton:hover,
+.browseButton:focus-visible {
+  border-color: var(--ifm-color-primary);
+  background: var(--kc-accent-soft);
+}
+
+.hintHybrid,
+.hintTouch {
+  display: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .hintPointer {
+    display: none;
+  }
+
+  .hintTouch {
+    display: inline;
+  }
+}
+
+@media (any-hover: hover) and (any-pointer: coarse) {
+  .hintPointer,
+  .hintTouch {
+    display: none;
+  }
+
+  .hintHybrid {
+    display: inline;
+  }
 }
 
 .legendItem .square {
@@ -141,6 +547,25 @@ a.columnBody:hover {
   .record {
     --square: 12px;
     --gap: 3px;
+    --square-hover-scale: 1;
+  }
+
+  .squareSelected::after {
+    width: 4px;
+    height: 4px;
+  }
+
+  .detailsBar {
+    flex-wrap: wrap;
+  }
+
+  .detailsBody {
+    flex: 1 0 100%;
+  }
+
+  .detailsActions {
+    margin: 0;
+    margin-left: auto;
   }
 
   .count,
@@ -172,14 +597,28 @@ a.columnBody:hover {
     margin-inline: -1rem;
   }
 
+  .record[data-bleed] .legend,
+  .record[data-bleed] .detailsBar,
+  .record[data-bleed] .popoverInline {
+    margin-inline: 1rem;
+  }
+
   .record[data-bleed] .legend {
-    padding-inline: 1rem;
+    padding-inline: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .record {
+    --square-hover-scale: 1;
+  }
+
   .square {
     animation: none;
+  }
+
+  .squareLink {
+    transition: none;
   }
 }
 
@@ -195,8 +634,72 @@ a.columnBody:hover {
     box-shadow: inset 0 0 0 2px CanvasText;
   }
 
-  a.columnBody:hover .square:not(.squareUpcoming) {
+  .squareLink:hover,
+  .squarePreviewed:not(:focus-visible) {
     background: LinkText;
+    box-shadow: none;
+  }
+
+  .squareUpcoming.squareLink:hover,
+  .squareUpcoming.squarePreviewed:not(:focus-visible) {
+    background: Canvas;
+    box-shadow: inset 0 0 0 2px LinkText;
+  }
+
+  .squareLink:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
+
+  .squareSelected,
+  .squareSelected.squareLink:hover,
+  .squareSelected.squarePreviewed:not(:focus-visible) {
+    background: Highlight;
+    box-shadow: inset 0 0 0 2px Canvas;
+  }
+
+  .squareSelected.squareLink:hover,
+  .squareSelected.squarePreviewed:not(:focus-visible) {
+    box-shadow: inset 0 0 0 2px Canvas, 0 0 0 1px LinkText;
+  }
+
+  .squareSelected::after {
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .squareUpcoming.squareSelected,
+  .squareUpcoming.squareSelected.squareLink:hover,
+  .squareUpcoming.squareSelected.squarePreviewed:not(:focus-visible) {
+    background: Canvas;
+    box-shadow: inset 0 0 0 2px Highlight;
+  }
+
+  .squareUpcoming.squareSelected.squareLink:hover,
+  .squareUpcoming.squareSelected.squarePreviewed:not(:focus-visible) {
+    box-shadow: inset 0 0 0 2px Highlight, 0 0 0 1px LinkText;
+  }
+
+  .squareUpcoming.squareSelected::after {
+    background: Highlight;
+  }
+
+  .popover,
+  .detailsBar,
+  .detailsCue {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .popover::after {
+    background: Canvas;
+    border-color: CanvasText;
+  }
+
+  .browseButton {
+    border-color: ButtonText;
+    color: ButtonText;
   }
 
   .chart {

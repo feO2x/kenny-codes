@@ -330,11 +330,33 @@
   background: var(--kc-gradient);
 }
 
-.listCaption {
+.sessionGroupTitle {
   font-size: 0.875rem;
+  font-stretch: normal;
   font-weight: 600;
+  letter-spacing: normal;
+  line-height: inherit;
   color: var(--kc-muted);
   margin: 0.5rem 0 0.75rem;
+}
+
+.upcomingTitle {
+  color: var(--kc-brand-line-to);
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .upcomingTitle {
+    width: fit-content;
+    background-image: linear-gradient(135deg, var(--kc-brand-line-from), var(--kc-brand-line-to));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.sessionGroupTitle:not(:first-child) {
+  margin: 0.75rem 0 0;
 }
 
 /* ---------- Methods ---------- */
@@ -516,22 +538,33 @@
   background: var(--kc-mark-amber);
 }
 
-/* CHACK in miniature: the dashed box is the process boundary, Humble Objects straddle it. */
+/*
+ * CHACK in miniature: the dashed box is the process boundary. The Humble Objects straddle its top
+ * edge, and the Automated Tests run past its bottom edge, as the integration tests cross it in the
+ * CHACK diagram.
+ */
 .chackMap {
+  --top-h: 4rem; /* the Humble Objects, straddling the top edge */
+  --bottom-h: 5.5rem; /* the Composition Root and the Automated Tests */
+  --boundary-gap: 1.5rem; /* between the bottom row and the bottom edge */
+  --cross: 2rem; /* how far the Automated Tests run past the bottom edge, as far as the Humble Objects rise above the top */
   position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 0.75rem;
-  margin: 1.35rem 0 2.25rem;
-  padding: 0 1rem 1.5rem;
+  margin: calc(var(--top-h) / 2) 0 calc(var(--cross) + 1rem);
+  padding: 0 1rem var(--boundary-gap);
   border: 1.5px dashed var(--kc-control-line);
   border-radius: var(--kc-radius);
 }
 
+/* Label and subtext stacked, centred in the tile. */
 .chackBox {
-  display: grid;
-  place-items: center;
-  min-height: 2.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
   padding: 0.45rem 0.6rem;
   border: 1.5px solid var(--kc-control-line);
   border-radius: var(--kc-radius);
@@ -543,11 +576,44 @@
   color: var(--kc-ink);
 }
 
+/* The subtext under a label, in the tile's own colour. */
+.chackNote {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+/* Keeps a phrase on one line, for example a dash with the word before it. */
+.chackNowrap {
+  white-space: nowrap;
+}
+
+/* On a 320px phone the map is only about 240px wide: tighten the gutters so the bottom tiles keep room. */
+@media (max-width: 360px) {
+  .chackMap {
+    gap: 0 0.5rem;
+    padding: 0 0.5rem var(--boundary-gap);
+  }
+
+  .chackBox {
+    padding: 0.45rem 0.4rem;
+  }
+
+  .chackNote {
+    font-size: 0.7rem;
+  }
+}
+
+/* Top edge: the Humble Objects straddle the boundary, centred on it. */
 .chackHumble {
   grid-column: 1 / -1;
   justify-self: center;
   min-width: 62%;
-  margin-top: -1.35rem;
+  height: var(--top-h);
+  margin-top: calc(var(--top-h) / -2);
 }
 
 /* The same category colours as the CHACK diagram in the docs. */
@@ -562,7 +628,7 @@
 
 .chackCore {
   grid-column: 1 / -1;
-  min-height: 4.25rem;
+  min-height: 4.75rem;
   border-color: transparent;
   background: var(--kc-gradient);
   color: #0c1a30;
@@ -579,11 +645,33 @@
   color: #12305a;
 }
 
+/*
+ * Bottom row: the Composition Root and the Automated Tests. Both stretch to the row's height, which
+ * grows with the text on a narrow screen. Both start their text at the same height, so the labels line up.
+ */
+.chackBottom {
+  align-self: stretch;
+  min-height: var(--bottom-h);
+  justify-content: flex-start;
+}
+
+.chackBox.chackBottom {
+  padding-top: 0.9rem;
+}
+
+/*
+ * The Automated Tests run past the bottom edge. The negative margin makes them stretch past the row
+ * by the boundary gap plus the crossing, so they cross the edge at any width.
+ */
+.chackTests {
+  margin-bottom: calc(-1 * (var(--boundary-gap) + var(--cross)));
+}
+
 .chackDown,
 .chackUp {
   display: grid;
   place-items: center;
-  height: 1.75rem;
+  height: 2rem;
   color: var(--kc-muted);
 }
 
@@ -601,15 +689,22 @@
   stroke-linejoin: round;
 }
 
+/*
+ * Kept in the right half of the map. Long text, for example with wider letter spacing, wraps within
+ * that half instead of running into the Automated Tests.
+ */
 .chackBoundary {
   position: absolute;
-  right: 0.9rem;
+  right: 0.625rem;
   bottom: 0;
   translate: 0 50%;
-  padding: 0 0.4rem;
+  max-width: calc(50% - 0.625rem);
+  padding: 0 0.2rem;
   background: var(--kc-bg);
   font-size: 0.75rem;
   line-height: 1.2;
+  text-align: right;
+  overflow-wrap: anywhere;
   color: var(--kc-muted);
 }
 
@@ -722,8 +817,9 @@
     position: static;
   }
 
-  /* Stacked, two sessions are enough, so the record follows sooner. Child 1 is the caption. */
-  .splitList > :nth-child(n + 4) {
+  /* Stacked, show two sessions and hide any heading whose rows are hidden. */
+  .splitList > :nth-child(n + 3 of article),
+  .splitList > :nth-child(2 of article) ~ .sessionGroupTitle {
     display: none;
   }
 
@@ -792,8 +888,9 @@
     margin-bottom: 0;
   }
 
+  /* Room for the Automated Tests running past the bottom edge. */
   .methodVisual > .chackMap {
-    margin-bottom: 0.75rem;
+    margin-bottom: calc(var(--cross) + 0.75rem);
   }
 }
 
@@ -853,7 +950,8 @@
     outline: 1.5px solid CanvasText;
   }
 
-  .greetingName {
+  .greetingName,
+  .upcomingTitle {
     background: none;
     color: CanvasText;
     -webkit-text-fill-color: CanvasText;
