@@ -538,14 +538,21 @@
   background: var(--kc-mark-amber);
 }
 
-/* CHACK in miniature: the dashed box is the process boundary, Humble Objects straddle it. */
+/*
+ * CHACK in miniature: the dashed box is the process boundary. The Humble Objects straddle its top
+ * edge, and the Automated Tests run past its bottom edge, as the integration tests cross it in the
+ * CHACK diagram.
+ */
 .chackMap {
+  --tile-h: 2.75rem;
+  --boundary-gap: 1.5rem; /* between the bottom row and the bottom edge */
+  --cross: 0.75rem; /* how far the Automated Tests run past the bottom edge */
   position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 0.75rem;
-  margin: 1.35rem 0 2.25rem;
-  padding: 0 1rem 1.5rem;
+  margin: calc(var(--tile-h) / 2) 0 2.25rem;
+  padding: 0 1rem var(--boundary-gap);
   border: 1.5px dashed var(--kc-control-line);
   border-radius: var(--kc-radius);
 }
@@ -553,8 +560,8 @@
 .chackBox {
   display: grid;
   place-items: center;
-  min-height: 2.6rem;
-  padding: 0.45rem 0.6rem;
+  min-height: var(--tile-h);
+  padding: 0.3rem 0.6rem;
   border: 1.5px solid var(--kc-control-line);
   border-radius: var(--kc-radius);
   background: var(--kc-bg);
@@ -565,11 +572,13 @@
   color: var(--kc-ink);
 }
 
+/* Top edge: the Humble Objects straddle the boundary, centred on it. */
 .chackHumble {
   grid-column: 1 / -1;
   justify-self: center;
   min-width: 62%;
-  margin-top: -1.35rem;
+  height: var(--tile-h);
+  margin-top: calc(var(--tile-h) / -2);
 }
 
 /* The same category colours as the CHACK diagram in the docs. */
@@ -599,6 +608,27 @@
   font-weight: 550;
   font-stretch: 100%;
   color: #12305a;
+}
+
+/*
+ * Bottom row, beside the Automated Tests. Both start at the row's top, so their tops line up.
+ */
+.chackRoot {
+  align-self: start;
+}
+
+/*
+ * Bottom row, left: the Automated Tests run past the bottom edge. The negative margin keeps the row
+ * no taller than the Composition Root, so the edge stays where the padding puts it. The label is
+ * centred on the first line, level with the Composition Root's label.
+ */
+.chackTests {
+  display: grid;
+  grid-template-rows: calc(var(--tile-h) - 3px) 1fr;
+  align-self: start;
+  height: calc(var(--tile-h) + var(--boundary-gap) + var(--cross));
+  margin-bottom: calc(-1 * (var(--boundary-gap) + var(--cross)));
+  padding: 0 0.6rem;
 }
 
 .chackDown,
@@ -815,8 +845,9 @@
     margin-bottom: 0;
   }
 
+  /* Room for the Automated Tests running past the bottom edge. */
   .methodVisual > .chackMap {
-    margin-bottom: 0.75rem;
+    margin-bottom: 1.75rem;
   }
 }
 

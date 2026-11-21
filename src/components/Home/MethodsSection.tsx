@@ -47,13 +47,16 @@ function Arrow({up = false, implementsAbstraction = false}: {up?: boolean; imple
   );
 }
 
-/** A pocket version of the CHACK diagram: the Core in the middle, every arrow points to it. */
+/**
+ * A pocket version of the CHACK diagram: the Core in the middle, every arrow points to it. The Humble
+ * Objects and the Automated Tests sit on the process boundary, as they do in the diagram.
+ */
 function ChackMap(): ReactNode {
   return (
     <div
       className={styles.chackMap}
       role="img"
-      aria-label="CHACK in miniature: the Humble Objects sit on the process boundary and implement the Core's I/O abstractions. Unit tests and the Composition Root reference the Core, which performs no I/O itself.">
+      aria-label="CHACK in miniature: the Humble Objects and the Automated Tests sit on the process boundary. The Humble Objects implement the Core's I/O abstractions. The Core performs no I/O itself and is referenced by the Automated Tests and the Composition Root.">
       <span className={clsx(styles.chackBox, styles.chackTile, styles.chackHumble)}>Humble Objects</span>
       <span className={styles.chackDown}>
         <Arrow implementsAbstraction />
