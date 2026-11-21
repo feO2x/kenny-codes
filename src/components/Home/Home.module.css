@@ -583,7 +583,28 @@
   font-size: 0.75rem;
   font-weight: 500;
   line-height: 1.35;
-  opacity: 0.85;
+  text-wrap: balance;
+}
+
+/* Keeps a phrase on one line, for example a dash with the word before it. */
+.chackNowrap {
+  white-space: nowrap;
+}
+
+/* On a 320px phone the map is only about 240px wide: tighten the gutters so the bottom tiles keep room. */
+@media (max-width: 360px) {
+  .chackMap {
+    gap: 0 0.5rem;
+    padding: 0 0.5rem var(--boundary-gap);
+  }
+
+  .chackBox {
+    padding: 0.45rem 0.4rem;
+  }
+
+  .chackNote {
+    font-size: 0.7rem;
+  }
 }
 
 /* Top edge: the Humble Objects straddle the boundary, centred on it. */
@@ -625,22 +646,21 @@
 }
 
 /*
- * Bottom row: the Composition Root and the Automated Tests. Both start at the row's top, so their
- * labels line up.
+ * Bottom row: the Composition Root and the Automated Tests. Both stretch to the row's height, which
+ * grows with the text on a narrow screen, and both start at the top, so their labels line up.
  */
 .chackBottom {
-  align-self: start;
-  height: var(--bottom-h);
+  align-self: stretch;
+  min-height: var(--bottom-h);
   justify-content: flex-start;
   padding-top: 0.7rem;
 }
 
 /*
- * The Automated Tests run past the bottom edge. The negative margin keeps the row no taller than
- * the Composition Root, so the edge stays where the padding puts it.
+ * The Automated Tests run past the bottom edge. The negative margin makes them stretch past the row
+ * by the boundary gap plus the crossing, so they cross the edge at any width.
  */
 .chackTests {
-  height: calc(var(--bottom-h) + var(--boundary-gap) + var(--cross));
   margin-bottom: calc(-1 * (var(--boundary-gap) + var(--cross)));
 }
 

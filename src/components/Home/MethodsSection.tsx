@@ -56,7 +56,7 @@ function ChackMap(): ReactNode {
     <div
       className={styles.chackMap}
       role="img"
-      aria-label="CHACK in miniature: the Humble Objects and the Automated Tests sit on the process boundary. The Humble Objects perform I/O calls and map data, and implement the Core's I/O abstractions. The Core performs no I/O itself and is referenced by the Automated Tests and the Composition Root. The Composition Root assembles all parts of the app. The Automated Tests are unit, integration, and E2E tests, following the Test Pyramid.">
+      aria-label="CHACK in miniature: the Humble Objects straddle the process boundary, and the Automated Tests extend across it, because tests may run inside or outside the process. The Humble Objects perform I/O calls and map data, and implement the Core's I/O abstractions. The Core performs no I/O itself and is referenced by the Automated Tests and the Composition Root. The Composition Root assembles all parts of the app. The Automated Tests are unit, integration, and E2E tests, following the Test Pyramid.">
       <span className={clsx(styles.chackBox, styles.chackTile, styles.chackHumble)}>
         Humble Objects
         <small className={styles.chackNote}>Perform I/O calls and map data</small>
@@ -76,7 +76,9 @@ function ChackMap(): ReactNode {
       </span>
       <span className={clsx(styles.chackBox, styles.chackTile, styles.chackBottom, styles.chackTests)}>
         Automated Tests
-        <small className={styles.chackNote}>Unit, Integration, E2E - following the Test Pyramid</small>
+        <small className={styles.chackNote}>
+          Unit, Integration, <span className={styles.chackNowrap}>E2E -</span> following the Test Pyramid
+        </small>
       </span>
       <span className={clsx(styles.chackBox, styles.chackTile, styles.chackBottom, styles.chackRoot)}>
         Composition Root
