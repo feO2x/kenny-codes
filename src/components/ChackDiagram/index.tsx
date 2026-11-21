@@ -41,6 +41,35 @@ const partTile: Record<ChackPart, Tile> = {
   'composition-root': 'amber',
 };
 
+/*
+ * Layout anchors in viewBox units. Boxes and the connectors that meet them derive their
+ * coordinates from these, so moving a row keeps the arrows attached.
+ */
+/** Centre line of the Humble Objects, the I/O Abstractions, the Core, and the runtime I/O call. */
+const mainY = 420;
+/** The broad tests' route to the Humble Objects, below Frameworks & Libraries. */
+const routeY = 250;
+/** Centre line of the Composition Root and the broad tests' route to it. */
+const rootY = 662;
+/** Test cards: unit tests and test doubles stack between the tops and bottoms of the broad tests. */
+const testTop = 356;
+const testBottom = 574;
+const testCardHeight = 82;
+const unitY = testTop + testCardHeight / 2;
+const doublesTop = testBottom - testCardHeight;
+const doublesY = doublesTop + testCardHeight / 2;
+/** Third-party systems: the middle card is centred on the runtime I/O call. */
+const thirdPartyX = 4;
+const thirdPartyWidth = 144;
+const thirdPartyCenterX = thirdPartyX + thirdPartyWidth / 2;
+const thirdPartyCardHeight = 66;
+const thirdPartyCardStep = 76;
+const thirdPartyCardTop = mainY - thirdPartyCardStep - thirdPartyCardHeight / 2;
+const thirdPartyTop = thirdPartyCardTop - 73;
+const thirdPartyBottom = thirdPartyCardTop + 2 * thirdPartyCardStep + thirdPartyCardHeight + 12;
+/** Half the gap that marks where one connector only crosses another. */
+const crossingGap = 9;
+
 /** A label centred on (x, y), one tspan per line. */
 function Label({x, y, lines, size = 20, className}: {x: number; y: number; lines: string[]; size?: number; className?: string}): ReactNode {
   const lineHeight = size * 1.2;
@@ -171,93 +200,102 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
         </text>
 
         {/* Third-party systems */}
-        <rect x="4" y="238" width="136" height="303" rx="10" className={d.box} />
-        <Label x={72} y={272} lines={['Third-Party', 'Systems']} />
-        {['Databases', 'Web Services', 'Message Brokers'].map((name, index) => (
-          <g key={name}>
-            <rect x="14" y={311 + index * 76} width="116" height="66" rx="8" className={d.inner} />
-            <Label x={72} y={344 + index * 76} lines={name === 'Databases' ? [name] : name.split(' ')} className={d.regular} />
-          </g>
-        ))}
+        <rect x={thirdPartyX} y={thirdPartyTop} width={thirdPartyWidth} height={thirdPartyBottom - thirdPartyTop} rx="10" className={d.box} />
+        <Label x={thirdPartyCenterX} y={thirdPartyTop + 34} lines={['Third-Party', 'Systems']} />
+        {['Databases', 'Web Services', 'Message Brokers'].map((name, index) => {
+          const top = thirdPartyCardTop + index * thirdPartyCardStep;
+          return (
+            <g key={name}>
+              <rect x={thirdPartyX + 10} y={top} width={thirdPartyWidth - 20} height={thirdPartyCardHeight} rx="8" className={d.inner} />
+              <Label x={thirdPartyCenterX} y={top + thirdPartyCardHeight / 2} lines={name === 'Databases' ? [name] : name.split(' ')} className={d.regular} />
+            </g>
+          );
+        })}
 
-        {/* Runtime I/O between third-party systems and humble objects */}
-        <line x1="142" y1="420" x2="196" y2="420" className={d.line} style={hoIo.style} markerEnd={hoIo.io} markerStart={hoIo.ioStart} />
+        {/* Runtime I/O between third-party systems and humble objects; the solid heads touch both boxes. */}
+        <line x1={thirdPartyX + thirdPartyWidth + 1} y1={mainY} x2="199" y2={mainY} className={d.line} style={hoIo.style} markerEnd={hoIo.io} markerStart={hoIo.ioStart} />
 
         {/* Implements / derives from */}
-        <line x1="340" y1="420" x2="402" y2="420" className={clsx(d.line, d.dashed)} style={hoImpl.style} markerEnd={hoImpl.impl} />
-        <path d="M 900 534 H 479 V 454" className={clsx(d.line, d.dashed)} style={tdImpl.style} markerEnd={tdImpl.impl} />
+        <line x1="340" y1={mainY} x2="402" y2={mainY} className={clsx(d.line, d.dashed)} style={hoImpl.style} markerEnd={hoImpl.impl} />
+        <path d={`M 900 ${doublesY} H 479 V ${mainY + 34}`} className={clsx(d.line, d.dashed)} style={tdImpl.style} markerEnd={tdImpl.impl} />
 
         {/* References */}
-        <line x1="610" y1="420" x2="556" y2="420" className={d.line} style={coreRef.style} markerEnd={coreRef.ref} />
-        <line x1="900" y1="398" x2="822" y2="398" className={d.line} style={unitRef.style} markerEnd={unitRef.ref} />
-        <line x1="948" y1="440" x2="948" y2="492" className={d.line} style={doubleRef.style} markerEnd={doubleRef.ref} />
+        <line x1="610" y1={mainY} x2="556" y2={mainY} className={d.line} style={coreRef.style} markerEnd={coreRef.ref} />
+        <line x1="900" y1={unitY} x2="822" y2={unitY} className={d.line} style={unitRef.style} markerEnd={unitRef.ref} />
+        <line x1="948" y1={testTop + testCardHeight} x2="948" y2={doublesTop - 2} className={d.line} style={doubleRef.style} markerEnd={doubleRef.ref} />
         {/* Integration and E2E tests share references to the same collaborators. */}
         {/* Dots mark where two connectors join; a gap marks where one only crosses another. */}
         <g style={broadToHumble.style}>
-          <path d="M 1034 356 V 250" className={d.line} />
-          <path d="M 1116 356 V 250 H 300 V 378" className={d.line} markerEnd={broadToHumble.ref} />
-          <circle cx="1034" cy="250" r="4.5" className={d.head} />
+          <path d={`M 1034 ${testTop} V ${routeY}`} className={d.line} />
+          <path d={`M 1116 ${testTop} V ${routeY} H 300 V ${mainY - 42}`} className={d.line} markerEnd={broadToHumble.ref} />
+          <circle cx="1034" cy={routeY} r="4.5" className={d.head} />
         </g>
         <g style={broadToThirdParty.style}>
-          <path d="M 1058 356 V 259 M 1058 241 V 30" className={d.line} />
-          <path d="M 1152 356 V 30 H 72 V 236" className={d.line} markerEnd={broadToThirdParty.ref} />
+          <path d={`M 1058 ${testTop} V ${routeY + crossingGap} M 1058 ${routeY - crossingGap} V 30`} className={d.line} />
+          <path d={`M 1152 ${testTop} V 30 H ${thirdPartyCenterX} V ${thirdPartyTop - 2}`} className={d.line} markerEnd={broadToThirdParty.ref} />
           <circle cx="1058" cy="30" r="4.5" className={d.head} />
         </g>
         <g style={broadToRoot.style}>
-          <path d="M 1034 574 V 662" className={d.line} />
-          <path d="M 1134 574 V 662 H 822" className={d.line} markerEnd={broadToRoot.ref} />
-          <circle cx="1034" cy="662" r="4.5" className={d.head} />
+          <path d={`M 1034 ${testBottom} V ${rootY}`} className={d.line} />
+          <path d={`M 1134 ${testBottom} V ${rootY} H 822`} className={d.line} markerEnd={broadToRoot.ref} />
+          <circle cx="1034" cy={rootY} r="4.5" className={d.head} />
         </g>
-        <line x1="715" y1="630" x2="715" y2="492" className={d.line} style={rootToCore.style} markerEnd={rootToCore.ref} />
-        <path d="M 610 662 H 300 V 462" className={d.line} style={rootToHumble.style} markerEnd={rootToHumble.ref} />
+        {/* Gap where the test doubles' implements arrow crosses. */}
+        <path
+          d={`M 715 ${rootY - 32} V ${doublesY + crossingGap} M 715 ${doublesY - crossingGap} V ${mainY + 72}`}
+          className={d.line}
+          style={rootToCore.style}
+          markerEnd={rootToCore.ref}
+        />
+        <path d={`M 610 ${rootY} H 300 V ${mainY + 42}`} className={d.line} style={rootToHumble.style} markerEnd={rootToHumble.ref} />
 
         {/* Humble objects, on the process boundary */}
-        <rect x="200" y="380" width="140" height="80" rx="10" {...box('humble-objects')} />
-        <Label x={270} y={420} lines={['Humble', 'Objects']} className={onBox('humble-objects')} />
+        <rect x="200" y={mainY - 40} width="140" height="80" rx="10" {...box('humble-objects')} />
+        <Label x={270} y={mainY} lines={['Humble', 'Objects']} className={onBox('humble-objects')} />
 
         {/* I/O abstractions belong to the Core: a tint with the Core's gradient outline. */}
         <rect
           x="404"
-          y="388"
+          y={mainY - 32}
           width="150"
           height="64"
           rx="10"
           {...(active('core') ? {className: d.soft, stroke: tileUrl(prefix, 'brandLine')} : {className: d.box})}
         />
-        <Label x={479} y={420} lines={['I/O', 'Abstractions']} />
+        <Label x={479} y={mainY} lines={['I/O', 'Abstractions']} />
 
         {/* Core */}
-        <rect x="610" y="350" width="210" height="140" rx="12" {...box('core')} />
-        <Label x={715} y={420} lines={['Core']} size={28} className={onBox('core')} />
+        <rect x="610" y={mainY - 70} width="210" height="140" rx="12" {...box('core')} />
+        <Label x={715} y={mainY} lines={['Core']} size={28} className={onBox('core')} />
 
         {/* Automated tests - the group straddles the process boundary */}
         <g style={active('automated-tests') ? markStyle('magenta') : undefined}>
-          <rect x="880" y="340" width="306" height="250" rx="14" className={d.group} />
+          <rect x="880" y={testTop - 16} width="306" height={testBottom - testTop + 32} rx="14" className={d.group} />
           {/* Above the group, left of the integration test connectors at x=1034. */}
-          <text x="882" y="290" fontSize="20" className={clsx(active('automated-tests') && d.markText, highlight === 'automated-tests' && d.markActive, d.strong)}>
+          <text x="882" y="296" fontSize="20" className={clsx(active('automated-tests') && d.markText, highlight === 'automated-tests' && d.markActive, d.strong)}>
             <tspan x="882">Automated</tspan>
             <tspan x="882" dy="23">
               Tests
             </tspan>
           </text>
-          <rect x="900" y="356" width="96" height="84" rx="10" {...box('automated-tests')} />
-          <Label x={948} y={398} lines={['Unit', 'Tests']} className={onBox('automated-tests')} />
+          <rect x="900" y={testTop} width="96" height={testCardHeight} rx="10" {...box('automated-tests')} />
+          <Label x={948} y={unitY} lines={['Unit', 'Tests']} className={onBox('automated-tests')} />
           {/* Test doubles implement the Core's abstractions: a lighter tint of the tests' colour. */}
-          <rect x="900" y="494" width="96" height="80" rx="10" className={active('automated-tests') ? d.tint : d.box} />
-          <Label x={948} y={534} lines={['Test', 'Doubles']} />
-          <rect x="1020" y="356" width="52" height="218" rx="10" {...box('automated-tests')} />
-          <text transform="translate(1046 465) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="20" className={clsx(d.strong, onBox('automated-tests'))}>
+          <rect x="900" y={doublesTop} width="96" height={testCardHeight} rx="10" className={active('automated-tests') ? d.tint : d.box} />
+          <Label x={948} y={doublesY} lines={['Test', 'Doubles']} />
+          <rect x="1020" y={testTop} width="52" height={testBottom - testTop} rx="10" {...box('automated-tests')} />
+          <text transform={`translate(1046 ${(testTop + testBottom) / 2}) rotate(-90)`} textAnchor="middle" dominantBaseline="middle" fontSize="20" className={clsx(d.strong, onBox('automated-tests'))}>
             Integration Tests
           </text>
-          <rect x="1100" y="356" width="68" height="218" rx="10" {...box('automated-tests')} />
-          <text transform="translate(1134 465) rotate(-90)" textAnchor="middle" dominantBaseline="middle" fontSize="20" className={clsx(d.strong, onBox('automated-tests'))}>
+          <rect x="1100" y={testTop} width="68" height={testBottom - testTop} rx="10" {...box('automated-tests')} />
+          <text transform={`translate(1134 ${(testTop + testBottom) / 2}) rotate(-90)`} textAnchor="middle" dominantBaseline="middle" fontSize="20" className={clsx(d.strong, onBox('automated-tests'))}>
             E2E Tests
           </text>
         </g>
 
         {/* Composition root */}
-        <rect x="610" y="630" width="210" height="64" rx="10" {...box('composition-root')} />
-        <Label x={715} y={662} lines={['Composition Root']} className={onBox('composition-root')} />
+        <rect x="610" y={rootY - 32} width="210" height="64" rx="10" {...box('composition-root')} />
+        <Label x={715} y={rootY} lines={['Composition Root']} className={onBox('composition-root')} />
 
         {/* Legend */}
         <line x1="8" y1="608" x2="56" y2="608" className={d.line} markerEnd={legend.ref} />
