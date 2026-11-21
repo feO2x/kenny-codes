@@ -423,6 +423,41 @@
   cursor: default;
 }
 
+/* Viewport-anchored cue shown only when an open details panel or inline preview is offscreen. */
+.detailsCue {
+  position: absolute;
+  z-index: 25;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--kc-line-strong);
+  border-radius: 999px;
+  background: var(--kc-surface);
+  color: var(--kc-ink);
+  box-shadow: var(--kc-shadow);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.detailsCue:hover,
+.detailsCue:focus-visible {
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary-darkest);
+}
+
+:global([data-theme='dark']) .detailsCue:hover,
+:global([data-theme='dark']) .detailsCue:focus-visible {
+  color: var(--ifm-color-primary);
+}
+
 .legend {
   display: flex;
   flex-wrap: wrap;
@@ -645,7 +680,8 @@
   }
 
   .popover,
-  .detailsBar {
+  .detailsBar,
+  .detailsCue {
     border-color: CanvasText;
     background: Canvas;
     color: CanvasText;

@@ -66,6 +66,15 @@ interface HiddenPopoverPosition {
 type PopoverLayout = FloatingPopoverPosition | InlinePopoverPosition | HiddenPopoverPosition;
 
 type DetailsOpener = {kind: 'browse'} | {kind: 'square'; permalink: string};
+type DetailsOwner = 'browse' | 'touch' | 'keyboard' | 'hover-fallback';
+
+interface DetailsPanelState {
+  permalink: string;
+  owner: DetailsOwner;
+  opener: DetailsOpener;
+  autoReveal: boolean;
+  focusOnOpen: boolean;
+}
 
 interface PendingPointer {
   permalink: string;
@@ -201,6 +210,18 @@ function revealElementIfObscured(element: HTMLElement): void {
   }
 }
 
+function rectsEqual(
+  a: {left: number; top: number; width: number; height: number},
+  b: DOMRectReadOnly,
+): boolean {
+  return (
+    Math.round(b.left) === a.left &&
+    Math.round(b.top) === a.top &&
+    Math.round(b.width) === a.width &&
+    Math.round(b.height) === a.height
+  );
+}
+
 /**
  * Observes position-only shifts of an element (e.g. content expanding above the chart)
  * without polling, by wrapping the element's current rect in an IntersectionObserver rootMargin.
@@ -215,7 +236,7 @@ function observeElementMove(element: Element, onMove: () => void): () => void {
     io = null;
   };
 
-  const refresh = () => {
+  const refresh = (armedRatio: number | null = null) => {
     disconnect();
     if (stopped) return;
     const rect = element.getBoundingClientRect();
@@ -223,10 +244,12 @@ function observeElementMove(element: Element, onMove: () => void): () => void {
     const rootHeight = document.documentElement.clientHeight;
     if (rootWidth === 0 || rootHeight === 0 || rect.width === 0 || rect.height === 0) return;
 
-    const observedLeft = Math.round(rect.left);
-    const observedTop = Math.round(rect.top);
-    const observedWidth = Math.round(rect.width);
-    const observedHeight = Math.round(rect.height);
+    const observed = {
+      left: Math.round(rect.left),
+      top: Math.round(rect.top),
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+    };
 
     const insetTop = Math.floor(rect.top);
     const insetLeft = Math.floor(rect.left);
@@ -234,35 +257,50 @@ function observeElementMove(element: Element, onMove: () => void): () => void {
     const insetBottom = Math.floor(rootHeight - (rect.top + rect.height));
     const rootMargin = `${-insetTop}px ${-insetRight}px ${-insetBottom}px ${-insetLeft}px`;
 
+    // When the anchor is partially clipped (0 < ratio < 1), bracket the current ratio tightly
+    // so movement between two partially intersecting positions still crosses a threshold.
+    let threshold: number | number[] = [0, 1];
+    if (armedRatio !== null && armedRatio > 0 && armedRatio < 1) {
+      const eps = 1e-4;
+      const low = Math.max(0, armedRatio - eps);
+      const high = Math.min(1, armedRatio + eps);
+      threshold = [...new Set([0, low, high, 1])].sort((a, b) => a - b);
+    }
+
     let isFirstObservation = true;
     io = new IntersectionObserver(
-      () => {
+      (entries) => {
         if (stopped) return;
-        if (isFirstObservation) {
-          isFirstObservation = false;
+        const entry = entries[entries.length - 1];
+        const nextRect = element.getBoundingClientRect();
+        if (!rectsEqual(observed, nextRect)) {
+          onMove();
+          refresh(null);
           return;
         }
-        const nextRect = element.getBoundingClientRect();
-        if (
-          Math.round(nextRect.left) !== observedLeft ||
-          Math.round(nextRect.top) !== observedTop ||
-          Math.round(nextRect.width) !== observedWidth ||
-          Math.round(nextRect.height) !== observedHeight
-        ) {
-          onMove();
-          refresh();
+
+        if (isFirstObservation) {
+          isFirstObservation = false;
+          const ratio = entry?.intersectionRatio ?? 1;
+          if (
+            ratio > 0 &&
+            ratio < 1 &&
+            (armedRatio === null || Math.abs(ratio - armedRatio) > 1e-4)
+          ) {
+            refresh(ratio);
+          }
         }
       },
       {
         root: document.documentElement,
         rootMargin,
-        threshold: [0, 1],
+        threshold,
       },
     );
     io.observe(element);
   };
 
-  refresh();
+  refresh(null);
   return () => {
     stopped = true;
     disconnect();
@@ -295,10 +333,12 @@ interface SessionPopoverProps {
   session: RecordSession;
   source: 'hover' | 'focus';
   containerRef: RefObject<HTMLDivElement | null>;
+  popoverRef: RefObject<HTMLDivElement | null>;
   squareRefs: RefObject<Map<string, HTMLAnchorElement>>;
   onPointerEnter: (event: PointerEvent<HTMLDivElement>) => void;
   onPointerLeave: (event: PointerEvent<HTMLDivElement>) => void;
   onHoverInlineFallback: (permalink: string) => void;
+  onInlineChange: (isInline: boolean) => void;
 }
 
 function isSamePopoverLayout(a: PopoverLayout | null, b: PopoverLayout | null): boolean {
@@ -320,12 +360,13 @@ function SessionPopover({
   session,
   source,
   containerRef,
+  popoverRef,
   squareRefs,
   onPointerEnter,
   onPointerLeave,
   onHoverInlineFallback,
+  onInlineChange,
 }: SessionPopoverProps): ReactNode {
-  const popoverRef = useRef<HTMLDivElement | null>(null);
   const [layout, setLayout] = useState<PopoverLayout | null>(null);
 
   const computeLayout = useCallback((): PopoverLayout | null => {
@@ -401,7 +442,7 @@ function SessionPopover({
     const top = Math.round(viewportTop - containerRect.top);
     const arrowX = Math.round(Math.max(14, Math.min(centerX - left, popoverWidth - 14)));
     return {kind: 'floating', left, top, arrowX, placement, maxWidth: availableWidth};
-  }, [containerRef, session.permalink, squareRefs]);
+  }, [containerRef, popoverRef, session.permalink, squareRefs]);
 
   useIsomorphicLayoutEffect(() => {
     let active = true;
@@ -411,10 +452,12 @@ function SessionPopover({
       // Route hover-triggered inline fallbacks to the persistent, dismissible details panel so
       // moving the pointer across other squares to reach the preview never switches or dismisses it.
       if (next?.kind === 'inline' && source === 'hover') {
+        onInlineChange(false);
         setLayout({kind: 'hidden'});
         onHoverInlineFallback(session.permalink);
         return;
       }
+      onInlineChange(next?.kind === 'inline');
       setLayout((prev) => (isSamePopoverLayout(prev, next) ? prev : next));
     };
 
@@ -456,6 +499,7 @@ function SessionPopover({
 
     return () => {
       active = false;
+      onInlineChange(false);
       if (rafId !== 0) window.cancelAnimationFrame(rafId);
       window.removeEventListener('resize', scheduleUpdate);
       window.removeEventListener('scroll', scheduleUpdate, {capture: true});
@@ -464,7 +508,16 @@ function SessionPopover({
       resizeObserver?.disconnect();
       stopMoveObserver();
     };
-  }, [computeLayout, containerRef, onHoverInlineFallback, session.permalink, source, squareRefs]);
+  }, [
+    computeLayout,
+    containerRef,
+    onHoverInlineFallback,
+    onInlineChange,
+    popoverRef,
+    session.permalink,
+    source,
+    squareRefs,
+  ]);
 
   const isInline = layout?.kind === 'inline';
   const isFloating = layout?.kind === 'floating';
@@ -495,6 +548,158 @@ function SessionPopover({
         titleSlot={<p className={styles.cardTitle}>{session.title}</p>}
       />
     </div>
+  );
+}
+
+interface OffscreenDetailsCueLayout {
+  left: number;
+  top: number;
+  maxWidth: number;
+  direction: 'up' | 'down';
+}
+
+interface OffscreenDetailsCueProps {
+  containerRef: RefObject<HTMLDivElement | null>;
+  targetRef: RefObject<HTMLDivElement | null>;
+  cueRef: RefObject<HTMLButtonElement | null>;
+  label: string;
+  onReveal: () => void;
+}
+
+/**
+ * Floating viewport-anchored cue shown only when an open inline preview or details panel
+ * lies outside the current visual viewport (e.g. under extreme pinch zoom or on short screens),
+ * giving pointer and keyboard users a visible way to reach the details without forced scrolling.
+ */
+function OffscreenDetailsCue({
+  containerRef,
+  targetRef,
+  cueRef,
+  label,
+  onReveal,
+}: OffscreenDetailsCueProps): ReactNode {
+  const [cueLayout, setCueLayout] = useState<OffscreenDetailsCueLayout | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    let active = true;
+
+    const update = () => {
+      if (!active) return;
+      const containerEl = containerRef.current;
+      const targetEl = targetRef.current;
+      const cueEl = cueRef.current;
+      if (!containerEl || !targetEl || !cueEl) {
+        setCueLayout(null);
+        return;
+      }
+
+      const vp = getVisibleViewport();
+      const visibleTop = Math.max(vp.top, getNavbarBottom());
+      const containerRect = containerEl.getBoundingClientRect();
+
+      // Hide the cue when the chart itself is no longer in the visible viewport.
+      if (containerRect.bottom <= visibleTop + 4 || containerRect.top >= vp.bottom - 4) {
+        setCueLayout(null);
+        return;
+      }
+
+      const targetRect = targetEl.getBoundingClientRect();
+      const targetVisible = targetRect.top < vp.bottom - 24 && targetRect.bottom > visibleTop + 24;
+      if (targetVisible) {
+        setCueLayout(null);
+        return;
+      }
+
+      const direction: 'up' | 'down' = targetRect.top >= vp.bottom - 24 ? 'down' : 'up';
+      const viewportMargin = 8;
+      const maxWidth = Math.max(110, Math.floor(vp.right - vp.left - viewportMargin * 2));
+      cueEl.style.maxWidth = `${maxWidth}px`;
+      const cueWidth = cueEl.offsetWidth;
+      const cueHeight = cueEl.offsetHeight;
+      if (cueWidth === 0 || cueHeight === 0) return;
+
+      const left = Math.round(
+        Math.max(
+          vp.left + viewportMargin - containerRect.left,
+          vp.left + (vp.right - vp.left - cueWidth) / 2 - containerRect.left,
+        ),
+      );
+      const top = Math.round(
+        Math.max(visibleTop + 8, vp.bottom - cueHeight - 10) - containerRect.top,
+      );
+
+      setCueLayout((prev) =>
+        prev &&
+        prev.left === left &&
+        prev.top === top &&
+        prev.maxWidth === maxWidth &&
+        prev.direction === direction
+          ? prev
+          : {left, top, maxWidth, direction},
+      );
+    };
+
+    update();
+
+    let rafId = 0;
+    const scheduleUpdate = () => {
+      if (!active || rafId !== 0) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        update();
+      });
+    };
+
+    window.addEventListener('resize', scheduleUpdate);
+    window.addEventListener('scroll', scheduleUpdate, {passive: true, capture: true});
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', scheduleUpdate);
+    vv?.addEventListener('scroll', scheduleUpdate);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(scheduleUpdate);
+      if (containerRef.current) resizeObserver.observe(containerRef.current);
+      if (targetRef.current) resizeObserver.observe(targetRef.current);
+      if (document.body) resizeObserver.observe(document.body);
+    }
+
+    const stopTargetMoveObserver = targetRef.current
+      ? observeElementMove(targetRef.current, scheduleUpdate)
+      : () => {};
+
+    return () => {
+      active = false;
+      if (rafId !== 0) window.cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', scheduleUpdate);
+      window.removeEventListener('scroll', scheduleUpdate, {capture: true});
+      vv?.removeEventListener('resize', scheduleUpdate);
+      vv?.removeEventListener('scroll', scheduleUpdate);
+      resizeObserver?.disconnect();
+      stopTargetMoveObserver();
+    };
+  }, [containerRef, cueRef, targetRef]);
+
+  return (
+    <button
+      ref={cueRef}
+      type="button"
+      className={styles.detailsCue}
+      tabIndex={cueLayout ? 0 : -1}
+      aria-hidden={cueLayout ? undefined : true}
+      style={
+        cueLayout
+          ? {
+              left: `${cueLayout.left}px`,
+              top: `${cueLayout.top}px`,
+              maxWidth: `${cueLayout.maxWidth}px`,
+            }
+          : {visibility: 'hidden', pointerEvents: 'none'}
+      }
+      onClick={onReveal}>
+      <span>{label}</span>
+      <span aria-hidden="true">{cueLayout?.direction === 'up' ? '↑' : '↓'}</span>
+    </button>
   );
 }
 
@@ -620,12 +825,15 @@ export default function SpeakingRecord({
   const [focusedPermalink, setFocusedPermalink] = useState<string | null>(null);
   const [previewSource, setPreviewSource] = useState<'hover' | 'focus'>('hover');
   const [dismissedFocusPermalink, setDismissedFocusPermalink] = useState<string | null>(null);
-  const [selectedPermalink, setSelectedPermalink] = useState<string | null>(null);
-  const [hoverLockedByDetails, setHoverLockedByDetails] = useState(false);
+  const [detailsPanel, setDetailsPanel] = useState<DetailsPanelState | null>(null);
+  const [isFocusPopoverInline, setIsFocusPopoverInline] = useState(false);
   const [activeTabPermalink, setActiveTabPermalink] = useState<string | null>(null);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const popoverElRef = useRef<HTMLDivElement | null>(null);
   const detailsBarRef = useRef<HTMLDivElement | null>(null);
+  const detailsCueRef = useRef<HTMLButtonElement | null>(null);
+  const detailsTitleLinkRef = useRef<HTMLAnchorElement | null>(null);
   const browseButtonRef = useRef<HTMLButtonElement | null>(null);
   const prevButtonRef = useRef<HTMLButtonElement | null>(null);
   const nextButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -633,8 +841,6 @@ export default function SpeakingRecord({
   const squareRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const pendingPointerRef = useRef<PendingPointer | null>(null);
   const suppressNextFocusPreviewRef = useRef<string | null>(null);
-  const detailsOpenerRef = useRef<DetailsOpener>({kind: 'browse'});
-  const detailsAutoScrollRef = useRef(true);
   const hoverLeaveTimerRef = useRef<number | null>(null);
   const keyboardHintId = useId();
   const detailsBarId = useId();
@@ -655,14 +861,15 @@ export default function SpeakingRecord({
 
   const selectedIndex = useMemo(
     () =>
-      selectedPermalink
-        ? allSessions.findIndex((session) => session.permalink === selectedPermalink)
+      detailsPanel
+        ? allSessions.findIndex((session) => session.permalink === detailsPanel.permalink)
         : -1,
-    [allSessions, selectedPermalink],
+    [allSessions, detailsPanel],
   );
   const selectedSession = selectedIndex >= 0 ? allSessions[selectedIndex] : null;
+  const activeDetails = selectedSession && detailsPanel ? detailsPanel : null;
   const selectedSessionPermalink = selectedSession?.permalink ?? null;
-  const isHoverLocked = hoverLockedByDetails && Boolean(selectedSession);
+  const isHoverLocked = activeDetails?.owner === 'hover-fallback';
 
   const activeFocusedPermalink =
     focusedPermalink &&
@@ -704,9 +911,8 @@ export default function SpeakingRecord({
 
   const closeDetailsBar = useCallback(
     (restoreFocus: boolean) => {
-      const opener = detailsOpenerRef.current;
-      setSelectedPermalink(null);
-      setHoverLockedByDetails(false);
+      const opener = activeDetails?.opener ?? {kind: 'browse'};
+      setDetailsPanel(null);
       if (!restoreFocus) return;
 
       if (opener.kind === 'browse') {
@@ -734,19 +940,20 @@ export default function SpeakingRecord({
         }
       }
     },
-    [effectiveTabPermalink, sessionByPermalink],
+    [activeDetails, effectiveTabPermalink, sessionByPermalink],
   );
 
   // Dismiss any open preview (hovered, focused, or details bar) on Escape from anywhere.
   useEffect(() => {
-    if (!popoverSession && !selectedSession) return;
+    if (!popoverSession && !activeDetails) return;
 
     const handleEscape = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       clearHoverLeaveTimer();
-      if (selectedSession) {
+      if (activeDetails) {
+        const activeEl = document.activeElement;
         const focusInsideDetails = Boolean(
-          detailsBarRef.current?.contains(document.activeElement),
+          detailsBarRef.current?.contains(activeEl) || detailsCueRef.current?.contains(activeEl),
         );
         closeDetailsBar(focusInsideDetails);
       }
@@ -760,29 +967,33 @@ export default function SpeakingRecord({
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [clearHoverLeaveTimer, closeDetailsBar, focusedPermalink, popoverSession, selectedSession]);
+  }, [activeDetails, clearHoverLeaveTimer, closeDetailsBar, focusedPermalink, popoverSession]);
 
   // Dismiss the details bar when tapping outside the chart.
   useEffect(() => {
-    if (!selectedSession) return;
+    if (!activeDetails) return;
 
     const handleOutsidePointerDown = (event: globalThis.PointerEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setSelectedPermalink(null);
-        setHoverLockedByDetails(false);
+        setDetailsPanel(null);
       }
     };
     document.addEventListener('pointerdown', handleOutsidePointerDown);
     return () => {
       document.removeEventListener('pointerdown', handleOutsidePointerDown);
     };
-  }, [selectedSession]);
+  }, [activeDetails]);
 
-  // Reveal the details bar with the minimum necessary scroll if it opens offscreen.
+  // Reveal (and optionally focus) the details bar when explicitly opened.
   useEffect(() => {
-    if (!selectedSessionPermalink || !detailsBarRef.current || !detailsAutoScrollRef.current) return;
-    revealElementIfObscured(detailsBarRef.current);
-  }, [selectedSessionPermalink]);
+    if (!activeDetails || !detailsBarRef.current) return;
+    if (activeDetails.autoReveal) {
+      revealElementIfObscured(detailsBarRef.current);
+    }
+    if (activeDetails.focusOnOpen) {
+      detailsTitleLinkRef.current?.focus({preventScroll: true});
+    }
+  }, [activeDetails]);
 
   const stepSelectedSession = useCallback(
     (delta: -1 | 1) => {
@@ -790,8 +1001,16 @@ export default function SpeakingRecord({
       const nextIndex = selectedIndex + delta;
       const nextSession = allSessions[nextIndex];
       if (!nextSession) return;
-      setSelectedPermalink(nextSession.permalink);
-      setActiveTabPermalink(nextSession.permalink);
+      setDetailsPanel((prev) =>
+        prev
+          ? {
+              ...prev,
+              permalink: nextSession.permalink,
+              autoReveal: false,
+              focusOnOpen: false,
+            }
+          : prev,
+      );
       // If stepping reaches a boundary and disables the clicked button, keep focus inside the bar.
       if (delta === -1 && nextIndex === 0) {
         (nextButtonRef.current ?? closeButtonRef.current)?.focus({preventScroll: true});
@@ -803,7 +1022,7 @@ export default function SpeakingRecord({
   );
 
   const toggleBrowsePanel = useCallback(() => {
-    if (selectedSession) {
+    if (activeDetails) {
       closeDetailsBar(false);
       return;
     }
@@ -814,17 +1033,19 @@ export default function SpeakingRecord({
     if (!target) return;
     clearHoverLeaveTimer();
     setHoveredPermalink(null);
-    detailsOpenerRef.current = {kind: 'browse'};
-    detailsAutoScrollRef.current = true;
-    setHoverLockedByDetails(false);
-    setActiveTabPermalink(target);
-    setSelectedPermalink(target);
+    setDetailsPanel({
+      permalink: target,
+      owner: 'browse',
+      opener: {kind: 'browse'},
+      autoReveal: true,
+      focusOnOpen: false,
+    });
   }, [
+    activeDetails,
     activeTabPermalink,
     clearHoverLeaveTimer,
     closeDetailsBar,
     lastPermalink,
-    selectedSession,
     sessionByPermalink,
   ]);
 
@@ -832,14 +1053,46 @@ export default function SpeakingRecord({
     (permalink: string) => {
       clearHoverLeaveTimer();
       setHoveredPermalink(null);
-      detailsOpenerRef.current = {kind: 'square', permalink};
-      detailsAutoScrollRef.current = false;
-      setHoverLockedByDetails(true);
+      // Never let passive hover fallback overwrite an explicitly opened panel (browse, touch,
+      // or keyboard) or disturb the chart's roving tab stop.
+      setDetailsPanel((prev) => {
+        if (prev && sessionByPermalink.has(prev.permalink)) {
+          return prev;
+        }
+        return {
+          permalink,
+          owner: 'hover-fallback',
+          opener: {kind: 'square', permalink},
+          autoReveal: false,
+          focusOnOpen: false,
+        };
+      });
+    },
+    [clearHoverLeaveTimer, sessionByPermalink],
+  );
+
+  const openKeyboardDetails = useCallback(
+    (permalink: string) => {
+      clearHoverLeaveTimer();
+      setHoveredPermalink(null);
       setActiveTabPermalink(permalink);
-      setSelectedPermalink(permalink);
+      setDismissedFocusPermalink(permalink);
+      setDetailsPanel({
+        permalink,
+        owner: 'keyboard',
+        opener: {kind: 'square', permalink},
+        autoReveal: true,
+        focusOnOpen: true,
+      });
     },
     [clearHoverLeaveTimer],
   );
+
+  const revealOpenDetails = useCallback(() => {
+    if (!detailsBarRef.current) return;
+    revealElementIfObscured(detailsBarRef.current);
+    detailsTitleLinkRef.current?.focus({preventScroll: true});
+  }, []);
 
   const focusSquare = useCallback(
     (permalink: string) => {
@@ -860,6 +1113,14 @@ export default function SpeakingRecord({
       const {key} = event;
       const currentColumn = columns[colIndex];
       if (!currentColumn) return;
+
+      if (key === ' ' || key === 'Spacebar') {
+        const currentSession = currentColumn.sessions[rowIndex];
+        if (!currentSession) return;
+        event.preventDefault();
+        openKeyboardDetails(currentSession.permalink);
+        return;
+      }
 
       let targetPermalink: string | null = null;
 
@@ -898,7 +1159,7 @@ export default function SpeakingRecord({
         focusSquare(targetPermalink);
       }
     },
-    [columns, firstPermalink, focusSquare, lastPermalink],
+    [columns, firstPermalink, focusSquare, lastPermalink, openKeyboardDetails],
   );
 
   const handleSquarePointerDown = useCallback(
@@ -1003,16 +1264,21 @@ export default function SpeakingRecord({
         event.preventDefault();
         clearHoverLeaveTimer();
         setHoveredPermalink(null);
-        detailsOpenerRef.current = {kind: 'square', permalink};
-        detailsAutoScrollRef.current = true;
-        setHoverLockedByDetails(false);
         setActiveTabPermalink(permalink);
-        setSelectedPermalink((prev) =>
-          prev === permalink && selectedSessionPermalink === permalink ? null : permalink,
+        setDetailsPanel((prev) =>
+          prev && prev.permalink === permalink && sessionByPermalink.has(prev.permalink)
+            ? null
+            : {
+                permalink,
+                owner: 'touch',
+                opener: {kind: 'square', permalink},
+                autoReveal: true,
+                focusOnOpen: false,
+              },
         );
       }
     },
-    [clearHoverLeaveTimer, selectedSessionPermalink],
+    [clearHoverLeaveTimer, sessionByPermalink],
   );
 
   return (
@@ -1024,7 +1290,7 @@ export default function SpeakingRecord({
       <figure className={styles.figure} aria-label="Talks, workshops, and webinars per year">
         <p id={keyboardHintId} className="kc-sr-only">
           Use arrow keys, Home, or End to move between sessions. Press Enter to open a session page,
-          or Escape to dismiss the preview.
+          Space to reveal session details, or Escape to dismiss the preview.
         </p>
         <ol className={styles.chart} style={{'--rows': tallest} as CSSProperties}>
           {columns.map((column, col) => {
@@ -1154,10 +1420,12 @@ export default function SpeakingRecord({
           session={popoverSession}
           source={effectivePopoverSource}
           containerRef={containerRef}
+          popoverRef={popoverElRef}
           squareRefs={squareRefs}
           onPointerEnter={handlePopoverPointerEnter}
           onPointerLeave={handlePopoverPointerLeave}
           onHoverInlineFallback={handleHoverInlineFallback}
+          onInlineChange={setIsFocusPopoverInline}
         />
       )}
 
@@ -1172,7 +1440,10 @@ export default function SpeakingRecord({
             <SessionPreviewContent
               session={selectedSession}
               titleSlot={
-                <Link to={selectedSession.permalink} className={styles.detailsTitleLink}>
+                <Link
+                  ref={detailsTitleLinkRef}
+                  to={selectedSession.permalink}
+                  className={styles.detailsTitleLink}>
                   {selectedSession.title}
                   <span className={styles.detailsArrow} aria-hidden="true">
                     {' '}
@@ -1218,6 +1489,28 @@ export default function SpeakingRecord({
             </button>
           </div>
         </div>
+      )}
+
+      {activeDetails ? (
+        <OffscreenDetailsCue
+          containerRef={containerRef}
+          targetRef={detailsBarRef}
+          cueRef={detailsCueRef}
+          label="View session details"
+          onReveal={revealOpenDetails}
+        />
+      ) : (
+        popoverSession &&
+        effectivePopoverSource === 'focus' &&
+        isFocusPopoverInline && (
+          <OffscreenDetailsCue
+            containerRef={containerRef}
+            targetRef={popoverElRef}
+            cueRef={detailsCueRef}
+            label="View session details (Space)"
+            onReveal={() => openKeyboardDetails(popoverSession.permalink)}
+          />
+        )
       )}
     </div>
   );
