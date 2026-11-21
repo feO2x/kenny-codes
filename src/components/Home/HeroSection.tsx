@@ -32,7 +32,7 @@ export default function HeroSection(): ReactNode {
               {/* The greeting uses my first name; the full name belongs right under it. */}
               <strong className={styles.heroFullName}>Kenny Pflug</strong>, Engineering Manager at{' '}
               <a href="https://gwvs.de/">TELIS/GWVS</a>, conference speaker, and consultant from
-              Regensburg, Germany. Book me for talks, in-house workshops, or consulting.
+              Regensburg, Germany. Book me for talks, workshops, or consulting.
             </p>
             <div className={styles.heroActions}>
               <a className={`button button--primary button--lg ${styles.ctaIcon}`} href={LINKEDIN_URL}>
