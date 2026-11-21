@@ -70,15 +70,23 @@
 }
 
 .squareLink:hover,
-.squareLink:focus-visible,
-.squareActive {
-  transform: scale(1.22);
+.squarePreviewed:not(:focus-visible) {
+  transform: scale(1.1);
   z-index: 2;
-  box-shadow: 0 0 0 2px var(--kc-bg), 0 0 0 4px var(--ifm-color-primary);
+  box-shadow: 0 0 0 1px var(--kc-bg), 0 0 0 2px var(--ifm-color-primary);
 }
 
 .squareLink:focus-visible {
-  outline: none;
+  transform: none;
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 1px;
+  z-index: 3;
+}
+
+.squareSelected {
+  transform: none;
+  z-index: 2;
+  box-shadow: inset 0 0 0 2px var(--kc-bg), 0 0 0 1.5px var(--kc-ink);
 }
 
 .squareUpcoming {
@@ -87,15 +95,19 @@
 }
 
 .squareUpcoming.squareLink:hover,
-.squareUpcoming.squareLink:focus-visible,
-.squareUpcoming.squareActive {
+.squareUpcoming.squarePreviewed:not(:focus-visible) {
   background: color-mix(in srgb, var(--kc-upcoming) 18%, transparent);
-  box-shadow: inset 0 0 0 2px var(--kc-upcoming), 0 0 0 2px var(--kc-bg), 0 0 0 4px var(--ifm-color-primary);
+  box-shadow: inset 0 0 0 2px var(--kc-upcoming), 0 0 0 1px var(--kc-bg), 0 0 0 2px var(--ifm-color-primary);
+}
+
+.squareUpcoming.squareSelected {
+  background: color-mix(in srgb, var(--kc-upcoming) 28%, transparent);
+  box-shadow: inset 0 0 0 2px var(--kc-upcoming), 0 0 0 1.5px var(--kc-ink);
 }
 
 /* Dark mode can brighten on hover; light mode keeps its contrast and relies on the ring. */
 :global([data-theme='dark']) .squareLink:hover:not(.squareUpcoming),
-:global([data-theme='dark']) .squareActive:not(.squareUpcoming) {
+:global([data-theme='dark']) .squarePreviewed:not(.squareUpcoming) {
   filter: brightness(1.12) saturate(1.1);
 }
 
@@ -172,6 +184,10 @@
   transform: translateX(-50%) rotate(225deg);
 }
 
+.popover[data-arrow='false']::after {
+  display: none;
+}
+
 .cardHeader {
   display: flex;
   flex-wrap: wrap;
@@ -206,6 +222,7 @@
   line-height: 1.3;
   letter-spacing: -0.005em;
   color: var(--kc-ink);
+  overflow-wrap: break-word;
 }
 
 .cardVenue {
@@ -213,6 +230,7 @@
   font-size: 0.8rem;
   line-height: 1.35;
   color: var(--kc-muted);
+  overflow-wrap: break-word;
 }
 
 .cardFormat {
@@ -220,6 +238,7 @@
   font-size: 0.75rem;
   line-height: 1.35;
   color: var(--kc-muted);
+  overflow-wrap: break-word;
 }
 
 /* Touch / mobile details bar beneath the chart */
@@ -242,9 +261,7 @@
 }
 
 .detailsTitleLink {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.35rem;
+  display: inline;
   font-size: 0.95rem;
   font-weight: 650;
   font-stretch: 104%;
@@ -254,6 +271,7 @@
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
   text-decoration-color: var(--kc-control-line);
+  overflow-wrap: break-word;
 }
 
 .detailsTitleLink:hover,
@@ -268,7 +286,7 @@
 }
 
 .detailsArrow {
-  flex: none;
+  white-space: nowrap;
   color: var(--ifm-color-primary);
 }
 
@@ -310,18 +328,18 @@
   gap: 0.5rem;
 }
 
-.legendLink {
-  color: var(--kc-ink);
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
-  text-decoration-color: var(--kc-control-line);
+.hintTouch {
+  display: none;
 }
 
-.legendLink:hover {
-  color: var(--kc-ink);
-  text-decoration-color: var(--ifm-color-primary);
+@media (hover: none), (pointer: coarse) {
+  .hintPointer {
+    display: none;
+  }
+
+  .hintTouch {
+    display: inline;
+  }
 }
 
 .legendItem .square {
@@ -343,6 +361,11 @@
   .record {
     --square: 12px;
     --gap: 3px;
+  }
+
+  .squareLink:hover,
+  .squarePreviewed {
+    transform: none;
   }
 
   .count,
@@ -395,7 +418,8 @@
 
   .squareLink:hover,
   .squareLink:focus-visible,
-  .squareActive {
+  .squarePreviewed,
+  .squareSelected {
     transform: none;
   }
 }
@@ -413,19 +437,30 @@
   }
 
   .squareLink:hover,
-  .squareLink:focus-visible,
-  .squareActive {
+  .squarePreviewed:not(:focus-visible) {
     background: LinkText;
-    outline: 2px solid Highlight;
-    outline-offset: 2px;
     box-shadow: none;
   }
 
   .squareUpcoming.squareLink:hover,
-  .squareUpcoming.squareLink:focus-visible,
-  .squareUpcoming.squareActive {
+  .squareUpcoming.squarePreviewed:not(:focus-visible) {
     background: Canvas;
     box-shadow: inset 0 0 0 2px LinkText;
+  }
+
+  .squareLink:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
+
+  .squareSelected {
+    background: Highlight;
+    box-shadow: inset 0 0 0 2px Canvas, 0 0 0 1.5px Highlight;
+  }
+
+  .squareUpcoming.squareSelected {
+    background: Canvas;
+    box-shadow: inset 0 0 0 3px Highlight;
   }
 
   .popover,
