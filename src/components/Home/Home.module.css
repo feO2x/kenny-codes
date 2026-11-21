@@ -330,11 +330,33 @@
   background: var(--kc-gradient);
 }
 
-.listCaption {
+.sessionGroupTitle {
   font-size: 0.875rem;
+  font-stretch: normal;
   font-weight: 600;
+  letter-spacing: normal;
+  line-height: inherit;
   color: var(--kc-muted);
   margin: 0.5rem 0 0.75rem;
+}
+
+.upcomingTitle {
+  color: var(--kc-brand-line-to);
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .upcomingTitle {
+    width: fit-content;
+    background-image: linear-gradient(135deg, var(--kc-brand-line-from), var(--kc-brand-line-to));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.sessionGroupTitle:not(:first-child) {
+  margin: 0.75rem 0 0;
 }
 
 /* ---------- Methods ---------- */
@@ -722,8 +744,9 @@
     position: static;
   }
 
-  /* Stacked, two sessions are enough, so the record follows sooner. Child 1 is the caption. */
-  .splitList > :nth-child(n + 4) {
+  /* Stacked, show two sessions and hide any heading whose rows are hidden. */
+  .splitList > :nth-child(n + 3 of article),
+  .splitList > :nth-child(2 of article) ~ .sessionGroupTitle {
     display: none;
   }
 
@@ -853,7 +876,8 @@
     outline: 1.5px solid CanvasText;
   }
 
-  .greetingName {
+  .greetingName,
+  .upcomingTitle {
     background: none;
     color: CanvasText;
     -webkit-text-fill-color: CanvasText;

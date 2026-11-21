@@ -1,5 +1,6 @@
 import React, {type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
+import clsx from 'clsx';
 import homeData from '@site/src/data/home-data.json';
 import EventRow from '../EventRow';
 import SpeakingRecord from '../SpeakingRecord';
@@ -27,6 +28,8 @@ const topics = [
   '.NET framework internals: ASP.NET Core, DI containers, ORMs, and serializers',
 ];
 
+const maxVisibleSessions = 4;
+
 export default function EventsSection(): ReactNode {
   const events = homeData.events as HomeEvent[];
   const today = useToday();
@@ -35,9 +38,15 @@ export default function EventsSection(): ReactNode {
 
   // Nearest upcoming sessions first (cancelled ones included so visitors learn about the
   // change), then the most recent delivered sessions fill the remaining rows.
-  const upcoming = events.filter((event) => event.date >= today).reverse();
-  const recent = events.filter((event) => event.date < today && !event.cancelled);
-  const visibleEvents = [...upcoming, ...recent].slice(0, 4);
+  const upcoming = events
+    .filter((event) => event.date.slice(0, 10) >= today)
+    .reverse()
+    .slice(0, maxVisibleSessions);
+  const recent = delivered.slice(0, maxVisibleSessions - upcoming.length);
+  const sessionGroups = [
+    {title: 'Upcoming', sessions: upcoming, isUpcoming: true},
+    {title: 'Recent sessions', sessions: recent, isUpcoming: false},
+  ];
 
   return (
     <section className={styles.section} aria-labelledby="talks-title">
@@ -61,29 +70,32 @@ export default function EventsSection(): ReactNode {
           </div>
 
           <div className={styles.splitList}>
-            <p className={styles.listCaption}>
-              {upcoming.length === 0
-                ? 'Recent sessions'
-                : upcoming.length >= visibleEvents.length
-                  ? 'Next sessions'
-                  : 'Next and recent sessions'}
-            </p>
-            {visibleEvents.map((event) => (
-              <EventRow
-                key={event.link}
-                title={event.title}
-                permalink={event.link}
-                date={event.date}
-                type={event.type}
-                duration={event.duration}
-                language={event.language}
-                location={event.location}
-                country={event.country}
-                event={event.event}
-                isUpcoming={event.date >= today}
-                cancelled={event.cancelled}
-              />
-            ))}
+            {sessionGroups
+              .filter(({sessions}) => sessions.length > 0)
+              .map(({title, sessions, isUpcoming}) => (
+                <React.Fragment key={title}>
+                  <h3 className={clsx(styles.sessionGroupTitle, isUpcoming && styles.upcomingTitle)}>
+                    {title}
+                  </h3>
+                  {sessions.map((event) => (
+                    <EventRow
+                      key={event.link}
+                      title={event.title}
+                      permalink={event.link}
+                      date={event.date}
+                      type={event.type}
+                      duration={event.duration}
+                      language={event.language}
+                      location={event.location}
+                      country={event.country}
+                      event={event.event}
+                      isUpcoming={isUpcoming}
+                      headingLevel="h4"
+                      cancelled={event.cancelled}
+                    />
+                  ))}
+                </React.Fragment>
+              ))}
           </div>
         </div>
 
