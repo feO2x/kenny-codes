@@ -32,6 +32,18 @@ const maxVisibleSessions = 4;
 
 export default function EventsSection(): ReactNode {
   const events = homeData.events as HomeEvent[];
+  const recordEvents = events.map((event) => ({
+    title: event.title,
+    date: event.date,
+    permalink: event.link,
+    type: event.type,
+    duration: event.duration,
+    language: event.language,
+    location: event.location,
+    country: event.country,
+    event: event.event,
+    cancelled: event.cancelled,
+  }));
   const today = useToday();
   const delivered = deliveredSessions(events, today);
   const firstYear = events[events.length - 1]?.date.slice(0, 4);
@@ -108,7 +120,7 @@ export default function EventsSection(): ReactNode {
               Browse all events
             </Link>
           </div>
-          <SpeakingRecord events={events} interactive={false} className={styles.recordChart} />
+          <SpeakingRecord events={recordEvents} className={styles.recordChart} />
         </div>
       </div>
     </section>
