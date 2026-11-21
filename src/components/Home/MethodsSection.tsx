@@ -56,7 +56,7 @@ function ChackMap(): ReactNode {
     <div
       className={styles.chackMap}
       role="img"
-      aria-label="CHACK in miniature: the Humble Objects straddle the process boundary, and the Automated Tests extend across it, because tests may run inside or outside the process. The Humble Objects perform I/O calls and map data, and implement the Core's I/O abstractions. The Core contains in-memory logic and performs no I/O itself. The Automated Tests and the Composition Root reference it. The Composition Root assembles all parts of the app. The Automated Tests are unit, integration, and E2E tests, following the Test Pyramid.">
+      aria-label="CHACK in miniature: the Humble Objects straddle the process boundary, and the Automated Tests extend across it, because tests may run inside or outside the process. The Humble Objects perform I/O calls and map data, and implement the Core's I/O abstractions. The Core contains in-memory logic and performs no I/O itself. The Automated Tests and the Composition Root reference it. The Core and the Composition Root sit inside the process boundary. The Composition Root assembles all parts of the app. The Automated Tests are unit, integration, and E2E tests, following the Test Pyramid.">
       <span className={clsx(styles.chackBox, styles.chackTile, styles.chackHumble)}>
         Humble Objects
         <small className={styles.chackNote}>Perform I/O calls and map data</small>
