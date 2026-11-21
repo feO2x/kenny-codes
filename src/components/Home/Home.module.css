@@ -652,8 +652,7 @@
 .chackBottom {
   align-self: stretch;
   min-height: var(--bottom-h);
-  justify-content: flex-start;
-  padding-top: 0.7rem;
+  justify-content: center;
 }
 
 /*
@@ -662,6 +661,11 @@
  */
 .chackTests {
   margin-bottom: calc(-1 * (var(--boundary-gap) + var(--cross)));
+}
+
+/* The bottom padding keeps the contents centred on the row, level with the Composition Root's. */
+.chackBox.chackTests {
+  padding-bottom: calc(var(--boundary-gap) + var(--cross));
 }
 
 .chackDown,
