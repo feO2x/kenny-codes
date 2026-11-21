@@ -686,7 +686,10 @@
   stroke-linejoin: round;
 }
 
-/* Kept in the right half of the map, so on a narrow map it never reaches the Automated Tests. */
+/*
+ * Kept in the right half of the map. Long text, for example with wider letter spacing, wraps within
+ * that half instead of running into the Automated Tests.
+ */
 .chackBoundary {
   position: absolute;
   right: 0.625rem;
@@ -698,7 +701,7 @@
   font-size: 0.75rem;
   line-height: 1.2;
   text-align: right;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
   color: var(--kc-muted);
 }
 
