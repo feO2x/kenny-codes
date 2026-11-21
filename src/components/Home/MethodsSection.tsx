@@ -56,8 +56,11 @@ function ChackMap(): ReactNode {
     <div
       className={styles.chackMap}
       role="img"
-      aria-label="CHACK in miniature: the Humble Objects and the Automated Tests sit on the process boundary. The Humble Objects implement the Core's I/O abstractions. The Core performs no I/O itself and is referenced by the Automated Tests and the Composition Root.">
-      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackHumble)}>Humble Objects</span>
+      aria-label="CHACK in miniature: the Humble Objects and the Automated Tests sit on the process boundary. The Humble Objects perform I/O calls and map data, and implement the Core's I/O abstractions. The Core performs no I/O itself and is referenced by the Automated Tests and the Composition Root. The Composition Root assembles all parts of the app. The Automated Tests are unit, integration, and E2E tests, following the Test Pyramid.">
+      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackHumble)}>
+        Humble Objects
+        <small className={styles.chackNote}>Perform I/O calls and map data</small>
+      </span>
       <span className={styles.chackDown}>
         <Arrow implementsAbstraction />
       </span>
@@ -71,8 +74,14 @@ function ChackMap(): ReactNode {
       <span className={styles.chackUp}>
         <Arrow up />
       </span>
-      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackTests)}>Automated Tests</span>
-      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackRoot)}>Composition Root</span>
+      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackBottom, styles.chackTests)}>
+        Automated Tests
+        <small className={styles.chackNote}>Unit, Integration, E2E - following the Test Pyramid</small>
+      </span>
+      <span className={clsx(styles.chackBox, styles.chackTile, styles.chackBottom, styles.chackRoot)}>
+        Composition Root
+        <small className={styles.chackNote}>Assembles all parts of the app</small>
+      </span>
       <span className={styles.chackBoundary} aria-hidden="true">
         process boundary
       </span>

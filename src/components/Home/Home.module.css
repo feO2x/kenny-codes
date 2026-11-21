@@ -544,24 +544,28 @@
  * CHACK diagram.
  */
 .chackMap {
-  --tile-h: 2.75rem;
+  --top-h: 4rem; /* the Humble Objects, straddling the top edge */
+  --bottom-h: 5.5rem; /* the Composition Root and the Automated Tests */
   --boundary-gap: 1.5rem; /* between the bottom row and the bottom edge */
   --cross: 0.75rem; /* how far the Automated Tests run past the bottom edge */
   position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 0.75rem;
-  margin: calc(var(--tile-h) / 2) 0 2.25rem;
+  margin: calc(var(--top-h) / 2) 0 2.25rem;
   padding: 0 1rem var(--boundary-gap);
   border: 1.5px dashed var(--kc-control-line);
   border-radius: var(--kc-radius);
 }
 
+/* Label and subtext stacked, centred in the tile. */
 .chackBox {
-  display: grid;
-  place-items: center;
-  min-height: var(--tile-h);
-  padding: 0.3rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.6rem;
   border: 1.5px solid var(--kc-control-line);
   border-radius: var(--kc-radius);
   background: var(--kc-bg);
@@ -572,13 +576,23 @@
   color: var(--kc-ink);
 }
 
+/* The subtext under a label, in the tile's own colour. */
+.chackNote {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  opacity: 0.85;
+}
+
 /* Top edge: the Humble Objects straddle the boundary, centred on it. */
 .chackHumble {
   grid-column: 1 / -1;
   justify-self: center;
   min-width: 62%;
-  height: var(--tile-h);
-  margin-top: calc(var(--tile-h) / -2);
+  height: var(--top-h);
+  margin-top: calc(var(--top-h) / -2);
 }
 
 /* The same category colours as the CHACK diagram in the docs. */
@@ -593,7 +607,7 @@
 
 .chackCore {
   grid-column: 1 / -1;
-  min-height: 4.25rem;
+  min-height: 4.75rem;
   border-color: transparent;
   background: var(--kc-gradient);
   color: #0c1a30;
@@ -611,31 +625,30 @@
 }
 
 /*
- * Bottom row, beside the Automated Tests. Both start at the row's top, so their tops line up.
+ * Bottom row: the Composition Root and the Automated Tests. Both start at the row's top, so their
+ * labels line up.
  */
-.chackRoot {
+.chackBottom {
   align-self: start;
+  height: var(--bottom-h);
+  justify-content: flex-start;
+  padding-top: 0.7rem;
 }
 
 /*
- * Bottom row, left: the Automated Tests run past the bottom edge. The negative margin keeps the row
- * no taller than the Composition Root, so the edge stays where the padding puts it. The label is
- * centred on the first line, level with the Composition Root's label.
+ * The Automated Tests run past the bottom edge. The negative margin keeps the row no taller than
+ * the Composition Root, so the edge stays where the padding puts it.
  */
 .chackTests {
-  display: grid;
-  grid-template-rows: calc(var(--tile-h) - 3px) 1fr;
-  align-self: start;
-  height: calc(var(--tile-h) + var(--boundary-gap) + var(--cross));
+  height: calc(var(--bottom-h) + var(--boundary-gap) + var(--cross));
   margin-bottom: calc(-1 * (var(--boundary-gap) + var(--cross)));
-  padding: 0 0.6rem;
 }
 
 .chackDown,
 .chackUp {
   display: grid;
   place-items: center;
-  height: 1.75rem;
+  height: 2rem;
   color: var(--kc-muted);
 }
 
