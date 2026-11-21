@@ -686,15 +686,19 @@
   stroke-linejoin: round;
 }
 
+/* Kept in the right half of the map, so on a narrow map it never reaches the Automated Tests. */
 .chackBoundary {
   position: absolute;
-  right: 0.9rem;
+  right: 0.625rem;
   bottom: 0;
   translate: 0 50%;
-  padding: 0 0.4rem;
+  max-width: calc(50% - 0.625rem);
+  padding: 0 0.2rem;
   background: var(--kc-bg);
   font-size: 0.75rem;
   line-height: 1.2;
+  text-align: right;
+  white-space: nowrap;
   color: var(--kc-muted);
 }
 
