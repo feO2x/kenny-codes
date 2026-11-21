@@ -84,11 +84,36 @@ const integrationTests: Box = {x: 1020, y: testTop, width: 52, height: testBotto
 const e2eTests: Box = {x: 1100, y: testTop, width: 68, height: testBottom - testTop};
 const testGroup: Box = {x: unitTests.x - 20, y: testTop - 16, width: right(e2eTests) + 18 - (unitTests.x - 20), height: testBottom - testTop + 32};
 
-/** Third-party systems: the middle card is centred on the runtime I/O call. */
-const thirdPartyCardHeight = 66;
-const thirdPartyCardStep = 76;
-const thirdPartyCardTop = mainY - thirdPartyCardStep - thirdPartyCardHeight / 2;
-const thirdParty: Box = {x: 4, y: thirdPartyCardTop - 73, width: 144, height: 73 + 2 * thirdPartyCardStep + thirdPartyCardHeight + 12};
+/** Third-party systems: the Web Services card is centred on the runtime I/O call. */
+/** The last, lower card with an ellipsis stands for any other system, accessed the same way. */
+const thirdPartyCardGap = 10;
+const thirdPartyCardSpecs: {lines: string[]; height: number; labelOffset?: number}[] = [
+  {lines: ['Databases'], height: 66},
+  {lines: ['Web', 'Services'], height: 66},
+  {lines: ['Message', 'Brokers'], height: 66},
+  // The dots sit on the baseline, so lift them to look centred.
+  {lines: ['…'], height: 40, labelOffset: -6},
+];
+const thirdPartyX = 4;
+const thirdPartyWidth = 144;
+const thirdPartyCardTop = mainY - thirdPartyCardSpecs[0].height - thirdPartyCardGap - thirdPartyCardSpecs[1].height / 2;
+const thirdPartyCards = thirdPartyCardSpecs.map(({lines, height, labelOffset = 0}, index) => ({
+  lines,
+  labelOffset,
+  box: {
+    x: thirdPartyX + 10,
+    y: thirdPartyCardTop + thirdPartyCardSpecs.slice(0, index).reduce((sum, card) => sum + card.height + thirdPartyCardGap, 0),
+    width: thirdPartyWidth - 20,
+    height,
+  } satisfies Box,
+}));
+const thirdPartyTop = thirdPartyCardTop - 73;
+const thirdParty: Box = {
+  x: thirdPartyX,
+  y: thirdPartyTop,
+  width: thirdPartyWidth,
+  height: bottom(thirdPartyCards[thirdPartyCards.length - 1].box) + 12 - thirdPartyTop,
+};
 
 /**
  * The process boundary runs through the middle of the Humble Objects and the integration tests,
@@ -97,8 +122,9 @@ const thirdParty: Box = {x: 4, y: thirdPartyCardTop - 73, width: 144, height: 73
 const boundary: Box = {x: centerX(humble), y: 70, width: centerX(integrationTests) - centerX(humble), height: bottom(root) + 26 - 70};
 /** Frameworks & Libraries span the top of the process boundary. */
 const frameworks: Box = {x: boundary.x + 20, y: boundary.y + 42, width: boundary.width - 40, height: 98};
-/** The legend sits below the third-party systems. */
-const legendY = bottom(thirdParty) + 67;
+/** The legend sits below the third-party systems; its last line's descenders end at `legendBottom`. */
+const legendY = bottom(thirdParty) + 45;
+const legendBottom = legendY + 104;
 
 /** Vertical lanes of the broad tests' connectors, and the lane into the Humble Objects. */
 const lane = {
@@ -213,7 +239,7 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
       label="CHACK diagram"
       caption="All four categories may depend on the frameworks and libraries. Those arrows are left out to keep the number of arrows manageable.">
       <svg
-        viewBox={`0 0 1192 ${bottom(boundary) + 14}`}
+        viewBox={`0 0 1192 ${Math.max(bottom(boundary), legendBottom) + 14}`}
         xmlns="http://www.w3.org/2000/svg"
         role="img"
         aria-labelledby={titleId}
@@ -251,15 +277,12 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
         {/* Third-party systems */}
         <rect {...thirdParty} rx="10" className={d.box} />
         <Label x={centerX(thirdParty)} y={thirdParty.y + 34} lines={['Third-Party', 'Systems']} />
-        {['Databases', 'Web Services', 'Message Brokers'].map((name, index) => {
-          const card: Box = {x: thirdParty.x + 10, y: thirdPartyCardTop + index * thirdPartyCardStep, width: thirdParty.width - 20, height: thirdPartyCardHeight};
-          return (
-            <g key={name}>
-              <rect {...card} rx="8" className={d.inner} />
-              <Label x={centerX(card)} y={centerY(card)} lines={name === 'Databases' ? [name] : name.split(' ')} className={d.regular} />
-            </g>
-          );
-        })}
+        {thirdPartyCards.map(({lines, labelOffset, box: card}) => (
+          <g key={lines.join(' ')}>
+            <rect {...card} rx="8" className={d.inner} />
+            <Label x={centerX(card)} y={centerY(card) + labelOffset} lines={lines} className={d.regular} />
+          </g>
+        ))}
 
         {/* Runtime I/O between third-party systems and humble objects */}
         <line x1={right(thirdParty) + inset} y1={mainY} x2={humble.x - inset} y2={mainY} className={d.line} style={hoIo.style} markerEnd={hoIo.io} markerStart={hoIo.ioStart} />
