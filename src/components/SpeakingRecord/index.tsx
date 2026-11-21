@@ -46,18 +46,67 @@ interface YearColumn {
   sessions: RecordSession[];
 }
 
-interface PopoverPosition {
+interface FloatingPopoverPosition {
+  kind: 'floating';
   left: number;
   top: number;
   arrowX: number;
   placement: 'top' | 'bottom';
-  showArrow: boolean;
 }
+
+interface InlinePopoverPosition {
+  kind: 'inline';
+}
+
+interface HiddenPopoverPosition {
+  kind: 'hidden';
+}
+
+type PopoverLayout = FloatingPopoverPosition | InlinePopoverPosition | HiddenPopoverPosition;
 
 interface PendingPointer {
   permalink: string;
   pointerType: string;
   timestamp: number;
+}
+
+const POINTER_GESTURE_TTL_MS = 1000;
+const HOVER_LEAVE_DELAY_MS = 180;
+
+function getFreshPendingPointer(
+  ref: RefObject<PendingPointer | null>,
+  permalink: string,
+): PendingPointer | null {
+  const pending = ref.current;
+  if (!pending) return null;
+  if (performance.now() - pending.timestamp >= POINTER_GESTURE_TTL_MS) {
+    ref.current = null;
+    return null;
+  }
+  return pending.permalink === permalink ? pending : null;
+}
+
+function getVisibleViewport(): {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+} {
+  const vv = window.visualViewport;
+  if (vv) {
+    return {
+      left: vv.offsetLeft,
+      top: vv.offsetTop,
+      right: vv.offsetLeft + vv.width,
+      bottom: vv.offsetTop + vv.height,
+    };
+  }
+  return {
+    left: 0,
+    top: 0,
+    right: window.innerWidth,
+    bottom: window.innerHeight,
+  };
 }
 
 function formatVenue(event: RecordEvent): string {
@@ -161,137 +210,164 @@ interface SessionPopoverProps {
   session: RecordSession;
   figureRef: RefObject<HTMLElement | null>;
   squareRefs: RefObject<Map<string, HTMLAnchorElement>>;
+  onPointerEnter: (event: PointerEvent<HTMLDivElement>) => void;
+  onPointerLeave: (event: PointerEvent<HTMLDivElement>) => void;
 }
 
-function SessionPopover({session, figureRef, squareRefs}: SessionPopoverProps): ReactNode {
-  const popoverRef = useRef<HTMLDivElement | null>(null);
-  const [popoverPos, setPopoverPos] = useState<PopoverPosition | null>(null);
+function isSamePopoverLayout(a: PopoverLayout | null, b: PopoverLayout | null): boolean {
+  if (a === b) return true;
+  if (!a || !b || a.kind !== b.kind) return false;
+  if (a.kind === 'floating' && b.kind === 'floating') {
+    return (
+      a.left === b.left &&
+      a.top === b.top &&
+      a.arrowX === b.arrowX &&
+      a.placement === b.placement
+    );
+  }
+  return true;
+}
 
-  const computePosition = useCallback((): PopoverPosition | null => {
+function SessionPopover({
+  session,
+  figureRef,
+  squareRefs,
+  onPointerEnter,
+  onPointerLeave,
+}: SessionPopoverProps): ReactNode {
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+  const [layout, setLayout] = useState<PopoverLayout | null>(null);
+
+  const computeLayout = useCallback((): PopoverLayout | null => {
     const figureEl = figureRef.current;
     const squareEl = squareRefs.current.get(session.permalink);
     const popoverEl = popoverRef.current;
     if (!figureEl || !squareEl || !popoverEl) return null;
 
+    // Measure the unscaled, non-animated slot wrapper so entrance animations or hover scale
+    // never skew anchor coordinates.
+    const anchorEl = squareEl.parentElement ?? squareEl;
     const figureRect = figureEl.getBoundingClientRect();
-    const squareRect = squareEl.getBoundingClientRect();
+    const anchorRect = anchorEl.getBoundingClientRect();
     const popoverWidth = popoverEl.offsetWidth;
     const popoverHeight = popoverEl.offsetHeight;
     if (popoverWidth === 0 || popoverHeight === 0) return null;
 
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const vp = getVisibleViewport();
     const navbarBottom = getNavbarBottom();
+    const visibleTop = Math.max(vp.top, navbarBottom);
 
-    // Hide the floating preview when its anchor square is scrolled under the navbar or offscreen.
+    // Hide the preview when its anchor square is scrolled under the navbar or outside the viewport.
     if (
-      squareRect.bottom <= navbarBottom + 2 ||
-      squareRect.top >= viewportHeight - 2 ||
-      squareRect.right <= 0 ||
-      squareRect.left >= viewportWidth
+      anchorRect.bottom <= visibleTop + 2 ||
+      anchorRect.top >= vp.bottom - 2 ||
+      anchorRect.right <= vp.left ||
+      anchorRect.left >= vp.right
     ) {
-      return null;
+      return {kind: 'hidden'};
     }
 
     const gap = 10;
     const viewportMargin = 12;
-    const topBound = navbarBottom + 8;
-    const bottomBound = viewportHeight - viewportMargin;
+    const topBound = visibleTop + 8;
+    const bottomBound = vp.bottom - viewportMargin;
 
-    const centerX = squareRect.left + squareRect.width / 2 - figureRect.left;
-    const minLeft = viewportMargin - figureRect.left;
-    const maxLeft = viewportWidth - viewportMargin - popoverWidth - figureRect.left;
+    const spaceAbove = anchorRect.top - gap - topBound;
+    const spaceBelow = bottomBound - (anchorRect.bottom + gap);
+    const fitsAbove = spaceAbove >= popoverHeight;
+    const fitsBelow = spaceBelow >= popoverHeight;
+
+    // If neither side has enough room without clipping or covering the trigger,
+    // fall back to an in-flow card beneath the chart so all content stays readable.
+    if (!fitsAbove && !fitsBelow) {
+      return {kind: 'inline'};
+    }
+
+    const placement: 'top' | 'bottom' = fitsAbove ? 'top' : 'bottom';
+    const viewportTop =
+      placement === 'top' ? anchorRect.top - gap - popoverHeight : anchorRect.bottom + gap;
+
+    const centerX = anchorRect.left + anchorRect.width / 2 - figureRect.left;
+    const minLeft = vp.left + viewportMargin - figureRect.left;
+    const maxLeft = vp.right - viewportMargin - popoverWidth - figureRect.left;
     const desiredLeft = centerX - popoverWidth / 2;
     const left = Math.round(
       maxLeft < minLeft ? minLeft : Math.max(minLeft, Math.min(desiredLeft, maxLeft)),
     );
-
-    const spaceAbove = squareRect.top - gap - topBound;
-    const spaceBelow = bottomBound - (squareRect.bottom + gap);
-    const fitsAbove = spaceAbove >= popoverHeight;
-    const fitsBelow = spaceBelow >= popoverHeight;
-
-    let placement: 'top' | 'bottom';
-    let viewportTop: number;
-    let showArrow = true;
-
-    if (fitsAbove) {
-      placement = 'top';
-      viewportTop = squareRect.top - gap - popoverHeight;
-    } else if (fitsBelow) {
-      placement = 'bottom';
-      viewportTop = squareRect.bottom + gap;
-    } else {
-      // Neither side fits completely: choose the roomier side and clamp within viewport bounds.
-      placement = spaceAbove >= spaceBelow ? 'top' : 'bottom';
-      const rawTop =
-        placement === 'top' ? squareRect.top - gap - popoverHeight : squareRect.bottom + gap;
-      const maxTop = Math.max(topBound, bottomBound - popoverHeight);
-      viewportTop = Math.max(topBound, Math.min(rawTop, maxTop));
-      showArrow = false;
-    }
-
     const top = Math.round(viewportTop - figureRect.top);
     const arrowX = Math.round(Math.max(14, Math.min(centerX - left, popoverWidth - 14)));
-    return {left, top, arrowX, placement, showArrow};
+    return {kind: 'floating', left, top, arrowX, placement};
   }, [figureRef, session.permalink, squareRefs]);
 
   useIsomorphicLayoutEffect(() => {
-    const applyPosition = () => {
-      const next = computePosition();
-      setPopoverPos((prev) => {
-        if (!prev && !next) return prev;
-        if (
-          prev &&
-          next &&
-          prev.left === next.left &&
-          prev.top === next.top &&
-          prev.arrowX === next.arrowX &&
-          prev.placement === next.placement &&
-          prev.showArrow === next.showArrow
-        ) {
-          return prev;
-        }
-        return next;
-      });
+    let active = true;
+    const applyLayout = () => {
+      if (!active) return;
+      const next = computeLayout();
+      setLayout((prev) => (isSamePopoverLayout(prev, next) ? prev : next));
     };
 
-    applyPosition();
+    applyLayout();
 
     let rafId = 0;
     const scheduleUpdate = () => {
       if (rafId !== 0) return;
       rafId = window.requestAnimationFrame(() => {
         rafId = 0;
-        applyPosition();
+        applyLayout();
       });
     };
 
     window.addEventListener('resize', scheduleUpdate);
     window.addEventListener('scroll', scheduleUpdate, {passive: true});
+
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', scheduleUpdate);
+    vv?.addEventListener('scroll', scheduleUpdate);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(scheduleUpdate);
+      if (figureRef.current) resizeObserver.observe(figureRef.current);
+      if (popoverRef.current) resizeObserver.observe(popoverRef.current);
+    }
+
+    document.fonts?.ready.then(scheduleUpdate).catch(() => {});
+
     return () => {
+      active = false;
       if (rafId !== 0) window.cancelAnimationFrame(rafId);
       window.removeEventListener('resize', scheduleUpdate);
       window.removeEventListener('scroll', scheduleUpdate);
+      vv?.removeEventListener('resize', scheduleUpdate);
+      vv?.removeEventListener('scroll', scheduleUpdate);
+      resizeObserver?.disconnect();
     };
-  }, [computePosition]);
+  }, [computeLayout, figureRef]);
+
+  const isInline = layout?.kind === 'inline';
+  const isFloating = layout?.kind === 'floating';
 
   return (
     <div
       ref={popoverRef}
       aria-hidden="true"
-      className={styles.popover}
-      data-placement={popoverPos?.placement ?? 'top'}
-      data-arrow={popoverPos?.showArrow === false ? 'false' : 'true'}
+      className={clsx(styles.popover, isInline && styles.popoverInline)}
+      data-placement={isFloating ? layout.placement : 'top'}
+      data-arrow={isFloating ? 'true' : 'false'}
       style={
-        popoverPos
+        isFloating
           ? ({
-              left: `${popoverPos.left}px`,
-              top: `${popoverPos.top}px`,
-              '--arrow-x': `${popoverPos.arrowX}px`,
+              left: `${layout.left}px`,
+              top: `${layout.top}px`,
+              '--arrow-x': `${layout.arrowX}px`,
             } as CSSProperties)
-          : {visibility: 'hidden'}
-      }>
+          : isInline
+            ? undefined
+            : {visibility: 'hidden', pointerEvents: 'none'}
+      }
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}>
       <SessionPreviewContent
         session={session}
         titleSlot={<p className={styles.cardTitle}>{session.title}</p>}
@@ -354,7 +430,7 @@ const RecordSquare = memo(function RecordSquare({
   const ariaLabel = `${session.title}, ${session.formattedDate}${session.isUpcoming ? ', upcoming' : ''}`;
 
   return (
-    <>
+    <span className={styles.squareSlot}>
       <Link
         ref={setRef}
         to={session.permalink}
@@ -384,7 +460,7 @@ const RecordSquare = memo(function RecordSquare({
           {descriptionText}
         </span>
       )}
-    </>
+    </span>
   );
 });
 
@@ -405,20 +481,18 @@ export default function SpeakingRecord({
   const tallest = Math.max(1, ...columns.map((c) => c.sessions.length));
   const hasUpcoming = columns.some((c) => c.upcoming.length > 0);
 
+  const allSessions = useMemo(() => columns.flatMap((c) => c.sessions), [columns]);
+
   const sessionByPermalink = useMemo(() => {
     const map = new Map<string, RecordSession>();
-    for (const column of columns) {
-      for (const session of column.sessions) {
-        map.set(session.permalink, session);
-      }
+    for (const session of allSessions) {
+      map.set(session.permalink, session);
     }
     return map;
-  }, [columns]);
+  }, [allSessions]);
 
-  const firstPermalink = useMemo(
-    () => columns.find((c) => c.sessions.length > 0)?.sessions[0]?.permalink ?? null,
-    [columns],
-  );
+  const firstPermalink = allSessions[0]?.permalink ?? null;
+  const lastPermalink = allSessions[allSessions.length - 1]?.permalink ?? null;
 
   const [hoveredPermalink, setHoveredPermalink] = useState<string | null>(null);
   const [focusedPermalink, setFocusedPermalink] = useState<string | null>(null);
@@ -429,19 +503,40 @@ export default function SpeakingRecord({
 
   const figureRef = useRef<HTMLElement | null>(null);
   const detailsBarRef = useRef<HTMLDivElement | null>(null);
+  const browseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const prevButtonRef = useRef<HTMLButtonElement | null>(null);
+  const nextButtonRef = useRef<HTMLButtonElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const squareRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const pendingPointerRef = useRef<PendingPointer | null>(null);
   const suppressNextFocusPreviewRef = useRef<string | null>(null);
+  const detailsOpenerRef = useRef<'square' | 'browse'>('square');
+  const hoverLeaveTimerRef = useRef<number | null>(null);
   const keyboardHintId = useId();
+  const detailsBarId = useId();
+
+  const clearHoverLeaveTimer = useCallback(() => {
+    if (hoverLeaveTimerRef.current !== null) {
+      window.clearTimeout(hoverLeaveTimerRef.current);
+      hoverLeaveTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => clearHoverLeaveTimer, [clearHoverLeaveTimer]);
 
   const effectiveTabPermalink =
     activeTabPermalink && sessionByPermalink.has(activeTabPermalink)
       ? activeTabPermalink
       : firstPermalink;
 
-  const selectedSession = selectedPermalink
-    ? sessionByPermalink.get(selectedPermalink) ?? null
-    : null;
+  const selectedIndex = useMemo(
+    () =>
+      selectedPermalink
+        ? allSessions.findIndex((session) => session.permalink === selectedPermalink)
+        : -1,
+    [allSessions, selectedPermalink],
+  );
+  const selectedSession = selectedIndex >= 0 ? allSessions[selectedIndex] : null;
 
   const activeFocusedPermalink =
     focusedPermalink &&
@@ -459,6 +554,10 @@ export default function SpeakingRecord({
     ? sessionByPermalink.get(popoverPermalink) ?? null
     : null;
 
+  const liveAnnouncement = selectedSession
+    ? `Selected session ${selectedIndex + 1} of ${allSessions.length}: ${selectedSession.title}, ${selectedSession.formattedDate}${selectedSession.venue ? `, ${selectedSession.venue}` : ''}.`
+    : '';
+
   const registerSquare = useCallback((permalink: string, node: HTMLAnchorElement | null) => {
     if (node) squareRefs.current.set(permalink, node);
     else squareRefs.current.delete(permalink);
@@ -467,22 +566,35 @@ export default function SpeakingRecord({
   const closeDetailsBar = useCallback(
     (restoreFocus: boolean) => {
       const current = selectedPermalink;
+      const opener = detailsOpenerRef.current;
       setSelectedPermalink(null);
-      if (restoreFocus && current) {
-        suppressNextFocusPreviewRef.current = current;
-        setDismissedFocusPermalink(current);
-        squareRefs.current.get(current)?.focus({preventScroll: true});
+      if (!restoreFocus) return;
+
+      if (opener === 'browse' && browseButtonRef.current) {
+        browseButtonRef.current.focus({preventScroll: true});
+        return;
+      }
+      if (current) {
+        const target = squareRefs.current.get(current);
+        if (target) {
+          suppressNextFocusPreviewRef.current = current;
+          setDismissedFocusPermalink(current);
+          target.focus({preventScroll: true});
+          // Clear synchronously after focus() so stale suppression never lingers if already focused.
+          suppressNextFocusPreviewRef.current = null;
+        }
       }
     },
     [selectedPermalink],
   );
 
-  // Dismiss any open preview (hovered, focused, or touch details bar) on Escape from anywhere.
+  // Dismiss any open preview (hovered, focused, or details bar) on Escape from anywhere.
   useEffect(() => {
     if (!popoverPermalink && !selectedPermalink) return;
 
     const handleEscape = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Escape') return;
+      clearHoverLeaveTimer();
       if (selectedPermalink) {
         const focusInsideDetails = Boolean(
           detailsBarRef.current?.contains(document.activeElement),
@@ -499,9 +611,9 @@ export default function SpeakingRecord({
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [closeDetailsBar, focusedPermalink, popoverPermalink, selectedPermalink]);
+  }, [clearHoverLeaveTimer, closeDetailsBar, focusedPermalink, popoverPermalink, selectedPermalink]);
 
-  // Dismiss the touch details bar when tapping outside the chart.
+  // Dismiss the details bar when tapping outside the chart.
   useEffect(() => {
     if (!selectedPermalink) return;
 
@@ -520,8 +632,9 @@ export default function SpeakingRecord({
   useEffect(() => {
     if (!selectedPermalink || !detailsBarRef.current) return;
     const rect = detailsBarRef.current.getBoundingClientRect();
-    const navbarBottom = getNavbarBottom();
-    if (rect.bottom > window.innerHeight - 12 || rect.top < navbarBottom + 8) {
+    const vp = getVisibleViewport();
+    const visibleTop = Math.max(vp.top, getNavbarBottom());
+    if (rect.bottom > vp.bottom - 12 || rect.top < visibleTop + 8) {
       const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
       detailsBarRef.current.scrollIntoView({
         block: 'nearest',
@@ -530,14 +643,60 @@ export default function SpeakingRecord({
     }
   }, [selectedPermalink]);
 
-  const focusSquare = useCallback((permalink: string) => {
-    pendingPointerRef.current = null;
+  const stepSelectedSession = useCallback(
+    (delta: -1 | 1) => {
+      if (selectedIndex < 0) return;
+      const nextIndex = selectedIndex + delta;
+      const nextSession = allSessions[nextIndex];
+      if (!nextSession) return;
+      setSelectedPermalink(nextSession.permalink);
+      setActiveTabPermalink(nextSession.permalink);
+      // If stepping reaches a boundary and disables the clicked button, keep focus inside the bar.
+      if (delta === -1 && nextIndex === 0) {
+        (nextButtonRef.current ?? closeButtonRef.current)?.focus({preventScroll: true});
+      } else if (delta === 1 && nextIndex === allSessions.length - 1) {
+        (prevButtonRef.current ?? closeButtonRef.current)?.focus({preventScroll: true});
+      }
+    },
+    [allSessions, selectedIndex],
+  );
+
+  const toggleBrowsePanel = useCallback(() => {
+    if (selectedPermalink) {
+      closeDetailsBar(false);
+      return;
+    }
+    const target =
+      (activeTabPermalink && sessionByPermalink.has(activeTabPermalink)
+        ? activeTabPermalink
+        : null) ?? lastPermalink;
+    if (!target) return;
+    clearHoverLeaveTimer();
     setHoveredPermalink(null);
-    setActiveTabPermalink(permalink);
-    setDismissedFocusPermalink(null);
-    setPreviewSource('focus');
-    squareRefs.current.get(permalink)?.focus();
-  }, []);
+    detailsOpenerRef.current = 'browse';
+    setActiveTabPermalink(target);
+    setSelectedPermalink(target);
+  }, [
+    activeTabPermalink,
+    clearHoverLeaveTimer,
+    closeDetailsBar,
+    lastPermalink,
+    selectedPermalink,
+    sessionByPermalink,
+  ]);
+
+  const focusSquare = useCallback(
+    (permalink: string) => {
+      clearHoverLeaveTimer();
+      pendingPointerRef.current = null;
+      setHoveredPermalink(null);
+      setActiveTabPermalink(permalink);
+      setDismissedFocusPermalink(null);
+      setPreviewSource('focus');
+      squareRefs.current.get(permalink)?.focus();
+    },
+    [clearHoverLeaveTimer],
+  );
 
   const handleSquareKeyDown = useCallback(
     (event: KeyboardEvent<HTMLAnchorElement>, colIndex: number, rowIndex: number) => {
@@ -573,13 +732,7 @@ export default function SpeakingRecord({
       } else if (key === 'Home') {
         targetPermalink = firstPermalink;
       } else if (key === 'End') {
-        for (let c = columns.length - 1; c >= 0; c--) {
-          const lastCol = columns[c];
-          if (lastCol.sessions.length > 0) {
-            targetPermalink = lastCol.sessions[lastCol.sessions.length - 1].permalink;
-            break;
-          }
-        }
+        targetPermalink = lastPermalink;
       } else {
         return;
       }
@@ -589,7 +742,7 @@ export default function SpeakingRecord({
         focusSquare(targetPermalink);
       }
     },
-    [columns, firstPermalink, focusSquare],
+    [columns, firstPermalink, focusSquare, lastPermalink],
   );
 
   const handleSquarePointerDown = useCallback(
@@ -610,18 +763,43 @@ export default function SpeakingRecord({
   const handleSquarePointerEnter = useCallback(
     (event: PointerEvent<HTMLAnchorElement>, permalink: string) => {
       if (event.pointerType === 'touch') return;
+      clearHoverLeaveTimer();
       setHoveredPermalink(permalink);
       setPreviewSource('hover');
     },
-    [],
+    [clearHoverLeaveTimer],
   );
 
   const handleSquarePointerLeave = useCallback(
     (event: PointerEvent<HTMLAnchorElement>, permalink: string) => {
       if (event.pointerType === 'touch') return;
-      setHoveredPermalink((prev) => (prev === permalink ? null : prev));
+      clearHoverLeaveTimer();
+      hoverLeaveTimerRef.current = window.setTimeout(() => {
+        hoverLeaveTimerRef.current = null;
+        setHoveredPermalink((prev) => (prev === permalink ? null : prev));
+      }, HOVER_LEAVE_DELAY_MS);
     },
-    [],
+    [clearHoverLeaveTimer],
+  );
+
+  const handlePopoverPointerEnter = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (event.pointerType === 'touch') return;
+      clearHoverLeaveTimer();
+    },
+    [clearHoverLeaveTimer],
+  );
+
+  const handlePopoverPointerLeave = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (event.pointerType === 'touch') return;
+      clearHoverLeaveTimer();
+      hoverLeaveTimerRef.current = window.setTimeout(() => {
+        hoverLeaveTimerRef.current = null;
+        setHoveredPermalink(null);
+      }, HOVER_LEAVE_DELAY_MS);
+    },
+    [clearHoverLeaveTimer],
   );
 
   const handleSquareFocus = useCallback((permalink: string) => {
@@ -634,12 +812,8 @@ export default function SpeakingRecord({
     }
     suppressNextFocusPreviewRef.current = null;
 
-    const pending = pendingPointerRef.current;
-    const isRecentTouchFocus =
-      pending !== null &&
-      pending.permalink === permalink &&
-      pending.pointerType === 'touch' &&
-      performance.now() - pending.timestamp < 1000;
+    const pending = getFreshPendingPointer(pendingPointerRef, permalink);
+    const isRecentTouchFocus = pending !== null && pending.pointerType === 'touch';
 
     if (!isRecentTouchFocus) {
       setFocusedPermalink(permalink);
@@ -654,7 +828,7 @@ export default function SpeakingRecord({
 
   const handleSquareClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>, permalink: string) => {
-      const pending = pendingPointerRef.current;
+      const pending = getFreshPendingPointer(pendingPointerRef, permalink);
       pendingPointerRef.current = null;
 
       // Keyboard activations (Enter/Space) have detail === 0 and must always follow the link.
@@ -664,21 +838,21 @@ export default function SpeakingRecord({
         'pointerType' in event.nativeEvent
           ? (event.nativeEvent as globalThis.PointerEvent).pointerType
           : '';
-      const effectivePointerType =
-        nativePointerType ||
-        (pending && pending.permalink === permalink ? pending.pointerType : '');
+      const effectivePointerType = nativePointerType || (pending ? pending.pointerType : '');
       const isTouchInteraction =
         effectivePointerType === 'touch' ||
         (effectivePointerType === '' && isCoarsePointerDevice());
 
       if (isTouchInteraction) {
         event.preventDefault();
+        clearHoverLeaveTimer();
         setHoveredPermalink(null);
+        detailsOpenerRef.current = 'square';
         setActiveTabPermalink(permalink);
         setSelectedPermalink((prev) => (prev === permalink ? null : permalink));
       }
     },
-    [],
+    [clearHoverLeaveTimer],
   );
 
   return (
@@ -771,21 +945,27 @@ export default function SpeakingRecord({
         })}
       </ol>
 
+      <div className="kc-sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {liveAnnouncement}
+      </div>
+
       {popoverSession && (
         <SessionPopover
           session={popoverSession}
           figureRef={figureRef}
           squareRefs={squareRefs}
+          onPointerEnter={handlePopoverPointerEnter}
+          onPointerLeave={handlePopoverPointerLeave}
         />
       )}
 
       {selectedSession && (
         <div
+          id={detailsBarId}
           ref={detailsBarRef}
           className={styles.detailsBar}
           role="region"
-          aria-label="Selected session details"
-          aria-live="polite">
+          aria-label="Selected session details">
           <div className={styles.detailsBody}>
             <SessionPreviewContent
               session={selectedSession}
@@ -800,13 +980,41 @@ export default function SpeakingRecord({
               }
             />
           </div>
-          <button
-            type="button"
-            className={styles.detailsClose}
-            aria-label="Close session details"
-            onClick={() => closeDetailsBar(true)}>
-            <span aria-hidden="true">×</span>
-          </button>
+          <div className={styles.detailsActions}>
+            {allSessions.length > 1 && (
+              <div className={styles.detailsNav} role="group" aria-label="Step through sessions">
+                <button
+                  ref={prevButtonRef}
+                  type="button"
+                  className={styles.detailsControl}
+                  aria-label="Previous session"
+                  disabled={selectedIndex <= 0}
+                  onClick={() => stepSelectedSession(-1)}>
+                  <span aria-hidden="true">‹</span>
+                </button>
+                <span className={styles.detailsCounter} aria-hidden="true">
+                  {selectedIndex + 1}/{allSessions.length}
+                </span>
+                <button
+                  ref={nextButtonRef}
+                  type="button"
+                  className={styles.detailsControl}
+                  aria-label="Next session"
+                  disabled={selectedIndex >= allSessions.length - 1}
+                  onClick={() => stepSelectedSession(1)}>
+                  <span aria-hidden="true">›</span>
+                </button>
+              </div>
+            )}
+            <button
+              ref={closeButtonRef}
+              type="button"
+              className={styles.detailsControl}
+              aria-label="Close session details"
+              onClick={() => closeDetailsBar(true)}>
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -822,15 +1030,31 @@ export default function SpeakingRecord({
         <span>
           <span className={styles.hintPointer}>
             {yearLink
-              ? 'Hover or focus a square to preview, click to open, or choose a year below.'
+              ? 'Hover or focus a square to preview, click to open, or select a year to jump to its sessions.'
               : 'Hover or focus a square to preview; click to open.'}
+          </span>
+          <span className={styles.hintHybrid}>
+            {yearLink
+              ? 'Hover, focus, or tap a square for details, click to open, or select a year to jump to its sessions.'
+              : 'Hover, focus, or tap a square for details; click to open.'}
           </span>
           <span className={styles.hintTouch}>
             {yearLink
-              ? 'Tap a square for details, or choose a year to jump below.'
-              : 'Tap a square for session details.'}
+              ? 'Tap or focus a square for details, or select a year to jump to its sessions.'
+              : 'Tap or focus a square for session details.'}
           </span>
         </span>
+        {allSessions.length > 0 && (
+          <button
+            ref={browseButtonRef}
+            type="button"
+            className={styles.browseButton}
+            aria-expanded={Boolean(selectedSession)}
+            aria-controls={selectedSession ? detailsBarId : undefined}
+            onClick={toggleBrowsePanel}>
+            {selectedSession ? 'Hide session browser' : 'Browse sessions'}
+          </button>
+        )}
       </figcaption>
     </figure>
   );

@@ -1,6 +1,7 @@
 .record {
   --square: 18px;
-  --gap: 4px;
+  --gap: 6px;
+  --square-hover-scale: 1.1;
   position: relative;
   margin: 0;
 }
@@ -49,6 +50,15 @@
   align-items: center;
 }
 
+.squareSlot {
+  display: inline-flex;
+  flex: none;
+  width: var(--square);
+  height: var(--square);
+  align-items: center;
+  justify-content: center;
+}
+
 .square {
   display: inline-block;
   flex: none;
@@ -71,7 +81,7 @@
 
 .squareLink:hover,
 .squarePreviewed:not(:focus-visible) {
-  transform: scale(1.1);
+  transform: scale(var(--square-hover-scale));
   z-index: 2;
   box-shadow: 0 0 0 1px var(--kc-bg), 0 0 0 2px var(--ifm-color-primary);
 }
@@ -83,10 +93,33 @@
   z-index: 3;
 }
 
+/* Persistent selection marker stays inside the square so it remains distinct next to an
+   adjacent focus ring and survives hover/focus states on hybrid devices. */
 .squareSelected {
-  transform: none;
   z-index: 2;
-  box-shadow: inset 0 0 0 2px var(--kc-bg), 0 0 0 1.5px var(--kc-ink);
+  box-shadow: inset 0 0 0 2px var(--kc-bg), inset 0 0 0 3.5px var(--kc-ink);
+}
+
+.squareSelected::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--kc-bg);
+  box-shadow: 0 0 0 1px var(--kc-ink);
+  pointer-events: none;
+}
+
+.squareSelected.squareLink:hover,
+.squareSelected.squarePreviewed:not(:focus-visible) {
+  box-shadow:
+    inset 0 0 0 2px var(--kc-bg),
+    inset 0 0 0 3.5px var(--kc-ink),
+    0 0 0 1px var(--kc-bg),
+    0 0 0 2px var(--ifm-color-primary);
 }
 
 .squareUpcoming {
@@ -97,12 +130,29 @@
 .squareUpcoming.squareLink:hover,
 .squareUpcoming.squarePreviewed:not(:focus-visible) {
   background: color-mix(in srgb, var(--kc-upcoming) 18%, transparent);
-  box-shadow: inset 0 0 0 2px var(--kc-upcoming), 0 0 0 1px var(--kc-bg), 0 0 0 2px var(--ifm-color-primary);
+  box-shadow:
+    inset 0 0 0 2px var(--kc-upcoming),
+    0 0 0 1px var(--kc-bg),
+    0 0 0 2px var(--ifm-color-primary);
 }
 
 .squareUpcoming.squareSelected {
   background: color-mix(in srgb, var(--kc-upcoming) 28%, transparent);
-  box-shadow: inset 0 0 0 2px var(--kc-upcoming), 0 0 0 1.5px var(--kc-ink);
+  box-shadow: inset 0 0 0 2px var(--kc-upcoming);
+}
+
+.squareUpcoming.squareSelected::after {
+  background: var(--kc-upcoming);
+  box-shadow: none;
+}
+
+.squareUpcoming.squareSelected.squareLink:hover,
+.squareUpcoming.squareSelected.squarePreviewed:not(:focus-visible) {
+  background: color-mix(in srgb, var(--kc-upcoming) 34%, transparent);
+  box-shadow:
+    inset 0 0 0 2px var(--kc-upcoming),
+    0 0 0 1px var(--kc-bg),
+    0 0 0 2px var(--ifm-color-primary);
 }
 
 /* Dark mode can brighten on hover; light mode keeps its contrast and relies on the ring. */
@@ -152,7 +202,7 @@
 .popover {
   position: absolute;
   z-index: 20;
-  pointer-events: none;
+  pointer-events: auto;
   width: max-content;
   max-width: min(19.5rem, calc(100vw - 1.5rem));
   padding: 0.75rem 0.9rem;
@@ -161,6 +211,24 @@
   border: 1px solid var(--kc-line-strong);
   box-shadow: var(--kc-shadow);
   color: var(--kc-ink);
+}
+
+/* Transparent hover bridge over the gap between trigger and popover (WCAG 1.4.13). */
+.popover[data-arrow='true']::before {
+  content: '';
+  position: absolute;
+  left: var(--arrow-x, 50%);
+  transform: translateX(-50%);
+  width: 36px;
+  height: 12px;
+}
+
+.popover[data-placement='top'][data-arrow='true']::before {
+  bottom: -12px;
+}
+
+.popover[data-placement='bottom'][data-arrow='true']::before {
+  top: -12px;
 }
 
 .popover::after {
@@ -186,6 +254,14 @@
 
 .popover[data-arrow='false']::after {
   display: none;
+}
+
+/* In-flow fallback when neither side of the trigger has enough viewport height. */
+.popoverInline {
+  position: static;
+  width: fit-content;
+  max-width: min(19.5rem, 100%);
+  margin-top: 0.75rem;
 }
 
 .cardHeader {
@@ -290,14 +366,36 @@
   color: var(--ifm-color-primary);
 }
 
-.detailsClose {
+.detailsActions {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: -0.25rem -0.35rem 0 0;
+}
+
+.detailsNav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.detailsCounter {
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--kc-muted);
+  padding-inline: 0.2rem;
+  white-space: nowrap;
+}
+
+.detailsControl {
   flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  margin: -0.25rem -0.35rem 0 0;
   border: 0;
   border-radius: var(--kc-radius-sm);
   background: transparent;
@@ -307,15 +405,21 @@
   cursor: pointer;
 }
 
-.detailsClose:hover,
-.detailsClose:focus-visible {
+.detailsControl:hover:not(:disabled),
+.detailsControl:focus-visible:not(:disabled) {
   color: var(--kc-ink);
   background: var(--kc-accent-soft);
+}
+
+.detailsControl:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .legend {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem 1.5rem;
   margin-top: 0.9rem;
   font-size: 0.85rem;
@@ -328,6 +432,30 @@
   gap: 0.5rem;
 }
 
+.browseButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--kc-control-line);
+  border-radius: var(--kc-radius-sm);
+  background: transparent;
+  color: var(--kc-ink);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.browseButton:hover,
+.browseButton:focus-visible {
+  border-color: var(--ifm-color-primary);
+  background: var(--kc-accent-soft);
+}
+
+.hintHybrid,
 .hintTouch {
   display: none;
 }
@@ -338,6 +466,17 @@
   }
 
   .hintTouch {
+    display: inline;
+  }
+}
+
+@media (any-hover: hover) and (any-pointer: coarse) {
+  .hintPointer,
+  .hintTouch {
+    display: none;
+  }
+
+  .hintHybrid {
     display: inline;
   }
 }
@@ -361,11 +500,21 @@
   .record {
     --square: 12px;
     --gap: 3px;
+    --square-hover-scale: 1;
   }
 
-  .squareLink:hover,
-  .squarePreviewed {
-    transform: none;
+  .squareSelected::after {
+    width: 4px;
+    height: 4px;
+  }
+
+  .detailsBar {
+    flex-wrap: wrap;
+  }
+
+  .detailsActions {
+    margin: 0;
+    margin-left: auto;
   }
 
   .count,
@@ -398,7 +547,8 @@
   }
 
   .record[data-bleed] .legend,
-  .record[data-bleed] .detailsBar {
+  .record[data-bleed] .detailsBar,
+  .record[data-bleed] .popoverInline {
     margin-inline: 1rem;
   }
 
@@ -408,19 +558,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .record {
+    --square-hover-scale: 1;
+  }
+
   .square {
     animation: none;
   }
 
   .squareLink {
     transition: none;
-  }
-
-  .squareLink:hover,
-  .squareLink:focus-visible,
-  .squarePreviewed,
-  .squareSelected {
-    transform: none;
   }
 }
 
@@ -453,14 +600,37 @@
     outline-offset: 1px;
   }
 
-  .squareSelected {
+  .squareSelected,
+  .squareSelected.squareLink:hover,
+  .squareSelected.squarePreviewed:not(:focus-visible) {
     background: Highlight;
-    box-shadow: inset 0 0 0 2px Canvas, 0 0 0 1.5px Highlight;
+    box-shadow: inset 0 0 0 2px Canvas;
   }
 
-  .squareUpcoming.squareSelected {
+  .squareSelected.squareLink:hover,
+  .squareSelected.squarePreviewed:not(:focus-visible) {
+    box-shadow: inset 0 0 0 2px Canvas, 0 0 0 1px LinkText;
+  }
+
+  .squareSelected::after {
     background: Canvas;
-    box-shadow: inset 0 0 0 3px Highlight;
+    box-shadow: none;
+  }
+
+  .squareUpcoming.squareSelected,
+  .squareUpcoming.squareSelected.squareLink:hover,
+  .squareUpcoming.squareSelected.squarePreviewed:not(:focus-visible) {
+    background: Canvas;
+    box-shadow: inset 0 0 0 2px Highlight;
+  }
+
+  .squareUpcoming.squareSelected.squareLink:hover,
+  .squareUpcoming.squareSelected.squarePreviewed:not(:focus-visible) {
+    box-shadow: inset 0 0 0 2px Highlight, 0 0 0 1px LinkText;
+  }
+
+  .squareUpcoming.squareSelected::after {
+    background: Highlight;
   }
 
   .popover,
@@ -473,6 +643,11 @@
   .popover::after {
     background: Canvas;
     border-color: CanvasText;
+  }
+
+  .browseButton {
+    border-color: ButtonText;
+    color: ButtonText;
   }
 
   .chart {
