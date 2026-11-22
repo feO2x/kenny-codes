@@ -6,11 +6,11 @@ image: /img/social-cards/docs-chack-dotnet-testing.jpg
 
 # Testing in .NET
 
-This guide puts [Automated Tests](../automated-tests.mdx) into practice using xUnit v3, ASP.NET Core, and Testcontainers.
+This page shows how [Automated Tests](../automated-tests.mdx) look with xUnit v3, ASP.NET Core, and Testcontainers.
 
 ## Unit Tests
 
-A Unit Test instantiates the endpoint with `new`, passes Test Doubles for the Humble Objects, and calls the endpoint method directly. [A Complete Slice in ASP.NET Core](./a-complete-slice.md#test-double-and-unit-tests) shows a full example.
+A Unit Test creates the endpoint with `new`, passes Test Doubles for the Humble Objects, and calls the endpoint method directly. [A Complete Slice in ASP.NET Core](./a-complete-slice.md#test-double-and-unit-tests) shows a full example.
 
 A Unit Test never starts an application host (no `WebApplicationFactory<T>`, `WebApplication`, or generic host). If you want the DI container to assemble a larger object graph for a test, build a plain `ServiceCollection` in the setup phase: call the relevant Modules, swap the Humble Objects for Test Doubles, and resolve the endpoint from the service provider. The container acts only as part of the fixture, and the test still runs completely in memory.
 

@@ -23,7 +23,7 @@ So CHACK isolates I/O from the Core. At the process boundary sit Humble Objects:
 
 1. **It performs the I/O calls.** You usually use a data access technology like an O/R mapper, an HTTP client, a broker client, a CLI tool, or proprietary SDKs/drivers to access the third-party system. Aim for one I/O call per method on the Humble Object, though in certain use cases, more than one call can occur.
 2. **It registers entity changes, if needed.** If your data access technology supports change tracking, some methods on the Humble Object may need to add entities to or remove them from the O/R mapper's Unit of Work. The capabilities of your data access technology shape the API for the Humble Object.
-3. **It maps the data.** Outgoing parameters get translated into whatever the third-party system expects, and incoming data gets translated into the types the Core wants back. This can involve catching exceptions which then can be mapped to, e.g., the Result Pattern or wrapped in another exception the Core understands.
+3. **It maps the data.** Outgoing parameters get translated into whatever the third-party system expects, and incoming data gets translated into the types the Core wants back. This can include catching exceptions and turning them into a result value (e.g., with the Result Pattern) or into an exception the Core understands.
 
 :::info[Light.PortableResults]
 I have implemented my own Result Pattern library called Light.PortableResults. Check it out on [GitHub](https://github.com/feO2x/Light.PortableResults)!
@@ -34,7 +34,7 @@ That is the whole list. Everything else, like decisions, validation, calculation
 Two notes on mapping the data:
 
 - **The framework does it for you.** An O/R mapper materializing entities from a query, or a serializer turning a response body into a DTO, is mapping you did not write. Cover it in Integration and End-to-End Tests.
-- **You write it yourself.** You might simply leave it in the Humble Object as a private method. If it is complex enough to deserve its own tests and you are able to unit-test it easily, move it into a static method on a different type, belonging to the Core. What stays in the Humble Object is the call plus a delegation to the mapper.
+- **You write it yourself.** You might simply leave it in the Humble Object as a private method. If it's complex enough to deserve its own tests, move it into a static method on a Core type. What stays in the Humble Object is the call plus a delegation to the mapper.
 
 The rule of thumb: **make the Core as large as possible and the Humble Object as small as possible**. If you find yourself wanting a test for something inside a Humble Object, that something likely belongs in the Core.
 

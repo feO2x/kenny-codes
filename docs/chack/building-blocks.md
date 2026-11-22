@@ -23,7 +23,7 @@ The four categories tell you where a piece of code belongs. When you build a bac
 | Module                 | Composition Root | Registers the building blocks of a slice with the DI container and calls the Modules of its child slices. |
 | Test Double            | Automated Tests  | Replaces a dependency of the system under test in a test. |
 
-Not every feature needs all of them. A feature without input has no Request DTO and no validator; a feature with little logic has no service; a feature that does not touch a third-party system has neither a Client nor a Session. Each building block you do write belongs to exactly one category, as shown in the table above.
+Not every feature needs all of them. A feature without input has no Request DTO and no validator; a feature with little logic has no service; a feature that does not touch a third-party system has neither a Client nor a Session. Each building block you do write belongs to exactly one category, and the table tells you which.
 
 Route definitions and message subscriptions belong to the [Composition Root](./composition-root.mdx) and usually live in the slice's Module.
 

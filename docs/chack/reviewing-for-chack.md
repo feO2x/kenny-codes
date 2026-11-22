@@ -22,10 +22,10 @@ Most of the time, the answer comes quickly. When it turns out to be "two of them
 ## In the Core
 
 - **A type that performs I/O shows up.** A database context, an HTTP client, a connection, a file API, or a broker client - anything that talks to another process. Once it enters the Core, the code can no longer run in memory and its tests require a real third-party system. Introduce a Core-owned I/O abstraction instead. Small, substitutable framework abstractions like a logger are fine as they are.
-- **Domain types or DTOs carry framework attributes.** Serialization, O/R mapping, or DI container attributes couple the type to how it's stored, transmitted, or composed. Move that configuration into separate types or into the Composition Root instead.
-- **The DI container is injected.** The type now fetches its own dependencies, hiding them from the compiler, your tests, and other developers. If the type must create objects at runtime, inject an abstract factory instead.
+- **Domain types or DTOs carry framework attributes.** Serialization, O/R mapping, or DI container attributes couple the type to how it's stored, transmitted, or composed. Move that configuration into separate types or into the Composition Root.
+- **The DI container is injected.** The type now fetches its own dependencies, hiding them from the compiler, your tests, and other developers. If the type must create objects at runtime, inject an abstract factory.
 - **The current time, new GUIDs, or random numbers are obtained directly.** Calling the system clock, a GUID generator, or a random number generator produces a different result on every run and makes tests non-deterministic. Pass these values through an abstraction.
-- **Mutable static state is used.** It introduces hidden coupling, breaks test isolation, and causes race conditions that often only surface in production. Pass context objects through dependency injection instead.
+- **Mutable static state is used.** It introduces hidden coupling, breaks test isolation, and causes race conditions that often only surface in production. Pass context objects through dependency injection.
 - **An abstraction has a single implementation and no Test Double behind it.** Not automatically wrong, but ask why it exists. If nothing varies, drop the indirection.
 
 ## In Humble Objects
@@ -43,14 +43,14 @@ Most of the time, the answer comes quickly. When it turns out to be "two of them
 
 - **A Humble Object or the Composition Root is the system under test.** Humble Objects are verified indirectly through Integration and End-to-End Tests as part of a feature. The Composition Root may set up the test fixture, but it's never the system under test. Wanting to unit-test a Humble Object usually means it contains logic that belongs in the Core.
 - **A Unit Test performs I/O other than to the local file system.** This usually means a Humble Object wasn't replaced by a Test Double - or hasn't been extracted yet.
-- **The arrange phase is full of Test Doubles.** The test is likely aimed too low. Target the most abstract API of the slice instead, letting the real Core collaborators participate.
+- **The arrange phase is full of Test Doubles.** The test is likely aimed too low. Target the most abstract API of the slice: the real Core collaborators take part, and most Test Doubles disappear.
 - **Unit Tests only cover the happy path.** Keeping the Core in memory makes error and edge cases cheap to test, and those are often the tests that catch real bugs.
 - **A Test Double is named after the wrong kind.** A `FakeOrderSession` that returns hard-coded values is a Stub; one that records calls is a Spy. Accurate names tell the reader how the test uses it (see [Test Doubles](./automated-tests.mdx#test-doubles)).
 - **A Unit Test starts a host.** Starting a host drags in the full framework pipeline and slows down the suite. Call the endpoint method directly in Unit Tests and leave pipeline verification to Integration Tests.
 - **Unit Tests depend on each other or on their execution order.** Tests like this pass locally and fail randomly in CI. Give each test its own setup and data.
 - **Integration or End-to-End Tests depend on each other without an explicit execution order.** A step-by-step scenario is fine when the order is declared explicitly in code; otherwise, test results depend on how the runner happens to schedule them.
 - **An Integration or End-to-End Test repeats what other tests in the same context already cover.** Duplicate flows slow the suite down without telling you more. Merge them or move the variation into a Unit Test.
-- **A third-party system is started per test or per test class.** Start each container once per test run and isolate each test's data instead.
+- **A third-party system is started per test or per test class.** Start each container once per test run and give each test its own data.
 
 ## In the Composition Root
 
@@ -64,7 +64,7 @@ Most of the time, the answer comes quickly. When it turns out to be "two of them
 
 - **The code of a feature is spread across technical folders.** `Services`, `Interfaces`, `Dtos`, and `Validators` folders obscure what the application does. Group files by feature instead.
 - **Loose types accumulate in a parent folder.** More than seven shared files next to the Module make a parent folder hard to scan. Group related types into a sibling folder named after their concept, and move types used by only one child back down into that child.
-- **A folder is named after a technical concern, like `Shared`, `Common`, or `Helpers`.** A folder of leftovers hides what the application does. Name the folder after the domain concept it represents, or move the files into the slices that use them.
+- **A folder is named after a technical concern, like `Shared`, `Common`, or `Helpers`.** A folder of leftovers tells you nothing about the domain. Name the folder after the domain concept it represents, or move the files into the slices that use them.
 - **Slices reference each other cyclically.** A cycle indicates shared logic that belongs to neither slice. Move it into a common parent or a new sibling folder.
 
 ## What is not a violation

@@ -6,7 +6,7 @@ image: /img/social-cards/docs-chack-relationship-to-other-approaches.jpg
 
 # Relationship to Other Approaches
 
-Nothing in CHACK is new. Every one of its four categories comes from an established book, and the ideas behind them have been around for twenty years. What CHACK adds is a small, memorable set of categories that fits in your head while you're writing code, along with a short set of rules.
+Nothing in CHACK is new. Every one of its four categories comes from an established book, and the ideas behind them have been around for twenty years. What CHACK adds is four categories that fit in your head while you're writing code, and a handful of rules attached to them.
 
 If you already know one of the approaches below, this page helps you find your way around: what carries over, and where CHACK takes a different turn.
 
@@ -16,7 +16,7 @@ This is CHACK's closest relative. Alistair Cockburn's [Hexagonal Architecture](h
 
 There are three differences:
 
-- **CHACK makes tests one of its four categories.** In Hexagonal Architecture, testability is the motivation. In CHACK, the test suite is one of the four things you build, with explicit rules about what each kind of test targets.
+- **CHACK makes tests one of its four categories.** In Hexagonal Architecture, testability is the motivation. In CHACK, the test suite is something you build on purpose, with explicit rules about what each kind of test targets.
 - **CHACK doesn't separate driving from driven adapters.** In Hexagonal Architecture, the code that receives an HTTP request is a primary adapter outside the hexagon. In CHACK, an endpoint receiving a deserialized DTO belongs to the Core: it runs in memory, contains decisions, and makes the best target for Unit Tests. The framework handles the incoming network I/O, and route mapping belongs to the Composition Root.
 - **CHACK's ports are scoped per feature.** Each I/O abstraction is designed for one consumer, usually a single vertical slice, rather than sharing a broad `OrderPort` across unrelated features.
 
@@ -24,7 +24,7 @@ There are three differences:
 
 [Clean Architecture](https://www.oreilly.com/library/view/clean-architecture-a/9780134494272/) and Jeffrey Palermo's Onion Architecture share the same dependency rule: source dependencies point inward toward the domain. CHACK agrees, and chapter 23 of Clean Architecture describes Humble Objects at the process boundary in very similar terms.
 
-The difference is how much structure you have to build. Clean Architecture defines concentric layers (entities, use cases, interface adapters, frameworks), and teams often turn each ring into a separate project with mapping code between them. CHACK has four categories and no rings, and it encourages keeping the number of projects small. If layers help your application, you can still add them. CHACK just doesn't require them, so a value can travel from the request to the database without being copied into a new DTO at every ring.
+The difference is how much structure you have to build. Clean Architecture defines concentric rings (entities, use cases, interface adapters, frameworks), and teams often turn each ring into a separate project with mapping code between them. CHACK has four categories and no rings, and it encourages keeping the number of projects small. If layers help your application, you can still add them. CHACK just doesn't require them, so a value can travel from the request to the database without being copied into a new DTO at every ring.
 
 Too much abstraction makes code just as hard to follow as too little, and adding layers by default is a common way to end up there.
 

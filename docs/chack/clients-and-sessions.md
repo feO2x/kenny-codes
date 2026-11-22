@@ -6,7 +6,7 @@ image: /img/social-cards/docs-chack-clients-and-sessions.jpg
 
 # Clients and Sessions
 
-This page takes a closer look at the Humble Objects that the Core calls directly. For the general rules covering all Humble Objects, see [Humble Objects](./humble-objects.mdx).
+This page goes deeper into the Humble Objects that the Core calls. For the general rules covering all Humble Objects, see [Humble Objects](./humble-objects.mdx).
 
 ## Who controls the transaction?
 
@@ -38,7 +38,7 @@ In [Patterns of Enterprise Application Architecture](https://martinfowler.com/bo
 
 Many O/R mappers already implement all three. With one in place, your Session stays thin: it exposes only the operations one feature needs, named in the Core's vocabulary, and delegates the rest to the O/R mapper. With a plain database driver, the Session handles the transaction explicitly: it opens a transaction on startup, commits it in the commit method, and rolls it back if disposed without a commit.
 
-In both cases, a Session represents a transaction, so you can see right away where a feature's transaction begins and ends.
+In both cases, a Session represents a transaction, so you can see where a feature's transaction begins and ends.
 
 ## Releasing Clients and Sessions
 
@@ -85,7 +85,7 @@ Place shared helpers in the closest common parent of the slices that use them, o
 ## Guidelines
 
 - **Start by deciding: Client or Session?** If the Core needs to commit, you're writing a Session. Otherwise, it's a Client.
-- **Name it after the feature and the technology.** `CancelOrderSession` is the Core's abstraction; its implementation includes the technology in its name, such as `SqlCancelOrderSession`. The names tell you right away what a feature needs and how it's backed.
+- **Name it after the feature and the technology.** `CancelOrderSession` is the Core's abstraction; its implementation includes the technology in its name, such as `SqlCancelOrderSession`. The names tell you what a feature needs and how it's backed.
 - **One method per interaction** with the third-party system. Each method stays easy to read, and each Test Double stays easy to write.
 - **Make I/O calls asynchronous and cancellable** if your language and data access technology support it. Blocking a thread while waiting for I/O wastes capacity under load.
 - **Register changes without I/O.** With an O/R mapper, adding or removing an entity only registers the change in the Unit of Work. Because those methods don't perform I/O, keep them synchronous.

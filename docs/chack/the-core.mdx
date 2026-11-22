@@ -49,7 +49,7 @@ Everything in this list runs in memory, without touching a disk, a socket, or an
 
 ## Frameworks and libraries
 
-A type fits into the Core as long as it doesn't perform I/O, even if it comes from a framework or library. That's perfectly fine for types from a data access framework, too - enums, value objects, or options types - when you can instantiate and use them in memory. How strongly your Core depends on a framework is up to you.
+What decides whether a type fits into the Core is I/O, not where it comes from. Your Core will use framework and library types, and that's perfectly fine as long as they don't perform I/O - even types from a data access framework, like enums, value objects, or options types. How strongly your Core depends on a framework is up to you.
 
 The same rule applies to code that extends or configures a framework:
 
@@ -61,7 +61,7 @@ The same rule applies to code that extends or configures a framework:
 
 When a Core service needs to call third-party systems, it depends on an abstraction like an interface or an abstract base class. The abstraction describes what the Core requires from the I/O call, in the Core's own vocabulary. A Humble Object implements this abstraction.
 
-This is the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf) at work. The Core owns this abstraction and names it in its own vocabulary.
+This is the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf) at work: the Core owns the abstraction, and the data access layer only implements it.
 
 Give each use case its own abstraction. For example, a single interface with a method for every I/O call across different endpoints (as you can see in many Repository implementations) is a violation of the [Interface Segregation Principle](https://www.cs.utexas.edu/~fares/papers/ISP.pdf). An abstraction works best when it is designed for exactly one consumer - usually one [vertical slice](./vertical-slices.md) - and only contains the members this consumer needs. [Clients and Sessions](./clients-and-sessions.md#one-per-slice-not-one-per-entity) shows what this looks like in practice.
 

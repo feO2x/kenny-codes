@@ -41,11 +41,11 @@ Resolve and Release happen repeatedly while the application runs: once per HTTP 
 
 **Keep lifetime management here.** Core objects shouldn't manage how long their dependencies live. Resolve and release object graphs at well-defined boundaries and let the container handle the rest. The exception is a short-lived resource that a Core object explicitly opens, uses, and closes within one operation - handling it locally is clearer than pushing that lifetime out to the container.
 
-**Keep it simple, and review it.** Like Humble Objects, the Composition Root is never the system under test; Integration Tests exercise it along the way, and testing it in isolation proves little. Readability is your main safety net here. Prefer straightforward registration code over clever conventions and reflection-driven scanning that nobody can follow.
+**Keep it simple, and review it.** Like Humble Objects, the Composition Root is never the system under test; Integration and End-to-End Tests exercise it along the way, and testing it in isolation proves little. Readability is your main safety net here. Prefer straightforward registration code over clever conventions and reflection-driven scanning that nobody can follow.
 
 **Bind configuration to options objects.** Read configuration from files, environment variables, or secret stores in the Composition Root. Pass plain options DTOs into the Core so it doesn't depend on where settings came from.
 
-**Startup tasks can call Humble Objects directly.** Some tasks need I/O before the app starts serving requests, such as creating database indexes or setting up a storage bucket. The Composition Root can call a Humble Object directly for those tasks. When logic is involved, put it in a Core service and call the service instead so you can unit-test it.
+**Startup tasks can call Humble Objects directly.** Some tasks need I/O before the app starts serving requests, such as creating database indexes or setting up a storage bucket. The Composition Root can call a Humble Object directly for those tasks. As soon as non-trivial logic is involved, put it in a Core service and call the service instead so you can unit-test it.
 
 ## Modules
 

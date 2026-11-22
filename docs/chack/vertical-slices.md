@@ -157,7 +157,7 @@ Not every folder represents a feature. Some folders adapt frameworks and infrast
 
 Technical infrastructure folders are fine in CHACK, with a few boundaries:
 
-- Organize them by technology. `DatabaseAccess` and `Messaging` tell you right away what's inside.
+- Organize them by technology. `DatabaseAccess` and `Messaging` say what's inside.
 - Put Modules, options, base types for Humble Objects, and shared static methods that Humble Objects call here.
 - Keep feature-specific domain logic out. If a type in `DatabaseAccess` starts referencing domain concepts like `Order`, move it into the `Orders` slice or one of its concept folders.
 
@@ -196,7 +196,7 @@ You can also keep the entire domain model in a single top-level folder like `Dom
 
 ## Tests mirror the slices
 
-The test projects follow the same structure as the production code. The Unit Tests for `Orders/Queuing/CreateQueueItem` live in `Orders/Queuing/CreateQueueItem` of the test project, next to the Test Doubles they need. When a slice moves, its tests move with it, and whenever you look for the tests of a feature, you know right away where to find them.
+The test projects follow the same structure as the production code. The Unit Tests for `Orders/Queuing/CreateQueueItem` live in `Orders/Queuing/CreateQueueItem` of the test project, next to the Test Doubles they need. When a slice moves, its tests move with it, and whenever you look for the tests of a feature, you know where to find them.
 
 ```text
 📁 WebApp.Tests
