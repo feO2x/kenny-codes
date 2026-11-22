@@ -13,14 +13,16 @@ import AnimatedImage from '@site/src/components/AnimatedImage';
 
 ## TL;DR
 
-**CHACK** is a simple structural model for a single app. Every piece of code you write belongs to exactly one of four categories:
+**CHACK** is a simple model for structuring a single app. Every piece of code you write belongs to exactly one of four categories:
 
 - **C**ore
 - **H**umble Objects at the process boundary
 - **A**utomated Tests
 - **C**omposition Root
 
-And the **K**? That's me, Kenny. It also lets you say CHACK just like "Chuck".
+CHACK is based on aspects of Domain-Driven Design, Hexagonal Architecture, and Vertical Slice Architecture. It follows software principles like SOLID, DRY, Composition-Over-Inheritance and KISS. It is easier to learn than these approaches and pushes junior developers in the pit of success.
+
+Oh, and the **K** in CHACK is for **K**enny - which conveniently lets you pronounce it like "Chuck".
 
 <AnimatedImage
   src="/img/chuck.gif"
@@ -35,7 +37,7 @@ And the **K**? That's me, Kenny. It also lets you say CHACK just like "Chuck".
 <ChackDiagram />
 
 - **The Core** is everything that runs in memory: your domain model, your services, your DTOs, your validators. It holds the logic that makes the software worth building, and it never performs an I/O call itself. When it needs one, it goes through an abstraction that belongs to the Core.
-- **Humble Objects** sit at the process boundary and do the I/O. Each one does two things: perform the actual I/O call to a third-party system, and map the data going out and coming back. They follow the [Humble Object pattern](http://xunitpatterns.com/Humble%20Object.html) from Gerard Meszaros' [xUnit Test Patterns](http://xunitpatterns.com/).
+- **Humble Objects** sit at the process boundary and take care of data access. Each one does two things: perform the actual I/O calls to one third-party system, and map the data going out and coming back. They follow the [Humble Object pattern](http://xunitpatterns.com/Humble%20Object.html) from Gerard Meszaros' [xUnit Test Patterns](http://xunitpatterns.com/).
 - **Automated Tests** follow the [test pyramid](https://martinfowler.com/bliki/TestPyramid.html). Unit tests exercise the Core with humble objects replaced by in-memory test doubles, which is why thousands of them run in seconds. Integration and end-to-end tests cover the happy path and wiring against third-party systems and act as a second line of defense against regression.
 - **The Composition Root** assembles the pieces at startup - usually with a DI container and configuration from files, environment variables, and command line parameters. It is described in depth in Mark Seemann's and Steven van Deursen's [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns).
 
@@ -66,9 +68,11 @@ CHACK avoids both extremes by being deliberate about where abstraction adds valu
 - **Use abstractions selectively inside the Core.** Core types are tightly coupled by default. Introduce an interface or abstract base class only when it serves a concrete purpose - multiple meaningful implementations are often a good indication. An endpoint service, for example, may call its validator directly; one unit test can cover both without a test double.
 
 :::info[The main idea behind CHACK]
-You want to use the Mediator pattern in your codebase? Go ahead. CQRS, event sourcing, a rich domain model, an anemic one? All compatible with CHACK.
+**CHACK forces you to clearly distinguish between in-memory and I/O calls.** Make the blue Core box as large as possible to have more code that in-memory Unit Tests can target.
 
-**CHACK forces you to make a clear distinction between in-memory and I/O calls.** Make the blue Core box as large as possible to have more code that in-memory Unit Tests can target. It does not tell you how to design within the four categories.
+Why? Third-party systems calls are a billion times slower than your in-memory calls and may fail way more often. Take a look at the [Performance Costs in the Automated Tests page](./automated-tests.mdx#performance-costs-of-integration-tests).
+
+CHACK does not tell you how to design within the four categories. You want to use the Mediator pattern in your codebase? Go ahead. CQRS, event sourcing, a rich domain model, an anemic one? All compatible with CHACK.
 :::
 
 ## A methodology, not a framework
@@ -90,9 +94,9 @@ If you work in another ecosystem, you can skip these callouts. Nothing in CHACK 
 
 ## Why CHACK?
 
-You might be wondering why you should care about CHACK. There are already many approaches to designing software, like Hexagonal Architecture, Domain-Driven Design, or Clean Architecture. CHACK doesn't bring particularly new things to the table. It is rather a distillation of patterns and approaches which can be easily taught to new developers and applied.
+You might be wondering why you should care about CHACK. There are already many approaches to designing software, like Hexagonal Architecture, Domain-Driven Design, or Clean Architecture. CHACK doesn't bring particularly new things to the table. It is rather a distillation of patterns and approaches which can be easily taught, especially to junior developers.
 
-Consider how many books you need to read to understand and apply Hexagonal Architecture, or Clean Architecture? I think CHACK is so condensed that it can be easily taught in 4 to 8 hours. You can start applying it without use of any frameworks or project templates. Apply it to parts of your codebase and see the benefits. Start small and grow over time.
+Consider how many books you need to read or tutorials you ned to watch to understand and apply Hexagonal Architecture, or Clean Architecture? I think CHACK is so condensed that it can be easily taught in 4 to 8 hours. You can start applying it without use of any frameworks or project templates. Apply it to parts of your codebase and see the benefits. Start small and grow over time.
 
 ## Where to go next
 
