@@ -18,17 +18,17 @@ Each page here belongs to one or more pages of the methodology, and each methodo
 | [The Composition Root](../composition-root.mdx), [Vertical Slices](../vertical-slices.md)           | [The Composition Root in .NET](./composition-root.md)         |
 | [Building Blocks of a Backend Feature](../building-blocks.md)                                       | [A Complete Slice in ASP.NET Core](./a-complete-slice.md)     |
 
-If you're new to CHACK, it's worth reading the methodology page first. The .NET pages assume you already know why things are done the way they are, and focus on how.
+If you are new to CHACK, read the corresponding methodology page first. The .NET pages focus on concrete C# implementations rather than repeating the underlying reasoning.
 
 ## About the code samples
 
-Apart from ASP.NET Core, Entity Framework Core, and the test packages a page mentions, the samples don't need any additional package.
+Apart from ASP.NET Core, Entity Framework Core, and the test packages mentioned on each page, the samples do not require any extra packages.
 
-Some of the base types you'll see are also available ready-made in my libraries. When that's the case, the page tells you at the end, so you can decide whether you'd rather write them yourself or take them from a package.
+Several base types shown in this section are also published in my NuGet packages. Each page notes where a package exists, so you can either copy the small base class into your project or install the library.
 
 ## Libraries that help
 
-CHACK doesn't depend on any library. These ones just save you from writing the same things in every project:
+CHACK does not depend on any library. These optional packages simply save you from rewriting the same boilerplate in every project:
 
 - [Light.SharedCore](https://github.com/feO2x/Light.SharedCore) contains `ISession`, the base abstraction for Sessions, along with entity base classes and a clock abstraction.
 - [Light.DatabaseAccess.EntityFrameworkCore](https://github.com/feO2x/Light.DatabaseAccess.EntityFrameworkCore) contains base classes for Clients and Sessions that use Entity Framework Core, with and without a dedicated transaction.

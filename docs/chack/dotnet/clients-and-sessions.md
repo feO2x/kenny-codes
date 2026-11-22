@@ -6,11 +6,11 @@ image: /img/social-cards/docs-chack-dotnet-clients-and-sessions.jpg
 
 # Clients and Sessions in .NET
 
-This page shows how [Clients and Sessions](../clients-and-sessions.md) look with Entity Framework Core and `HttpClient`. If you haven't read the methodology page yet, it's a good place to start: it explains who controls the transaction, and why each slice gets its own Humble Object.
+In .NET, [Clients and Sessions](../clients-and-sessions.md) are most commonly backed by Entity Framework Core or `HttpClient`. If you have not read the methodology page yet, start there for the conceptual distinction between Clients and Sessions and why each vertical slice gets its own Humble Object.
 
 ## The base abstractions
 
-A Session lets the Core commit, and every Session does that the same way. That's why it makes sense to give them a common base interface:
+Because every Session commits the same way, they can share a small base interface:
 
 ```csharp
 public interface ISession : IAsyncDisposable
@@ -38,7 +38,7 @@ public interface IOrderQueueClient : IAsyncDisposable
 ```
 
 :::info[ISession in ASP.NET Core projects]
-ASP.NET Core has an `ISession` interface of its own, for HTTP session state, and the Web SDK imports its namespace `Microsoft.AspNetCore.Http` implicitly. When a file sees both, the compiler can't tell them apart. A global using alias settles this once for the whole project:
+ASP.NET Core defines its own `ISession` interface for HTTP session state, and the Web SDK imports `Microsoft.AspNetCore.Http` implicitly. When both namespaces are in scope, the compiler reports an ambiguous reference. Resolve it once for the whole project with a global using alias:
 
 ```csharp
 global using ISession = MyApp.DatabaseAccess.ISession;
@@ -49,9 +49,9 @@ Better yet: disable Implicit Usings and you won't face this problem.
 
 ## Why the abstractions are disposable
 
-A Client or Session owns its connection to the third-party system, and with it, possibly a transaction. Whoever uses it has to be able to release it - and the caller only sees the abstraction. That's why `IAsyncDisposable` is part of the abstraction rather than just the implementation.
+A Client or Session owns its connection to the third-party system and possibly an open transaction. Because callers only depend on the interface, `IAsyncDisposable` belongs on the abstraction itself rather than just the concrete class.
 
-In an ASP.NET Core application, you rarely notice this. You register Clients and Sessions as scoped services, and the container disposes them when the request ends. Without a container, the caller does it, for example in a console tool that imports data:
+In an ASP.NET Core application, you rarely call `DisposeAsync` yourself: register Clients and Sessions as scoped services and the DI container disposes them at the end of the request. Without a container, such as in a console tool that imports data, the caller disposes the Session directly:
 
 ```csharp
 await using var session = new EfImportProductsSession(new AppDbContext(options));
@@ -103,13 +103,13 @@ public abstract class EfSession<TDbContext> : EfClient<TDbContext>, ISession
 }
 ```
 
-Clients don't track changes by default, because nobody saves the entities they return. Sessions do, because that's how Entity Framework Core finds out what to write.
+Clients disable change tracking by default because nobody saves the entities they return. Sessions enable it so Entity Framework Core can track updates for `SaveChangesAsync`.
 
-The Client or Session disposes its `DbContext`, because it owns it. When the container created the context as a scoped service, it disposes it once more at the end of the scope, and that's fine: disposing a `DbContext` a second time does nothing.
+The Client or Session disposes its `DbContext` because it owns it. When the DI container creates the context as a scoped service, the container disposes it again at the end of the scope, which is safe because `DbContext.Dispose` and `DisposeAsync` are idempotent.
 
 ## Implementing a Session
 
-With the base class in place, the Session of a feature only contains what is truly its own. The `Ef` prefix tells you which technology sits behind the abstraction:
+With the base class handling setup and disposal, a feature's Session only implements its own database operations. The `Ef` prefix indicates which technology backs the abstraction:
 
 ```csharp
 public sealed class EfAddToDoItemSession(AppDbContext dbContext)
@@ -119,11 +119,11 @@ public sealed class EfAddToDoItemSession(AppDbContext dbContext)
 }
 ```
 
-You might be looking for the rollback. Entity Framework Core collects changes in memory and only writes them inside `SaveChangesAsync`, wrapped in a database transaction. So when a Session is disposed before anyone commits, the database simply never hears about the changes.
+Notice there is no explicit rollback call. Entity Framework Core tracks changes in memory and only executes SQL inside `SaveChangesAsync` within a transaction. If the Session is disposed before `SaveChangesAsync` runs, nothing is ever written to the database.
 
 ## Implementing a Client
 
-A Client that reads from the database looks very similar - it just doesn't commit:
+A Client that reads from the database looks very similar, without a commit method:
 
 ```csharp
 public sealed class EfOrderQueueClient(AppDbContext dbContext)
@@ -143,9 +143,9 @@ public sealed class EfOrderQueueClient(AppDbContext dbContext)
 }
 ```
 
-One I/O call and a mapping - that's the whole job of a Humble Object. The mapping is a projection that Entity Framework Core turns into SQL, so there's nothing here for a Unit Test to check. The Integration Tests of the feature cover it.
+One database query and a projection - nothing else. Because Entity Framework Core translates the projection directly into SQL, cover it with the feature's Integration Tests rather than Unit Tests.
 
-Clients aren't limited to databases. A typed `HttpClient` that calls a web service is a Client, too:
+Clients are not limited to databases. A typed `HttpClient` calling a web service is a Client, too:
 
 ```csharp
 public interface IShippingRatesClient
@@ -182,7 +182,7 @@ public sealed class HttpShippingRatesClient(HttpClient httpClient) : IShippingRa
 }
 ```
 
-This Client owns nothing that it would have to release: `IHttpClientFactory` manages the lifetime of the underlying connections. So here, the abstraction doesn't need to be disposable. [The Composition Root in .NET](./composition-root.md#registering-http-clients) shows how to register it.
+This Client owns no unmanaged resources because `IHttpClientFactory` manages the underlying connections. As a result, the interface does not need to inherit `IAsyncDisposable`. [The Composition Root in .NET](./composition-root.md#registering-http-clients) shows how to register it.
 
 ## A transaction for the Client's whole lifetime
 
@@ -238,11 +238,11 @@ This Client doesn't derive from `EfClient<TDbContext>`, because it has to dispos
 
 Which isolation level makes several reads agree depends on your database. On PostgreSQL, Repeatable Read works on a snapshot taken at the first query, so the report above sees one consistent state. On SQL Server, Repeatable Read still lets rows appear that were inserted in between; there, you'd choose `IsolationLevel.Snapshot`, after enabling snapshot isolation for the database.
 
-Disposing a transaction that was never committed rolls it back, and for a Client that only reads, that's exactly right. A Session can work the same way when it needs a specific isolation level: it begins the transaction lazily, commits it in `SaveChangesAsync` after saving the changes, and disposes it at the end. Keep the cost of an open transaction in mind, which the [methodology page](../clients-and-sessions.md#who-controls-the-transaction) describes.
+Disposing an uncommitted transaction rolls it back, which is the right behavior for a read-only Client. A Session can follow the same pattern when it needs a specific isolation level: begin the transaction lazily, commit it in `SaveChangesAsync` after saving changes, and dispose it at the end. Keep the cost of open transactions in mind (see the [methodology page](../clients-and-sessions.md#who-controls-the-transaction)).
 
 ## One per slice, not one per entity
 
-Here is the kind of Repository that CHACK replaces:
+Compare a typical entity-wide Repository interface:
 
 ```csharp
 public interface IOrderRepository
@@ -257,7 +257,7 @@ public interface IOrderRepository
 }
 ```
 
-And here are two abstractions shaped by the features that use them - one that cancels an order, and one that shows a customer's order history:
+with two feature-specific abstractions - one for canceling an order, and one for reading a customer's order history:
 
 ```csharp
 public interface ICancelOrderSession : ISession
@@ -307,12 +307,12 @@ public sealed class EfCancelOrderSession(AppDbContext dbContext)
 - **Make I/O methods asynchronous** and give them a `CancellationToken` as the last parameter, with a default value. Pass the token on from the caller: ASP.NET Core passes one to every endpoint, and message handlers get one from their context. Synchronous I/O blocks a thread pool thread while it waits, which can starve the thread pool under load.
 - **Attach and remove synchronously.** Adding an entity to a `DbSet<T>` or removing it doesn't hit the database yet, so these methods don't need to be asynchronous.
 - **Call `SaveChangesAsync` once per Session.** One commit means one transaction: either the whole business transaction succeeds, or none of it does.
-- **Never let `IQueryable<T>` leave a Humble Object.** As soon as a caller adds to the query, the Core decides which SQL runs, and the query executes somewhere a Test Double can't imitate. Return a `List<T>`, an array, or a DTO instead.
-- **Translate exceptions the Core cares about.** Entity Framework Core reports a concurrency conflict with a `DbUpdateConcurrencyException`. If the Core wants to react to it, catch it in the Humble Object and throw an exception of the Core, or return a result. If several Sessions need this, a base class of your own is a good home for it.
-- **Register Clients and Sessions as scoped services.** They are not thread-safe, so a singleton is not an option. Transient disposable services are kept alive by the container until the scope ends anyway, so scoped says what actually happens. A typed `HttpClient` is the exception: `AddHttpClient` registers it as transient, and that's fine, because it owns nothing that the scope would have to release.
-- **Give your `DbContext` a home outside the slices.** It's a Humble Object, too, and so are the base classes above. A [folder that is not a slice](../vertical-slices.md#folders-that-are-not-slices), like `DatabaseAccess`, is a good place for them.
+- **Never let `IQueryable<T>` leave a Humble Object.** Once a caller composes onto the query, the Core decides which SQL runs, and execution moves outside the Humble Object where a Test Double cannot reproduce database query semantics. Return a `List<T>`, an array, or a DTO instead.
+- **Translate exceptions the Core cares about.** Entity Framework Core reports concurrency conflicts with `DbUpdateConcurrencyException`. When the Core needs to react to it, catch it in the Humble Object and map it to a Core exception or a result value. If several Sessions need the same handling, put it in a shared base class.
+- **Register Clients and Sessions as scoped services.** They are not thread-safe, so a singleton is not an option. Because the DI container keeps transient disposables alive until the scope ends anyway, scoped registration reflects their actual lifetime. A typed `HttpClient` is the exception: `AddHttpClient` registers it as transient, which works because it owns nothing the scope needs to dispose.
+- **Keep your `DbContext` outside feature slices.** It is a Humble Object, too, along with the base classes above. Place them in a [folder that is not a slice](../vertical-slices.md#folders-that-are-not-slices), like `DatabaseAccess`.
 
-If you'd like to see a Session in action - used by an endpoint, registered in a Module, and replaced by a Spy in a Unit Test - continue with [A Complete Slice in ASP.NET Core](./a-complete-slice.md).
+To see a Session wired into a full endpoint with a Module and Unit Tests, continue to [A Complete Slice in ASP.NET Core](./a-complete-slice.md).
 
 ## Ready-made base types
 

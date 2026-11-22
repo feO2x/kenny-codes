@@ -6,7 +6,7 @@ image: /img/social-cards/docs-chack-dotnet-a-complete-slice.jpg
 
 # A Complete Slice in ASP.NET Core
 
-This page turns the example from [Building Blocks of a Backend Feature](../building-blocks.md) into code: a feature that adds an item to a to-do list, with ASP.NET Core Minimal APIs, Entity Framework Core, and xUnit.
+Here is the full C# implementation of the to-do feature from [Building Blocks of a Backend Feature](../building-blocks.md), built with ASP.NET Core Minimal APIs, Entity Framework Core, and xUnit.
 
 ## The slice
 
@@ -81,7 +81,7 @@ public sealed class NewToDoItemDtoValidator
 }
 ```
 
-`Title` is declared non-nullable because that's what the business logic needs after validation. The deserializer may still produce `null`, and the validator catches it. In a real codebase, you'd probably write the validator with a library. The hand-written version keeps the example free of library details.
+`Title` is declared non-nullable because that is what the business logic expects after validation. The deserializer may still produce `null`, and the validator catches it. In a production codebase, you would likely use a validation library like FluentValidation or Light.PortableResults.Validation; the hand-written version keeps this example self-contained.
 
 ## Session
 
@@ -127,7 +127,7 @@ public sealed class AddToDoItemEndpoint(
 }
 ```
 
-`TypedResults` is an ASP.NET Core type, and that's fine: the result types run in memory, and a test can inspect them. The return type `Results<Created<int>, ValidationProblem>` also tells the reader - and the OpenAPI document - every response the endpoint can produce.
+Using `TypedResults` in the Core is fine because these result types run entirely in memory and can be asserted on directly in Unit Tests. The return type `Results<Created<int>, ValidationProblem>` also documents every response the endpoint can produce - both for readers and for OpenAPI generation.
 
 ## Module
 
@@ -175,7 +175,7 @@ public static class ToDoItemsModule
 
 ## Test Double and Unit Tests
 
-The test wants to observe what the endpoint did with the Session, so the Test Double is a Spy:
+To verify what the endpoint passed to the Session and whether it committed, we implement a Spy:
 
 ```csharp
 public sealed class AddToDoItemSessionSpy : IAddToDoItemSession
@@ -234,6 +234,6 @@ public sealed class AddToDoItemEndpointTests
 }
 ```
 
-`FakeTimeProvider` comes from the `Microsoft.Extensions.TimeProvider.Testing` package. These tests never leave memory, so you can add many more for edge and error cases - a title that is too long, or a Session Stub that throws - and your test suite stays fast.
+`FakeTimeProvider` comes from the `Microsoft.Extensions.TimeProvider.Testing` package. Because these tests run entirely in memory, you can add as many edge and error cases as you need (such as an overly long title or a Session Stub that throws a concurrency exception) without noticeably slowing down the suite.
 
-The Integration Test for the happy path starts the application with `WebApplicationFactory<Program>` and PostgreSQL via Testcontainers, sends a `POST` request, and checks that the item ends up in the database. [Testing in .NET](./testing.md) shows how to set that up.
+The happy-path Integration Test starts the application with `WebApplicationFactory<Program>` and PostgreSQL via Testcontainers, sends a `POST` request, and verifies that the item is persisted in the database. [Testing in .NET](./testing.md) shows how to set that up.
