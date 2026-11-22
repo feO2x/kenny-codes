@@ -34,7 +34,7 @@ That is the whole list. Everything else, like decisions, validation, calculation
 Two notes on mapping the data:
 
 - **The framework does it for you.** An O/R mapper materializing entities from a query, or a serializer turning a response body into a DTO, is mapping you did not write. Cover it in Integration and End-to-End Tests.
-- **You write it yourself.** You might simply leave it in the Humble Object as a private method. If it's complex enough to deserve its own tests, move it into a static method on a Core type. What stays in the Humble Object is the call plus a delegation to the mapper.
+- **You write it yourself.** You might simply leave it in the Humble Object as a private method. If it's complex enough to deserve its own tests and runs in memory, move it into a static method on a Core type. What stays in the Humble Object is the call plus a delegation to the mapper.
 
 The rule of thumb: **make the Core as large as possible and the Humble Object as small as possible**. If you find yourself wanting a test for something inside a Humble Object, that something likely belongs in the Core.
 

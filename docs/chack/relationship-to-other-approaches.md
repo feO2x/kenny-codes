@@ -6,7 +6,7 @@ image: /img/social-cards/docs-chack-relationship-to-other-approaches.jpg
 
 # Relationship to Other Approaches
 
-Nothing in CHACK is new. Every one of its four categories comes from an established book, and the ideas behind them have been around for twenty years. What CHACK adds is four categories that fit in your head while you're writing code, and a handful of rules attached to them.
+Nothing in CHACK is new. Every one of its four categories comes from an established book, and the ideas behind them have been around for twenty years. What CHACK adds is a way to fit them into four categories you can keep in your head while writing code, and a handful of rules attached to them.
 
 If you already know one of the approaches below, this page helps you find your way around: what carries over, and where CHACK takes a different turn.
 
