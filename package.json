@@ -56,5 +56,37 @@
   },
   "engines": {
     "node": ">=24.0"
+  },
+  "//overrides": [
+    "npm ignores this key. It documents the 'overrides' block below, which pins sharp.",
+    "",
+    "Background, as of 2026-11-22. Re-check it when Docusaurus is upgraded.",
+    "",
+    "1. sharp is the image library used at build time. scripts/generate-social-cards.ts uses it directly, through the top-level devDependency sharp ^0.35.5.",
+    "2. @docusaurus/plugin-ideal-image and its placeholder loader @docusaurus/lqip-loader pin sharp ^0.32.3, which resolves to 0.32.6. Without this override, npm installs a second, older sharp inside each of those two packages.",
+    "3. sharp 0.32 needs an install script that downloads a prebuilt libvips binary. npm 11 blocks install scripts by default. This npm version still runs them but warns that it will stop. If the script is skipped, the build fails with 'Cannot find module ../build/Release/sharp-linux-x64.node'.",
+    "4. The sharp 0.32 line has high-severity advisories (libvips, libheif, librsvg; for example GHSA-f88m-g3jw-g9cj). npm cannot fix them, because the ^0.32.3 range never allows 0.33 or later.",
+    "5. The override 'sharp': '$sharp' makes npm use, for every copy of sharp, the version of our top-level devDependency. The result is one sharp, 0.35.5. It gets its native binary from npm's optional @img/sharp-linux-x64 package, so it needs no install script, and the 0.32 advisories no longer apply.",
+    "",
+    "Verified: the production build passes with all install scripts ignored, and it still generates the image placeholders.",
+    "",
+    "Risk: Docusaurus is tested against sharp 0.32, not 0.35. If the build or the placeholders break after a Docusaurus upgrade, first try removing this override.",
+    "",
+    "When to remove: once the Docusaurus packages accept sharp 0.35. Check with `npm view @docusaurus/plugin-ideal-image@latest dependencies.sharp`. Then delete the override and this note, run `npm install`, and confirm that `npm ls sharp` shows a single version."
+  ],
+  "overrides": {
+    "sharp": "$sharp"
+  },
+  "//allowScripts": [
+    "npm 11 runs a dependency's install script only when the package is listed here. false means the script never runs.",
+    "core-js only prints a donation banner, so it is not needed.",
+    "@swc/core checks its native binary and falls back to wasm. It is not needed, because @docusaurus/faster is not enabled in docusaurus.config.ts.",
+    "esbuild checks the platform binary that npm already installed through optional dependencies. It is not needed; the tsx scripts and the build work without it.",
+    "sharp is not listed, because the sharp 0.35.5 used here has no install script. If the override is removed, sharp 0.32 needs approval with `npm install-scripts approve sharp`."
+  ],
+  "allowScripts": {
+    "core-js": false,
+    "@swc/core": false,
+    "esbuild": false
   }
 }
