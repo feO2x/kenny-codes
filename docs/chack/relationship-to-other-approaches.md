@@ -6,9 +6,9 @@ image: /img/social-cards/docs-chack-relationship-to-other-approaches.jpg
 
 # Relationship to Other Approaches
 
-Nothing in CHACK is brand new. Every one of its four categories comes from an established book, and the underlying ideas have been around for over twenty years. CHACK distills them into four memorable categories and a short set of rules you can keep in your head while writing code.
+Nothing in CHACK is new. Every one of its four categories comes from an established book, and the ideas behind them have been around for twenty years. What CHACK adds is a small, memorable set of categories that fits in your head while you're writing code, along with a short set of rules.
 
-If you already know one of the approaches below, this comparison shows what carries over and where CHACK differs.
+If you already know one of the approaches below, this page helps you find your way around: what carries over, and where CHACK takes a different turn.
 
 ## Hexagonal Architecture / Ports and Adapters
 
@@ -16,23 +16,23 @@ This is CHACK's closest relative. Alistair Cockburn's [Hexagonal Architecture](h
 
 There are three differences:
 
-- **CHACK makes tests a first-class category.** In Hexagonal Architecture, testability is the motivation. In CHACK, the test suite is one of the four categories you build, with explicit rules about what each kind of test targets.
-- **CHACK does not separate driving from driven adapters.** In Hexagonal Architecture, the code that receives an HTTP request is a primary adapter outside the hexagon. In CHACK, an endpoint receiving a deserialized DTO belongs to the Core: it runs in memory, contains decisions, and makes the best target for Unit Tests. The framework handles the incoming network I/O, and route mapping belongs to the Composition Root.
+- **CHACK makes tests one of its four categories.** In Hexagonal Architecture, testability is the motivation. In CHACK, the test suite is one of the four things you build, with explicit rules about what each kind of test targets.
+- **CHACK doesn't separate driving from driven adapters.** In Hexagonal Architecture, the code that receives an HTTP request is a primary adapter outside the hexagon. In CHACK, an endpoint receiving a deserialized DTO belongs to the Core: it runs in memory, contains decisions, and makes the best target for Unit Tests. The framework handles the incoming network I/O, and route mapping belongs to the Composition Root.
 - **CHACK's ports are scoped per feature.** Each I/O abstraction is designed for one consumer, usually a single vertical slice, rather than sharing a broad `OrderPort` across unrelated features.
 
 ## Clean Architecture and Onion Architecture
 
 [Clean Architecture](https://www.oreilly.com/library/view/clean-architecture-a/9780134494272/) and Jeffrey Palermo's Onion Architecture share the same dependency rule: source dependencies point inward toward the domain. CHACK agrees, and chapter 23 of Clean Architecture describes Humble Objects at the process boundary in very similar terms.
 
-The difference is how much ceremony you take on. Clean Architecture defines concentric rings (entities, use cases, interface adapters, frameworks), and teams frequently turn each ring into a separate project with mapping boilerplate between them. CHACK has four categories, no rings, and encourages keeping the number of projects small. You can still add layers where they genuinely help, but CHACK does not require copying a value into a new DTO at every boundary.
+The difference is how much structure you have to build. Clean Architecture defines concentric layers (entities, use cases, interface adapters, frameworks), and teams often turn each ring into a separate project with mapping code between them. CHACK has four categories and no rings, and it encourages keeping the number of projects small. If layers help your application, you can still add them. CHACK just doesn't require them, so a value can travel from the request to the database without being copied into a new DTO at every ring.
 
-Omitting mandatory rings is deliberate: adding layers by default is one of the fastest ways to end up with excessive abstraction.
+Too much abstraction makes code just as hard to follow as too little, and adding layers by default is a common way to end up there.
 
 ## Domain-Driven Design
 
-[Domain-Driven Design](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/) is the source of the isolated domain, the ubiquitous language, and the building blocks of a rich Core. CHACK builds on those ideas without forcing you to adopt all of tactical or strategic DDD.
+[Domain-Driven Design](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/) is where the isolated domain, the ubiquitous language, and the patterns that populate a Core come from. CHACK borrows most of it and leaves the bigger commitments up to you.
 
-You can use entities, value objects, aggregates, domain events, and bounded contexts - or stick to plain services over an anemic model. Both fit inside the Core. What matters in CHACK is that your domain vocabulary appears in your type names and that domain types stay free of persistence concerns.
+You can use entities, value objects, aggregates, domain events, and bounded contexts - or none of them, with plain services over an anemic model. Both fit inside the Core. What matters in CHACK is that your domain vocabulary shows up in your type names and that the domain doesn't need to know how it is persisted.
 
 The one DDD pattern CHACK replaces is the **Repository**. In DDD, a Repository gives each aggregate a collection-like interface, which in many codebases grows into a wide entity-level interface holding every operation any feature has ever needed. CHACK uses per-feature [Clients and Sessions](./clients-and-sessions.md) instead. Your aggregates and invariants stay intact; only the data-access abstraction follows the features rather than the tables.
 
@@ -57,15 +57,15 @@ Where they differ:
 
 ## The classic three-layer architecture
 
-The traditional presentation / business logic / data access split looks similar on the surface, but differs where it counts: dependency direction. In a classic three-layer app, the business layer references the data access layer directly, making it impossible to test business logic without a database.
+The traditional presentation / business logic / data access split looks similar on the surface, but differs in one important point: dependency direction. In a classic three-layer app, the business layer references the data access layer directly, making it impossible to test business logic without a database.
 
-Once you invert that dependency - letting the business logic own the abstraction and the data access layer implement it - you are already most of the way to CHACK.
+Once you invert that dependency - letting the business logic own the abstraction and the data access layer implement it - you're already most of the way to CHACK.
 
 ## Functional Core, Imperative Shell
 
 Gary Bernhardt's [Functional Core, Imperative Shell](https://www.destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell) arrives at the same separation from the functional programming side: pure decision-making code in the center, side effects at the edge, and tests concentrated on the pure core.
 
-CHACK's Core does not have to be functionally pure - it may mutate state, and in object-oriented code it usually does. It also triggers I/O through abstractions. Still, the principle matches: push I/O to the boundary, keep decisions in memory where Unit Tests can reach them, and cover the boundary with code reviews and Integration Tests.
+CHACK's Core doesn't have to be functionally pure - it may mutate state, and in object-oriented code it usually does. It also triggers I/O through abstractions. Still, the principle matches: push I/O to the boundary, keep decisions in memory where Unit Tests can reach them, and cover the boundary with code reviews and Integration Tests.
 
 ## Patterns CHACK leaves to you
 
@@ -75,11 +75,11 @@ The patterns below come up frequently in discussions about CHACK. All of them wo
 - **CQRS.** Commands typically use Sessions, queries typically use Clients, and both sides keep their logic in the Core.
 - **Event Sourcing.** The event store is a third-party system behind a Humble Object like any other.
 - **Message buses.** Message handlers are endpoints, and publishing a message goes through a Client.
-- **Microservices, modular monoliths, single processes.** CHACK describes the structure inside one application. How many deployable services you run is a separate decision and does not change these rules.
+- **Microservices, modular monoliths, single processes.** CHACK describes the structure inside one application. How many deployable services you run is a separate decision and doesn't change these rules.
 
 ## What CHACK actually claims
 
-At its core, CHACK comes down to three rules:
+CHACK boils down to three rules:
 
 1. Every piece of code belongs to exactly one of the four categories.
 2. The Core never performs I/O itself. Every I/O call goes through an abstraction owned by the Core, implemented by a Humble Object that only performs the call and maps the data.

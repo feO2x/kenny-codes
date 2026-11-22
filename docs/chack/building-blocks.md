@@ -9,7 +9,7 @@ image: /img/social-cards/docs-chack-building-blocks.jpg
 
 ## The building blocks
 
-The four categories tell you where a piece of code belongs. When you build a backend feature - an HTTP endpoint or a message broker handler - the same set of building blocks shows up repeatedly:
+The four categories tell you where a piece of code belongs. When you build a backend feature - an HTTP endpoint or a message broker handler - you'll meet the same handful of building blocks again and again:
 
 | Building Block         | Category         | Description |
 |------------------------|------------------|-------------|
@@ -53,20 +53,20 @@ Let's walk through a small feature that adds an item to a to-do list. Organized 
 
 `ToDoItem` sits in the parent folder because other slices under `ToDoItems` use it as well. `DatabaseAccess` is a [folder that is not a slice](./vertical-slices.md#folders-that-are-not-slices): it holds what all database Humble Objects share, plus the Module that registers it.
 
-Each building block plays a specific role in this slice:
+Here's what each building block contributes:
 
-- **The domain model.** `ToDoItem` checks its preconditions on creation (a title must not be empty), so invalid instances cannot be created. It knows nothing about how it is stored.
-- **The Request DTO and its validator.** `NewToDoItemDto` carries the title sent by the client and stays untrusted until `NewToDoItemDtoValidator` validates it.
+- **The domain model.** `ToDoItem` checks its preconditions when it is created - a title must not be empty - so nobody can create one in an invalid state. It knows nothing about how it's stored.
+- **The Request DTO and its validator.** `NewToDoItemDto` carries the title sent by the client and stays untrusted until `NewToDoItemDtoValidator` has checked it.
 - **The Session.** Because the feature writes data and the endpoint controls when to commit, its Humble Object is a Session. `AddToDoItemSession` is the Core-owned abstraction with methods to add an item and commit; `SqlAddToDoItemSession` implements it for the database.
 - **The endpoint.** `AddToDoItemEndpoint` receives the DTO, calls the validator, creates the `ToDoItem`, passes it to the Session, and commits.
 - **The Module.** `AddToDoItemModule` registers the endpoint, validator, and Session, and maps the route to the endpoint.
 
-Four design choices stand out in this layout:
+A few things in here are worth a closer look:
 
-- **The endpoint calls the validator directly.** Both are Core types, so there is no abstraction between them and one Unit Test covers both.
-- **The current time comes from an abstraction.** The item records its creation timestamp. Instead of reading the system clock directly, the endpoint uses a clock abstraction so tests can control the time.
+- **The endpoint calls the validator directly.** Both are Core types, so there's no abstraction between them and one Unit Test covers both.
+- **The current time comes from an abstraction.** The item records when it was created. Instead of reading the system clock directly, the endpoint uses a clock abstraction so tests can decide what time it is.
 - **There is no service.** The logic is small enough to stay in the endpoint. Once it grows more complex (coordinating multiple entities, interdependent rules, or several Humble Objects), extract a service that the endpoint calls directly. Your Unit Tests stay the same because they target the endpoint.
-- **The Module does not register everything the slice uses.** The Session depends on the database connection and the endpoint depends on the clock abstraction, both owned by other parts of the application. Registering them here would duplicate registrations and make startup depend on Module execution order (see [Modules](./composition-root.mdx#modules)).
+- **The Module doesn't register everything the slice uses.** The Session depends on the database connection and the endpoint depends on the clock abstraction, both owned by other parts of the application. If this Module registered them as well, they'd be registered twice, and startup would depend on Module execution order (see [Modules](./composition-root.mdx#modules)).
 
 ## Testing the slice
 
@@ -74,7 +74,7 @@ The Unit Tests target the endpoint while using the real validator and real domai
 
 One test sends a valid DTO and asserts that exactly one item was added with a trimmed title and the test's timestamp, and that the Session committed once. Another sends an empty title and asserts that the endpoint returns a validation error without touching the Session. Because these tests run entirely in memory, you can add edge and error cases freely (such as an overly long title or a Session Stub that simulates a concurrency conflict) while keeping the suite fast.
 
-Unit Tests cannot verify that the Session, database mapping, Module registrations, and route mapping work together. Cover that wiring with one happy-path Integration Test: start the application with the real Composition Root and a real database, send a request, and verify that the item is stored. See [Automated Tests](./automated-tests.mdx) for the reasoning.
+Unit Tests can't tell you whether the Session, database mapping, Module registrations, and route mapping work together. Cover that wiring with one happy-path Integration Test: start the application with the real Composition Root and a real database, send a request, and verify that the item ends up in the database. See [Automated Tests](./automated-tests.mdx) for the reasoning.
 
 :::tip[In .NET Practice]
 [A Complete Slice in ASP.NET Core](./dotnet/a-complete-slice.md) shows this feature in code, from the entity to the Unit Tests.

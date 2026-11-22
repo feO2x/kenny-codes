@@ -15,7 +15,7 @@ import ChackDiagram from '@site/src/components/ChackDiagram';
 
 When an application's behavior is spread across dozens or hundreds of types, one place has to wire them together and start the app. That place is the Composition Root.
 
-Most applications use a Dependency Injection container for this, and some frameworks require one. The alternative is Pure DI: plain imperative code that instantiates objects and passes them into constructors. Both approaches work well, and for small apps Pure DI is often easier to read. The concept comes from [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns) by Steven van Deursen and Mark Seemann.
+Most applications use a Dependency Injection container for this, and some frameworks require one. The alternative is Pure DI: plain imperative code that instantiates objects and passes them into constructors. Both work, and for small apps Pure DI is often easier to read. The concept comes from [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns) by Steven van Deursen and Mark Seemann.
 
 The Composition Root is the only category allowed to reference both the Core and the Humble Objects, and it decides which concrete Humble Object fulfills each I/O abstraction. Neither the Core nor the Humble Objects reference it back; only [Automated Tests](./automated-tests.mdx) may use it as part of their fixture.
 
@@ -27,11 +27,11 @@ Every Composition Root runs through three phases:
 
 **Register.** The first thing the application does at startup. You register types and their lifetimes with the container and read configuration from files, environment variables, command-line arguments, or secret stores. Once this phase finishes, the container is immutable - nothing gets registered afterwards.
 
-**Resolve.** The top-level root component that runs the application is created, either by the container or by your own imperative code. In a web app this is the app itself; in a UI app it is the root view or main window.
+**Resolve.** The top-level root component that runs the application is created, either by the container or by your own imperative code. In a web app this is the app itself; in a UI app it's the root view or main window.
 
 **Release.** The root component is disposed, ending its lifetime along with the objects it owns. Native resources are closed, buffered data is flushed, and state that must survive the session is persisted.
 
-Resolve and Release happen repeatedly while the application runs: once per HTTP request in a web app, once per message in a broker subscriber, or once per navigation or dialog in a UI app. Each cycle builds an object graph, executes the work, and disposes it.
+Resolve and Release happen repeatedly while the application runs: once per HTTP request in a web app, once per message in a broker subscriber, or once per navigation or dialog in a UI app. Each cycle builds an object graph, uses it, and disposes it.
 
 ## Guidelines
 
@@ -39,13 +39,13 @@ Resolve and Release happen repeatedly while the application runs: once per HTTP 
 
 **Do not share state through mutable statics.** Static fields and properties that change at runtime create invisible coupling, break test isolation, cause race conditions, and prevent running two configurations side by side. Pass context objects via dependency injection instead.
 
-**Keep lifetime management here.** Core objects should not manage how long their dependencies live. Resolve and release object graphs at well-defined boundaries and let the container handle the rest. The exception is a short-lived resource that a Core object explicitly opens, uses, and closes within one operation - handling it locally is clearer than pushing that lifetime out to the container.
+**Keep lifetime management here.** Core objects shouldn't manage how long their dependencies live. Resolve and release object graphs at well-defined boundaries and let the container handle the rest. The exception is a short-lived resource that a Core object explicitly opens, uses, and closes within one operation - handling it locally is clearer than pushing that lifetime out to the container.
 
-**Keep it simple, and review it.** Like Humble Objects, the Composition Root is not heavily unit-tested: it is wiring code, and testing it in isolation proves little. Readability is your main safety net here. Prefer straightforward registration code over clever conventions and reflection-driven scanning that nobody can follow.
+**Keep it simple, and review it.** Like Humble Objects, the Composition Root is never the system under test; Integration Tests exercise it along the way, and testing it in isolation proves little. Readability is your main safety net here. Prefer straightforward registration code over clever conventions and reflection-driven scanning that nobody can follow.
 
-**Bind configuration to options objects.** Read configuration from files, environment variables, or secret stores in the Composition Root. Pass plain options DTOs into the Core so it never depends on where settings came from.
+**Bind configuration to options objects.** Read configuration from files, environment variables, or secret stores in the Composition Root. Pass plain options DTOs into the Core so it doesn't depend on where settings came from.
 
-**Startup tasks can call Humble Objects directly.** Some tasks need I/O before the app starts serving requests, such as creating database indexes or setting up a storage bucket. The Composition Root can call a Humble Object directly for those tasks. As soon as non-trivial logic is involved, put that logic in a Core service and call the service instead so you can unit-test it.
+**Startup tasks can call Humble Objects directly.** Some tasks need I/O before the app starts serving requests, such as creating database indexes or setting up a storage bucket. The Composition Root can call a Humble Object directly for those tasks. When logic is involved, put it in a Core service and call the service instead so you can unit-test it.
 
 ## Modules
 
@@ -53,7 +53,7 @@ As an application grows, a single registration file gets long and turns into a m
 
 One rule keeps Modules maintainable: **a Module only registers the types that belong to its own folder.** Even when a slice depends on something registered elsewhere, its Module leaves that registration to the owning folder - it neither registers the shared dependency itself nor calls the other Module. Breaking this rule causes duplicate registrations and makes startup behavior depend on the order in which Modules run.
 
-In practice, that rule leads to three conventions:
+In practice, that means:
 
 - Types shared by several slices are registered by the Module of the folder that owns them: either the closest common parent or the sibling folder they moved into (see [Hierarchy and sharing](./vertical-slices.md#hierarchy-and-sharing)).
 - Shared infrastructure like the database context is registered by the Module of a [folder that is not a slice](./vertical-slices.md#folders-that-are-not-slices), such as `DatabaseAccess`.

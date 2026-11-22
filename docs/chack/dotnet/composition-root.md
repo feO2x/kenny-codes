@@ -98,6 +98,6 @@ Let the base address end with a slash, like `https://rates.example.com/api/`. Ot
 ## Guidelines
 
 - **Register Humble Objects against their Core abstraction:** `services.AddScoped<IPlaceOrderSession, EfPlaceOrderSession>()`. The Core only sees the interface; this registration line is the one place that wires in Entity Framework Core.
-- **Get lifetimes right.** A scoped dependency captured by a singleton is a classic DI bug because it keeps a `DbContext` alive for the entire process lifetime. ASP.NET Core validates scopes in the Development environment and catches this at startup - leave scope validation enabled.
-- **Bind configuration to options.** `services.Configure<ShippingOptions>(configuration.GetSection("Shipping"))` or `AddOptions<T>().Bind(...).ValidateOnStart()` binds settings into plain options objects. The Core receives those objects without knowing whether values came from `appsettings.json`, environment variables, or a secret store.
+- **Get lifetimes right.** A scoped dependency captured by a singleton is the classic bug - it keeps a `DbContext` alive for the life of the process. ASP.NET Core validates scopes in the Development environment and reports this at startup, so it's worth leaving that on.
+- **Bind configuration to options.** `services.Configure<ShippingOptions>(configuration.GetSection("Shipping"))` or `AddOptions<T>().Bind(...).ValidateOnStart()` binds settings into plain options objects. The Core receives them and doesn't need to know whether values came from `appsettings.json`, environment variables, or a secret store.
 - **Run startup tasks before the app serves requests.** Database migrations or storage bucket setup can run in `Program.cs` between `Build()` and `RunAsync()`, inside a dedicated service scope.

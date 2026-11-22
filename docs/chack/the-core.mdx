@@ -17,7 +17,7 @@ Everything that runs in memory.
 
 The Core is the heart of the software. It is written so that it can execute completely in memory, decoupled from every I/O call, which is what makes it cheap to test. It usually consists of three kinds of types:
 
-- **A domain model.** Related types capture the data and potentially rules of the domain. A Humble Object must be able to persist an entity, while the entity itself knows nothing about how that happens. An entity may carry a foreign key property it would not strictly need, but it must not have a method that builds the SQL statement to load or save itself. Whether your entities carry behavior (as in [Domain-Driven Design](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/)) or are plain data holders ([Anemic Domain Model](https://martinfowler.com/bliki/AnemicDomainModel.html)) is your call - CHACK works with both.
+- **A domain model.** Related types capture the data and, potentially, the rules of the domain. A Humble Object must be able to persist an entity, while the entity itself knows nothing about how that happens. An entity may carry a foreign key property it wouldn't strictly need, but it must not have a method that builds the SQL statement to load or save itself. Whether your entities carry behavior (as in [Domain-Driven Design](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/)) or are plain data holders ([Anemic Domain Model](https://martinfowler.com/bliki/AnemicDomainModel.html)) is your call - CHACK works with both.
 - **Services.** These are not persisted. They encapsulate logic that operates on one or more entities. They might be the entry points a framework calls when a request arrives - an HTTP endpoint, a gRPC method, a message subscriber - and they hold the logic for that operation. Services may call other services: an endpoint may call a validator, a calculator, or a mapper.
 - **Data Transfer Objects.** Inputs and outputs of endpoints, messages on a broker, configuration values. An anemic domain model usually consists of DTO types. They may be mutable or immutable. If possible, prefer the latter. DTOs that arrive from outside the process are untrusted until your Core has validated them.
 
@@ -29,9 +29,9 @@ Everything in this list runs in memory, without touching a disk, a socket, or an
 
 **Encapsulate the domain.** Implement the required behavior in a way that makes invalid state unreachable - in memory as well as in the database. If a type can only be constructed in a valid state, no caller has to remember the rules.
 
-**Check preconditions, verify postconditions.** As described by Bertrand Meyer's [Design by Contract](https://www.eiffel.com/values/design-by-contract/introduction/), validate the parameters a method receives and throw when they are invalid. Make sure a method upholds its postconditions and its invariants with automated tests. An advanced developer should study his book [Object-Oriented Software Construction](https://bertrandmeyer.com/OOSC2/).
+**Check preconditions, verify postconditions.** Following Bertrand Meyer's [Design by Contract](https://www.eiffel.com/values/design-by-contract/introduction/), validate the parameters a method receives and throw when they are invalid. Verify with automated tests that a method upholds its postconditions and invariants. An advanced developer should study his book [Object-Oriented Software Construction](https://bertrandmeyer.com/OOSC2/).
 
-**Reach for immutability** when a set of values must not change within a part of the code. It removes a whole class of bugs and makes concurrent code far easier to reason about.
+**Reach for immutability** when a set of values must not change within a part of the code. It prevents accidental state changes and makes concurrent code much easier to follow.
 
 **Name things after the domain.** Types and methods should come out of the ubiquitous language that your domain experts use. Someone reading the Core should recognize the concepts they deal with in their daily work.
 
@@ -45,11 +45,11 @@ Everything in this list runs in memory, without touching a disk, a socket, or an
 
 **Make non-determinism explicit.** The current time, new GUIDs, and random numbers change with every call - and so would the results of your tests. When the Core gets these values through an abstraction, each test can decide what they are.
 
-**Cover it with Unit Tests.** They do not only cover the happy path, but allow edge and error cases via prepared Test Doubles that are painful to reconstruct in an Integration or End-to-End Test, see [Automated Tests](./automated-tests.mdx).
+**Cover it with Unit Tests.** They cover not only the happy path but also edge and error cases: a prepared Test Double can simulate failures that are painful to reproduce in an Integration or End-to-End Test (see [Automated Tests](./automated-tests.mdx)).
 
 ## Frameworks and libraries
 
-A type fits into the Core as long as it does not perform I/O, even if it comes from a framework or third-party library. That includes types from a data access framework - enums, value objects, or options types - when you can instantiate and use them purely in memory. How strongly you couple your Core to a framework is your decision.
+A type fits into the Core as long as it doesn't perform I/O, even if it comes from a framework or library. That's perfectly fine for types from a data access framework, too - enums, value objects, or options types - when you can instantiate and use them in memory. How strongly your Core depends on a framework is up to you.
 
 The same rule applies to code that extends or configures a framework:
 
@@ -59,13 +59,13 @@ The same rule applies to code that extends or configures a framework:
 
 ## The I/O abstractions belong to the Core
 
-When a Core service needs to call third-party systems, it depends on an abstraction like an interface or an abstract base class. It describes what the Core requires from the I/O call, in the Core's own vocabulary. A Humble Object implements this abstraction.
+When a Core service needs to call third-party systems, it depends on an abstraction like an interface or an abstract base class. The abstraction describes what the Core requires from the I/O call, in the Core's own vocabulary. A Humble Object implements this abstraction.
 
-This is the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf) at work. The abstraction is not a technical artifact of the data access layer that the Core happens to consume - it is owned, named, and shaped by the Core.
+This is the [Dependency Inversion Principle](https://www.labri.fr/perso/clement/enseignements/ao/DIP.pdf) at work. The Core owns this abstraction and names it in its own vocabulary.
 
 Give each use case its own abstraction. For example, a single interface with a method for every I/O call across different endpoints (as you can see in many Repository implementations) is a violation of the [Interface Segregation Principle](https://www.cs.utexas.edu/~fares/papers/ISP.pdf). An abstraction works best when it is designed for exactly one consumer - usually one [vertical slice](./vertical-slices.md) - and only contains the members this consumer needs. [Clients and Sessions](./clients-and-sessions.md#one-per-slice-not-one-per-entity) shows what this looks like in practice.
 
-One exception applies: your Core can depend directly on a framework-provided I/O abstraction if it is small, built for substitution, and ships with ready-made Test Doubles. Logging is the classic example - wrapping a framework logger in your own interface just adds another layer without making tests any easier.
+There is one exception: your Core can depend directly on a framework-provided I/O abstraction if it's small, designed for substitution, and ships with ready-made Test Doubles. A logger is a typical example - wrapping it in your own interface only adds another layer without making anything easier to test.
 
 :::tip[In .NET Practice]
 [The Core in .NET](./dotnet/the-core.md) shows which framework types fit into the Core, how to keep persistence and serialization details off your entities, and how to make time testable.

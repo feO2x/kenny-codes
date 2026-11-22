@@ -29,7 +29,7 @@ An Integration Test starts the application in-process with `WebApplicationFactor
 
 ### One container per test run
 
-xUnit v3 lets you share a fixture across all test classes in an assembly. Use an assembly fixture to share both the database container and the test host across the suite:
+xUnit v3 lets you share a fixture across all test classes in an assembly. Put both the database container and the test host in an assembly fixture:
 
 ```csharp
 [assembly: AssemblyFixture(typeof(WebAppFixture))]

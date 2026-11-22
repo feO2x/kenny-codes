@@ -6,11 +6,11 @@ image: /img/social-cards/docs-chack-dotnet-the-core.jpg
 
 # The Core in .NET
 
-Applying [The Core](../the-core.mdx) in .NET comes down to three practical questions: which .NET types belong in the Core, where to put framework configuration, and how to handle non-deterministic APIs in tests.
+This page shows how the ideas from [The Core](../the-core.mdx) translate to .NET: which types fit into the Core, where framework configuration goes, and how to keep time and other non-deterministic values under the control of your tests.
 
 ## Which .NET types fit into the Core?
 
-The rule is simple: if a type runs in memory, it can live in the Core; if it performs I/O, it belongs in a Humble Object.
+The question is always the same: does the type perform I/O? Here's how that plays out for the types you'll meet most often.
 
 Types that belong in the Core:
 
@@ -25,14 +25,14 @@ Types that perform I/O and belong in Humble Objects:
 - `DbContext`, `DbSet<T>`, and queries built from them
 - `HttpClient`
 - `DbConnection`, `DbCommand`, and other ADO.NET types
-- `File`, `Directory`, `FileStream`, and related file APIs
+- `File`, `Directory`, `FileStream`, and friends
 - Clients for message brokers, object storage, and other SDKs that talk to another process
 
-One type stays out for a different reason: `IServiceProvider`. A Core type that asks the container for its dependencies hides them from its constructor. When a Core type truly needs to create objects at runtime, inject an abstract factory instead and implement it in the Composition Root.
+One type stays out for a different reason: `IServiceProvider`. A Core type that asks the container for its dependencies hides them from its constructor. When a Core type has to create objects at runtime, inject an abstract factory instead and implement it in the Composition Root.
 
 ## Keep attributes off your entities
 
-`System.Text.Json` and Entity Framework Core both offer attributes like `[JsonPropertyName]`, `[Key]`, or `[MaxLength]`. Attributes are convenient, but they couple your entities directly to persistence and serialization details. Both frameworks support external configuration classes instead, which is what CHACK recommends:
+`System.Text.Json` and Entity Framework Core both offer attributes like `[JsonPropertyName]`, `[Key]`, or `[MaxLength]`. Attributes are convenient, but they couple your entities directly to persistence and serialization details. Both frameworks also let you configure the same things in separate types, and that's the way CHACK suggests:
 
 ```csharp
 public sealed class ToDoItemConfiguration : IEntityTypeConfiguration<ToDoItem>
@@ -45,22 +45,22 @@ public sealed class ToDoItemConfiguration : IEntityTypeConfiguration<ToDoItem>
 }
 ```
 
-This configuration runs in memory, so it belongs to the Core even though it configures persistence. The same applies to `JsonSerializerOptions` and custom `JsonConverter<T>` implementations. If a custom converter contains non-trivial logic, cover it with Unit Tests.
+This configuration runs in memory, so it belongs to the Core even though it's all about persistence. The same applies to `JsonSerializerOptions` and custom `JsonConverter<T>` implementations. If a custom converter contains non-trivial logic, cover it with Unit Tests.
 
 ## Pipes and filters
 
-Middleware, `IEndpointFilter` implementations, and MediatR pipeline behaviors belong to the Core as long as they do not perform I/O. When they need I/O, they call an I/O abstraction like any other Core type. Registering them and setting their order is the job of the Composition Root.
+Middleware, `IEndpointFilter` implementations, and MediatR pipeline behaviors belong to the Core as long as they don't perform I/O. When they need I/O, they call an I/O abstraction like any other Core type. Registering them and setting their order is the job of the Composition Root.
 
 ## Logging
 
-`ILogger<T>` is the one I/O abstraction that the Core uses directly without a custom wrapper on top. It is small, designed for substitution, and ships with a built-in Null Object: pass `NullLogger<T>.Instance` in tests. When a test needs to assert on log output, write a small Spy implementing `ILogger<T>`.
+`ILogger<T>` is the one I/O abstraction that the Core uses directly without a custom wrapper on top. It's small, designed for substitution, and ships with a built-in Null Object: pass `NullLogger<T>.Instance` in tests. When a test needs to assert on log output, write a small Spy implementing `ILogger<T>`.
 
 ## Time, GUIDs, and random numbers
 
 `DateTime.UtcNow`, `DateTimeOffset.UtcNow`, `Guid.NewGuid()`, and `Random.Shared` return a different value on every call. To keep tests deterministic, inject them through abstractions instead:
 
 - **Time:** inject `TimeProvider`. In production, the Composition Root registers `TimeProvider.System`; in tests, `FakeTimeProvider` from the `Microsoft.Extensions.TimeProvider.Testing` package lets you fix and advance time. [Light.SharedCore](https://github.com/feO2x/Light.SharedCore) offers `IClock` as a slimmer alternative.
-- **GUIDs:** often the Core does not need to generate GUIDs at all - the client can pass one in the request, or the database can assign it. When the Core must generate one, inject a small abstraction like `Func<Guid>` or an `IIdGenerator`.
+- **GUIDs:** often the Core doesn't need to generate GUIDs at all - the client can pass one in the request, or the database can assign it. When the Core must generate one, inject a small abstraction like `Func<Guid>` or an `IIdGenerator`.
 - **Random numbers:** inject a `Random` instance instead of using `Random.Shared`, so tests can pass one with a fixed seed.
 
 ## DTOs and validation

@@ -6,7 +6,7 @@ image: /img/social-cards/docs-chack-dotnet-clients-and-sessions.jpg
 
 # Clients and Sessions in .NET
 
-In .NET, [Clients and Sessions](../clients-and-sessions.md) are most commonly backed by Entity Framework Core or `HttpClient`. If you have not read the methodology page yet, start there for the conceptual distinction between Clients and Sessions and why each vertical slice gets its own Humble Object.
+In .NET, [Clients and Sessions](../clients-and-sessions.md) are most commonly backed by Entity Framework Core or `HttpClient`. If you haven't read the methodology page yet, start there - it explains who controls the transaction and why each vertical slice gets its own Humble Object.
 
 ## The base abstractions
 
@@ -145,7 +145,7 @@ public sealed class EfOrderQueueClient(AppDbContext dbContext)
 
 One database query and a projection - nothing else. Because Entity Framework Core translates the projection directly into SQL, cover it with the feature's Integration Tests rather than Unit Tests.
 
-Clients are not limited to databases. A typed `HttpClient` calling a web service is a Client, too:
+Clients aren't limited to databases. A typed `HttpClient` calling a web service is a Client, too:
 
 ```csharp
 public interface IShippingRatesClient
@@ -182,7 +182,7 @@ public sealed class HttpShippingRatesClient(HttpClient httpClient) : IShippingRa
 }
 ```
 
-This Client owns no unmanaged resources because `IHttpClientFactory` manages the underlying connections. As a result, the interface does not need to inherit `IAsyncDisposable`. [The Composition Root in .NET](./composition-root.md#registering-http-clients) shows how to register it.
+This Client owns no unmanaged resources because `IHttpClientFactory` manages the underlying connections. As a result, the interface doesn't need to inherit `IAsyncDisposable`. [The Composition Root in .NET](./composition-root.md#registering-http-clients) shows how to register it.
 
 ## A transaction for the Client's whole lifetime
 
@@ -242,7 +242,7 @@ Disposing an uncommitted transaction rolls it back, which is the right behavior 
 
 ## One per slice, not one per entity
 
-Compare a typical entity-wide Repository interface:
+Here is the kind of Repository that CHACK replaces:
 
 ```csharp
 public interface IOrderRepository
@@ -257,7 +257,7 @@ public interface IOrderRepository
 }
 ```
 
-with two feature-specific abstractions - one for canceling an order, and one for reading a customer's order history:
+And here are two abstractions shaped by the features that use them - one for canceling an order, and one for reading a customer's order history:
 
 ```csharp
 public interface ICancelOrderSession : ISession
@@ -300,17 +300,17 @@ public sealed class EfCancelOrderSession(AppDbContext dbContext)
 }
 ```
 
-`OrderQueries` performs I/O, so it belongs to the Humble Object category. A reusable `Expression<Func<Order, OrderHistoryEntry>>` that several projections share only runs in memory and may belong to the Core.
+`OrderQueries` performs I/O, so it belongs to the Humble Object category. A reusable `Expression<Func<Order, OrderHistoryEntry>>` that several projections share only runs in memory and belongs to the Core.
 
 ## Guidelines
 
 - **Make I/O methods asynchronous** and give them a `CancellationToken` as the last parameter, with a default value. Pass the token on from the caller: ASP.NET Core passes one to every endpoint, and message handlers get one from their context. Synchronous I/O blocks a thread pool thread while it waits, which can starve the thread pool under load.
 - **Attach and remove synchronously.** Adding an entity to a `DbSet<T>` or removing it doesn't hit the database yet, so these methods don't need to be asynchronous.
 - **Call `SaveChangesAsync` once per Session.** One commit means one transaction: either the whole business transaction succeeds, or none of it does.
-- **Never let `IQueryable<T>` leave a Humble Object.** Once a caller composes onto the query, the Core decides which SQL runs, and execution moves outside the Humble Object where a Test Double cannot reproduce database query semantics. Return a `List<T>`, an array, or a DTO instead.
+- **Never let `IQueryable<T>` leave a Humble Object.** As soon as a caller adds to the query, the Core decides which SQL runs, and execution moves outside the Humble Object where a Test Double can't behave like the real database. Return a `List<T>`, an array, or a DTO instead.
 - **Translate exceptions the Core cares about.** Entity Framework Core reports concurrency conflicts with `DbUpdateConcurrencyException`. When the Core needs to react to it, catch it in the Humble Object and map it to a Core exception or a result value. If several Sessions need the same handling, put it in a shared base class.
-- **Register Clients and Sessions as scoped services.** They are not thread-safe, so a singleton is not an option. Because the DI container keeps transient disposables alive until the scope ends anyway, scoped registration reflects their actual lifetime. A typed `HttpClient` is the exception: `AddHttpClient` registers it as transient, which works because it owns nothing the scope needs to dispose.
-- **Keep your `DbContext` outside feature slices.** It is a Humble Object, too, along with the base classes above. Place them in a [folder that is not a slice](../vertical-slices.md#folders-that-are-not-slices), like `DatabaseAccess`.
+- **Register Clients and Sessions as scoped services.** They aren't thread-safe, so a singleton isn't an option. Transient disposable services are kept alive by the container until the scope ends anyway, so scoped says what actually happens. A typed `HttpClient` is the exception: `AddHttpClient` registers it as transient, and that's fine, because it owns nothing that the scope would have to release.
+- **Give your `DbContext` a home outside the slices.** It's a Humble Object, too, along with the base classes above. Place them in a [folder that is not a slice](../vertical-slices.md#folders-that-are-not-slices), like `DatabaseAccess`.
 
 To see a Session wired into a full endpoint with a Module and Unit Tests, continue to [A Complete Slice in ASP.NET Core](./a-complete-slice.md).
 

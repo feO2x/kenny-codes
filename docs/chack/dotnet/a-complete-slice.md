@@ -81,7 +81,7 @@ public sealed class NewToDoItemDtoValidator
 }
 ```
 
-`Title` is declared non-nullable because that is what the business logic expects after validation. The deserializer may still produce `null`, and the validator catches it. In a production codebase, you would likely use a validation library like FluentValidation or Light.PortableResults.Validation; the hand-written version keeps this example self-contained.
+`Title` is declared non-nullable because that's what the business logic expects after validation. The deserializer may still produce `null`, and the validator catches it. In a real codebase, you'd probably use a validation library like FluentValidation or Light.PortableResults.Validation; the hand-written version keeps this example self-contained.
 
 ## Session
 
@@ -175,7 +175,7 @@ public static class ToDoItemsModule
 
 ## Test Double and Unit Tests
 
-To verify what the endpoint passed to the Session and whether it committed, we implement a Spy:
+To verify what the endpoint passed to the Session and whether it committed, you write a Spy:
 
 ```csharp
 public sealed class AddToDoItemSessionSpy : IAddToDoItemSession

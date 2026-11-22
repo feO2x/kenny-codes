@@ -13,23 +13,23 @@ import ChackDiagram from '@site/src/components/ChackDiagram';
 
 ## Why the boundary needs its own category
 
-No application does anything useful without I/O. Databases, the file system, web services, message brokers, printers, CRMs, ERPs, SAP, you name it. Every one of them lives outside your process, and reaching them costs usually a billion times more time than an in-memory call. The [Automated Tests](./automated-tests.mdx) page has the numbers.
+No application does anything useful without I/O. Databases, the file system, web services, message brokers, printers, CRMs, ERPs, SAP, you name it. Every one of them lives outside your process, and reaching them usually costs a billion times more time than an in-memory call. The [Automated Tests](./automated-tests.mdx) page has the numbers.
 
-Cost is only half of it. I/O is also the main part of your code that causes exceptions and that is the hardest to exercise in Automated Tests: a third-party system must be running, populated with the right state before the test and reset afterwards. Provoking failures on demand can be hard or outright impossible. Code that mixes business rules with I/O inherits all of that difficulty. Entangling both is the main reason for "Spaghetti Code" in my opinion.
+Cost is only half of it. I/O is also where most exceptions come from, and the hardest part of your code to exercise in Automated Tests: a third-party system must be running, populated with the right state before the test and reset afterwards. Provoking failures on demand can be hard or outright impossible. Code that mixes business rules with I/O inherits all of that difficulty. Entangling both is the main reason for "Spaghetti Code" in my opinion.
 
-So CHACK isolates I/O from the Core. At the process boundary sit Humble Objects: for each use case, they represent the glue between your Data Access technology and the Core. Each Humble Object should talk to one third-party system. They implement an [I/O abstraction owned by the Core](./the-core.mdx), which means you can introduce a Test Double for it in Unit Tests and stay in-memory.
+So CHACK isolates I/O from the Core. At the process boundary sit Humble Objects: for each use case, they represent the glue between your data access technology and the Core. Each Humble Object should talk to one third-party system. They implement an [I/O abstraction owned by the Core](./the-core.mdx), which means you can introduce a Test Double for it in Unit Tests and stay in memory.
 
 ## The responsibilities of a Humble Object
 
-1. **It performs the I/O calls.** You usually use a data access technology like an O/R mapper, an HTTP client, a broker client, invoking a CLI process, or proprietary SDKs/drivers to access the third-party system. Aim for one I/O call per method on the Humble Object, though in certain use cases, more than one call can occur.
-2. **It registers entity changes, if needed.** If your data access technology supports Change Tracking, some methods on the Humble Object may be required to add or remove entities from the O/R mapper's Unit of Work. The capabilities of your Data Access technology shape the API for the Humble Object.
+1. **It performs the I/O calls.** You usually use a data access technology like an O/R mapper, an HTTP client, a broker client, a CLI tool, or proprietary SDKs/drivers to access the third-party system. Aim for one I/O call per method on the Humble Object, though in certain use cases, more than one call can occur.
+2. **It registers entity changes, if needed.** If your data access technology supports change tracking, some methods on the Humble Object may need to add entities to or remove them from the O/R mapper's Unit of Work. The capabilities of your data access technology shape the API for the Humble Object.
 3. **It maps the data.** Outgoing parameters get translated into whatever the third-party system expects, and incoming data gets translated into the types the Core wants back. This can involve catching exceptions which then can be mapped to, e.g., the Result Pattern or wrapped in another exception the Core understands.
 
 :::info[Light.PortableResults]
 I have implemented my own Result Pattern library called Light.PortableResults. Check it out on [GitHub](https://github.com/feO2x/Light.PortableResults)!
 :::
 
-That is the whole list. Everything else like decisions, validation, calculation, orchestration, or logging belongs to the Core.
+That is the whole list. Everything else, like decisions, validation, calculation, orchestration, or logging, belongs to the Core.
 
 Two notes on mapping the data:
 
@@ -62,11 +62,11 @@ A Humble Object that only reads data and offers no commit method is therefore a 
 
 Each vertical slice gets its own Humble Object per third-party system. This matters most when transactions are involved, because a Session then marks the transaction boundary of exactly one feature.
 
-You may know a different approach from the Repository pattern, where one interface collects every operation on an entity across all features. That kind of abstraction is shaped around database tables rather than the features using it, which violates the Dependency Inversion and Interface Segregation Principles: every consumer depends on methods it never calls, and every Test Double has to implement them. [Clients and Sessions](./clients-and-sessions.md#one-per-slice-not-one-per-entity) compares the two approaches.
+You may know a different approach from the Repository pattern, where one interface collects every operation on an entity across all features. Such an abstraction is shaped by the data instead of by its consumer, which works against the Dependency Inversion and Interface Segregation Principles: every consumer depends on members it doesn't need, and every Test Double has to implement them. [Clients and Sessions](./clients-and-sessions.md#one-per-slice-not-one-per-entity) compares the two approaches.
 
-Two or more slices can share a Humble Object when they need the exact same abstraction. If their requirements diverge later, split it again.
+Two or more slices can share a Humble Object when they need the exact same abstraction. If their needs diverge later, split it again.
 
-Keeping Humble Objects separate does not mean duplicating code. Shared queries, filters, projections, or mappings can move into static methods that each Humble Object calls. [Hierarchy and sharing](./vertical-slices.md#hierarchy-and-sharing) explains which folder to put them in. Static methods that perform I/O belong to the Humble Object category; static methods that run purely in memory belong to the Core.
+Keeping Humble Objects separate doesn't mean duplicating code. Shared queries, filters, projections, or mappings can move into static methods that each Humble Object calls. [Hierarchy and sharing](./vertical-slices.md#hierarchy-and-sharing) explains which folder to put them in. Static methods that perform I/O belong to the Humble Object category; static methods that run purely in memory belong to the Core.
 
 ## The local file system is I/O, too
 
@@ -74,7 +74,7 @@ Reading and writing files is still I/O, even though the local file system is alw
 
 ## Supporting types
 
-Not every type in this category is called by the Core. A database context subclass, a base class for Humble Objects, a static helper method that performs I/O, or a startup task that creates database indexes all perform I/O, which puts them in the Humble Object category even though they do not implement a Core abstraction. The same guidelines apply: keep them small and free of business logic.
+Not every type in this category is called by the Core. A database context subclass, a base class for Humble Objects, a static helper method that performs I/O, or a startup task that creates database indexes all perform I/O, which puts them in the Humble Object category even though they don't implement a Core abstraction. The same guidelines apply: keep them small and free of business logic.
 
 ## Where the pattern comes from
 
