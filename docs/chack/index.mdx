@@ -70,7 +70,7 @@ CHACK avoids both extremes with two rules:
 :::info[The main idea behind CHACK]
 **CHACK forces you to clearly distinguish between in-memory and I/O calls.** Make the blue Core box as large as possible to have more code that in-memory Unit Tests can target.
 
-Why? Third-party system calls are a billion times slower than your in-memory calls and may fail way more often. Take a look at [the performance costs on the Automated Tests page](./automated-tests.mdx#performance-costs-of-integration-tests).
+Why? I/O calls to third-party systems are a billion times slower than your in-memory calls and may fail way more often. Take a look at [the performance costs on the Automated Tests page](./automated-tests.mdx#performance-costs-of-integration-tests).
 
 CHACK does not tell you how to design within the four categories. You want to use the Mediator pattern in your codebase? Go ahead. CQRS, event sourcing, a rich domain model, an anemic one? All compatible with CHACK.
 :::
