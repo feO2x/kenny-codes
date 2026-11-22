@@ -7,18 +7,18 @@ const extremes: {title: string; bullets: string[]}[] = [
   {
     title: 'Too Little Abstraction',
     bullets: [
-      'Thousands of lines of code in a single file',
-      'Little or no abstraction: SQL statements, HTTP calls, business logic, UI manipulation all reside in the same scope',
-      'Tight coupling makes individual parts impossible to test automatically without third-party systems',
+      'Thousands of lines of code in a single file.',
+      'Little or no abstraction: SQL statements, HTTP calls, business logic, UI manipulation all reside in the same scope.',
+      'Tight coupling makes individual parts impossible to cover with automated tests without third-party systems running.',
     ],
   },
   {
     title: 'Excessive Abstraction',
     bullets: [
-      'Loose coupling everywhere: new functionality → new class, new interface, an army of interfaces and tiny objects',
-      'Many test doubles scatter the test suite',
-      'Static methods are considered tight-coupling and are forbidden',
-      'You have to jump to the definition ten times to find the code that actually does the work',
+      'Loose coupling everywhere: new functionality → new class, new interface. Results in an army of interfaces and tiny objects.',
+      'Many test doubles scatter the test suite.',
+      'Static methods are considered tight-coupling and are forbidden.',
+      'You have to jump to the definition ten times to find the code that actually does the work.',
     ],
   },
 ];
