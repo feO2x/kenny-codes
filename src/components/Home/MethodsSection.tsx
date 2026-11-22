@@ -163,8 +163,9 @@ export default function MethodsSection(): ReactNode {
               CHACK
             </Heading>
             <p className={styles.methodText}>
-              A simple way to structure an application: every piece of code belongs to one of four
-              categories.
+              A simple way to structure software apps: every piece of code belongs to one of four
+              categories. Based on DDD, Hexagonal Architecture, and Vertical Slice Architecture,
+              CHACK is easier to learn and pushes junior devs into the pit of success.
             </p>
             <div className={clsx(styles.methodVisual, styles.chackVisual)}>
               <ChackMap />
