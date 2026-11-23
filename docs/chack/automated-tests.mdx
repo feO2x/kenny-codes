@@ -58,7 +58,7 @@ This critique might stem from a misunderstanding of what "unit" actually means. 
   />
 </a>
 
-Beyond that, two approaches to writing Unit Tests matter: **Solitary vs. Sociable**. A Solitary Test replaces every collaborator of the system under test with a Test Double. A Sociable Test allows other units to participate. The same split also goes by another pair of names: **Mockist vs. Classic Style.** Mockist style prefers Solitary Tests and mocks everything. Classic style prefers Sociable Tests and uses Test Doubles only where it must.
+Beyond that, two approaches to writing Unit Tests matter: **Solitary vs. Sociable**. A Solitary Test replaces every collaborator of the System under Test with a Test Double. A Sociable Test allows other units to participate. The same split also goes by another pair of names: **Mockist vs. Classic Style.** Mockist style prefers Solitary Tests and mocks everything. Classic style prefers Sociable Tests and uses Test Doubles only where it must.
 
 <a href="https://martinfowler.com/bliki/UnitTest.html">
   <Image
@@ -74,17 +74,17 @@ Beyond that, two approaches to writing Unit Tests matter: **Solitary vs. Sociabl
 
 Because "Unit Test" means different things to different teams, CHACK defines the three layers of Automated Tests unambiguously:
 
-1. **Unit Tests** run entirely in memory. They mainly exercise types in the Core and are written preferably as Sociable Tests. They target higher-level APIs first and let the lower-level Core components they reference take part in the same test, reducing the need for Test Doubles. Where the system under test would perform an I/O call, the Humble Object is replaced by a Test Double. These tests cover the happy path as well as error and edge cases. There is one deliberate exception: **the local file system doesn't disqualify a Unit Test**. It is available in every context - development machine, CI/CD pipeline, container - and it is fast and stable. Humble Objects that only access the local file system may therefore take part in a Unit Test as collaborators, but never as the system under test.
+1. **Unit Tests** run entirely in memory. They mainly exercise types in the Core and are written preferably as Sociable Tests. They target higher-level APIs first and let the lower-level Core components they reference take part in the same test, reducing the need for Test Doubles. Where the System under Test would perform an I/O call, the Humble Object is replaced by a Test Double. These tests cover the happy path as well as error and edge cases. There is one deliberate exception: **the local file system doesn't disqualify a Unit Test**. It is available in every context - development machine, CI/CD pipeline, container - and it is fast and stable. Humble Objects that only access the local file system may therefore take part in a Unit Test as collaborators, but never as the System under Test.
 2. **Integration Tests** exercise a whole feature through its entry point, with the application assembled by the real Composition Root, and perform at least one real I/O call to one third-party system in another process: a database server, a web service, a message broker, SAP - you name it. An Integration Test may still use Test Doubles for certain abstractions, as long as one genuine I/O call happens. These tests focus on happy paths because failures and edge cases are typically hard to replicate in real systems running in a Docker container or in staging environments.
 3. **End-to-End Tests** allow no Test Doubles at all. Every I/O call goes to a real instance of the real system, in a configuration as close to production as you can make it. They are the most expensive tests to build and run, and like Integration Tests they mainly cover the happy path.
 
 Every test belongs to exactly one of these categories. Here they are side by side:
 
-| Category    | System under test                                    | I/O                                  | Test Doubles                                                                       |
-|-------------|------------------------------------------------------|--------------------------------------|------------------------------------------------------------------------------------|
-| Unit        | Core types, preferably the feature's endpoint        | None, except the local file system   | Replace Humble Objects, except those that only access the local file system        |
-| Integration | A whole feature through the real Composition Root    | At least one real third-party system | Allowed for other third-party systems                                              |
-| End-to-End  | The whole system, running as it does in production   | All real                             | Not allowed                                                                        |
+| Category    | System under test                                    | I/O                                  | Test Doubles                                                                                                 |
+|-------------|------------------------------------------------------|--------------------------------------|--------------------------------------------------------------------------------------------------------------|
+| Unit        | Core types, preferably the feature's endpoint        | None, except the local file system   | Replace at least Humble Objects. Those that only access the local file system may take part in the Unit Test.|
+| Integration | A whole feature through the real Composition Root    | At least one real third-party system | Test Doubles are allowed.                                                                                    |
+| End-to-End  | The whole system, running as it does in production   | All real                             | Test Doubles are not allowed                                                                                 |
 
 ### Performance costs of Integration Tests
 
@@ -92,7 +92,7 @@ The first reason for this split is cost. You can run many thousands of Unit Test
 
 <IoCostChart />
 
-The horizontal axis is logarithmic by default: every grid step is a factor of ten. Switch to linear scaling to see how the slowest operation dominates. You shouldn't focus on the absolute values of this setup, but rather on the differences between these values. They determine how long you sit waiting before you know whether your change works.
+The horizontal axis is logarithmic by default: every grid step is a factor of ten. Switch to linear scaling to see how the slowest operation dominates. You shouldn't focus on the absolute values (they depend on your hardware) but rather on the differences between these values.
 
 ### Writing tests for errors and edge cases
 
@@ -102,19 +102,17 @@ The second reason is coverage of the unhappy paths. Integration Tests are excell
 
 The diagram at the top of this page splits the Automated Tests box into its parts, because the three kinds of tests don't point at the same things.
 
-**The system under test of a Unit Test is always in the Core.** Never a Humble Object, never a component of the Composition Root. Humble Objects are replaced by Test Doubles that implement the same I/O abstraction; that's the entire reason those abstractions exist. Reusing a piece of the Composition Root inside a Unit Test is fine - for example, building a DI container in the setup phase to assemble the object graph - but the Composition Root is the fixture, not the system under test. Starting a host is a different matter, as you'll see in the next section.
+**The System under Test (SUT) of a Unit Test is always in the Core.** Humble Objects are replaced by Test Doubles that implement the same I/O abstraction. Reusing a piece of the Composition Root inside a Unit Test is fine - for example, building a DI container in the setup phase to assemble the object graph.
 
-**Test Doubles implement the I/O abstractions.** Because of them, the system under test can stay in memory during a test run. That is also why the diagram draws Test Doubles pointing at the I/O abstractions rather than at the Humble Objects. A Test Double is a second implementation of the same abstraction, written for the test.
+**Integration Tests may touch everything and E2E Tests must touch everything.** Their point is realism: they use the real Humble Objects and the real Composition Root, so that the fixture resembles what runs in production. They also reach the third-party systems directly - starting a container, seeding a database, publishing a message. Depending on your test setup, they run inside the test runner process (using e.g., Testcontainers to set up third-party systems) or outside of it (e.g., via Docker Compose or Aspire). Integration Tests may add Test Doubles where they need to, End-to-End Tests may not.
 
-**Integration and End-to-End Tests may touch everything.** Their point is realism: they use the real Humble Objects and the real Composition Root, so that the fixture resembles what runs in production. They also reach the third-party systems directly - starting a container, seeding a database, publishing a message. Depending on your test setup, they run inside the test runner process (e.g., via Testcontainers) or outside of it (e.g., via Docker Compose). Integration Tests may add Test Doubles where they need to; End-to-End Tests may not.
-
-**Humble Objects are never the system under test, in any category.** Integration and End-to-End Tests aim at a feature or at the whole system. The Humble Objects take part and are verified along the way, as part of that feature. The same holds for the Composition Root: it helps set up the test, but it is never what the test aims at.
+**Humble Objects are never the System under Test, in any category.** Integration and End-to-End Tests aim at a feature or at the whole system. The Humble Objects take part and are verified along the way, as part of that feature. The same holds for the Composition Root: it helps set up the test, but it is never what the test aims at.
 
 ### Sociable Tests: aim your tests at the most abstract API of a slice
 
-Imagine you implement a feature - an HTTP endpoint, or a subscriber that handles a message from a broker. Typically there will be an entry point and one or more services below it holding the actual logic, plus the I/O abstraction for the database.
+Imagine you implement a feature - an HTTP endpoint, or a subscriber that handles a message from a broker. Typically, there will be an entry point and one or more services below it holding the actual logic, plus the I/O abstraction for the database.
 
-The tempting approach is one test class per type: test the endpoint with a mocked service, test the service with a mocked repository, test the validator on its own. You end up maintaining a web of Test Doubles that mirrors your class structure, and every refactoring below the surface breaks tests, even when behavior didn't change. A typical scenario for Solitary Tests.
+From your experience, you might be tempted to write one test class per type: test the endpoint with a mocked service, test the service with a mocked repository, test the validator on its own. You end up maintaining a web of Test Doubles that mirrors your class structure, and every refactoring below the surface breaks tests, even when behavior didn't change. A typical scenario for Solitary Tests.
 
 CHACK does the opposite. **Write the test against the most abstract API of the slice** - the endpoint - and let the real service, the real validator, and the real mapper participate. Only the Humble Object is doubled. This pays off right away:
 
@@ -122,44 +120,34 @@ CHACK does the opposite. **Write the test against the most abstract API of the s
 - You're free to refactor everything below the endpoint - split a service, merge two types, rename a method - without breaking a single test, as long as the observable behavior is unchanged.
 - The test reads like a description of what the feature does, because it enters through the same door the outside world uses.
 
-Test Doubles at the level of the slice's high-level API therefore stay coarse-grained on purpose.
-
-**Call the endpoint directly.** A Unit Test calls the endpoint method itself, just like the framework would after receiving and deserializing a request. Don't start a host of any kind - no web server, no in-memory test server. A host brings routing, serialization, middleware, and the rest of the framework pipeline with it; making sure all of that works together is what Integration and End-to-End Tests are for. Calling the endpoint directly keeps Unit Tests fast and focused on your own logic.
+**Call the endpoint directly.** A Unit Test calls the endpoint method itself, just like the framework would after receiving and deserializing a request. Don't start a host of any kind - no web server, no in-memory test server. A host brings routing, serialization, middleware, and the rest of the framework pipeline with it. Making sure all of that works is what Integration and End-to-End Tests are for. Calling the endpoint directly keeps Unit Tests fast and focused on your own logic.
 
 **Close coverage gaps with Solitary Tests.** Some code is hard or impossible to reach from the endpoint. Guard clauses are the typical example: when callers of a lower-level type already prevent invalid arguments, a Sociable Test never hits those guard clauses. A Solitary Test calls the method directly to verify them. Intricate calculations with many edge cases are another good candidate, because driving every case through the endpoint buries the actual test logic under setup code.
 
-Overall, strive to keep the number of Test Doubles low.
+Overall, strive to keep the number of Solitary Tests and Test Doubles low.
 
 ## Keeping the test suite fast and reliable
 
 A test suite only helps you when you can trust it and don't mind running it. A few habits make a big difference here.
 
-**Start third-party systems inside the test run.** Tools like [Testcontainers](https://testcontainers.com/) for Integration Tests and [Docker Compose](https://docs.docker.com/compose/) for End-to-End Tests make your suite self-contained and reproducible: every dependency starts automatically when the tests run. Running against a shared, always-on test environment also works, but be aware of the catch: if that environment is only reset periodically, tests that mutate data will eventually collide with leftover state and turn into [flaky tests](https://en.wikipedia.org/wiki/Flaky_test).
+**Start third-party systems inside the test run.** Tools like [Testcontainers](https://testcontainers.com/) for Integration Tests and [Docker Compose](https://docs.docker.com/compose/) for End-to-End Tests make your suite self-contained and reproducible: every dependency starts automatically when the tests run. Running against a shared, always-on test environment also works, but be aware of the catch: if that environment is only reset periodically, tests that mutate data will eventually collide with leftover state and turn into [flaky tests](https://en.wikipedia.org/wiki/Flaky_test). You also cannot run your tests when the shared shared environmment is down.
 
 **Start each system once per test run.** Starting a database or message broker takes seconds. If every test or test class starts its own container, the test run slows down with every new class you add. Start each third-party system once before the tests run and share that instance across the suite.
 
 **Give each test its own data.** When tests share a third-party system, isolate their data: give each test unique IDs, its own database or schema, or its own queue so tests can run in any order or in parallel without interfering with each other.
 
-**Keep tests independent.** Every Unit Test should run on its own, in any order, and fail for one reason. The same applies to Integration and End-to-End Tests, with one exception: a multi-step scenario where one test sets up state for the next, such as registering a customer, placing an order, and then canceling it. That's fine, as long as the execution order is made explicit, so that nobody has to guess it, and neither does the test runner.
-
-**Don't repeat what other tests already cover.** Within the same test class, every Integration or End-to-End Test should add something new. When two of them run through the same steps, the second one slows the suite down without telling you more. Unit Tests are cheap enough to cover every edge case; Integration Tests aren't, and they don't need to be, because the Unit Tests already do.
+**Keep Unit Tests independent, Integration and E2E tests may have ordered tests.** Unit Tests should be independent of each other and be able to run in any order. The same principle applies to Integration and End-to-End Tests but they may have ordered tests: a multi-step scenario where one test sets up state for the next, such as registering a customer, placing an order, and then canceling it, is fine, as long as the execution order is made explicit. The reason to do this is avoiding repeated logic in different test methods (a previous method's logic in the act phase is required in another test's arrange phase).
 
 ## Test Doubles
 
-CHACK uses the Test Double vocabulary from Gerard Meszaros' [xUnit Test Patterns](http://xunitpatterns.com/Test%20Double.html). What kind of Test Double you have depends on how the test uses it, not on how you built it:
+CHACK uses the Test Double vocabulary from Gerard Meszaros' [xUnit Test Patterns](http://xunitpatterns.com/Test%20Double.html):
 
-- as a **control point** for the indirect inputs of the system under test (the values it receives from its dependencies),
-- as an **observation point** for its indirect outputs (the calls it makes to its dependencies),
-- or as neither.
-
-This gives the following kinds:
-
-- A **Dummy** is passed to satisfy a parameter, but the system under test never uses it.
-- A **Stub** is a control point. It provides predefined answers, or throws predefined exceptions, in response to calls from the system under test.
-- A **Spy** is an observation point. It records calls made by the system under test so the test can verify them afterwards. It may also return predefined answers.
-- A **Mock** is an observation point, too, but it is configured with expectations before the exercise phase and verifies on its own that the system under test called it as expected. It may also return predefined answers.
+- A **Dummy** is passed to satisfy a parameter, but the System under Test never uses it.
+- A **Stub** is a control point. It provides predefined answers, or throws predefined exceptions, in response to calls from the System under Test.
+- A **Spy** is an observation point. It records calls made by the System under Test so the test can verify them afterwards. It may also return predefined answers.
+- A **Mock** is an observation point, too, but it is configured with expectations before the exercise phase and verifies on its own that the System under Test called it as expected. It may also return predefined answers.
 - A **Fake** is neither a control point nor an observation point. It is a working, lightweight implementation of a dependency that behaves self-consistently: data passed in by earlier calls is returned by later calls. A dictionary-based implementation of a Session abstraction, an in-memory database, or a fake web service are typical examples. Unlike Stubs and Mocks, its answers are neither hard-coded nor configured per test, though a test may seed its initial state.
-- A **Null Object** is a special Fake for operations whose only effect is a side effect: it is called by the system under test, does nothing, and returns nothing.
+- A **Null Object** is a special Fake for operations whose only effect is a side effect: it is called by the System under Test, does nothing, and returns nothing.
 
 Name each Test Double after its actual role. A `FakeOrderSession` that returns hard-coded values is really a Stub, and one that records calls is a Spy. Accurate names tell the next developer immediately whether a test controls inputs or observes outputs. A Null Object may be called `Null…` instead of `Fake…`.
 
