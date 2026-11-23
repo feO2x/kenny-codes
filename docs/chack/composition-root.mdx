@@ -13,9 +13,9 @@ import ChackDiagram from '@site/src/components/ChackDiagram';
 
 ## What it is
 
-When an application's behavior is spread across dozens or hundreds of types, one place has to wire them together and start the app. That place is the Composition Root.
+When an application's behavior is spread across dozens or hundreds of types, one place has to wire them together and start the app. That place is the Composition Root. The concept comes from [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns) by Steven van Deursen and Mark Seemann.
 
-Most applications use a Dependency Injection container for this, and some frameworks require one. The alternative is Pure DI: plain imperative code that instantiates objects and passes them into constructors. Both work, and for small apps Pure DI is often easier to read. The concept comes from [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns) by Steven van Deursen and Mark Seemann.
+Most applications use a Dependency Injection container for this, and some frameworks require one. The alternative is Pure DI: plain imperative code that instantiates objects and passes them into constructors. Both work, and for small apps Pure DI is often easier to read.
 
 The Composition Root is the only category allowed to reference both the Core and the Humble Objects, and it decides which concrete Humble Object fulfills each I/O abstraction. Neither the Core nor the Humble Objects reference it back; only [Automated Tests](./automated-tests.mdx) may use it as part of their fixture.
 
@@ -31,13 +31,13 @@ Every Composition Root runs through three phases:
 
 **Release.** The root component is disposed, ending its lifetime along with the objects it owns. Native resources are closed, buffered data is flushed, and state that must survive the session is persisted.
 
-Resolve and Release happen repeatedly while the application runs: once per HTTP request in a web app, once per message in a broker subscriber, or once per navigation or dialog in a UI app. Each cycle builds an object graph, uses it, and disposes it.
+Resolve and Release also happen repeatedly while the application runs: once per HTTP request in a web app, once per message in a broker subscriber, or once per navigation or dialog in a UI app. Each cycle builds an object graph, uses it, and disposes it.
 
 ## Guidelines
 
 **Do not use the Service Locator pattern.** The container belongs in the Composition Root and nowhere else. A Core type that asks a container for its dependencies hides them from its constructor, which hides them from the compiler, your tests, and anyone reading the code. If a Core type must create objects at runtime, give it an abstract factory that the Composition Root implements by adapting the container.
 
-**Do not share state through mutable statics.** Static fields and properties that change at runtime create invisible coupling, break test isolation, cause race conditions, and prevent running two configurations side by side. Pass context objects via dependency injection instead.
+**Do not share state through mutable statics (Global State).** Static fields and properties that change at runtime create invisible coupling, break test isolation, cause race conditions, and prevent running two configurations side by side. Pass context objects via Dependency Injection instead.
 
 **Keep lifetime management here.** Core objects shouldn't manage how long their dependencies live. Resolve and release object graphs at well-defined boundaries and let the container handle the rest. The exception is a short-lived resource that a Core object explicitly opens, uses, and closes within one operation - handling it locally is clearer than pushing that lifetime out to the container.
 
