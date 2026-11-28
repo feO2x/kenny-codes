@@ -6,30 +6,30 @@ image: /img/social-cards/docs-chack-dotnet-testing.jpg
 
 # Testing in .NET
 
-This page shows how the ideas from [Automated Tests](../automated-tests.mdx) look with xUnit v3, ASP.NET Core, and Testcontainers.
+This page shows how [Automated Tests](../automated-tests.mdx) look with xUnit v3, ASP.NET Core, and Testcontainers.
 
 ## Unit Tests
 
 A Unit Test creates the endpoint with `new`, passes Test Doubles for the Humble Objects, and calls the endpoint method directly. [A Complete Slice in ASP.NET Core](./a-complete-slice.md#test-double-and-unit-tests) shows a full example.
 
-What a Unit Test doesn't do is start a host: no `WebApplicationFactory<T>`, no `WebApplication`, no generic host. If you'd like the DI container to build a larger object graph for you, a plain `ServiceCollection` in the setup phase is fine. Call the Modules you need, replace the Humble Objects with Test Doubles, and resolve the endpoint from the resulting service provider. The container is then part of the fixture, and the test still runs in memory.
+A Unit Test never starts an application host (no `WebApplicationFactory<T>`, `WebApplication`, or generic host). If you want the DI container to assemble a larger object graph for a test, build a plain `ServiceCollection` in the setup phase: call the relevant Modules, swap the Humble Objects for Test Doubles, and resolve the endpoint from the service provider. The container acts only as part of the fixture, and the test still runs completely in memory.
 
 ## Test Doubles
 
-Hand-written Test Doubles are short in C#, and they make the kind of a Test Double easy to see. Two of them come with .NET:
+Hand-written Test Doubles stay short in C# and make each double's role obvious. Two standard ones ship with .NET:
 
 - `NullLogger<T>.Instance` is a Null Object.
-- `FakeTimeProvider` from the `Microsoft.Extensions.TimeProvider.Testing` package is a Fake: it behaves like a real clock that the test sets and advances.
+- `FakeTimeProvider` from the `Microsoft.Extensions.TimeProvider.Testing` package is a Fake: it behaves like a real clock that your test can fix and advance.
 
-With a mocking library like NSubstitute or Moq, the same substitute can be a Stub, a Spy, or a Mock. What counts is how the test uses it: whether it configures return values, checks the received calls afterwards, or sets up strict expectations upfront.
+With a mocking library like NSubstitute or Moq, the same substitute can act as a Stub, a Spy, or a Mock depending on how your test uses it: configuring return values, verifying received calls afterwards, or setting strict expectations upfront.
 
 ## Integration Tests
 
-An Integration Test starts the application in-process with `WebApplicationFactory<Program>` and the real Composition Root, and the third-party systems with Testcontainers.
+An Integration Test starts the application in-process with `WebApplicationFactory<Program>` and the real Composition Root, backed by real third-party systems started via Testcontainers.
 
 ### One container per test run
 
-xUnit v3 can share a fixture across all test classes of an assembly. That's the right place for the container and the application:
+xUnit v3 lets you share a fixture across all test classes in an assembly. Put both the database container and the test host in an assembly fixture:
 
 ```csharp
 [assembly: AssemblyFixture(typeof(WebAppFixture))]
@@ -56,7 +56,7 @@ The container starts once, before the first test that needs it, and stops after 
 
 ### A test with its own data
 
-Since all tests share the database, each one works with data that only it knows about. A unique value is often enough:
+Because all tests share one database instance, isolate each test's records using unique values:
 
 ```csharp
 public sealed class AddToDoItemIntegrationTests(WebAppFixture fixture)
@@ -88,4 +88,4 @@ The test goes through the whole feature - routing, deserialization, the endpoint
 
 ### Scenarios that proceed step by step
 
-xUnit runs the tests of a class in an unspecified order. When one test builds on the outcome of another, you can make the order explicit with a test case orderer, applied via `[TestCaseOrderer]`. Often, though, a single test method with several steps tells the story more clearly: it registers the customer, places the order, and cancels it, checking the result of each step along the way.
+xUnit runs test methods in an unspecified order. When one test builds on the outcome of another, declare the order explicitly with `[TestCaseOrderer]`. In many cases, though, a single multi-step test method is easier to follow: register the customer, place the order, and cancel it, asserting each step along the way.

@@ -7,7 +7,7 @@ image: /img/social-cards/docs-chack-vertical-slices.jpg
 # Organizing Code with Vertical Slices
 
 :::info[Recommended, not required]
-CHACK works with any folder structure, but it prefers vertical slices. The four categories tell you what a piece of code *is*. Vertical slices help you decide which *folder* it goes in. That's why a slice folder usually contains code from three categories: Core, Humble Objects, and the slice's part of the Composition Root.
+CHACK works with any folder structure, but it prefers vertical slices. The four categories define what role a piece of code plays; vertical slices organize where its files live. Because of that, a single slice folder typically holds Core types, Humble Objects, and the slice's Composition Root Module side by side.
 :::
 
 ## Organize by feature, not by technical concern
@@ -48,16 +48,16 @@ Vertical slices organize folders by feature instead, driven by the requirements.
 
 A slice contains everything that belongs to its feature. In a backend system, that is typically one endpoint with its DTOs, validators, services, I/O abstractions, Humble Objects, and Module - the [building blocks of a backend feature](./building-blocks.md).
 
-The problems above go away:
+Organizing by feature avoids those problems:
 
-- You can see at a glance that this application deals with orders and invoices, not with cooking recipes. The domain language is in the folder names.
+- You can see immediately that this application deals with orders and invoices, not cooking recipes. The domain language shows up directly in the folder names.
 - Files that change together sit next to each other.
-- You can judge the size of a feature by expanding its folder.
-- Two developers working on two features rarely produce merge conflicts, because they work in different directories.
+- You can judge the size of a feature simply by expanding its folder.
+- Two developers working on different features rarely produce merge conflicts because they edit files in separate directories.
 
 There is one cost: as the application grows, you will spend a little more time refactoring the folder structure than you would with fixed technical folders. In my experience, that time is well spent, and [Keeping slices clean](#keeping-slices-clean) shows how to make it a habit.
 
-CHACK's Vertical Slices borrow their name and their main idea from Jimmy Bogard's [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/), but they are only about organizing code. [Relationship to Other Approaches](./relationship-to-other-approaches.md#vertical-slice-architecture) compares the two.
+CHACK's Vertical Slices borrow their name and core idea from Jimmy Bogard's [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/), but in CHACK they only govern folder organization. [Relationship to Other Approaches](./relationship-to-other-approaches.md#vertical-slice-architecture) compares the two.
 
 ## Slices nest
 
@@ -82,8 +82,7 @@ A slice can contain sub-slices, in the same way a feature can be broken down int
 
 Here, "Orders" has a sub-feature "Queuing", which in turn has four endpoints. This works well with a [one endpoint per file](https://ardalis.com/moving-from-controllers-and-actions-to-endpoints-with-mediatr/) approach, and it lines up with the advice from [Automated Tests](./automated-tests.mdx): the endpoint is the most abstract API of a leaf slice, and that is where the Unit Tests aim.
 
-Each folder can also bring its own registrations, in the form of a [Module](./composition-root.mdx#modules). `CreateQueueItemModule` registers the endpoint, the validator, and the Session of its slice. `QueuingModule` calls the Modules of its four children, `OrdersModule` calls `QueuingModule` and its other children, and the Composition Root only calls the top-level Modules. When you add a feature, you add its Module next to it and call it from the parent - there's no central registration file that everybody edits.
-
+Each folder can also own its DI registrations through a [Module](./composition-root.mdx#modules). `CreateQueueItemModule` registers the endpoint, validator, and Session of its slice. `QueuingModule` calls the Modules of its four children, `OrdersModule` calls `QueuingModule` and its other children, and the Composition Root only calls the top-level Modules. When you add a feature, you add its Module next to it and call it from the parent - there's no central registration file that everyone edits.
 
 ## Hierarchy and sharing
 
@@ -131,16 +130,16 @@ You can unify them and move the result up into the closest common parent:
 
 Both sub-features now reference `FeatureASession`. Because the Session lives in `FeatureA`, `FeatureAModule` registers it, and the Modules of the two sub-features don't need to know about it.
 
-A few ideas guide moves like this one:
+When you move code up or down the folder tree, keep these rules in mind:
 
-- **Shared code moves up.** When two or more slices use the same code, its natural home is their closest common parent, or a sibling folder named after the concept it represents.
-- **Code that is no longer shared moves back down.** If one of the two slices stops using the Session, it belongs to the remaining slice again.
-- **Sharing a Humble Object requires identical needs.** Two slices share a Client or Session only if they need exactly the same abstraction. Often, they only share implementation code. Then each slice keeps its own Humble Object, and the common code moves up as a static method, as shown in [Clients and Sessions](./clients-and-sessions.md#sharing-code-without-sharing-abstractions).
-- **Dependencies between slices point in one direction.** A slice may use code of another slice, as long as the other slice doesn't use code of the first one in return. When such a cycle appears, it's a sign that the code in between belongs to neither feature. A common parent or a new sibling folder gives it a home of its own.
+- **Shared code moves up.** When two or more slices use the same code, move it into their closest common parent or into a sibling folder named after the concept it represents.
+- **Code that is no longer shared moves back down.** If one of the two slices stops using the Session, move it back into the remaining slice.
+- **Sharing a Humble Object requires identical needs.** Two slices share a Client or Session only when they require the exact same abstraction. Often they only share implementation code; in that case, keep separate Humble Objects and move the shared query or mapping up as a static method (see [Clients and Sessions](./clients-and-sessions.md#sharing-code-without-sharing-abstractions)).
+- **Dependencies between slices point in one direction.** One slice may use types from another slice, provided the second slice doesn't reference the first in return. A cyclic dependency means the shared logic belongs to neither feature - extract it into a common parent or a new sibling folder.
 
 ## Folders that are not slices
 
-Not every folder represents a feature. Some folders extend frameworks and libraries and adapt them to the application: messaging infrastructure, persistence infrastructure, object storage access, authentication - or the Composition Root itself.
+Not every folder represents a feature. Some folders adapt frameworks and infrastructure libraries to your application: messaging infrastructure, persistence infrastructure, object storage access, authentication, or the Composition Root itself.
 
 ```text
 📁 WebApp
@@ -156,22 +155,22 @@ Not every folder represents a feature. Some folders extend frameworks and librar
 |- 📁 ...
 ```
 
-These folders are perfectly fine, and they work a little differently:
+Technical infrastructure folders are fine in CHACK, with a few boundaries:
 
-- They can be organized by technology. `DatabaseAccess` and `Messaging` describe exactly what you'll find inside.
-- They can contain Modules, options, base types for Humble Objects, and shared static methods that Humble Objects call.
-- They stay free of feature-specific logic. When a type in `DatabaseAccess` starts to know what an order is, it has found its way into the wrong folder - the `Orders` slice or one of its concept folders is a better home.
+- Organize them by technology. `DatabaseAccess` and `Messaging` say what's inside.
+- Put Modules, options, base types for Humble Objects, and shared static methods that Humble Objects call here.
+- Keep feature-specific domain logic out. If a type in `DatabaseAccess` starts referencing domain concepts like `Order`, move it into the `Orders` slice or one of its concept folders.
 
 ## Keeping slices clean
 
-The structure of a codebase is most helpful when it tells the truth about the system. The easiest way to keep it that way is to tidy up folders as part of feature work, while the context is still fresh - rather than planning a separate task for it.
+The structure of a codebase is most helpful when it tells the truth about the system. Tidy up folders as part of normal feature work while the context is fresh, instead of scheduling a separate refactoring task.
 
-- **A parent folder holds its Module and the code its children share - up to a point.** Up to five shared files are easy to take in at a glance. At six or seven, look for a concept that groups some of them. Beyond seven, regroup all of them - not only the newest ones - into sibling folders named after the concepts they represent, next to the slices that use them or further up the hierarchy. Think of the domain model of an aggregate together with its persistence mapping, or the access to a particular third-party system. Ideally, the parent folder then holds nothing but its Module, like `Orders` in the example below. Name these folders after a concept, like `OrderAggregate` or `PaymentProvider`, never `Shared` or `Common`: a folder of leftovers is a technical folder again. If no concept emerges, some of the files may belong to a different parent. The numbers are a rule of thumb, not a law; what matters is that a newcomer can understand the folder at a glance.
-- **Code that only one slice uses lives in that slice.**
-- **Code lives in the folder of the slice or concept it belongs to, and that folder's Module registers it.**
-- **Each change to a slice is a good moment to look around.** Did the change make code shared that wasn't before? Did it leave code behind that only one slice still uses?
+- **Limit loose shared files in parent folders.** Up to five shared files next to a parent Module are easy to scan. At six or seven, look for a domain concept that groups some of them. Beyond seven, regroup all of them - not just the newest ones - into sibling folders named after their concepts (for example, an aggregate's domain model and persistence mapping, or everything needed to talk to a specific third-party API). Ideally, the parent folder then holds only its Module, like `Orders` below. Name concept folders after what they represent, such as `OrderAggregate` or `PaymentProvider`, never `Shared` or `Common`: a folder of leftovers is a technical folder again. If no concept emerges, some of those files may belong under a different parent. Treat the numbers as a rule of thumb rather than a hard limit: the goal is that a newcomer can understand the folder quickly.
+- **Code used by only one slice stays in that slice.**
+- **Every type lives in the folder of the slice or concept it belongs to, and that folder's Module registers it.**
+- **Treat every change to a slice as a quick folder check.** Did the change make previously private code shared, or leave shared code behind that only one slice still uses?
 
-Here is what a grown `Orders` slice can look like after a few rounds of this:
+After a few iterations of tidying up, a larger `Orders` slice might look like this:
 
 ```text
 📁 Orders
@@ -191,13 +190,13 @@ Here is what a grown `Orders` slice can look like after a few rounds of this:
 |- 📄 OrdersModule
 ```
 
-`OrderAggregate` groups the domain model with its O/R mapping configuration and the static query methods that several Sessions call. `PaymentProvider` holds what several slices need to talk to the payment provider's API. The parent folder `Orders` itself only holds its Module.
+`OrderAggregate` groups the domain model with its O/R mapping configuration and the static query methods shared by several Sessions. `PaymentProvider` holds what several slices need to call the payment provider's API. The parent folder `Orders` itself only contains its Module.
 
-You may also keep the whole domain model in a top-level folder of its own, like `DomainModel`, next to the feature slices. This works well when most entities are used by many features: every entity is easy to find, and the slices hold what is specific to them. The price is that the domain model no longer sits next to the features that use it. Both ways are fine - what helps most is choosing one and sticking with it, so that everybody knows where to look.
+You can also keep the entire domain model in a single top-level folder like `DomainModel` next to the feature slices. That works well when most entities are used across many features: every entity is easy to locate, and each slice holds only its feature-specific code. The trade-off is that domain types no longer sit right next to the features that use them. Both ways work - pick one and stick with it so everyone on the team knows where to look.
 
 ## Tests mirror the slices
 
-The test projects follow the same structure as the production code. The Unit Tests for `Orders/Queuing/CreateQueueItem` live in `Orders/Queuing/CreateQueueItem` of the test project, next to the Test Doubles they need. When a slice moves, its tests move with it, and whenever you look for the tests of a feature, you know right away where to find them.
+The test projects follow the same structure as the production code. The Unit Tests for `Orders/Queuing/CreateQueueItem` live in `Orders/Queuing/CreateQueueItem` of the test project, next to the Test Doubles they need. When a slice moves, its tests move with it, and whenever you look for the tests of a feature, you know where to find them.
 
 ```text
 📁 WebApp.Tests

@@ -19,11 +19,11 @@ const baseDescription =
   'compile-time arrows are used: an open arrowhead means one category references another, and a ' +
   'dashed arrow with a hollow triangle means one type implements or derives from another. The ' +
   'Humble Objects and the test doubles both implement the I/O abstractions. The Core references ' +
-  'the I/O abstractions. Unit tests reference the Core and their test doubles. Integration and ' +
-  'end-to-end tests reference the Humble Objects, the Composition Root, and the third-party ' +
-  'systems. The Composition Root references the Core and the Humble Objects. Every category may ' +
-  'depend on the frameworks and libraries they reference, so ' +
-  'those arrows are left out.';
+  'the I/O abstractions. Unit tests reference the Core and their test doubles. Integration tests ' +
+  'may also reference test doubles. Integration and end-to-end tests reference the Humble Objects, ' +
+  'the Composition Root, and the third-party systems. The Composition Root references the Core ' +
+  'and the Humble Objects. Every category may depend on the frameworks and libraries they ' +
+  'reference, so those arrows are left out.';
 
 const descriptions: Record<string, string> = {
   core: `${baseDescription} The Core and its I/O abstractions are highlighted.`,
@@ -78,10 +78,10 @@ const root = onRow(centerX(core) - rootWidth / 2, rootY, rootWidth, 64);
 const testTop = 356;
 const testBottom = 574;
 const testCardHeight = 82;
-const unitTests: Box = {x: 900, y: testTop, width: 96, height: testCardHeight};
-const testDoubles: Box = {x: 900, y: testBottom - testCardHeight, width: 96, height: testCardHeight};
-const integrationTests: Box = {x: 1020, y: testTop, width: 52, height: testBottom - testTop};
-const e2eTests: Box = {x: 1100, y: testTop, width: 68, height: testBottom - testTop};
+const unitTests: Box = {x: 900, y: testTop, width: 112, height: testCardHeight};
+const testDoubles: Box = {x: 900, y: testBottom - testCardHeight, width: 112, height: testCardHeight};
+const integrationTests: Box = {x: 1046, y: testTop, width: 52, height: testBottom - testTop};
+const e2eTests: Box = {x: 1116, y: testTop, width: 52, height: testBottom - testTop};
 const testGroup: Box = {x: unitTests.x - 20, y: testTop - 16, width: right(e2eTests) + 18 - (unitTests.x - 20), height: testBottom - testTop + 32};
 
 /** Third-party systems: the Web Services card is centred on the runtime I/O call. */
@@ -130,9 +130,9 @@ const legendBottom = legendY + 104;
 const lane = {
   integrationShared: centerX(integrationTests) - 12,
   integrationThirdParty: centerX(integrationTests) + 12,
-  e2eHumble: centerX(e2eTests) - 18,
+  e2eHumble: centerX(e2eTests) - 12,
   e2eRoot: centerX(e2eTests),
-  e2eThirdParty: centerX(e2eTests) + 18,
+  e2eThirdParty: centerX(e2eTests) + 12,
   /** Right of the process boundary, which crosses the Humble Objects' centre. */
   intoHumble: right(humble) - 40,
 };
@@ -304,6 +304,15 @@ export default function ChackDiagram({highlight}: ChackDiagramProps): ReactNode 
           y1={bottom(unitTests)}
           x2={centerX(testDoubles)}
           y2={testDoubles.y - inset}
+          className={d.line}
+          style={doubleRef.style}
+          markerEnd={doubleRef.ref}
+        />
+        <line
+          x1={integrationTests.x}
+          y1={centerY(testDoubles)}
+          x2={right(testDoubles) + inset}
+          y2={centerY(testDoubles)}
           className={d.line}
           style={doubleRef.style}
           markerEnd={doubleRef.ref}

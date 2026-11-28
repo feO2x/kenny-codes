@@ -1,20 +1,24 @@
-/* Shades of the Automated Tests' magenta, as in the CHACK diagram; navy text in both themes. */
+/* Brand turquoise-to-blue ramp; navy text in both themes. Each layer sets `--mark` to its
+   darker light-mode outline colour (used by `.gradient` in Diagram/styles.module.css). */
 .e2e {
-  fill: var(--kc-magenta);
+  fill: var(--kc-mint);
+  --mark: var(--kc-brand-line-from);
 }
 
 .integration {
-  fill: color-mix(in oklab, var(--kc-magenta) 50%, var(--kc-magenta-from));
+  fill: color-mix(in oklab, var(--kc-mint) 50%, var(--kc-blue));
+  --mark: color-mix(in oklab, var(--kc-brand-line-from) 50%, var(--kc-brand-line-to));
 }
 
 .unit {
-  fill: var(--kc-magenta-from);
+  fill: var(--kc-blue);
+  --mark: var(--kc-brand-line-to);
 }
 
-/* In light mode the lines between the layers are dark magenta: white lines on pastel pink would
-   fall below 3:1. */
+/* In light mode the lines between the layers are deep teal-blue: white lines on mint/cyan would
+   fall below 3:1, and this shade keeps >= 3:1 against all three fills. */
 :global([data-theme='light']) .layerLines {
-  stroke: #851448;
+  stroke: #003e5c;
 }
 
 @media (forced-colors: active) {
