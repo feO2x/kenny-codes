@@ -13,16 +13,17 @@ import AnimatedImage from '@site/src/components/AnimatedImage';
 
 ## TL;DR
 
-**CHACK** is a simple model for structuring a single app. Every piece of code you write belongs to exactly one of four categories:
+CHACK stands for 
 
 - **C**ore
-- **H**umble Objects at the process boundary
+- **H**umble Objects
 - **A**utomated Tests
 - **C**omposition Root
+- by **K**enny
+
+It is a simple model for structuring a single app. Every piece of code you write belongs to exactly one of the four categories.
 
 CHACK is based on aspects of Domain-Driven Design, Hexagonal Architecture, and Vertical Slice Architecture. It follows software principles like SOLID, DRY, Composition-Over-Inheritance, and KISS. It is easier to learn than these approaches and pushes junior developers into the pit of success.
-
-Oh, and the **K** in CHACK is for **K**enny - which conveniently lets you pronounce it like "Chuck".
 
 <AnimatedImage
   src="/img/chuck.gif"
@@ -38,7 +39,7 @@ Oh, and the **K** in CHACK is for **K**enny - which conveniently lets you pronou
 
 - **The Core** is everything that runs in memory: your domain model, your services, your DTOs, your validators. It holds the logic that makes the software worth building, and it never performs an I/O call itself. When it needs one, it goes through an abstraction that belongs to the Core.
 - **Humble Objects** sit at the process boundary and take care of data access. Each one does two things: perform the actual I/O calls to one third-party system, and map the data going out and coming back. They follow the [Humble Object pattern](http://xunitpatterns.com/Humble%20Object.html) from Gerard Meszaros' [xUnit Test Patterns](http://xunitpatterns.com/).
-- **Automated Tests** follow the [test pyramid](https://martinfowler.com/bliki/TestPyramid.html). Unit Tests exercise the Core with Humble Objects replaced by in-memory Test Doubles, which is why thousands of them run in seconds. Integration and End-to-End Tests cover the happy path and wiring against third-party systems and act as a second line of defense against regression.
+- **Automated Tests** follow the [test pyramid](https://martinfowler.com/bliki/TestPyramid.html). Unit Tests exercise the Core with Humble Objects replaced by in-memory Test Doubles, which is why thousands of them can run in seconds. Integration and End-to-End Tests cover the happy path and wiring against third-party systems and act as a second line of defense against regression.
 - **The Composition Root** assembles the pieces at startup - usually with a DI container and configuration from files, environment variables, and command-line arguments. It is described in depth in Mark Seemann's and Steven van Deursen's [Dependency Injection Principles, Practices, and Patterns](https://www.manning.com/books/dependency-injection-principles-practices-patterns).
 
 Most arrows in the diagram are compile-time dependencies, like in UML:
@@ -52,7 +53,7 @@ The placements along the process boundary are deliberate. The Humble Objects box
 
 All of this can happen in a single project, and **CHACK encourages you to keep the number of projects in your codebase small**.
 
-## The problem CHACK solves
+## The main problem CHACK solves
 
 Codebases get hard to maintain at two extremes.
 
